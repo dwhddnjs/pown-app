@@ -1,59 +1,81 @@
-import React from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Link, Tabs } from 'expo-router';
-import { Pressable } from 'react-native';
+import React from "react"
+import FontAwesome from "@expo/vector-icons/FontAwesome"
+import { Link, router, Tabs } from "expo-router"
+import { Pressable, useColorScheme } from "react-native"
+// import { GiMuscleUp } from "react-icons/gi"
+import DumbelIcon from "@expo/vector-icons/FontAwesome5"
+import UserIcon from "@expo/vector-icons/FontAwesome"
+import PlusIcon from "@expo/vector-icons/EvilIcons"
 
-import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
-import { useClientOnlyValue } from '@/components/useClientOnlyValue';
+import Colors from "@/constants/Colors"
+import ModalScreen from "../modal"
+// import { useColorScheme } from '@/components/useColorScheme';
+// import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
+  name: React.ComponentProps<typeof FontAwesome>["name"]
+  color: string
 }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
+  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />
 }
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+  const colorScheme = useColorScheme()
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        // Disable the static render of the header on web
-        // to prevent a hydration error in React Navigation v6.
-        headerShown: useClientOnlyValue(false, true),
-      }}>
+        headerStyle: {
+          backgroundColor: Colors[colorScheme ?? "light"].background,
+        },
+        tabBarStyle: {
+          backgroundColor: Colors[colorScheme ?? "light"].tabBar,
+        },
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarItemStyle: {
+          paddingBottom: 5, // 하단 패딩을 줄입니다
+          paddingTop: 5,
+        },
+      }}
+    >
       <Tabs.Screen
-        name="index"
+        name="workout"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          headerRight: () => (
-            <Link href="/modal" asChild>
-              <Pressable>
-                {({ pressed }) => (
-                  <FontAwesome
-                    name="info-circle"
-                    size={25}
-                    color={Colors[colorScheme ?? 'light'].text}
-                    style={{ marginRight: 15, opacity: pressed ? 0.5 : 1 }}
-                  />
-                )}
-              </Pressable>
-            </Link>
+          title: "운동",
+          tabBarIcon: ({ color }) => (
+            <DumbelIcon name="dumbbell" size={20} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="add"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <PlusIcon
+              name="plus"
+              size={50}
+              color={colorScheme === "dark" ? "#ffffff" : "#000000"}
+            />
+          ),
+          tabBarLabel: () => null,
+        }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault()
+            navigation.navigate("modal")
+          },
+        })}
+      />
+      <Tabs.Screen
+        name="mypage"
+        options={{
+          title: "내 정보",
+          tabBarIcon: ({ color }) => (
+            <UserIcon name="user" size={20} color={color} />
+          ),
         }}
       />
     </Tabs>
-  );
+  )
 }
