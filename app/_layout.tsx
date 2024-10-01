@@ -9,7 +9,8 @@ import { useFonts } from "expo-font"
 import { Stack } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
-import { useColorScheme } from "react-native"
+import { TouchableOpacity, useColorScheme } from "react-native"
+import XIcon from "@expo/vector-icons/Feather"
 import "react-native-reanimated"
 
 export {
@@ -63,7 +64,30 @@ function RootLayoutNav() {
         }}
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: "modal" }} />
+        <Stack.Screen
+          name="modal"
+          options={({ navigation }) => ({
+            presentation: "modal",
+            headerTitle: "",
+            headerStyle: {
+              borderBottomWidth: 0,
+              elevation: 0,
+              shadowOpacity: 0,
+              backgroundColor: "#1a1a1a",
+            },
+            headerShadowVisible: false,
+
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <XIcon
+                  name="x"
+                  size={30}
+                  color={Colors[colorScheme ?? "light"].subText}
+                />
+              </TouchableOpacity>
+            ),
+          })}
+        />
       </Stack>
     </ThemeProvider>
   )

@@ -29,13 +29,19 @@ export default function TabLayout() {
         headerStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].background,
         },
+        headerTitleStyle: {
+          fontFamily: "sb-m",
+        },
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].tabBar,
         },
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarItemStyle: {
-          paddingBottom: 5, // 하단 패딩을 줄입니다
-          paddingTop: 5,
+          paddingBottom: 3, // 하단 패딩을 줄입니다
+          paddingTop: 3,
+        },
+        tabBarLabelStyle: {
+          fontFamily: "sb-m",
         },
       }}
     >

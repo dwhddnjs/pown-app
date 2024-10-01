@@ -4,6 +4,7 @@ const tintColorDark = "#fff"
 export default {
   light: {
     text: "#000",
+    subText: "#c4c4c4",
     background: "#eeeeee",
     tint: "#00ccbb",
     pressed: "#15e5d3",
@@ -13,6 +14,7 @@ export default {
   },
   dark: {
     text: "#fff",
+    subText: "#555555",
     background: "#1a1a1a",
     tint: "#00ccbb",
     pressed: "#12b5a7",
