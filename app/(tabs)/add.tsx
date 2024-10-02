@@ -5,7 +5,7 @@ import { Text, View } from "@/components/Themed"
 export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>시발시발시발</Text>
+      <Text style={styles.title}>..</Text>
       <View style={styles.separator} />
     </View>
   )

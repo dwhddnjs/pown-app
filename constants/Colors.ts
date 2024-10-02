@@ -11,6 +11,7 @@ export default {
     tabIconDefault: "#c4c4c4",
     tabIconSelected: "#00ccbb",
     tabBar: "#ededed",
+    itemColor: "#272727",
   },
   dark: {
     text: "#fff",
@@ -21,5 +22,6 @@ export default {
     tabIconDefault: "#555555",
     tabIconSelected: "#00ccbb",
     tabBar: "#1e1e1e",
+    itemColor: "#272727",
   },
 }

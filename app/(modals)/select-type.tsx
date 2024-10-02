@@ -8,6 +8,7 @@ import Leg from "@/assets/images/svg/leg_icon.svg"
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 import Colors from "@/constants/Colors"
 import { IconTitleButton } from "@/components/IconTitleButton"
+import { useRouter } from "expo-router"
 
 export default function ModalScreen() {
   const iconButtonData = [
@@ -15,28 +16,34 @@ export default function ModalScreen() {
       id: 1,
       title: "등",
       icon: Back,
+      type: "back",
     },
     {
       id: 2,
       title: "가슴",
       icon: Chest,
+      type: "chest",
     },
     {
       id: 3,
       title: "어깨",
       icon: Shoulder,
+      type: "shoulder",
     },
     {
       id: 4,
       title: "하체",
       icon: Leg,
+      type: "leg",
     },
     {
       id: 5,
       title: "팔",
       icon: Arm,
+      type: "arm",
     },
   ]
+  const router = useRouter()
 
   return (
     <View style={styles.container}>
@@ -49,7 +56,15 @@ export default function ModalScreen() {
 
       <View style={styles.iconContainer}>
         {iconButtonData.map((item) => (
-          <IconTitleButton key={item.id} Icon={item.icon} title={item.title} />
+          <IconTitleButton
+            key={item.id}
+            Icon={item.icon}
+            title={item.title}
+            onClick={() => {
+              router.back()
+              router.push(`/add-plan/${item.type}`)
+            }}
+          />
         ))}
       </View>
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />

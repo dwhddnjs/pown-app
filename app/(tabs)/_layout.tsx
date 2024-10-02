@@ -8,7 +8,7 @@ import UserIcon from "@expo/vector-icons/FontAwesome"
 import PlusIcon from "@expo/vector-icons/EvilIcons"
 
 import Colors from "@/constants/Colors"
-import ModalScreen from "../modal"
+import ModalScreen from "../(modals)/select-type"
 // import { useColorScheme } from '@/components/useColorScheme';
 // import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
@@ -37,7 +37,7 @@ export default function TabLayout() {
         },
         tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
         tabBarItemStyle: {
-          paddingBottom: 3, // 하단 패딩을 줄입니다
+          paddingBottom: 3,
           paddingTop: 3,
         },
         tabBarLabelStyle: {
@@ -69,7 +69,7 @@ export default function TabLayout() {
         listeners={({ navigation }) => ({
           tabPress: (e) => {
             e.preventDefault()
-            navigation.navigate("modal")
+            router.push("/(modals)/select-type")
           },
         })}
       />
