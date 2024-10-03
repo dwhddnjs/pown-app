@@ -1,8 +1,10 @@
-import { StyleSheet, Text, View } from "react-native"
+import { Button, StyleSheet } from "react-native"
 import React, { forwardRef, useCallback, useMemo, useState } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import { Picker } from "@react-native-picker/picker"
 import Colors from "@/constants/Colors"
+import { TouchableOpacity } from "react-native-gesture-handler"
+import { Text, View } from "./Themed"
 
 interface SetCountSheetProps {
   sheetRef: any
@@ -11,6 +13,24 @@ interface SetCountSheetProps {
 
 export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
   const [selectedLanguage, setSelectedLanguage] = useState()
+  const set = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+  const count = [
+    "1 + α",
+    "2 + α",
+    "3 + α",
+    "4 + α",
+    "5 + α",
+    "6 + α",
+    "7 + α",
+    "8 + α",
+    "9 + α",
+    "10 + α",
+    "11 + α",
+    "12 + α",
+    "13 + α",
+    "14 + α",
+    "15 + α",
+  ]
 
   const snapPoints = useMemo(() => ["50%"], [])
   const renderBackdrop = useCallback(
@@ -39,11 +59,13 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
           flex: 1,
           flexDirection: "row",
           paddingTop: 14,
+          backgroundColor: Colors.dark.itemColor,
         }}
       >
         <View
           style={{
             width: "50%",
+            backgroundColor: Colors.dark.itemColor,
           }}
         >
           <Text style={styles.title}>세트 수</Text>
@@ -53,19 +75,21 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
               setSelectedLanguage(itemValue)
             }
           >
-            <Picker.Item label="Java" value="java" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
-            <Picker.Item label="JavaScript" value="js" color="#ffffff" />
+            {set.map((item) => (
+              <Picker.Item
+                label={item}
+                value={item}
+                color={Colors.dark.text}
+                fontFamily="sb-b"
+              />
+            ))}
           </Picker>
         </View>
 
         <View
           style={{
             width: "50%",
+            backgroundColor: Colors.dark.itemColor,
           }}
         >
           <Text style={styles.title}>횟수</Text>
@@ -75,11 +99,20 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
               setSelectedLanguage(itemValue)
             }
           >
-            <Picker.Item label="Java" value="java" />
-            <Picker.Item label="JavaScript" value="js" />
+            {count.map((item) => (
+              <Picker.Item
+                label={item}
+                value={item}
+                color={Colors.dark.text}
+                fontFamily="sb-b"
+              />
+            ))}
           </Picker>
         </View>
       </View>
+      <TouchableOpacity style={styles.successButton}>
+        <Text style={{ textAlign: "center", fontSize: 16 }}>완료</Text>
+      </TouchableOpacity>
     </BottomSheet>
   )
 })
@@ -93,5 +126,12 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     textAlign: "center",
     color: Colors.dark.text,
+  },
+  successButton: {
+    backgroundColor: Colors.dark.tint,
+    paddingVertical: 14,
+    marginHorizontal: 24,
+    marginBottom: 44,
+    borderRadius: 12,
   },
 })

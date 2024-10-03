@@ -6,6 +6,9 @@ import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet"
 import { Picker } from "@react-native-picker/picker"
 import React, { useCallback, useMemo, useRef, useState } from "react"
 import Octicons from "@expo/vector-icons/Octicons"
+import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
+
 import {
   Button,
   Pressable,
@@ -13,6 +16,7 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native"
+import { Link } from "expo-router"
 
 export default function AddPlan() {
   const planData = {
@@ -87,7 +91,7 @@ export default function AddPlan() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>어떤 종목 하실건가요?</Text>
+      <Text style={styles.title}>🔥 어떤 종목 하실건가요?</Text>
       <View style={styles.tagContainer}>
         {workoutData.leg.map((item) => (
           <TouchableOpacity key={item} style={styles.tag}>
@@ -107,14 +111,56 @@ export default function AddPlan() {
         </TouchableOpacity>
       </View>
 
-      <Text>목표 중량</Text>
-      <Text>컨디션</Text>
-      <View>
-        <View>
-          <Text>퀵 노트</Text>
-          <Text>전체노트 열기</Text>
+      {/* 목표중량 */}
+      <View style={{ paddingHorizontal: 24 }}>
+        <View style={[styles.textIconContainer, { gap: 6 }]}>
+          <WeightIcon
+            name="weight-kilogram"
+            size={20}
+            color={Colors.dark.tint}
+          />
+          <Text style={{ fontSize: 16 }}>목표 중량</Text>
         </View>
-        <TextInput />
+        <View style={styles.textInputContainer}>
+          <TextInput
+            style={styles.TextInput}
+            keyboardType="numeric"
+            returnKeyType="done"
+            maxLength={3}
+          />
+          <Text>kg</Text>
+        </View>
+      </View>
+
+      {/* <Text>컨디션</Text> */}
+      {/* 퀵노트 전체 노트 */}
+      <View style={{ paddingHorizontal: 24 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "flex-end",
+          }}
+        >
+          <View style={[styles.textIconContainer, { gap: 7 }]}>
+            <NoteIcon name="note-text" size={20} color={Colors.dark.tint} />
+            <Text style={{ fontSize: 16 }}>퀵 노트</Text>
+          </View>
+          <Link
+            href="/"
+            style={{
+              fontSize: 14,
+              fontFamily: "sb-l",
+              color: Colors.dark.tint,
+            }}
+          >
+            전체노트 열기
+          </Link>
+        </View>
+        <TextInput
+          style={styles.noteTextInput}
+          placeholder="특이사항을 적어주세요!"
+        />
       </View>
       <SetCountSheet ref={bottomSheetModalRef} />
     </View>
@@ -122,13 +168,45 @@ export default function AddPlan() {
 }
 
 const styles = StyleSheet.create({
+  noteTextInput: {
+    borderWidth: 2,
+    borderColor: Colors.dark.subText,
+    // backgroundColor: Colors.dark.itemColor,
+    borderRadius: 12,
+    paddingVertical: 12,
+    color: Colors.dark.text,
+    paddingLeft: 12,
+    fontSize: 14,
+    fontFamily: "sb-l",
+  },
+
+  textInputContainer: {
+    flexDirection: "row",
+    borderWidth: 2,
+    borderColor: Colors.dark.subText,
+
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    gap: 3,
+    paddingLeft: 4,
+    paddingRight: 8,
+    borderRadius: 12,
+  },
+
+  TextInput: {
+    textAlign: "right",
+    color: Colors.dark.tint,
+    minWidth: 40,
+    fontSize: 16,
+    fontFamily: "sb-l",
+  },
   sheetBtn: {
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
     borderColor: Colors.dark.subText,
     paddingVertical: 12,
-    borderRadius: 14,
+    borderRadius: 12,
     backgroundColor: Colors.dark.itemColor,
   },
 

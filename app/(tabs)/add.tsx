@@ -5,8 +5,7 @@ import { Text, View } from "@/components/Themed"
 export default function TabTwoScreen() {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>..</Text>
-      <View style={styles.separator} />
+      <Text style={styles.title}>AddActionTab</Text>
     </View>
   )
 }
