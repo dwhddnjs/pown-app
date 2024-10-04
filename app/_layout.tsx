@@ -16,6 +16,7 @@ import ArrowIcon from "@expo/vector-icons/AntDesign"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { BottomSheetProvider } from "@gorhom/bottom-sheet/lib/typescript/contexts"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+import Checkcircle from "@expo/vector-icons/AntDesign"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -89,6 +90,46 @@ function RootLayoutNav() {
                       name="x"
                       size={30}
                       color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
+            <Stack.Screen
+              name="(modals)/note"
+              options={({ navigation }) => ({
+                presentation: "modal",
+                headerTitle: "",
+                headerStyle: {
+                  borderBottomWidth: 0,
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  backgroundColor: "#1a1a1a",
+                },
+                headerShadowVisible: false,
+
+                headerLeft: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{ marginLeft: 3, marginTop: 18 }}
+                  >
+                    <XIcon
+                      name="x"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+
+                headerRight: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{ marginRight: 8, marginTop: 18 }}
+                  >
+                    <Checkcircle
+                      name="checkcircle"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].tint}
                     />
                   </TouchableOpacity>
                 ),

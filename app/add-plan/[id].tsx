@@ -8,6 +8,7 @@ import React, { useCallback, useMemo, useRef, useState } from "react"
 import Octicons from "@expo/vector-icons/Octicons"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import EmotionIcon from "@expo/vector-icons/MaterialIcons"
 
 import {
   Button,
@@ -17,6 +18,8 @@ import {
   TouchableOpacity,
 } from "react-native"
 import { Link } from "expo-router"
+import { condition } from "@/constants/condition"
+import { FlashList } from "@shopify/flash-list"
 
 export default function AddPlan() {
   const planData = {
@@ -32,6 +35,7 @@ export default function AddPlan() {
     condition: ["화남", "피곤함", "우울함", "신남"],
     comment: "아 진짜 개빡치네 너무 아쉽게 못 들었음",
   }
+
   const workoutData = {
     back: [
       "풀업",
@@ -132,7 +136,50 @@ export default function AddPlan() {
         </View>
       </View>
 
-      {/* <Text>컨디션</Text> */}
+      {/* 컨디션 */}
+      <View>
+        <View style={[styles.textIconContainer, { gap: 6, paddingLeft: 24 }]}>
+          <EmotionIcon
+            name="emoji-emotions"
+            size={20}
+            color={Colors.dark.tint}
+          />
+          <Text style={{ fontSize: 16 }}>컨디션</Text>
+        </View>
+        <View style={{ width: "100%", height: 60, alignItems: "center" }}>
+          <FlashList
+            data={condition}
+            horizontal
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                style={[
+                  styles.conditionIcon,
+                  index === 0 && { marginLeft: 24 },
+                  index === condition.length - 1 && { marginRight: 24 },
+                ]}
+                key={item.id}
+              >
+                <View>{item.Icon}</View>
+                <Text style={{ fontSize: 8, color: Colors.dark.tint }}>
+                  {item.condition}
+                </Text>
+              </TouchableOpacity>
+            )}
+            estimatedItemSize={61}
+          />
+        </View>
+        {/* <View style={{ flexDirection: "row" }}>
+          {condition.map((item) => (
+            <TouchableOpacity style={styles.conditionIcon}>
+              <View>{item.Icon}</View>
+              <Text style={{ fontSize: 8, color: Colors.dark.tint }}>
+                {item.condition}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View> */}
+      </View>
+
       {/* 퀵노트 전체 노트 */}
       <View style={{ paddingHorizontal: 24 }}>
         <View
@@ -147,7 +194,7 @@ export default function AddPlan() {
             <Text style={{ fontSize: 16 }}>퀵 노트</Text>
           </View>
           <Link
-            href="/"
+            href="/(modals)/note"
             style={{
               fontSize: 14,
               fontFamily: "sb-l",
@@ -159,7 +206,7 @@ export default function AddPlan() {
         </View>
         <TextInput
           style={styles.noteTextInput}
-          placeholder="특이사항을 적어주세요!"
+          placeholder="특이사항을 적어주세요 (선택)"
         />
       </View>
       <SetCountSheet ref={bottomSheetModalRef} />
@@ -168,6 +215,19 @@ export default function AddPlan() {
 }
 
 const styles = StyleSheet.create({
+  conditionIcon: {
+    alignSelf: "flex-start",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: Colors.dark.tint,
+    width: 50,
+    height: 50,
+    borderRadius: 50,
+    gap: 1,
+    marginLeft: 10,
+  },
+
   noteTextInput: {
     borderWidth: 2,
     borderColor: Colors.dark.subText,
