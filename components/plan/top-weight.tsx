@@ -1,0 +1,48 @@
+import { StyleSheet, TextInput } from "react-native"
+import React from "react"
+import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import { Text, View } from "../Themed"
+import { IconTitle } from "../IconTitle"
+import Colors from "@/constants/Colors"
+
+export const TopWeight = () => {
+  return (
+    <View>
+      <IconTitle style={{ gap: 6 }}>
+        <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
+        <Text style={{ fontSize: 16 }}>최고 중량</Text>
+      </IconTitle>
+      <View style={styles.container}>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          returnKeyType="done"
+          maxLength={3}
+        />
+        <Text>kg</Text>
+      </View>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    borderWidth: 2,
+    borderColor: Colors.dark.subText,
+    alignSelf: "flex-start",
+    paddingVertical: 8,
+    gap: 3,
+    paddingLeft: 4,
+    paddingRight: 8,
+    borderRadius: 12,
+    marginHorizontal: 24,
+  },
+  input: {
+    textAlign: "right",
+    color: Colors.dark.tint,
+    minWidth: 40,
+    fontSize: 16,
+    fontFamily: "sb-l",
+  },
+})
