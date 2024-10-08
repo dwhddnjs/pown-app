@@ -10,7 +10,7 @@ type PlanStoreType = {
     title: string
     content: string
   }
-  setPlanValue: (type: string, value: any) => void
+  setPlanValue: (type: string, value: string) => void
   onReset: () => void
 }
 

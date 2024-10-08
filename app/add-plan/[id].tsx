@@ -59,37 +59,6 @@ export default function AddPlan() {
 }
 
 const styles = StyleSheet.create({
-  conditionIcon: {
-    alignSelf: "flex-start",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: Colors.dark.tint,
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    gap: 1,
-    marginLeft: 10,
-  },
-
-  noteTextInput: {
-    borderWidth: 2,
-    borderColor: Colors.dark.subText,
-    // backgroundColor: Colors.dark.itemColor,
-    borderRadius: 12,
-    paddingVertical: 12,
-    color: Colors.dark.text,
-    paddingLeft: 12,
-    fontSize: 14,
-    fontFamily: "sb-l",
-  },
-
-  textIconContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-
   container: {
     flex: 1,
   },
