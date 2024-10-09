@@ -9,10 +9,10 @@ import { IconTitle } from "../IconTitle"
 
 export const ConditionList = () => {
   return (
-    <View>
-      <IconTitle style={{ gap: 6 }}>
+    <View style={styles.main}>
+      <IconTitle style={{ gap: 7 }}>
         <EmotionIcon name="emoji-emotions" size={20} color={Colors.dark.tint} />
-        <Text style={{ fontSize: 16 }}>지금의 컨디션</Text>
+        <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
       </IconTitle>
       <View style={styles.container}>
         <FlashList
@@ -31,7 +31,7 @@ export const ConditionList = () => {
               <Text style={styles.text}>{item.condition}</Text>
             </TouchableOpacity>
           )}
-          estimatedItemSize={61}
+          estimatedItemSize={65}
         />
       </View>
     </View>
@@ -39,9 +39,13 @@ export const ConditionList = () => {
 }
 
 const styles = StyleSheet.create({
+  main: {
+    paddingVertical: 12,
+    gap: 10,
+  },
   container: {
     width: "100%",
-    height: 60,
+    height: 65,
     alignItems: "center",
   },
 

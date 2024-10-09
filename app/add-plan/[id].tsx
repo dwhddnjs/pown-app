@@ -1,31 +1,24 @@
-// import { StyleSheet, Text, View } from "react-native"
 import { SetCountSheet } from "@/components/SetCountSheet"
 import { Text, View } from "@/components/Themed"
-import Colors from "@/constants/Colors"
 import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet"
-import { Picker } from "@react-native-picker/picker"
-import React, { useCallback, useMemo, useRef, useState } from "react"
-import Octicons from "@expo/vector-icons/Octicons"
-
-import EmotionIcon from "@expo/vector-icons/MaterialIcons"
-
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
-  Button,
+  Keyboard,
+  KeyboardAvoidingView,
   Pressable,
+  ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
 } from "react-native"
-import { Link } from "expo-router"
-import { condition } from "@/constants/condition"
-import { FlashList } from "@shopify/flash-list"
-import { workoutData } from "@/constants/constants"
 import { WorkoutTags } from "@/components/plan/workout-tags"
 import { SetCounter } from "@/components/plan/set-counter"
-import { IconTitle } from "@/components/IconTitle"
 import { TopWeight } from "@/components/plan/top-weight"
 import { ConditionList } from "@/components/plan/condition-list"
 import { PlanNote } from "@/components/plan/plan-note"
+import { Button } from "@/components/Button"
+import Colors from "@/constants/Colors"
+import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
@@ -33,35 +26,43 @@ export default function AddPlan() {
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
 
+  const onHideKeyboard = () => {
+    Keyboard.dismiss()
+  }
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+    <KeyBoardAvoid style={styles.container}>
+      <ScrollView>
+        <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+        {/* 운동 태그 */}
+        <WorkoutTags />
 
-      {/* 운동 태그 */}
-      <WorkoutTags />
+        {/* 세트와 횟수 */}
+        <SetCounter onOpen={onSheetOpen} />
 
-      {/* 세트와 횟수 */}
-      <SetCounter onOpen={onSheetOpen} />
+        {/* 목표중량 */}
+        <TopWeight />
 
-      {/* 목표중량 */}
-      <TopWeight />
+        {/* 컨디션 */}
+        <ConditionList />
 
-      {/* 컨디션 */}
-      <ConditionList />
-
-      {/* 퀵노트 전체 노트 */}
-      <PlanNote />
-
-      {/* 바텀시트 */}
+        {/* 퀵노트 전체 노트 */}
+        <PlanNote />
+      </ScrollView>
+      <Button type="submit">저장</Button>
       <SetCountSheet ref={bottomSheetModalRef} />
-    </View>
+    </KeyBoardAvoid>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "space-between",
+    backgroundColor: Colors.dark.background,
+    paddingTop: 12,
   },
+
   title: {
     fontSize: 24,
     textAlign: "center",

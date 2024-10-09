@@ -23,6 +23,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
+    paddingVertical: 12,
   },
   tag: {
     paddingVertical: 4,

@@ -7,18 +7,13 @@ import Colors from "@/constants/Colors"
 
 export const TopWeight = () => {
   return (
-    <View>
-      <IconTitle style={{ gap: 6 }}>
+    <View style={{ paddingVertical: 12, gap: 10 }}>
+      <IconTitle style={{ gap: 8 }}>
         <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
         <Text style={{ fontSize: 16 }}>최고 중량</Text>
       </IconTitle>
       <View style={styles.container}>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          returnKeyType="done"
-          maxLength={3}
-        />
+        <TextInput style={styles.input} keyboardType="numeric" maxLength={3} />
         <Text>kg</Text>
       </View>
     </View>
@@ -35,7 +30,7 @@ const styles = StyleSheet.create({
     gap: 3,
     paddingLeft: 4,
     paddingRight: 8,
-    borderRadius: 12,
+    borderRadius: 10,
     marginHorizontal: 24,
   },
   input: {

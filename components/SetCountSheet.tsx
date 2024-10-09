@@ -1,10 +1,11 @@
-import { Button, StyleSheet } from "react-native"
+import { StyleSheet } from "react-native"
 import React, { forwardRef, useCallback, useMemo, useState } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import { Picker } from "@react-native-picker/picker"
 import Colors from "@/constants/Colors"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import { Text, View } from "./Themed"
+import { Button } from "./Button"
 
 interface SetCountSheetProps {
   sheetRef: any
@@ -77,6 +78,7 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
           >
             {set.map((item) => (
               <Picker.Item
+                key={item}
                 label={item}
                 value={item}
                 color={Colors.dark.text}
@@ -101,6 +103,7 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
           >
             {count.map((item) => (
               <Picker.Item
+                key={item}
                 label={item}
                 value={item}
                 color={Colors.dark.text}
@@ -110,9 +113,7 @@ export const SetCountSheet = forwardRef<BottomSheet, any>((props, ref) => {
           </Picker>
         </View>
       </View>
-      <TouchableOpacity style={styles.successButton}>
-        <Text style={{ textAlign: "center", fontSize: 16 }}>완료</Text>
-      </TouchableOpacity>
+      <Button type="solid">완료</Button>
     </BottomSheet>
   )
 })

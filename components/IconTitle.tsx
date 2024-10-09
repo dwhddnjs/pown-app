@@ -14,7 +14,7 @@ export const IconTitle = ({ children, style }: IconTitleProps) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     gap: 10,
     paddingHorizontal: 24,
   },

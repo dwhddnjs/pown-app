@@ -8,7 +8,7 @@ import { Link } from "expo-router"
 
 export const PlanNote = () => {
   return (
-    <View>
+    <View style={styles.main}>
       <View style={styles.container}>
         <IconTitle style={{ gap: 7 }}>
           <NoteIcon name="note-text" size={20} color={Colors.dark.tint} />
@@ -27,6 +27,10 @@ export const PlanNote = () => {
 }
 
 const styles = StyleSheet.create({
+  main: {
+    paddingVertical: 12,
+    gap: 10,
+  },
   container: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -44,7 +48,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.dark.subText,
     borderRadius: 12,
-    paddingVertical: 12,
+    paddingVertical: 14,
     color: Colors.dark.text,
     paddingLeft: 12,
     fontSize: 14,

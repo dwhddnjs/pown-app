@@ -11,7 +11,7 @@ interface SetCounterProps {
 
 export const SetCounter = ({ onOpen }: SetCounterProps) => {
   return (
-    <View>
+    <View style={styles.container}>
       <IconTitle>
         <Octicons name="number" size={20} color={Colors.dark.tint} />
         <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
@@ -23,4 +23,9 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 12,
+    gap: 10,
+  },
+})

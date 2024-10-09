@@ -156,6 +156,18 @@ function RootLayoutNav() {
                     />
                   </TouchableOpacity>
                 ),
+                headerRight: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{ marginRight: 8 }}
+                  >
+                    <Checkcircle
+                      name="checkcircle"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].tint}
+                    />
+                  </TouchableOpacity>
+                ),
               })}
             />
           </Stack>
