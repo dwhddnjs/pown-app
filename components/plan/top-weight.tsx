@@ -1,11 +1,15 @@
 import { StyleSheet, TextInput } from "react-native"
-import React from "react"
+import React, { useState } from "react"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
 import Colors from "@/constants/Colors"
+import { usePlanStore } from "@/hooks/use-plan-store"
 
 export const TopWeight = () => {
+  const { weight, setPlanValue } = usePlanStore()
+  console.log("weight: ", weight)
+
   return (
     <View style={{ paddingVertical: 12, gap: 10 }}>
       <IconTitle style={{ gap: 8 }}>
@@ -13,7 +17,14 @@ export const TopWeight = () => {
         <Text style={{ fontSize: 16 }}>최고 중량</Text>
       </IconTitle>
       <View style={styles.container}>
-        <TextInput style={styles.input} keyboardType="numeric" maxLength={3} />
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          maxLength={3}
+          value={weight}
+          onChangeText={(value) => setPlanValue("weight", value)}
+          placeholder="0"
+        />
         <Text>kg</Text>
       </View>
     </View>

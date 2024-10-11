@@ -3,34 +3,29 @@ import React from "react"
 import { Text, View } from "../Themed"
 import EmotionIcon from "@expo/vector-icons/MaterialIcons"
 import { FlashList } from "@shopify/flash-list"
-import { condition } from "@/constants/condition"
+import { ConditionIcon } from "@/components/plan/condition-icon"
 import Colors from "@/constants/Colors"
 import { IconTitle } from "../IconTitle"
+import { conditionData } from "@/constants/constants"
+import { usePlanStore } from "@/hooks/use-plan-store"
+import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
 
 export const ConditionList = () => {
   return (
     <View style={styles.main}>
       <IconTitle style={{ gap: 7 }}>
-        <EmotionIcon name="emoji-emotions" size={20} color={Colors.dark.tint} />
+        <BatteryIcon
+          name="battery-heart-variant"
+          size={20}
+          color={Colors.dark.tint}
+        />
         <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
       </IconTitle>
       <View style={styles.container}>
         <FlashList
-          data={condition}
+          data={conditionData}
           horizontal
-          renderItem={({ item, index }) => (
-            <TouchableOpacity
-              style={[
-                styles.icon,
-                index === 0 && { marginLeft: 24 },
-                index === condition.length - 1 && { marginRight: 24 },
-              ]}
-              key={item.id}
-            >
-              <View>{item.Icon}</View>
-              <Text style={styles.text}>{item.condition}</Text>
-            </TouchableOpacity>
-          )}
+          renderItem={({ item, index }) => <ConditionIcon item={item} />}
           estimatedItemSize={65}
         />
       </View>
@@ -43,6 +38,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
   },
+
   container: {
     width: "100%",
     height: 65,
@@ -55,12 +51,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 2,
     borderColor: Colors.dark.tint,
+    // backgroundColor: Colors.dark.tint,
     width: 50,
     height: 50,
     borderRadius: 50,
-    gap: 1,
+    gap: 0.5,
     marginLeft: 10,
   },
+
   text: {
     fontSize: 8,
     color: Colors.dark.tint,

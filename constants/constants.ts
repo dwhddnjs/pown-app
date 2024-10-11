@@ -12,12 +12,16 @@ const planData = {
   comment: "아 진짜 개빡치네 너무 아쉽게 못 들었음",
 }
 
-export const workoutData = {
+export const equipmentData: string[] = ["바벨", "덤벨", "머신", "맨몸"]
+
+export const workoutData: {
+  [key: string]: string[]
+} = {
   back: [
     "풀업",
     "시티드로우",
     "랫풀다운",
-    "바벨로우",
+    "로우",
     "하이로우",
     "로우로우",
     "암풀다운",
@@ -63,3 +67,61 @@ export const workoutData = {
     "리버스리스트컬",
   ],
 }
+
+export const setData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+export const countData = [
+  "1 + α",
+  "2 + α",
+  "3 + α",
+  "4 + α",
+  "5 + α",
+  "6 + α",
+  "7 + α",
+  "8 + α",
+  "9 + α",
+  "10 + α",
+  "11 + α",
+  "12 + α",
+  "13 + α",
+  "14 + α",
+  "15 + α",
+]
+
+export const conditionData = [
+  {
+    id: 1,
+    condition: "좋음",
+  },
+  {
+    id: 2,
+    condition: "피곤함",
+  },
+  {
+    id: 3,
+    condition: "화남",
+  },
+  {
+    id: 4,
+    condition: "아픔",
+  },
+  {
+    id: 5,
+    condition: "슬픔",
+  },
+  {
+    id: 6,
+    condition: "신남",
+  },
+  {
+    id: 7,
+    condition: "상쾌함",
+  },
+  {
+    id: 8,
+    condition: "양호함",
+  },
+  {
+    id: 9,
+    condition: "짜증남",
+  },
+]

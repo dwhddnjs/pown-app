@@ -136,7 +136,7 @@ function RootLayoutNav() {
               })}
             />
             <Stack.Screen
-              name="add-plan/[id]"
+              name="add-plan/[slug]"
               options={({ navigation }) => ({
                 headerTitle: "",
                 headerStyle: {

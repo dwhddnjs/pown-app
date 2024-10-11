@@ -1,4 +1,4 @@
-import { SetCountSheet } from "@/components/SetCountSheet"
+import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet"
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -19,6 +19,7 @@ import { PlanNote } from "@/components/plan/plan-note"
 import { Button } from "@/components/Button"
 import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
+import { EquipmentBox } from "@/components/plan/equipment-box"
 
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
@@ -37,6 +38,9 @@ export default function AddPlan() {
         {/* 운동 태그 */}
         <WorkoutTags />
 
+        {/* 도구 선택 */}
+        <EquipmentBox />
+
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} />
 
@@ -50,7 +54,7 @@ export default function AddPlan() {
         <PlanNote />
       </ScrollView>
       <Button type="submit">저장</Button>
-      <SetCountSheet ref={bottomSheetModalRef} />
+      <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>
   )
 }
