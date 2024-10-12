@@ -20,6 +20,20 @@ import { Button } from "@/components/Button"
 import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/plan/equipment-box"
+import { usePlanStore } from "@/hooks/use-plan-store"
+
+interface InputRefObject {
+  measure: (
+    callback: (
+      x: number,
+      y: number,
+      width: number,
+      height: number,
+      pageX: number,
+      pageY: number
+    ) => void
+  ) => void
+}
 
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
@@ -31,9 +45,28 @@ export default function AddPlan() {
     Keyboard.dismiss()
   }
 
+  const scrollRef = useRef<ScrollView>(null)
+
+  const onInputFocus = (node: InputRefObject) => {
+    if (node) {
+      node.measure(
+        (
+          fx: number,
+          fy: number,
+          width: number,
+          height: number,
+          px: number,
+          py: number
+        ) => {
+          scrollRef.current?.scrollTo({ y: py, animated: true })
+        }
+      )
+    }
+  }
+
   return (
     <KeyBoardAvoid style={styles.container}>
-      <ScrollView>
+      <ScrollView ref={scrollRef}>
         <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
         {/* 운동 태그 */}
         <WorkoutTags />
@@ -45,13 +78,14 @@ export default function AddPlan() {
         <SetCounter onOpen={onSheetOpen} />
 
         {/* 목표중량 */}
-        <TopWeight />
+        <TopWeight onFocus={onInputFocus} />
 
         {/* 컨디션 */}
         <ConditionList />
 
         {/* 퀵노트 전체 노트 */}
-        <PlanNote />
+        <PlanNote onFocus={onInputFocus} />
+        <View style={{ height: 250 }} />
       </ScrollView>
       <Button type="submit">저장</Button>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />

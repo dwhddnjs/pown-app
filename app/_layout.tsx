@@ -17,6 +17,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { BottomSheetProvider } from "@gorhom/bottom-sheet/lib/typescript/contexts"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
+import { useNoteStore } from "@/hooks/use-note-store"
+import { usePlanStore } from "@/hooks/use-plan-store"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -109,10 +111,7 @@ function RootLayoutNav() {
                 headerShadowVisible: false,
 
                 headerLeft: () => (
-                  <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={{ marginLeft: 3, marginTop: 18 }}
-                  >
+                  <TouchableOpacity style={{ marginLeft: 3, marginTop: 18 }}>
                     <XIcon
                       name="x"
                       size={30}
@@ -120,19 +119,26 @@ function RootLayoutNav() {
                     />
                   </TouchableOpacity>
                 ),
-
-                headerRight: () => (
-                  <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={{ marginRight: 8, marginTop: 18 }}
-                  >
-                    <Checkcircle
-                      name="checkcircle"
-                      size={30}
-                      color={Colors[colorScheme ?? "light"].tint}
-                    />
-                  </TouchableOpacity>
-                ),
+                headerRight: () => {
+                  const { title, content } = useNoteStore()
+                  const { setPlanValue } = usePlanStore()
+                  return (
+                    <TouchableOpacity
+                      onPress={() => {
+                        setPlanValue("title", title)
+                        setPlanValue("content", content)
+                        navigation.goBack()
+                      }}
+                      style={{ marginRight: 8, marginTop: 18 }}
+                    >
+                      <Checkcircle
+                        name="checkcircle"
+                        size={30}
+                        color={Colors[colorScheme ?? "light"].tint}
+                      />
+                    </TouchableOpacity>
+                  )
+                },
               })}
             />
             <Stack.Screen

@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput } from "react-native"
+import { StyleSheet, TextInput, useWindowDimensions } from "react-native"
 import React, { useState } from "react"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { Text, View } from "../Themed"
@@ -6,9 +6,8 @@ import { IconTitle } from "../IconTitle"
 import Colors from "@/constants/Colors"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
-export const TopWeight = () => {
+export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
   const { weight, setPlanValue } = usePlanStore()
-  console.log("weight: ", weight)
 
   return (
     <View style={{ paddingVertical: 12, gap: 10 }}>
@@ -20,6 +19,7 @@ export const TopWeight = () => {
         <TextInput
           style={styles.input}
           keyboardType="numeric"
+          onFocus={(e) => onFocus(e.target)}
           maxLength={3}
           value={weight}
           onChangeText={(value) => setPlanValue("weight", value)}

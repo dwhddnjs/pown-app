@@ -2,16 +2,27 @@ import { StyleSheet, TextInput } from "react-native"
 import React from "react"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
+import { usePlanStore } from "@/hooks/use-plan-store"
+import { useNoteStore } from "@/hooks/use-note-store"
 
 export default function note() {
+  const { title, content, setValue } = useNoteStore()
+
   return (
     <View style={styles.container}>
-      <TextInput placeholder="제목 입력..." style={styles.titleInput} />
       <TextInput
+        value={title}
+        placeholder="제목 입력..."
+        style={styles.titleInput}
+        onChangeText={(value) => setValue("title", value)}
+      />
+      <TextInput
+        value={content}
         multiline={true}
         numberOfLines={10}
         style={styles.descInput}
-        placeholder="설명을 넣어주세요."
+        placeholder="설명을 넣어주세요..."
+        onChangeText={(value) => setValue("content", value)}
       />
     </View>
   )
