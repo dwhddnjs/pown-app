@@ -76,6 +76,49 @@ export default function AddPlan() {
 
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} />
+        <View style={{ paddingHorizontal: 24, gap: 12, flexDirection: "row" }}>
+          <View
+            style={{
+              width: "100%",
+              //   backgroundColor: Colors.dark.tint,
+              paddingVertical: 4,
+              flexDirection: "row",
+              borderRadius: 50,
+              borderWidth: 2,
+              borderColor: Colors.dark.tint,
+              paddingHorizontal: 6,
+              gap: 8,
+            }}
+          >
+            <View
+              style={{
+                backgroundColor: Colors.dark.tint,
+                borderRadius: 50,
+                width: 16,
+                height: 16,
+                justifyContent: "flex-end",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "sb-m",
+                  color: Colors.dark.text,
+                  textAlign: "center",
+                  fontSize: 12,
+                }}
+              >
+                1
+              </Text>
+            </View>
+            <Text style={{ fontFamily: "sb-m", color: Colors.dark.tint }}>
+              웜업
+            </Text>
+            <Text style={{ fontFamily: "sb-l", color: Colors.dark.text }}>
+              8 + α
+            </Text>
+          </View>
+        </View>
 
         {/* 목표중량 */}
         <TopWeight onFocus={onInputFocus} />
