@@ -69,6 +69,7 @@ export const workoutData: {
 }
 
 export const setData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+export const setTypeData = ["웜업", "본 세트", "PR", "연습"]
 export const countData = [
   "1 + α",
   "2 + α",

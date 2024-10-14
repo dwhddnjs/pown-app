@@ -5,13 +5,15 @@ import Colors from "@/constants/Colors"
 import { Button } from "../Button"
 import { IconTitle } from "../IconTitle"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { SetCounterItem } from "./set-counter-item"
 
 interface SetCounterProps {
   onOpen: () => void
 }
 
 export const SetCounter = ({ onOpen }: SetCounterProps) => {
-  const { set, count } = usePlanStore()
+  const { setWithCount } = usePlanStore()
+  console.log("setWithCount: ", setWithCount)
 
   return (
     <View style={styles.container}>
@@ -19,7 +21,18 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
         <Octicons name="number" size={20} color={Colors.dark.tint} />
         <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
       </IconTitle>
-      {set && count ? (
+      <Button type="bordered" onPress={onOpen}>
+        선택하기
+      </Button>
+      {setWithCount.length > 0 && (
+        <View style={{ gap: 8 }}>
+          {setWithCount.map((item, index) => (
+            <SetCounterItem key={item.id} item={item} index={index} />
+          ))}
+        </View>
+      )}
+
+      {/* {set && count ? (
         <TouchableOpacity style={styles.selected} onPress={onOpen}>
           <Text style={styles.selectedText}>{`${set} 세트 x ${count} 회`}</Text>
         </TouchableOpacity>
@@ -27,7 +40,7 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
         <Button type="bordered" onPress={onOpen}>
           선택하기
         </Button>
-      )}
+      )} */}
     </View>
   )
 }

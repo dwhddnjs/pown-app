@@ -6,7 +6,7 @@ import Colors from "@/constants/Colors"
 import { TouchableOpacity } from "react-native-gesture-handler"
 import { Text, View } from "./Themed"
 import { Button } from "./Button"
-import { countData, setData } from "@/constants/constants"
+import { countData, setData, setTypeData } from "@/constants/constants"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
 interface SetCountSheetProps {
@@ -16,10 +16,10 @@ interface SetCountSheetProps {
 export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
   ({ onClose }, ref) => {
     const [picker, setPicker] = useState({
-      set: "4",
+      set: "본 세트",
       count: "8 + α",
     })
-    const { set, count, setPlanValue } = usePlanStore()
+    const { setSetWithCount, setWithCount } = usePlanStore()
 
     const onSelectedPicker = (type: string, value: string) => {
       setPicker({
@@ -29,8 +29,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     }
 
     const onSetPlanStore = () => {
-      setPlanValue("set", picker.set)
-      setPlanValue("count", picker.count)
+      setSetWithCount({ ...picker, id: setWithCount.length + 1 })
       onClose()
     }
 
@@ -70,14 +69,14 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
               backgroundColor: Colors.dark.itemColor,
             }}
           >
-            <Text style={styles.title}>세트 수</Text>
+            <Text style={styles.title}>세트 유형</Text>
             <Picker
               selectedValue={picker.set}
               onValueChange={(itemValue, itemIndex) =>
                 onSelectedPicker("set", itemValue)
               }
             >
-              {setData.map((item) => (
+              {setTypeData.map((item) => (
                 <Picker.Item
                   key={item}
                   label={String(item)}
