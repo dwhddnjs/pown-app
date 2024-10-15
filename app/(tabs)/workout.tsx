@@ -1,4 +1,4 @@
-import { WorkoutPlan } from "@/components/plan/workout-plan"
+import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
 import { StyleSheet } from "react-native"
 
@@ -8,8 +8,6 @@ export default function TabOneScreen() {
       <View style={styles.list}>
         <WorkoutPlan />
       </View>
-      {/* <Text style={styles.title}>Tab One</Text>
-      <View style={styles.separator} /> */}
     </View>
   )
 }

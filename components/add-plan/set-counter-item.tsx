@@ -4,6 +4,7 @@ import TrashIcon from "@expo/vector-icons/Ionicons"
 import PlusIcon from "@expo/vector-icons/AntDesign"
 import { StyleSheet, TouchableOpacity } from "react-native"
 import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store"
+import { NumberBallIcon } from "../number-ball-icon"
 
 interface SetCounterItemProps {
   item: SetWithCountType
@@ -18,9 +19,7 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
     <View style={styles.container}>
       <View style={styles.item}>
         <View style={styles.setTypeCount}>
-          <View style={styles.numberBall}>
-            <Text style={styles.numberBallText}>{index + 1}</Text>
-          </View>
+          <NumberBallIcon>{index + 1}</NumberBallIcon>
           <Text style={styles.type}>{item.set}</Text>
           <Text style={styles.typeText}>{`${item.count} 회`}</Text>
         </View>

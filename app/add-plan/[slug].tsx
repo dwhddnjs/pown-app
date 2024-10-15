@@ -11,17 +11,15 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native"
-import { WorkoutTags } from "@/components/plan/workout-tags"
-import { SetCounter } from "@/components/plan/set-counter"
-import { TopWeight } from "@/components/plan/top-weight"
-import { ConditionList } from "@/components/plan/condition-list"
-import { PlanNote } from "@/components/plan/plan-note"
+import { WorkoutTags } from "@/components/add-plan/workout-tags"
+import { SetCounter } from "@/components/add-plan/set-counter"
+import { TopWeight } from "@/components/add-plan/top-weight"
+import { ConditionList } from "@/components/add-plan/condition-list"
+import { PlanNote } from "@/components/add-plan/plan-note"
 import { Button } from "@/components/Button"
 import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
-import { EquipmentBox } from "@/components/plan/equipment-box"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { SetCounterItem } from "@/components/plan/set-counter-item"
+import { EquipmentBox } from "@/components/add-plan/equipment-box"
 
 interface InputRefObject {
   measure: (

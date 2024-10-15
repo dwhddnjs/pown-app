@@ -3,7 +3,7 @@ import React from "react"
 import { Text, View } from "../Themed"
 import EmotionIcon from "@expo/vector-icons/MaterialIcons"
 import { FlashList } from "@shopify/flash-list"
-import { ConditionIcon } from "@/components/plan/condition-icon"
+import { ConditionIcon } from "@/components/add-plan/condition-icon"
 import Colors from "@/constants/Colors"
 import { IconTitle } from "../IconTitle"
 import { conditionData } from "@/constants/constants"
@@ -25,7 +25,9 @@ export const ConditionList = () => {
         <FlashList
           data={conditionData}
           horizontal
-          renderItem={({ item, index }) => <ConditionIcon item={item} />}
+          renderItem={({ item, index }) => (
+            <ConditionIcon item={item} type="column" />
+          )}
           estimatedItemSize={65}
         />
       </View>
