@@ -65,7 +65,7 @@ export default function AddPlan() {
 
   return (
     <KeyBoardAvoid style={styles.container}>
-      <ScrollView ref={scrollRef}>
+      <ScrollView ref={scrollRef} style={{ flex: 1 }}>
         <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
         {/* 운동 태그 */}
         <WorkoutTags />

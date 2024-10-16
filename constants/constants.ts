@@ -12,7 +12,14 @@ const planData = {
   comment: "아 진짜 개빡치네 너무 아쉽게 못 들었음",
 }
 
-export const equipmentData: string[] = ["바벨", "덤벨", "머신", "맨몸"]
+export const equipmentData: string[] = [
+  "바벨",
+  "덤벨",
+  "머신",
+  "스미스",
+  "케이블",
+  "맨몸",
+]
 
 export const workoutData: {
   [key: string]: string[]

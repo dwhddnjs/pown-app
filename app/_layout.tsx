@@ -27,7 +27,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
+  initialRouteName: "auth/login",
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -174,6 +174,41 @@ function RootLayoutNav() {
                     />
                   </TouchableOpacity>
                 ),
+              })}
+            />
+            <Stack.Screen
+              name="auth/login"
+              options={({ navigation }) => ({
+                headerTitle: "",
+                headerStyle: {
+                  borderBottomWidth: 0,
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  backgroundColor: "#1a1a1a",
+                },
+                headerShadowVisible: false,
+
+                // headerLeft: () => (
+                //   <TouchableOpacity onPress={() => navigation.goBack()}>
+                //     <ArrowIcon
+                //       name="left"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].subText}
+                //     />
+                //   </TouchableOpacity>
+                // ),
+                // headerRight: () => (
+                //   <TouchableOpacity
+                //     onPress={() => navigation.goBack()}
+                //     style={{ marginRight: 8 }}
+                //   >
+                //     <Checkcircle
+                //       name="checkcircle"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].tint}
+                //     />
+                //   </TouchableOpacity>
+                // ),
               })}
             />
           </Stack>

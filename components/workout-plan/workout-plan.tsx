@@ -25,7 +25,7 @@ export const WorkoutPlan = () => {
 
         <View style={styles.conditionTagList}>
           {conditionData.map((item) => (
-            <ConditionIcon item={item} type="row" />
+            <ConditionIcon key={item.id} item={item} type="row" />
           ))}
         </View>
 
@@ -33,7 +33,14 @@ export const WorkoutPlan = () => {
         <NoteText />
 
         {/* 세트와 횟수 */}
-        <SetListItem />
+        <View
+          style={{
+            paddingVertical: 8,
+            backgroundColor: Colors.dark.itemColor,
+          }}
+        >
+          <SetListItem />
+        </View>
       </View>
     </View>
   )

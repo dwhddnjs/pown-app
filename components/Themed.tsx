@@ -34,7 +34,7 @@ export function Text(props: TextProps) {
 
   return (
     <DefaultText
-      style={[{ fontFamily: "sb-m" }, { color }, style]}
+      style={[{ fontFamily: "sb-m", marginTop: 2 }, { color }, style]}
       {...otherProps}
     />
   )

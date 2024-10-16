@@ -14,6 +14,7 @@ import { equipmentData } from "@/constants/constants"
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore()
+  console.log("equipment: ", equipment)
 
   const onPressEquipment = (item: string) => {
     setPlanValue("equipment", item)
@@ -48,6 +49,7 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 12,
     gap: 10,
+    flex: 1,
   },
 
   selectedText: {
@@ -59,28 +61,28 @@ const styles = StyleSheet.create({
   },
 
   item: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    // backgroundColor: Colors.dark.tint,
-    marginVertical: 4,
-    marginHorizontal: 4,
   },
 
   selected: {
-    paddingHorizontal: 18,
+    paddingHorizontal: 12,
     paddingVertical: 8,
+
     backgroundColor: Colors.dark.tint,
-    marginVertical: 4,
-    marginHorizontal: 4,
     borderRadius: 8,
   },
 
   box: {
     flexDirection: "row",
-    alignSelf: "flex-start",
+    // alignSelf: "flex-start",
+    justifyContent: "space-between",
     borderWidth: 2,
     borderColor: Colors.dark.tint,
-    borderRadius: 12,
-    marginLeft: 24,
+    borderRadius: 14,
+    marginHorizontal: 24,
+    // flexWrap: "wrap",
+    paddingHorizontal: 4,
+    paddingVertical: 4,
   },
 })

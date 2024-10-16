@@ -1,16 +1,23 @@
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
-import { StyleSheet } from "react-native"
+import { ScrollView, StyleSheet } from "react-native"
+import Colors from "@/constants/Colors"
 
 export default function TabOneScreen() {
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.list}>
         <WorkoutPlan />
+        <WorkoutPlan />
+        <WorkoutPlan />
+        <WorkoutPlan />
       </View>
-    </View>
+    </ScrollView>
   )
 }
+
+// borderWidth: 1,
+// borderColor: Colors.dark.text,
 
 const styles = StyleSheet.create({
   container: {
@@ -18,9 +25,15 @@ const styles = StyleSheet.create({
     flex: 1,
     // alignItems: "center",
     // justifyContent: "center",
+    backgroundColor: Colors.dark.background,
+    paddingHorizontal: 24,
   },
   list: {
-    paddingHorizontal: 24,
+    backgroundColor: Colors.dark.itemColor,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 14,
+    gap: 12,
   },
   title: {
     fontSize: 24,
