@@ -27,7 +27,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "auth/login",
+  initialRouteName: "auth/sign-in",
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -177,7 +177,7 @@ function RootLayoutNav() {
               })}
             />
             <Stack.Screen
-              name="auth/login"
+              name="auth/sign-in"
               options={({ navigation }) => ({
                 headerTitle: "",
                 headerStyle: {

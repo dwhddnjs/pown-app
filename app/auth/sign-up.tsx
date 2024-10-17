@@ -1,13 +1,18 @@
 import React, { useState } from "react"
-import { StyleSheet, TextInput } from "react-native"
+import { StyleSheet, TextInput, TouchableOpacity } from "react-native"
+import {
+  GoogleSignin,
+  GoogleSigninButton,
+  statusCodes,
+} from "@react-native-google-signin/google-signin"
 
-import { Button, Input } from "@rneui/themed"
 import { supabase } from "@/lib/supabase"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
 import { Controller, useForm } from "react-hook-form"
+import { Button } from "@/components/Button"
 
-export default function login() {
+export default function SignUp() {
   const {
     control,
     handleSubmit,
@@ -22,12 +27,11 @@ export default function login() {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <Text style={styles.title}>PowPow</Text>
+        <Text style={styles.title}>Sign Up.</Text>
       </View>
-      <View>
-        <Text>로그인</Text>
-        <View>
-          <Text>email*</Text>
+      <View style={styles.contentWrapper}>
+        <View style={styles.textInputContainer}>
+          <Text>Email*</Text>
           <Controller
             control={control}
             rules={{
@@ -35,18 +39,19 @@ export default function login() {
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                placeholder="First name"
+                placeholder="email을 입력해주세요"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                style={styles.input}
               />
             )}
             name="email"
           />
-          {errors.email && <Text>This is required.</Text>}
+          {errors.email && <Text>이메일을 입력해주세요</Text>}
         </View>
-        <View>
-          <Text>password*</Text>
+        <View style={styles.textInputContainer}>
+          <Text>Password*</Text>
           <Controller
             control={control}
             rules={{
@@ -54,16 +59,29 @@ export default function login() {
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                placeholder="First name"
+                placeholder="비밀번호를 입력해주세요"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
+                style={styles.input}
               />
             )}
             name="password"
           />
-          {errors.password && <Text>This is required.</Text>}
+          {errors.password && <Text>비밀번호를 입력해주세요</Text>}
         </View>
+      </View>
+      <Button type="solid">로그인</Button>
+      <View style={styles.dividerContainer}>
+        <View style={styles.divider} />
+        <Text style={styles.or}>OR</Text>
+        <View style={styles.divider} />
+      </View>
+
+      <View>
+        {/* <GoogleSigninButton /> */}
+        {/* <TouchableOpacity></TouchableOpacity>
+        <TouchableOpacity></TouchableOpacity> */}
       </View>
     </View>
   )
@@ -72,12 +90,21 @@ export default function login() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    // paddingHorizontal: 24,
+  },
+
+  contentWrapper: {
     paddingHorizontal: 24,
   },
 
+  login: {
+    fontSize: 18,
+    fontFamily: "sb-b",
+  },
+
   titleContainer: {
-    borderWidth: 1,
-    borderColor: Colors.dark.text,
+    // borderWidth: 1,
+    // borderColor: Colors.dark.text,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -85,6 +112,43 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "sb-b",
     fontSize: 32,
+    color: Colors.dark.tint,
+  },
+
+  input: {
+    // borderWidth: 1,
+    // borderColor: Colors.dark.background,
+    backgroundColor: Colors.dark.itemColor,
+    fontFamily: "sb-l",
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  },
+  textInputContainer: {
+    gap: 2,
+  },
+  textInput: {
+    color: Colors.dark.subText,
+  },
+
+  dividerContainer: {
+    paddingHorizontal: 24,
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  divider: {
+    backgroundColor: Colors.dark.subText,
+    height: 1,
+    width: 150,
+  },
+
+  or: {
+    textAlign: "center",
+    color: Colors.dark.subText,
+    fontFamily: "sb-l",
   },
 })
 

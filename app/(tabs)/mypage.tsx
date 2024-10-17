@@ -8,7 +8,7 @@ export default function TabTwoScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Tab Two</Text>
       <View style={styles.separator} />
-      <Link href="/auth/login">로그인으로 이동하쇼</Link>
+      <Link href="/auth/sign-in">로그인으로 이동하쇼</Link>
     </View>
   )
 }
