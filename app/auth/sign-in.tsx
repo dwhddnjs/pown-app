@@ -5,6 +5,8 @@ import {
   GoogleSigninButton,
   statusCodes,
 } from "@react-native-google-signin/google-signin"
+import Logo from "@/assets/images/svg/pow_logo.svg"
+import Logo2 from "@/assets/images/svg/pow_logo2.svg"
 
 import { supabase } from "@/lib/supabase"
 import { Text, View } from "@/components/Themed"
@@ -27,7 +29,10 @@ export default function SignIn() {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
+        <Logo2 />
+
         <Text style={styles.title}>Sign In.</Text>
+        <Logo />
       </View>
       <View style={styles.contentWrapper}>
         <View style={styles.textInputContainer}>
@@ -79,7 +84,6 @@ export default function SignIn() {
       </View>
 
       <View>
-        <GoogleSigninButton />
         {/* <TouchableOpacity></TouchableOpacity>
         <TouchableOpacity></TouchableOpacity> */}
       </View>
