@@ -19,6 +19,13 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
 import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import {
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query"
+import { supabase } from "@/lib/supabase"
+import { useUser } from "@/hooks/use-user"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -27,11 +34,13 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "auth/sign-in",
+  initialRouteName: "(tabs)",
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
+
+const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -55,11 +64,23 @@ export default function RootLayout() {
     return null
   }
 
-  return <RootLayoutNav />
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RootLayoutNav />
+    </QueryClientProvider>
+  )
 }
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
+  const { setUser } = useUser()
+
+  useEffect(() => {
+    supabase.auth.onAuthStateChange((_event, session) => {
+      console.log("session: ", session)
+      setUser(session)
+    })
+  }, [])
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
@@ -157,7 +178,7 @@ function RootLayoutNav() {
                   <TouchableOpacity onPress={() => navigation.goBack()}>
                     <ArrowIcon
                       name="left"
-                      size={30}
+                      size={28}
                       color={Colors[colorScheme ?? "light"].subText}
                     />
                   </TouchableOpacity>
@@ -187,16 +208,49 @@ function RootLayoutNav() {
                   backgroundColor: "#1a1a1a",
                 },
                 headerShadowVisible: false,
+                animation: "slide_from_bottom",
 
-                // headerLeft: () => (
-                //   <TouchableOpacity onPress={() => navigation.goBack()}>
-                //     <ArrowIcon
-                //       name="left"
-                //       size={30}
-                //       color={Colors[colorScheme ?? "light"].subText}
-                //     />
-                //   </TouchableOpacity>
-                // ),
+                headerLeft: () => (
+                  <TouchableOpacity
+                    style={{ marginLeft: 4 }}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <XIcon
+                      name="x"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
+            <Stack.Screen
+              name="auth/sign-up"
+              options={({ navigation }) => ({
+                headerTitle: "회원가입",
+                headerStyle: {
+                  borderBottomWidth: 0,
+                  elevation: 0,
+                  shadowOpacity: 0,
+                  backgroundColor: "#1a1a1a",
+                },
+                headerTitleStyle: {
+                  fontFamily: "sb-m",
+                },
+                // headerShadowVisible: false,
+
+                headerLeft: () => (
+                  <TouchableOpacity
+                    style={{ marginLeft: 6 }}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <ArrowIcon
+                      name="left"
+                      size={24}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
                 // headerRight: () => (
                 //   <TouchableOpacity
                 //     onPress={() => navigation.goBack()}

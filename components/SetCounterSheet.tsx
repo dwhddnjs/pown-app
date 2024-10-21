@@ -113,9 +113,13 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
             </Picker>
           </View>
         </View>
-        <Button type="solid" onPress={onSetPlanStore}>
-          완료
-        </Button>
+        <View
+          style={{ paddingBottom: 44, backgroundColor: Colors.dark.itemColor }}
+        >
+          <Button type="solid" onPress={onSetPlanStore}>
+            완료
+          </Button>
+        </View>
       </BottomSheet>
     )
   }

@@ -1,16 +1,23 @@
 import React, { useState } from "react"
-import { StyleSheet, TextInput, TouchableOpacity } from "react-native"
+import {
+  ScrollView,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+} from "react-native"
 import {
   GoogleSignin,
   GoogleSigninButton,
   statusCodes,
 } from "@react-native-google-signin/google-signin"
-
 import { supabase } from "@/lib/supabase"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
 import { Controller, useForm } from "react-hook-form"
 import { Button } from "@/components/Button"
+import { Link } from "expo-router"
+import Logo from "@/assets/images/svg/pow_logo.svg"
+import { useSignUpMutation } from "@/hooks/mutation/user"
 
 export default function SignUp() {
   const {
@@ -21,14 +28,17 @@ export default function SignUp() {
     defaultValues: {
       email: "",
       password: "",
+      name: "",
     },
   })
+  const { mutate } = useSignUpMutation()
+
+  const onSubmit = async (formData: any) => {
+    mutate(formData)
+  }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Sign Up.</Text>
-      </View>
+    <ScrollView style={styles.container}>
       <View style={styles.contentWrapper}>
         <View style={styles.textInputContainer}>
           <Text>Email*</Text>
@@ -39,7 +49,7 @@ export default function SignUp() {
             }}
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                placeholder="email을 입력해주세요"
+                placeholder="이메일을 입력해주세요"
                 onBlur={onBlur}
                 onChangeText={onChange}
                 value={value}
@@ -49,6 +59,26 @@ export default function SignUp() {
             name="email"
           />
           {errors.email && <Text>이메일을 입력해주세요</Text>}
+        </View>
+        <View style={styles.textInputContainer}>
+          <Text>Name*</Text>
+          <Controller
+            control={control}
+            rules={{
+              required: true,
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="이름을 입력해주세요"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                style={styles.input}
+              />
+            )}
+            name="name"
+          />
+          {errors.name && <Text>이메일을 입력해주세요</Text>}
         </View>
         <View style={styles.textInputContainer}>
           <Text>Password*</Text>
@@ -71,30 +101,35 @@ export default function SignUp() {
           {errors.password && <Text>비밀번호를 입력해주세요</Text>}
         </View>
       </View>
-      <Button type="solid">로그인</Button>
-      <View style={styles.dividerContainer}>
-        <View style={styles.divider} />
-        <Text style={styles.or}>OR</Text>
-        <View style={styles.divider} />
+      <View style={styles.signinup}>
+        <Button type="solid" onPress={handleSubmit(onSubmit)}>
+          회원가입
+        </Button>
+        <Link href="/auth/sign-in" style={styles.link}>
+          이미 가입한 계정이 있으신가요?
+        </Link>
       </View>
-
-      <View>
-        {/* <GoogleSigninButton /> */}
-        {/* <TouchableOpacity></TouchableOpacity>
-        <TouchableOpacity></TouchableOpacity> */}
-      </View>
-    </View>
+    </ScrollView>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingHorizontal: 24,
+    backgroundColor: Colors.dark.background,
   },
 
   contentWrapper: {
     paddingHorizontal: 24,
+    paddingVertical: 24,
+    gap: 12,
+  },
+
+  socialText: {
+    // textAlign: "center",
+    color: Colors.light.text,
+    fontFamily: "sb-b",
+    // fontSize: 16,
   },
 
   login: {
@@ -105,13 +140,14 @@ const styles = StyleSheet.create({
   titleContainer: {
     // borderWidth: 1,
     // borderColor: Colors.dark.text,
+    gap: 12,
     justifyContent: "center",
     alignItems: "center",
   },
 
   title: {
     fontFamily: "sb-b",
-    fontSize: 32,
+    fontSize: 28,
     color: Colors.dark.tint,
   },
 
@@ -123,9 +159,10 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 12,
     borderRadius: 10,
+    color: Colors.dark.text,
   },
   textInputContainer: {
-    gap: 2,
+    gap: 8,
   },
   textInput: {
     color: Colors.dark.subText,
@@ -149,6 +186,21 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: Colors.dark.subText,
     fontFamily: "sb-l",
+    paddingVertical: 12,
+  },
+
+  link: {
+    color: Colors.dark.tint,
+    fontFamily: "sb-l",
+    textAlign: "center",
+  },
+  signinup: {
+    // borderWidth: 1,
+    justifyContent: "center",
+    gap: 14,
+  },
+  socialContainer: {
+    gap: 10,
   },
 })
 

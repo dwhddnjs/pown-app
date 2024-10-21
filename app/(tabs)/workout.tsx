@@ -2,8 +2,13 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
 import { ScrollView, StyleSheet } from "react-native"
 import Colors from "@/constants/Colors"
+import { supabase } from "@/lib/supabase"
+import { useEffect } from "react"
+import { useGetUsers } from "@/hooks/use-get-users"
 
 export default function TabOneScreen() {
+  const { data } = useGetUsers()
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.list}>

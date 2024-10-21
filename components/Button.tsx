@@ -12,10 +12,13 @@ import { useKeyboardVisible } from "@/hooks/use-keyboard-visible"
 
 interface ButtonProps extends TouchableOpacityProps {
   children: React.ReactNode
-  type: "solid" | "bordered" | "submit"
+  type: "solid" | "bordered" | "submit" | "icon"
+  style?: {
+    [key: string]: number | string
+  }
 }
 
-export const Button = ({ type, children, ...props }: ButtonProps) => {
+export const Button = ({ type, children, style, ...props }: ButtonProps) => {
   const isVisible = useKeyboardVisible() // 여기서 키보드가 켜졌는지 안켜졌는지 확인함
 
   const marginAnim = useRef(new Animated.Value(24)).current
@@ -36,15 +39,19 @@ export const Button = ({ type, children, ...props }: ButtonProps) => {
         },
       ]}
     >
-      <TouchableOpacity style={[styles(isVisible)[type]]} {...props}>
-        <Text
-          style={[
-            styles().title,
-            type === "bordered" && { color: Colors.dark.tint },
-          ]}
-        >
-          {children}
-        </Text>
+      <TouchableOpacity style={[styles(isVisible)[type], style]} {...props}>
+        {type === "icon" ? (
+          children
+        ) : (
+          <Text
+            style={[
+              styles().title,
+              type === "bordered" && { color: Colors.dark.tint },
+            ]}
+          >
+            {children}
+          </Text>
+        )}
       </TouchableOpacity>
     </Animated.View>
   )
@@ -63,7 +70,6 @@ const styles = (props?: boolean) =>
       backgroundColor: Colors.dark.tint,
       paddingVertical: 14,
       marginHorizontal: 24,
-      marginBottom: 44,
       borderRadius: 12,
     },
     bordered: {
@@ -80,5 +86,17 @@ const styles = (props?: boolean) =>
       paddingVertical: 14,
       marginBottom: 44,
       borderRadius: props ? 0 : 12,
+    },
+    icon: {
+      backgroundColor: "transparent",
+      borderWidth: 2,
+      borderColor: Colors.dark.tabBar,
+      gap: 8,
+      flexDirection: "row",
+      justifyContent: "center",
+      alignItems: "center",
+      paddingVertical: 14,
+      marginHorizontal: 24,
+      borderRadius: 12,
     },
   })

@@ -1,0 +1,32 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider          = "postgresql"
+    url               = env("DATABASE_URL")
+    directUrl         = env("DIRECT_URL")
+}
+
+
+enum Gender {
+    male
+    female
+}
+
+enum AuthType {
+    email
+    google
+    apple
+}
+
+model User {
+    id String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+    email String @unique
+    password String
+    provider AuthType @default(email)
+    created_at DateTime?
+    updated_at DateTime?
+    name String
+    gender Gender?
+}
