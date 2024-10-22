@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll"
   },
@@ -57,6 +57,7 @@
     "prisma": "^5.21.1",
     "react-native-svg-transformer": "^1.5.0",
     "react-test-renderer": "18.2.0",
+    "reactotron-react-native": "^5.1.9",
     "typescript": "~5.3.3"
   },
   "private": true

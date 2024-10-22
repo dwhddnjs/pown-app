@@ -26,6 +26,11 @@ import {
 } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
 import { useUser } from "@/hooks/use-user"
+import Reactotron from "reactotron-react-native"
+
+// if (__DEV__) {
+//   require("../ReactotronConfig")
+// }
 
 export {
   // Catch any errors thrown by the Layout component.
