@@ -12,10 +12,11 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
-      "jsEngine": "jsc",
+      "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app"
     },
     "android": {
@@ -26,7 +27,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
     "packagerOpts": {
