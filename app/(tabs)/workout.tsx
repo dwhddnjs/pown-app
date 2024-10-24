@@ -5,18 +5,35 @@ import Colors from "@/constants/Colors"
 import { supabase } from "@/lib/supabase"
 import { useEffect } from "react"
 import { useGetUsers } from "@/hooks/use-get-users"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import { Button } from "@/components/Button"
+import { groupByDate } from "@/lib/function"
 
 export default function TabOneScreen() {
   const { data } = useGetUsers()
+  const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
+  console.log("workoutPlanList: ", workoutPlanList)
+  const sortWorkList = groupByDate(workoutPlanList)
+  console.log("sortWorkList: ", sortWorkList)
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.list}>
-        <WorkoutPlan />
-        <WorkoutPlan />
-        <WorkoutPlan />
-        <WorkoutPlan />
+      <View>
+        {Object.entries(sortWorkList).map((item) => {
+          console.log("item: ", item)
+          return (
+            <View style={styles.list}>
+              <Text>{item[0]}</Text>
+              {item[1].map((item) => (
+                <WorkoutPlan item={item} />
+              ))}
+            </View>
+          )
+        })}
       </View>
+      <Button type="solid" onPress={onResetPlanList}>
+        RESET
+      </Button>
     </ScrollView>
   )
 }

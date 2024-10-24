@@ -9,7 +9,7 @@ import CoolIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import NeutralIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import AnoyIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { StyleSheet, TouchableOpacity } from "react-native"
-import { Text } from "@/components/Themed"
+import { Text, View } from "@/components/Themed"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
 interface ConditionIconProps {
@@ -17,6 +17,7 @@ interface ConditionIconProps {
     id: number
     condition: string
   }
+
   type: "column" | "row"
 }
 
@@ -57,29 +58,11 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
         break
       case "양호함":
         result = (
-          <NeutralIcon
-            name="emoticon-neutral"
-            size={size}
-            color={
-              condition.includes(value)
-                ? Colors.dark.background
-                : Colors.dark.tint
-            }
-          />
+          <NeutralIcon name="emoticon-neutral" size={size} color={color} />
         )
         break
       default:
-        result = (
-          <AnoyIcon
-            name="emoticon-sad"
-            size={size}
-            color={
-              condition.includes(value)
-                ? Colors.dark.background
-                : Colors.dark.tint
-            }
-          />
-        )
+        result = <AnoyIcon name="emoticon-sad" size={size} color={color} />
         break
     }
     return result
@@ -119,10 +102,10 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
       </TouchableOpacity>
     ),
     row: (
-      <TouchableOpacity style={[styles.rowIcon]} key={item.id}>
+      <View style={[styles.rowIcon]} key={item.id}>
         {getIcon(item.condition, 16, Colors.dark.tint)}
         <Text style={[styles.rowText]}>{item.condition}</Text>
-      </TouchableOpacity>
+      </View>
     ),
   }
 

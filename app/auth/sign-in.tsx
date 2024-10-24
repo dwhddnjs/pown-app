@@ -23,8 +23,6 @@ import { useUser } from "@/hooks/use-user"
 
 export default function SignIn() {
   const { mutate } = useSignInMutation()
-  const { user } = useUser()
-  console.log("user: ", user)
 
   const {
     control,

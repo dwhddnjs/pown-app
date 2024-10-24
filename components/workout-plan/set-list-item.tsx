@@ -3,15 +3,16 @@ import React from "react"
 import { Text, View } from "../Themed"
 import Colors from "@/constants/Colors"
 import { NumberBallIcon } from "../number-ball-icon"
+import { SetWithCountType } from "@/hooks/use-plan-store"
 
-export const SetListItem = () => {
+export const SetListItem = ({ item }: { item: SetWithCountType }) => {
   return (
     <View style={styles.container}>
       <NumberBallIcon>1</NumberBallIcon>
       <View style={styles.setCounter}>
         <View style={styles.setCounterContainer}>
-          <Text style={styles.setType}>본세트</Text>
-          <Text style={styles.count}>8 + α 회</Text>
+          <Text style={styles.setType}>{item.set}</Text>
+          <Text style={styles.count}>{`${item.count} 회`}</Text>
         </View>
         <Text style={styles.progressText}>진행중</Text>
       </View>

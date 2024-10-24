@@ -20,6 +20,9 @@ import { Button } from "@/components/Button"
 import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import { usePlanStore } from "@/hooks/use-plan-store"
+import { useLocalSearchParams } from "expo-router"
 
 interface InputRefObject {
   measure: (
@@ -36,12 +39,31 @@ interface InputRefObject {
 
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
+  const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore()
+  const { ...result } = usePlanStore()
+  console.log("result: ", result)
+  const { slug } = useLocalSearchParams()
 
   const onHideKeyboard = () => {
     Keyboard.dismiss()
+  }
+
+  const onSubmitWorkoutPlan = () => {
+    setWorkoutPlan({
+      id: workoutPlanList.length + 1,
+      workout: result.workout,
+      type: slug as string,
+      equipment: result.equipment,
+      weight: result.weight,
+      condition: result.condition,
+      content: result.content,
+      title: result.title,
+      setWithCount: result.setWithCount,
+      createdAt: "2024-10-25T19:51:28.459Z" as any,
+      updatedAt: new Date(),
+    })
   }
 
   const scrollRef = useRef<ScrollView>(null)
@@ -86,7 +108,9 @@ export default function AddPlan() {
         <PlanNote onFocus={onInputFocus} />
         <View style={{ height: 250 }} />
       </ScrollView>
-      <Button type="submit">저장</Button>
+      <Button type="submit" onPress={onSubmitWorkoutPlan}>
+        저장
+      </Button>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>
   )

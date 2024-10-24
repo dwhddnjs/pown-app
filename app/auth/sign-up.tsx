@@ -33,7 +33,7 @@ export default function SignUp() {
   })
   const { mutate } = useSignUpMutation()
 
-  const onSubmit = async (formData: any) => {
+  const onSubmit = (formData: any) => {
     mutate(formData)
   }
 

@@ -14,7 +14,6 @@ import { equipmentData } from "@/constants/constants"
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore()
-  console.log("equipment: ", equipment)
 
   const onPressEquipment = (item: string) => {
     setPlanValue("equipment", item)

@@ -1,13 +1,26 @@
 import { StyleSheet, Text, View } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
+import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 
-export const WeightDate = () => {
+interface WeightDateProps {
+  workout: string
+  weight: string
+  date: string
+  equipment: string
+}
+
+export const WeightDate = ({
+  workout,
+  weight,
+  date,
+  equipment,
+}: WeightDateProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleWeight}>
-        <Text style={styles.title}>바벨 로우</Text>
-        <Text style={styles.weight}> X 90kg</Text>
+        <Text style={styles.title}>{`${equipment} ${workout}`}</Text>
+        <Text style={styles.weight}>{`X ${weight}kg`} </Text>
       </View>
       <Text style={styles.date}>09:21</Text>
     </View>

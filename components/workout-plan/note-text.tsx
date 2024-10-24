@@ -3,13 +3,16 @@ import React from "react"
 import Colors from "@/constants/Colors"
 import { Text, View } from "../Themed"
 
-export const NoteText = () => {
+interface NoteTextProps {
+  title?: string
+  content: string
+}
+
+export const NoteText = ({ title, content }: NoteTextProps) => {
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>오늘 느낌이 좋은데?</Text>
-      <Text style={styles.content}>
-        근데 사실 오늘 컨디션 좋지는 않았는데 뭔가 욕심 내면 들 수 있을거 같음
-      </Text>
+      {title && <Text style={styles.title}>{title}</Text>}
+      <Text style={styles.content}>{content}</Text>
     </View>
   )
 }

@@ -1,6 +1,6 @@
 import { create } from "zustand"
 
-type PlanStoreType = {
+export type PlanStoreType = {
   workout: string
   type: string
   equipment: string
@@ -17,10 +17,16 @@ type PlanStoreType = {
   setFilterSetWithCount: (id: number) => void
 }
 
+export type ConditionTypes = {
+  id: number
+  condition: string
+}
+
 export type SetWithCountType = {
   id: number
   set: string
   count: string
+  progress: "진행중" | "완료"
 }
 
 export const usePlanStore = create<PlanStoreType>((set) => ({

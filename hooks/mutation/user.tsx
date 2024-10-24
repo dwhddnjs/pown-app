@@ -23,17 +23,15 @@ export const useSignInMutation = () => {
 
 export const useSignUpMutation = () => {
   const { mutate } = useMutation({
-    mutationFn: async (form: any) =>
-      await supabase.auth.signUp({
+    mutationFn: async (form: any) => {
+      console.log("form: ", form)
+      return await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: {
-          data: {
-            name: form.name,
-          },
-        },
-      }),
-    onSuccess: (data) => {
+      })
+    },
+
+    onSuccess: async (data) => {
       console.log("data: ", data)
     },
     onError: (error) => {

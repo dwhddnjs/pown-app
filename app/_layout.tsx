@@ -73,14 +73,13 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
-  const { setUser } = useUser()
+  //   const { setUser } = useUser()
 
-  useEffect(() => {
-    supabase.auth.onAuthStateChange((_event, session) => {
-      console.log("session: ", session)
-      setUser(session)
-    })
-  }, [])
+  //   useEffect(() => {
+  //     supabase.auth.onAuthStateChange((_event, session) => {
+  //       setUser(session)
+  //     })
+  //   }, [])
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
