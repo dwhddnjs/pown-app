@@ -43,7 +43,6 @@ export default function AddPlan() {
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
   const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore()
   const { ...result } = usePlanStore()
-  console.log("result: ", result)
   const { slug } = useLocalSearchParams()
 
   const onHideKeyboard = () => {
@@ -61,10 +60,12 @@ export default function AddPlan() {
       content: result.content,
       title: result.title,
       setWithCount: result.setWithCount,
-      createdAt: "2024-10-25T19:51:28.459Z" as any,
+      createdAt: "2024-10-27T19:51:28.459Z",
       updatedAt: new Date(),
     })
   }
+
+  //   ;("2024-10-25T19:51:28.459Z")
 
   const scrollRef = useRef<ScrollView>(null)
 

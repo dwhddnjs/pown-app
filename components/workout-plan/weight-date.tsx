@@ -20,9 +20,9 @@ export const WeightDate = ({
     <View style={styles.container}>
       <View style={styles.titleWeight}>
         <Text style={styles.title}>{`${equipment} ${workout}`}</Text>
-        <Text style={styles.weight}>{`X ${weight}kg`} </Text>
+        <Text style={styles.date}>09:21</Text>
       </View>
-      <Text style={styles.date}>09:21</Text>
+      <Text style={styles.weight}>{`목표 • ${weight}kg`} </Text>
     </View>
   )
 }
@@ -32,24 +32,25 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.itemColor,
     flexDirection: "column",
     // alignItems: "flex-end",
-    paddingTop: 10,
+    paddingTop: 8,
   },
 
   titleWeight: {
     flexDirection: "row",
     alignItems: "flex-end",
+    gap: 6,
   },
 
   title: {
     color: Colors.dark.tint,
-    fontSize: 20,
+    fontSize: 18,
     fontFamily: "sb-m",
   },
 
   weight: {
-    fontSize: 16,
-    color: Colors.dark.tint,
-    fontFamily: "sb-l",
+    // fontSize: 16
+    color: Colors.dark.text,
+    fontFamily: "sb-m",
   },
 
   date: {

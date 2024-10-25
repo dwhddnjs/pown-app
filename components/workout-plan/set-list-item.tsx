@@ -8,7 +8,9 @@ import { SetWithCountType } from "@/hooks/use-plan-store"
 export const SetListItem = ({ item }: { item: SetWithCountType }) => {
   return (
     <View style={styles.container}>
-      <NumberBallIcon>1</NumberBallIcon>
+      <View style={styles.ballContainer}>
+        <NumberBallIcon>1</NumberBallIcon>
+      </View>
       <View style={styles.setCounter}>
         <View style={styles.setCounterContainer}>
           <Text style={styles.setType}>{item.set}</Text>
@@ -21,21 +23,12 @@ export const SetListItem = ({ item }: { item: SetWithCountType }) => {
           style={[
             styles.button,
             {
-              backgroundColor: Colors.dark.fail,
+              backgroundColor: Colors.dark.tint,
+              borderRadius: 8,
             },
           ]}
         >
-          <Text style={styles.butttonText}>실패</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              backgroundColor: Colors.dark.success,
-            },
-          ]}
-        >
-          <Text style={styles.butttonText}>성공</Text>
+          <Text style={styles.butttonText}>완료</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -47,17 +40,20 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.itemColor,
     flexDirection: "row",
     // gap: 8,
+    // borderWidth: 1,
   },
+  ballContainer: { paddingTop: 2, backgroundColor: Colors.dark.itemColor },
   progressText: {
     color: Colors.dark.subText,
     fontFamily: "sb-l",
-    fontSize: 12,
+    fontSize: 10,
   },
 
   setCounterContainer: {
     flexDirection: "row",
     backgroundColor: Colors.dark.itemColor,
-    gap: 2,
+    alignItems: "center",
+    gap: 4,
   },
 
   setCounter: {
@@ -65,10 +61,11 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     borderBottomWidth: 1,
     borderBottomColor: Colors.dark.subText,
-    gap: 2,
+    // gap: 2,
     flex: 1,
-    marginLeft: 8,
-    marginRight: 12,
+    marginLeft: 6,
+    marginRight: 6,
+    justifyContent: "center",
   },
   setType: {
     color: Colors.dark.tint,

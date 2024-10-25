@@ -21,11 +21,13 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.itemColor,
     gap: 2,
+    paddingBottom: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: 16,
   },
   content: {
     fontFamily: "sb-l",
+    fontSize: 12,
   },
 })

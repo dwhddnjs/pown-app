@@ -138,6 +138,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 2,
     alignItems: "center",
+    marginRight: 4,
+    marginBottom: 4,
   },
   rowText: {
     fontSize: 10,

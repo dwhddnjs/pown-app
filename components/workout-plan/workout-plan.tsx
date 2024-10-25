@@ -17,9 +17,11 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes
+  index: number
+  totalLength: number
 }
 
-export const WorkoutPlan = ({ item }: WorkoutPlanProps) => {
+export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
   const getWorkoutIcon = (type: string) => {
     let result
     switch (type) {
@@ -44,14 +46,25 @@ export const WorkoutPlan = ({ item }: WorkoutPlanProps) => {
   }
 
   return (
-    <View style={styles.container}>
-      {/* 세션 1 */}
+    <View
+      style={[
+        styles.container,
+        index === totalLength - 1 && { paddingBottom: 24 },
+      ]}
+    >
       <View style={styles.iconLine}>
         {getWorkoutIcon(item.type)}
-        {/* <View style={styles.line} /> */}
+        {index !== totalLength - 1 && (
+          <View
+            style={{
+              width: 2,
+              height: 1,
+              flex: 1,
+              backgroundColor: Colors.dark.subText,
+            }}
+          />
+        )}
       </View>
-
-      {/* 세션 2 */}
       <View style={styles.workoutContainer}>
         <WeightDate
           equipment={item.equipment}
@@ -74,15 +87,18 @@ export const WorkoutPlan = ({ item }: WorkoutPlanProps) => {
         <NoteText title={item.title} content={item.content} />
 
         {/* 세트와 횟수 */}
-        <View
-          style={{
-            paddingVertical: 8,
-            backgroundColor: Colors.dark.itemColor,
-          }}
-        >
-          {item.setWithCount.map((item) => (
-            <SetListItem item={item} />
-          ))}
+        <View>
+          <View
+            style={{
+              paddingTop: 8,
+              backgroundColor: Colors.dark.itemColor,
+              gap: 8,
+            }}
+          >
+            {item.setWithCount.map((item) => (
+              <SetListItem item={item} />
+            ))}
+          </View>
         </View>
       </View>
     </View>
@@ -92,17 +108,21 @@ export const WorkoutPlan = ({ item }: WorkoutPlanProps) => {
 const styles = StyleSheet.create({
   container: {
     // paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingHorizontal: 16,
     backgroundColor: Colors.dark.itemColor,
     // borderRadius: 12,
-    gap: 10,
+    gap: 14,
     flexDirection: "row",
     alignItems: "flex-start",
+    // borderWidth: 1,
   },
   iconLine: {
     backgroundColor: Colors.dark.itemColor,
     // justifyContent: "center",
+
     alignItems: "center",
-    gap: 10,
+    gap: 16,
   },
   workoutContainer: {
     backgroundColor: Colors.dark.itemColor,
@@ -113,7 +133,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.dark.itemColor,
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingVertical: 8,
+    paddingVertical: 12,
   },
 
   //   line: {

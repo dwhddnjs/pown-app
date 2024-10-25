@@ -22,7 +22,7 @@ export default {
     tabIconDefault: "#555555",
     tabIconSelected: "#00ccbb",
     tabBar: "#1e1e1e",
-    itemColor: "#272727",
+    itemColor: "#27272a",
     success: "#3A76E2",
     fail: "#F13C33",
   },

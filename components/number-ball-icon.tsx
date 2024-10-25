@@ -13,10 +13,10 @@ export const NumberBallIcon = ({ children }: { children: React.ReactNode }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.tint,
+    backgroundColor: Colors.dark.subText,
     borderRadius: 50,
-    width: 24,
-    height: 24,
+    width: 20,
+    height: 20,
     justifyContent: "center",
     alignItems: "center",
   },

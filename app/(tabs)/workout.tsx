@@ -8,6 +8,7 @@ import { useGetUsers } from "@/hooks/use-get-users"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { Button } from "@/components/Button"
 import { groupByDate } from "@/lib/function"
+import { format } from "date-fns"
 
 export default function TabOneScreen() {
   const { data } = useGetUsers()
@@ -16,47 +17,66 @@ export default function TabOneScreen() {
   const sortWorkList = groupByDate(workoutPlanList)
   console.log("sortWorkList: ", sortWorkList)
 
+  const formatDate = (value: string) => {
+    const splitValue = value.split("-")
+    return `${splitValue[0]}년 ${splitValue[1]}월 ${splitValue[2]}일`
+  }
+
   return (
     <ScrollView style={styles.container}>
       <View>
         {Object.entries(sortWorkList).map((item) => {
-          console.log("item: ", item)
+          console.log("asdasdsad", item[1])
+
           return (
             <View style={styles.list}>
-              <Text>{item[0]}</Text>
-              {item[1].map((item) => (
-                <WorkoutPlan item={item} />
-              ))}
+              <Text style={styles.date}>{formatDate(item[0])}</Text>
+              <View style={styles.workoutList}>
+                {item[1].map((data, index) => (
+                  <WorkoutPlan
+                    item={data}
+                    index={index}
+                    totalLength={item[1].length}
+                  />
+                ))}
+              </View>
             </View>
           )
         })}
       </View>
-      <Button type="solid" onPress={onResetPlanList}>
+      {/* <Button type="solid" onPress={onResetPlanList}>
         RESET
-      </Button>
+      </Button> */}
     </ScrollView>
   )
 }
 
-// borderWidth: 1,
-// borderColor: Colors.dark.text,
-
 const styles = StyleSheet.create({
   container: {
-    paddingTop: 24,
+    // paddingTop: 24,
     flex: 1,
     // alignItems: "center",
     // justifyContent: "center",
     backgroundColor: Colors.dark.background,
-    paddingHorizontal: 24,
+    // paddingHorizontal: 24,
   },
-  list: {
-    backgroundColor: Colors.dark.itemColor,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
+
+  date: {
+    fontSize: 16,
+    textAlign: "center",
+  },
+  workoutList: {
     borderRadius: 14,
-    gap: 12,
+    overflow: "hidden",
   },
+
+  list: {
+    paddingHorizontal: 24,
+    gap: 18,
+    paddingTop: 18,
+    // paddingBottom: 12,
+  },
+
   title: {
     fontSize: 24,
     fontWeight: "bold",
