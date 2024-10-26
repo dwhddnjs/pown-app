@@ -1,7 +1,7 @@
 import React from "react"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { Link, router, Tabs } from "expo-router"
-import { Pressable, useColorScheme } from "react-native"
+import { Pressable, SafeAreaView, useColorScheme } from "react-native"
 // import { GiMuscleUp } from "react-icons/gi"
 import DumbelIcon from "@expo/vector-icons/FontAwesome5"
 import UserIcon from "@expo/vector-icons/FontAwesome"
@@ -9,6 +9,9 @@ import PlusIcon from "@expo/vector-icons/EvilIcons"
 
 import Colors from "@/constants/Colors"
 import ModalScreen from "../(modals)/select-type"
+import { BlurView } from "expo-blur"
+import { Text } from "@/components/Themed"
+import { useHeaderHeight } from "@react-navigation/elements"
 // import { useColorScheme } from '@/components/useColorScheme';
 // import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
@@ -52,6 +55,26 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <DumbelIcon name="dumbbell" size={20} color={color} />
           ),
+          header: ({ navigation, route, options }) => {
+            return (
+              <BlurView
+                intensity={80}
+                tint="default"
+                style={{
+                  width: "100%",
+                  paddingBottom: 10,
+                  alignItems: "center",
+                }}
+              >
+                <SafeAreaView>
+                  <Text style={{ fontSize: 18, textAlign: "center" }}>
+                    🔥 오늘의 운동
+                  </Text>
+                </SafeAreaView>
+              </BlurView>
+            )
+          },
+          headerTransparent: true,
         }}
       />
       <Tabs.Screen

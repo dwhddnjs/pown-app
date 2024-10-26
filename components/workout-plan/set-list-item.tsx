@@ -4,19 +4,27 @@ import { Text, View } from "../Themed"
 import Colors from "@/constants/Colors"
 import { NumberBallIcon } from "../number-ball-icon"
 import { SetWithCountType } from "@/hooks/use-plan-store"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 
-export const SetListItem = ({ item }: { item: SetWithCountType }) => {
+interface SetListItemProps {
+  item: SetWithCountType
+  planId: number
+}
+
+export const SetListItem = ({ item, planId }: SetListItemProps) => {
+  const { setCompleteProgress } = userWorkoutPlanStore()
+
   return (
     <View style={styles.container}>
       <View style={styles.ballContainer}>
-        <NumberBallIcon>1</NumberBallIcon>
+        <NumberBallIcon>{item.id}</NumberBallIcon>
       </View>
       <View style={styles.setCounter}>
         <View style={styles.setCounterContainer}>
           <Text style={styles.setType}>{item.set}</Text>
           <Text style={styles.count}>{`${item.count} 회`}</Text>
         </View>
-        <Text style={styles.progressText}>진행중</Text>
+        <Text style={styles.progressText}>{item.progress}</Text>
       </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity
@@ -27,6 +35,7 @@ export const SetListItem = ({ item }: { item: SetWithCountType }) => {
               borderRadius: 8,
             },
           ]}
+          onPress={() => setCompleteProgress(planId, item.id)}
         >
           <Text style={styles.butttonText}>완료</Text>
         </TouchableOpacity>

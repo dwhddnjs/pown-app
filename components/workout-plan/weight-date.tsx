@@ -2,6 +2,8 @@ import { StyleSheet, Text, View } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
+import { format, formatDate } from "date-fns"
+import { formatTime } from "@/lib/function"
 
 interface WeightDateProps {
   workout: string
@@ -20,7 +22,7 @@ export const WeightDate = ({
     <View style={styles.container}>
       <View style={styles.titleWeight}>
         <Text style={styles.title}>{`${equipment} ${workout}`}</Text>
-        <Text style={styles.date}>09:21</Text>
+        <Text style={styles.date}>{formatTime(date)}</Text>
       </View>
       <Text style={styles.weight}>{`목표 • ${weight}kg`} </Text>
     </View>

@@ -72,7 +72,6 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           weight={item.weight}
           date={item.createdAt as string}
         />
-
         <View style={styles.conditionTagList}>
           {item.condition.map((item, index) => (
             <ConditionIcon
@@ -82,10 +81,8 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
             />
           ))}
         </View>
-
         {/* 노트 */}
         <NoteText title={item.title} content={item.content} />
-
         {/* 세트와 횟수 */}
         <View>
           <View
@@ -95,8 +92,8 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               gap: 8,
             }}
           >
-            {item.setWithCount.map((item) => (
-              <SetListItem item={item} />
+            {item.setWithCount.map((setCount) => (
+              <SetListItem planId={item.id} item={setCount} />
             ))}
           </View>
         </View>

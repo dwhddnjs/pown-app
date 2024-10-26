@@ -22,7 +22,8 @@ import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { useLocalSearchParams } from "expo-router"
+import { useLocalSearchParams, useRouter } from "expo-router"
+import { format } from "date-fns"
 
 interface InputRefObject {
   measure: (
@@ -42,8 +43,9 @@ export default function AddPlan() {
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
   const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore()
-  const { ...result } = usePlanStore()
+  const { onReset, ...result } = usePlanStore()
   const { slug } = useLocalSearchParams()
+  const { back } = useRouter()
 
   const onHideKeyboard = () => {
     Keyboard.dismiss()
@@ -60,9 +62,11 @@ export default function AddPlan() {
       content: result.content,
       title: result.title,
       setWithCount: result.setWithCount,
-      createdAt: "2024-10-27T19:51:28.459Z",
-      updatedAt: new Date(),
+      createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+      updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
     })
+    onReset()
+    back()
   }
 
   //   ;("2024-10-25T19:51:28.459Z")

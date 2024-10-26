@@ -29,7 +29,11 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     }
 
     const onSetPlanStore = () => {
-      setSetWithCount({ ...picker, id: setWithCount.length + 1 })
+      setSetWithCount({
+        ...picker,
+        id: setWithCount.length + 1,
+        progress: "진행중",
+      })
       onClose()
     }
 

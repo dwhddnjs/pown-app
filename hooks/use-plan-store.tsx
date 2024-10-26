@@ -72,6 +72,7 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       setWithCount: [],
       weight: "",
       condition: [],
+      equipment: "바벨",
       title: "",
       content: "",
     }),
