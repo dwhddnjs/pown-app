@@ -19,6 +19,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
 import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { Toaster } from "sonner-native"
 import {
   onlineManager,
   QueryClient,
@@ -39,8 +40,6 @@ export const unstable_settings = {
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync()
-
-const queryClient = new QueryClient()
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -64,11 +63,7 @@ export default function RootLayout() {
     return null
   }
 
-  return (
-    <QueryClientProvider client={queryClient}>
-      <RootLayoutNav />
-    </QueryClientProvider>
-  )
+  return <RootLayoutNav />
 }
 
 function RootLayoutNav() {
@@ -169,9 +164,11 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: "#1a1a1a",
+                  backgroundColor: Colors.dark.background,
                 },
                 headerShadowVisible: false,
+                // headerBlurEffect: "regular",
+                // headerTransparent: true,
 
                 headerLeft: () => (
                   <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -265,6 +262,7 @@ function RootLayoutNav() {
               })}
             />
           </Stack>
+          <Toaster />
         </BottomSheetModalProvider>
       </GestureHandlerRootView>
     </ThemeProvider>

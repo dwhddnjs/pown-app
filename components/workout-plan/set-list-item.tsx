@@ -5,6 +5,7 @@ import Colors from "@/constants/Colors"
 import { NumberBallIcon } from "../number-ball-icon"
 import { SetWithCountType } from "@/hooks/use-plan-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import CheckCircle from "@expo/vector-icons/AntDesign"
 
 interface SetListItemProps {
   item: SetWithCountType
@@ -24,21 +25,38 @@ export const SetListItem = ({ item, planId }: SetListItemProps) => {
           <Text style={styles.setType}>{item.set}</Text>
           <Text style={styles.count}>{`${item.count} 회`}</Text>
         </View>
-        <Text style={styles.progressText}>{item.progress}</Text>
+        <Text
+          style={[
+            styles.progressText,
+            item.progress === "완료" && { color: Colors.dark.tint },
+          ]}
+        >
+          {item.progress}
+        </Text>
       </View>
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            {
-              backgroundColor: Colors.dark.tint,
-              borderRadius: 8,
-            },
-          ]}
-          onPress={() => setCompleteProgress(planId, item.id)}
-        >
-          <Text style={styles.butttonText}>완료</Text>
-        </TouchableOpacity>
+        {item.progress === "완료" ? (
+          <View style={styles.completedIcon}>
+            <CheckCircle
+              name="checkcircleo"
+              size={24}
+              color={Colors.dark.tint}
+            />
+          </View>
+        ) : (
+          <TouchableOpacity
+            style={[
+              styles.button,
+              {
+                backgroundColor: Colors.dark.subText,
+                borderRadius: 8,
+              },
+            ]}
+            onPress={() => setCompleteProgress(planId, item.id)}
+          >
+            <Text style={styles.butttonText}>완료</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   )
@@ -96,5 +114,10 @@ const styles = StyleSheet.create({
 
   butttonText: {
     fontSize: 12,
+  },
+  completedIcon: {
+    justifyContent: "center",
+    backgroundColor: Colors.dark.itemColor,
+    paddingHorizontal: 10,
   },
 })

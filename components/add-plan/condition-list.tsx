@@ -13,14 +13,17 @@ import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
 export const ConditionList = () => {
   return (
     <View style={styles.main}>
-      <IconTitle style={{ gap: 7 }}>
-        <BatteryIcon
-          name="battery-heart-variant"
-          size={20}
-          color={Colors.dark.tint}
-        />
-        <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
-      </IconTitle>
+      <View style={styles.titleContainer}>
+        <IconTitle style={{ gap: 7 }}>
+          <BatteryIcon
+            name="battery-heart-variant"
+            size={20}
+            color={Colors.dark.tint}
+          />
+          <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
+        </IconTitle>
+        <Text style={styles.subText}>(선택)</Text>
+      </View>
       <View style={styles.container}>
         <FlashList
           data={conditionData}
@@ -64,5 +67,17 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 8,
     color: Colors.dark.tint,
+  },
+
+  subText: {
+    fontFamily: "sb-l",
+    color: Colors.dark.tint,
+    fontSize: 12,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingRight: 24,
+    alignItems: "flex-end",
   },
 })

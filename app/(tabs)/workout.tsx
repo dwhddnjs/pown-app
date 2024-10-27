@@ -4,7 +4,6 @@ import { PlatformColor, ScrollView, StyleSheet } from "react-native"
 import Colors from "@/constants/Colors"
 import { supabase } from "@/lib/supabase"
 import { useEffect } from "react"
-import { useGetUsers } from "@/hooks/use-get-users"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { Button } from "@/components/Button"
 import { formatDate, groupByDate } from "@/lib/function"
@@ -14,7 +13,6 @@ import { useHeaderHeight } from "@react-navigation/elements"
 import { BlurView } from "expo-blur"
 
 export default function TabOneScreen() {
-  const { data } = useGetUsers()
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const sortWorkList = groupByDate(workoutPlanList)
   console.log("sortWorkList: ", sortWorkList)
@@ -23,10 +21,10 @@ export default function TabOneScreen() {
   return (
     <ScrollView style={[styles.container, { paddingTop: headerHeight }]}>
       <View>
-        {Object.entries(sortWorkList).map((item) => {
+        {Object.entries(sortWorkList).map((item, index) => {
           return (
-            <View style={styles.list}>
-              <Text style={styles.date}>{formatDate(item[0])}</Text>
+            <View style={styles.list} key={index}>
+              <Text style={styles.date}>{`🗓️  ${formatDate(item[0])}`}</Text>
               <View style={styles.workoutList}>
                 {item[1].map((data, index) => (
                   <WorkoutPlan
@@ -41,6 +39,7 @@ export default function TabOneScreen() {
           )
         })}
       </View>
+      <View style={{ height: 300 }} />
     </ScrollView>
   )
 }
@@ -55,8 +54,17 @@ const styles = StyleSheet.create({
   },
 
   date: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
+    fontFamily: "sb-l",
+    borderWidth: 2,
+    // color: Colors.dark.subText,
+    alignSelf: "center",
+    borderColor: Colors.dark.subText,
+    paddingHorizontal: 10,
+    // paddingTop: 1,
+    paddingBottom: 4,
+    borderRadius: 16,
   },
   workoutList: {
     borderRadius: 14,

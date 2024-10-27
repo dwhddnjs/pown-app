@@ -42,7 +42,7 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
       workoutPlanList: [],
       setWorkoutPlan: (value) =>
         set((prev) => ({
-          workoutPlanList: [...prev.workoutPlanList, value],
+          workoutPlanList: [value, ...prev.workoutPlanList],
         })),
       onResetPlanList: () =>
         set({
@@ -51,9 +51,7 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
       setCompleteProgress: (id: number, itemId: number) =>
         set((prev) => {
           const newWorkoutList = [...prev.workoutPlanList]
-          console.log("newWorkoutList: ", newWorkoutList)
           const findIndex = newWorkoutList.findIndex((item) => item.id === id)
-          console.log("findIndex: ", findIndex)
           const selectItem = newWorkoutList[findIndex].setWithCount.map(
             (item) => {
               if (item.id === itemId) {
@@ -65,30 +63,16 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
               return item
             }
           )
-          console.log("selectItem: ", selectItem)
 
           const newObj = {
             ...newWorkoutList[findIndex],
             setWithCount: selectItem,
           }
-          console.log("newObj: ", newObj)
 
           const newArr = newWorkoutList.filter((item) => item.id !== id)
-          console.log("newArr: ", newArr)
-          const result = [...newArr, newObj].sort((a, b) => a.id - b.id)
-          console.log("result: ", result)
-          //   const newWorkoutList = prev.workoutPlanList.map((item) => {
-          //     if (item.id === id) {
-          //       return {
-          //         ...item,
-          //         setWithCount: item.setWithCount.map((setItem) =>
-          //           setItem.id === itemId
-          //             ? { ...setItem, progress: "완료" }
-          //             : setItem
-          //         ),
-          //       }
-          //     }
-          //   })
+
+          const result = [...newArr, newObj].sort((a, b) => b.id - a.id)
+
           return {
             workoutPlanList: result as any,
           }

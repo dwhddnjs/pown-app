@@ -13,14 +13,16 @@ interface SetCounterProps {
 
 export const SetCounter = ({ onOpen }: SetCounterProps) => {
   const { setWithCount } = usePlanStore()
-  console.log("setWithCount: ", setWithCount)
 
   return (
     <View style={styles.container}>
-      <IconTitle>
-        <Octicons name="number" size={20} color={Colors.dark.tint} />
-        <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
-      </IconTitle>
+      <View style={styles.titleContainer}>
+        <IconTitle>
+          <Octicons name="number" size={20} color={Colors.dark.tint} />
+          <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
+        </IconTitle>
+        <Text style={styles.subText}>(선택)</Text>
+      </View>
       <Button type="bordered" onPress={onOpen}>
         선택하기
       </Button>
@@ -63,5 +65,16 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     textAlign: "center",
     color: Colors.dark.tint,
+  },
+  subText: {
+    fontFamily: "sb-l",
+    color: Colors.dark.tint,
+    fontSize: 12,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingRight: 24,
+    alignItems: "flex-end",
   },
 })

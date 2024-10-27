@@ -13,7 +13,7 @@ export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
     <View style={{ paddingVertical: 12, gap: 10 }}>
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
-        <Text style={{ fontSize: 16 }}>최고 중량</Text>
+        <Text style={{ fontSize: 16 }}>목표 중량</Text>
       </IconTitle>
       <View style={styles.container}>
         <TextInput

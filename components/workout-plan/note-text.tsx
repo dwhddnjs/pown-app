@@ -21,7 +21,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: Colors.dark.itemColor,
     gap: 2,
-    paddingBottom: 12,
   },
   title: {
     fontSize: 16,

@@ -49,6 +49,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
     <View
       style={[
         styles.container,
+        index === 0 && { paddingTop: 16 },
         index === totalLength - 1 && { paddingBottom: 24 },
       ]}
     >
@@ -58,45 +59,48 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           <View
             style={{
               width: 2,
-              height: 1,
+              height: 16,
               flex: 1,
               backgroundColor: Colors.dark.subText,
             }}
           />
         )}
       </View>
-      <View style={styles.workoutContainer}>
+      <View style={[styles.workoutContainer, { paddingBottom: 12 }]}>
         <WeightDate
           equipment={item.equipment}
           workout={item.workout}
           weight={item.weight}
           date={item.createdAt as string}
         />
-        <View style={styles.conditionTagList}>
-          {item.condition.map((item, index) => (
-            <ConditionIcon
-              key={index}
-              item={{ id: index + 1, condition: item }}
-              type="row"
-            />
-          ))}
-        </View>
+        {/* 컨디션 */}
+        {item.condition.length > 0 && (
+          <View style={styles.conditionTagList}>
+            {item.condition.map((item, index) => (
+              <ConditionIcon
+                key={index}
+                item={{ id: index + 1, condition: item }}
+                type="row"
+              />
+            ))}
+          </View>
+        )}
         {/* 노트 */}
-        <NoteText title={item.title} content={item.content} />
+        {item.content && <NoteText title={item.title} content={item.content} />}
+
         {/* 세트와 횟수 */}
-        <View>
+        {item.setWithCount.length > 0 && (
           <View
             style={{
-              paddingTop: 8,
               backgroundColor: Colors.dark.itemColor,
               gap: 8,
             }}
           >
             {item.setWithCount.map((setCount) => (
-              <SetListItem planId={item.id} item={setCount} />
+              <SetListItem key={setCount.id} planId={item.id} item={setCount} />
             ))}
           </View>
-        </View>
+        )}
       </View>
     </View>
   )
@@ -105,7 +109,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
 const styles = StyleSheet.create({
   container: {
     // paddingHorizontal: 24,
-    paddingTop: 16,
+    paddingTop: 8,
     paddingHorizontal: 16,
     backgroundColor: Colors.dark.itemColor,
     // borderRadius: 12,
@@ -119,18 +123,18 @@ const styles = StyleSheet.create({
     // justifyContent: "center",
 
     alignItems: "center",
-    gap: 16,
+    gap: 8,
   },
   workoutContainer: {
     backgroundColor: Colors.dark.itemColor,
     flex: 1,
+    gap: 14,
   },
 
   conditionTagList: {
     backgroundColor: Colors.dark.itemColor,
     flexDirection: "row",
     flexWrap: "wrap",
-    paddingVertical: 12,
   },
 
   //   line: {

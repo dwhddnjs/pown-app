@@ -139,8 +139,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     gap: 2,
     alignItems: "center",
-    marginRight: 4,
-    marginBottom: 4,
+    marginRight: 6,
+    marginBottom: 5,
   },
   rowText: {
     fontSize: 10,

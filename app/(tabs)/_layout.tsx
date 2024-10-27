@@ -6,6 +6,8 @@ import { Pressable, SafeAreaView, useColorScheme } from "react-native"
 import DumbelIcon from "@expo/vector-icons/FontAwesome5"
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import PlusIcon from "@expo/vector-icons/EvilIcons"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import { SymbolView, SymbolViewProps, SFSymbol } from "expo-symbols"
 
 import Colors from "@/constants/Colors"
 import ModalScreen from "../(modals)/select-type"
@@ -53,7 +55,13 @@ export default function TabLayout() {
         options={{
           title: "운동",
           tabBarIcon: ({ color }) => (
-            <DumbelIcon name="dumbbell" size={20} color={color} />
+            // <DumbelIcon name="dumbbell" size={20} color={color} />
+            <SymbolView
+              name="dumbbell.fill"
+              type="hierarchical"
+              tintColor={color}
+              //   size={24}
+            />
           ),
           header: ({ navigation, route, options }) => {
             return (
@@ -83,7 +91,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <PlusIcon
               name="plus"
-              size={50}
+              size={54}
               color={colorScheme === "dark" ? "#ffffff" : "#000000"}
             />
           ),
@@ -101,7 +109,7 @@ export default function TabLayout() {
         options={{
           title: "내 정보",
           tabBarIcon: ({ color }) => (
-            <UserIcon name="user" size={20} color={color} />
+            <UserIcon name="user" size={24} color={color} />
           ),
         }}
       />
