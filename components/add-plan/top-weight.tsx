@@ -10,7 +10,7 @@ export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
   const { weight, setPlanValue } = usePlanStore()
 
   return (
-    <View style={{ paddingVertical: 12, gap: 10 }}>
+    <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 24 }}>
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
         <Text style={{ fontSize: 16 }}>목표 중량</Text>
@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     paddingRight: 8,
     borderRadius: 10,
-    marginHorizontal: 24,
+    // marginHorizontal: 24,
   },
   input: {
     textAlign: "right",

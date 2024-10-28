@@ -11,6 +11,7 @@ import { IconTitle } from "../IconTitle"
 import Colors from "@/constants/Colors"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { equipmentData } from "@/constants/constants"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore()
@@ -22,7 +23,11 @@ export const EquipmentBox = () => {
   return (
     <View style={styles.container}>
       <IconTitle style={{ gap: 7 }}>
-        <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
+        <MaterialCommunityIcons
+          name="dumbbell"
+          size={20}
+          color={Colors.dark.tint}
+        />
         <Text style={{ fontSize: 16 }}>기구 종류</Text>
       </IconTitle>
       <View style={styles.box}>
@@ -49,6 +54,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
     flex: 1,
+    paddingHorizontal: 24,
   },
 
   selectedText: {
@@ -79,7 +85,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.dark.tint,
     borderRadius: 14,
-    marginHorizontal: 24,
+    // marginHorizontal: 24,
     // flexWrap: "wrap",
     paddingHorizontal: 4,
     paddingVertical: 4,

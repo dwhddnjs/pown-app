@@ -261,6 +261,83 @@ function RootLayoutNav() {
                 // ),
               })}
             />
+            <Stack.Screen
+              name="mypage/user-info"
+              options={({ navigation }) => ({
+                headerTitle: "내정보 작성",
+                headerTitleStyle: {
+                  fontFamily: "sb-m",
+                },
+                headerShadowVisible: false,
+                animation: "slide_from_bottom",
+
+                headerLeft: () => (
+                  <TouchableOpacity
+                    style={{ marginLeft: 4 }}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <XIcon
+                      name="x"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+                headerRight: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{ marginRight: 8 }}
+                  >
+                    <Checkcircle
+                      name="checkcircle"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].tint}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
+            <Stack.Screen
+              name="mypage/max-weights"
+              options={({ navigation }) => ({
+                headerTitle: "3대 중량",
+                // headerStyle: {
+                //   borderBottomWidth: 0,
+                //   elevation: 0,
+                //   shadowOpacity: 0,
+                //   backgroundColor: "#1a1a1a",
+                // },
+                headerTitleStyle: {
+                  fontFamily: "sb-m",
+                },
+                headerShadowVisible: false,
+                animation: "slide_from_bottom",
+                headerLeft: () => (
+                  <TouchableOpacity
+                    style={{ marginLeft: 4 }}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <XIcon
+                      name="x"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+                headerRight: () => (
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={{ marginRight: 8 }}
+                  >
+                    <Checkcircle
+                      name="checkcircle"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].tint}
+                    />
+                  </TouchableOpacity>
+                ),
+              })}
+            />
           </Stack>
           <Toaster />
         </BottomSheetModalProvider>

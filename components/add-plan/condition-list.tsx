@@ -14,7 +14,7 @@ export const ConditionList = () => {
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>
-        <IconTitle style={{ gap: 7 }}>
+        <IconTitle style={{ gap: 7, paddingLeft: 24 }}>
           <BatteryIcon
             name="battery-heart-variant"
             size={20}

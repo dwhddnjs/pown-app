@@ -17,7 +17,7 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
-        <IconTitle>
+        <IconTitle style={{ paddingLeft: 24 }}>
           <Octicons name="number" size={20} color={Colors.dark.tint} />
           <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
         </IconTitle>

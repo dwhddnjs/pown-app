@@ -13,7 +13,7 @@ export const PlanNote = ({ onFocus }: { onFocus: (value: any) => void }) => {
   return (
     <View style={styles.main}>
       <View style={styles.container}>
-        <IconTitle style={{ gap: 7 }}>
+        <IconTitle style={{ gap: 7, paddingLeft: 24 }}>
           <NoteIcon name="note-text" size={20} color={Colors.dark.tint} />
           <Text style={{ fontSize: 16 }}>퀵 노트</Text>
         </IconTitle>
