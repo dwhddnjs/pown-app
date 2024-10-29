@@ -12,10 +12,14 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6"
 import { IconTitle } from "@/components/IconTitle"
 
 import { useState } from "react"
+import { UserDataCard } from "@/components/mypage/user-data-card"
+import { useUserStore } from "@/hooks/use-user-store"
 
 export default function TabTwoScreen() {
   const { onResetPlanList } = userWorkoutPlanStore()
   const [value, setValue] = useState(true)
+  const { onReset, ...result } = useUserStore()
+  console.log("result: ", result)
   const { push } = useRouter()
 
   const weightMax = [
@@ -32,27 +36,9 @@ export default function TabTwoScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.userData}>
-        {/* 무게 */}
-        <View style={[styles.weight, { gap: 52 }]}>
-          {useData.map((item) => (
-            <View style={styles.weightItem}>
-              <Text style={styles.weightTitle}>{item.title}</Text>
-              <Text style={styles.weightKg}>{`${item.weight}`}</Text>
-            </View>
-          ))}
-        </View>
-        <View style={[styles.weight, { gap: 46 }]}>
-          {weightMax.map((item) => (
-            <View style={styles.weightItem}>
-              <Text style={styles.weightTitle}>{item.title}</Text>
-              <Text style={styles.weightKg}>{`${item.weight}`}</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-
+      <UserDataCard />
       <View style={styles.settingsContainer}>
+        {/* 내정보 */}
         <TouchableOpacity
           style={styles.settings}
           onPress={() => push("/mypage/user-info")}
@@ -67,6 +53,8 @@ export default function TabTwoScreen() {
           </IconTitle>
           <AntDesign name="up" size={20} color={Colors.dark.subText} />
         </TouchableOpacity>
+
+        {/* 3대중량 */}
         <TouchableOpacity
           style={styles.settings}
           onPress={() => push("/mypage/max-weights")}
@@ -81,26 +69,26 @@ export default function TabTwoScreen() {
           </IconTitle>
           <AntDesign name="up" size={20} color={Colors.dark.subText} />
         </TouchableOpacity>
-        <View style={[styles.settings, { paddingVertical: 10 }]}>
+
+        {/* 컬러모드 */}
+        <TouchableOpacity
+          style={[styles.settings]}
+          onPress={() => push("/mypage/theme-mode")}
+        >
           <IconTitle style={{ backgroundColor: Colors.dark.itemColor }}>
             <MaterialCommunityIcons
               name="circle-half-full"
               size={20}
               color={Colors.dark.tint}
             />
-            <Text>컬러 모드</Text>
+            <Text>컬러모드 선택</Text>
           </IconTitle>
-          <Switch
-            value={value}
-            onChange={() => setValue(!value)}
-            ios_backgroundColor={Colors.dark.background}
-            trackColor={{
-              false: Colors.dark.background,
-              true: Colors.dark.tint,
-            }}
-          />
-        </View>
+          <AntDesign name="up" size={20} color={Colors.dark.subText} />
+        </TouchableOpacity>
       </View>
+      <Button type="solid" onPress={onReset}>
+        리셋
+      </Button>
     </View>
   )
 }
@@ -111,33 +99,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     gap: 14,
     paddingTop: 14,
-  },
-  userData: {
-    backgroundColor: Colors.dark.itemColor,
-    paddingVertical: 6,
-    justifyContent: "space-between",
-    borderRadius: 12,
-    overflow: "hidden",
-    // marginHorizontal: 24,
-  },
-  weight: {
-    backgroundColor: Colors.dark.itemColor,
-    flexDirection: "row",
-    justifyContent: "center",
-    padding: 12,
-  },
-
-  weightItem: {
-    backgroundColor: Colors.dark.itemColor,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  weightTitle: {
-    fontSize: 14,
-    color: Colors.dark.tint,
-  },
-  weightKg: {
-    fontSize: 12,
   },
 
   settingsContainer: {

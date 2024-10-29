@@ -19,7 +19,7 @@ import { Controller, useForm } from "react-hook-form"
 import { Button } from "@/components/Button"
 import { Link } from "expo-router"
 import { useSignInMutation } from "@/hooks/mutation/user"
-import { useUser } from "@/hooks/use-user"
+import { useUser } from "@/hooks/use-user-store"
 
 export default function SignIn() {
   const { mutate } = useSignInMutation()

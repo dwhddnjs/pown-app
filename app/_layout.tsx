@@ -26,7 +26,6 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
-import { useUser } from "@/hooks/use-user"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -276,37 +275,31 @@ function RootLayoutNav() {
                     style={{ marginLeft: 4 }}
                     onPress={() => navigation.goBack()}
                   >
-                    <XIcon
-                      name="x"
+                    <ArrowIcon
+                      name="down"
                       size={30}
-                      color={Colors[colorScheme ?? "light"].subText}
+                      color={Colors.dark.subText}
                     />
                   </TouchableOpacity>
                 ),
-                headerRight: () => (
-                  <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={{ marginRight: 8 }}
-                  >
-                    <Checkcircle
-                      name="checkcircle"
-                      size={30}
-                      color={Colors[colorScheme ?? "light"].tint}
-                    />
-                  </TouchableOpacity>
-                ),
+                // headerRight: () => (
+                //   <TouchableOpacity
+                //     onPress={() => navigation.goBack()}
+                //     style={{ marginRight: 8 }}
+                //   >
+                //     <Checkcircle
+                //       name="checkcircle"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].tint}
+                //     />
+                //   </TouchableOpacity>
+                // ),
               })}
             />
             <Stack.Screen
               name="mypage/max-weights"
               options={({ navigation }) => ({
                 headerTitle: "3대 중량",
-                // headerStyle: {
-                //   borderBottomWidth: 0,
-                //   elevation: 0,
-                //   shadowOpacity: 0,
-                //   backgroundColor: "#1a1a1a",
-                // },
                 headerTitleStyle: {
                   fontFamily: "sb-m",
                 },
@@ -317,25 +310,60 @@ function RootLayoutNav() {
                     style={{ marginLeft: 4 }}
                     onPress={() => navigation.goBack()}
                   >
-                    <XIcon
-                      name="x"
+                    <ArrowIcon
+                      name="down"
                       size={30}
-                      color={Colors[colorScheme ?? "light"].subText}
+                      color={Colors.dark.subText}
                     />
                   </TouchableOpacity>
                 ),
-                headerRight: () => (
+                // headerRight: () => (
+                //   <TouchableOpacity
+                //     onPress={() => navigation.goBack()}
+                //     style={{ marginRight: 8 }}
+                //   >
+                //     <Checkcircle
+                //       name="checkcircle"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].tint}
+                //     />
+                //   </TouchableOpacity>
+                // ),
+              })}
+            />
+            <Stack.Screen
+              name="mypage/theme-mode"
+              options={({ navigation }) => ({
+                headerTitle: "컬러 모드 선택",
+                headerTitleStyle: {
+                  fontFamily: "sb-m",
+                },
+                headerShadowVisible: false,
+                animation: "slide_from_bottom",
+                headerLeft: () => (
                   <TouchableOpacity
+                    style={{ marginLeft: 4 }}
                     onPress={() => navigation.goBack()}
-                    style={{ marginRight: 8 }}
                   >
-                    <Checkcircle
-                      name="checkcircle"
+                    <ArrowIcon
+                      name="down"
                       size={30}
-                      color={Colors[colorScheme ?? "light"].tint}
+                      color={Colors.dark.subText}
                     />
                   </TouchableOpacity>
                 ),
+                // headerRight: () => (
+                //   <TouchableOpacity
+                //     onPress={() => navigation.goBack()}
+                //     style={{ marginRight: 8 }}
+                //   >
+                //     <Checkcircle
+                //       name="checkcircle"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].tint}
+                //     />
+                //   </TouchableOpacity>
+                // ),
               })}
             />
           </Stack>

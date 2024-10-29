@@ -4,6 +4,8 @@ import { Text, View } from "@/components/Themed"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import Colors from "@/constants/Colors"
 import { Button } from "@/components/Button"
+import { useUserStore } from "@/hooks/use-user-store"
+import { useRouter } from "expo-router"
 
 export default function MaxWeights() {
   const [value, setValue] = useState({
@@ -11,12 +13,19 @@ export default function MaxWeights() {
     bp: "",
     dl: "",
   })
+  const { setUserData } = useUserStore()
+  const { back } = useRouter()
 
-  const onSetValue = (newValue: string, type: string) => {
+  const onSetValue = (type: string, newValue: string) => {
     setValue({
       ...value,
       [type]: newValue,
     })
+  }
+
+  const onSubmitWeight = () => {
+    setUserData({ ...value })
+    back()
   }
 
   return (
@@ -70,7 +79,9 @@ export default function MaxWeights() {
           </View>
         </View>
       </ScrollView>
-      <Button type="submit">저장</Button>
+      <Button type="submit" onPress={onSubmitWeight}>
+        저장
+      </Button>
     </KeyBoardAvoid>
   )
 }

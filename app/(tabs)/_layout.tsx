@@ -107,7 +107,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="mypage"
         options={{
-          title: "내 정보",
+          title: "마이페이지",
           tabBarIcon: ({ color }) => (
             <UserIcon name="user" size={24} color={color} />
           ),
