@@ -1,4 +1,9 @@
-import { StyleSheet, TextInput, useWindowDimensions } from "react-native"
+import {
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+  useWindowDimensions,
+} from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
@@ -9,17 +14,22 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 
 export const PlanNote = ({ onFocus }: { onFocus: (value: any) => void }) => {
   const { title, content, setPlanValue } = usePlanStore()
+  const colorScheme = useColorScheme()
 
   return (
     <View style={styles.main}>
       <View style={styles.container}>
         <IconTitle style={{ gap: 7, paddingLeft: 24 }}>
-          <NoteIcon name="note-text" size={20} color={Colors.dark.tint} />
+          <NoteIcon
+            name="note-text"
+            size={20}
+            color={Colors[colorScheme ?? "light"].tint}
+          />
           <Text style={{ fontSize: 16 }}>퀵 노트</Text>
         </IconTitle>
         <Link
           href="/(modals)/note"
-          style={styles.link}
+          style={[styles.link, { color: Colors[colorScheme ?? "light"].tint }]}
           onPress={() => setPlanValue("content", "")}
         >
           전체노트 열기
@@ -33,7 +43,13 @@ export const PlanNote = ({ onFocus }: { onFocus: (value: any) => void }) => {
         </View>
       ) : (
         <TextInput
-          style={styles.input}
+          style={[
+            styles.input,
+            {
+              borderColor: Colors[colorScheme ?? "light"].subText,
+              color: Colors[colorScheme ?? "light"].text,
+            },
+          ]}
           onFocus={(e) => onFocus(e.target)}
           placeholder="특이사항을 적어주세요 (선택)"
           value={content}
@@ -59,15 +75,12 @@ const styles = StyleSheet.create({
   link: {
     fontSize: 14,
     fontFamily: "sb-l",
-    color: Colors.dark.tint,
   },
 
   input: {
     borderWidth: 2,
-    borderColor: Colors.dark.subText,
     borderRadius: 12,
     paddingVertical: 14,
-    color: Colors.dark.text,
     paddingLeft: 12,
     fontSize: 14,
     fontFamily: "sb-l",

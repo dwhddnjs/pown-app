@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import Colors from "@/constants/Colors"
@@ -14,33 +14,82 @@ interface SetListItemProps {
 
 export const SetListItem = ({ item, planId }: SetListItemProps) => {
   const { setCompleteProgress } = userWorkoutPlanStore()
+  const colorScheme = useColorScheme()
 
   return (
-    <View style={styles.container}>
-      <View style={styles.ballContainer}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+      ]}
+    >
+      <View
+        style={[
+          styles.ballContainer,
+          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+        ]}
+      >
         <NumberBallIcon>{item.id}</NumberBallIcon>
       </View>
-      <View style={styles.setCounter}>
-        <View style={styles.setCounterContainer}>
-          <Text style={styles.setType}>{item.set}</Text>
-          <Text style={styles.count}>{`${item.count} 회`}</Text>
+      <View
+        style={[
+          styles.setCounter,
+          {
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            borderBottomColor: Colors[colorScheme ?? "light"].subText,
+          },
+        ]}
+      >
+        <View
+          style={[
+            styles.setCounterContainer,
+            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          ]}
+        >
+          <Text
+            style={[
+              styles.setType,
+              { color: Colors[colorScheme ?? "light"].tint },
+            ]}
+          >
+            {item.set}
+          </Text>
+          <Text
+            style={[
+              styles.count,
+              { color: Colors[colorScheme ?? "light"].text },
+            ]}
+          >{`${item.count} 회`}</Text>
         </View>
         <Text
           style={[
             styles.progressText,
-            item.progress === "완료" && { color: Colors.dark.tint },
+            { color: Colors[colorScheme ?? "light"].subText },
+            item.progress === "완료" && {
+              color: Colors[colorScheme ?? "light"].tint,
+            },
           ]}
         >
           {item.progress}
         </Text>
       </View>
-      <View style={styles.buttonContainer}>
+      <View
+        style={[
+          styles.buttonContainer,
+          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+        ]}
+      >
         {item.progress === "완료" ? (
-          <View style={styles.completedIcon}>
+          <View
+            style={[
+              styles.completedIcon,
+              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+            ]}
+          >
             <CheckCircle
               name="checkcircleo"
               size={24}
-              color={Colors.dark.tint}
+              color={Colors[colorScheme ?? "light"].tint}
             />
           </View>
         ) : (
@@ -48,7 +97,7 @@ export const SetListItem = ({ item, planId }: SetListItemProps) => {
             style={[
               styles.button,
               {
-                backgroundColor: Colors.dark.subText,
+                backgroundColor: Colors[colorScheme ?? "light"].subText,
                 borderRadius: 8,
               },
             ]}
@@ -64,47 +113,39 @@ export const SetListItem = ({ item, planId }: SetListItemProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.itemColor,
     flexDirection: "row",
     // gap: 8,
     // borderWidth: 1,
   },
-  ballContainer: { paddingTop: 2, backgroundColor: Colors.dark.itemColor },
+  ballContainer: { paddingTop: 2 },
   progressText: {
-    color: Colors.dark.subText,
     fontFamily: "sb-l",
     fontSize: 10,
   },
 
   setCounterContainer: {
     flexDirection: "row",
-    backgroundColor: Colors.dark.itemColor,
+
     alignItems: "center",
     gap: 4,
   },
 
   setCounter: {
-    backgroundColor: Colors.dark.itemColor,
     flexDirection: "column",
     borderBottomWidth: 1,
-    borderBottomColor: Colors.dark.subText,
     // gap: 2,
     flex: 1,
     marginLeft: 6,
     marginRight: 6,
     justifyContent: "center",
   },
-  setType: {
-    color: Colors.dark.tint,
-  },
+  setType: {},
   count: {
-    color: Colors.dark.text,
     fontFamily: "sb-l",
     fontSize: 12,
   },
   buttonContainer: {
     flexDirection: "row",
-    backgroundColor: Colors.dark.itemColor,
   },
   button: {
     justifyContent: "center",
@@ -117,7 +158,7 @@ const styles = StyleSheet.create({
   },
   completedIcon: {
     justifyContent: "center",
-    backgroundColor: Colors.dark.itemColor,
+
     paddingHorizontal: 10,
   },
 })

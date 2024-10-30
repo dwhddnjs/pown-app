@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import EmotionIcon from "@expo/vector-icons/MaterialIcons"
@@ -11,6 +11,7 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
 
 export const ConditionList = () => {
+  const colorScheme = useColorScheme()
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>
@@ -18,11 +19,18 @@ export const ConditionList = () => {
           <BatteryIcon
             name="battery-heart-variant"
             size={20}
-            color={Colors.dark.tint}
+            color={Colors[colorScheme ?? "light"].tint}
           />
           <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
         </IconTitle>
-        <Text style={styles.subText}>(선택)</Text>
+        <Text
+          style={[
+            styles.subText,
+            { color: Colors[colorScheme ?? "light"].tint },
+          ]}
+        >
+          (선택)
+        </Text>
       </View>
       <View style={styles.container}>
         <FlashList
@@ -50,28 +58,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  icon: {
-    alignSelf: "flex-start",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderColor: Colors.dark.tint,
-    // backgroundColor: Colors.dark.tint,
-    width: 50,
-    height: 50,
-    borderRadius: 50,
-    gap: 0.5,
-    marginLeft: 10,
-  },
-
-  text: {
-    fontSize: 8,
-    color: Colors.dark.tint,
-  },
-
   subText: {
     fontFamily: "sb-l",
-    color: Colors.dark.tint,
     fontSize: 12,
   },
   titleContainer: {

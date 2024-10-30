@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import { workoutData } from "@/constants/constants"
@@ -9,6 +9,7 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 export const WorkoutTags = () => {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const { workout, setPlanValue } = usePlanStore()
+  const colorScheme = useColorScheme()
 
   const onPressWorkout = (item: string) => {
     if (workout === item) {
@@ -25,15 +26,19 @@ export const WorkoutTags = () => {
           key={item}
           style={[
             styles.tag,
-            item === workout && { backgroundColor: Colors.dark.tint },
+            { borderColor: Colors[colorScheme ?? "light"].tint },
+            item === workout && {
+              backgroundColor: Colors[colorScheme ?? "light"].tint,
+            },
           ]}
           onPress={() => onPressWorkout(item)}
         >
           <Text
             style={[
               styles.title,
+              { color: Colors[colorScheme ?? "light"].tint },
               item === workout && {
-                color: Colors.dark.text,
+                color: Colors[colorScheme ?? "light"].text,
               },
             ]}
           >
@@ -58,12 +63,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderWidth: 2,
-    borderColor: Colors.dark.tint,
+
     borderRadius: 50,
   },
   title: {
     fontFamily: "sb-l",
-    color: Colors.dark.tint,
     fontSize: 14,
   },
 })

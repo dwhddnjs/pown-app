@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, TextInput } from "react-native"
+import { ScrollView, StyleSheet, TextInput, useColorScheme } from "react-native"
 import React, { useState } from "react"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import Colors from "@/constants/Colors"
@@ -7,18 +7,21 @@ import { Text, View } from "@/components/Themed"
 import Checkbox from "expo-checkbox"
 import { useUserStore } from "@/hooks/use-user-store"
 import { router, useRouter } from "expo-router"
+import { toast } from "sonner-native"
 
 export default function UserInfo() {
+  const { setUserData, ...result } = useUserStore()
+  const colorScheme = useColorScheme()
   const [value, setValue] = useState({
-    height: "",
-    age: "",
-    weight: "",
+    height: result.weight ?? "",
+    age: result.age ?? "",
+    weight: result.weight ?? "",
   })
   const [isChecked, setChecked] = useState({
-    male: false,
-    female: false,
+    male: result.gender === "male" ? true : false,
+    female: result.gender === "female" ? true : false,
   })
-  const { setUserData } = useUserStore()
+
   const { back } = useRouter()
 
   const onSetValue = (type: string, newValue: string) => {
@@ -49,20 +52,34 @@ export default function UserInfo() {
       ...value,
       gender: isChecked.male ? "male" : isChecked.female ? "female" : null,
     })
+    toast.success("내정보가 추가 되었습니다!")
     back()
   }
 
   return (
-    <KeyBoardAvoid style={{ flex: 1, backgroundColor: Colors.dark.background }}>
+    <KeyBoardAvoid
+      style={{
+        flex: 1,
+        backgroundColor: Colors[colorScheme ?? "light"].background,
+      }}
+    >
       <ScrollView>
         {/* 좌 */}
         <View style={styles.contentContainer}>
           <View style={styles.sqBpDlO}>
             <View style={styles.itemContainer}>
               <Text>키</Text>
-              <View style={styles.container}>
+              <View
+                style={[
+                  styles.container,
+                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                ]}
+              >
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { color: Colors[colorScheme ?? "light"].tint },
+                  ]}
                   keyboardType="numeric"
                   //   onFocus={(e) => onFocus(e.target)}
                   maxLength={3}
@@ -75,9 +92,17 @@ export default function UserInfo() {
             </View>
             <View style={styles.itemContainer}>
               <Text>몸무게</Text>
-              <View style={styles.container}>
+              <View
+                style={[
+                  styles.container,
+                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                ]}
+              >
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { color: Colors[colorScheme ?? "light"].tint },
+                  ]}
                   keyboardType="numeric"
                   //   onFocus={(e) => onFocus(e.target)}
                   maxLength={3}
@@ -94,9 +119,17 @@ export default function UserInfo() {
           <View style={styles.sqBpDlO}>
             <View style={styles.itemContainer}>
               <Text>나이</Text>
-              <View style={[styles.container]}>
+              <View
+                style={[
+                  styles.container,
+                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                ]}
+              >
                 <TextInput
-                  style={styles.input}
+                  style={[
+                    styles.input,
+                    { color: Colors[colorScheme ?? "light"].tint },
+                  ]}
                   keyboardType="numeric"
                   //   onFocus={(e) => onFocus(e.target)}
                   maxLength={3}
@@ -115,9 +148,18 @@ export default function UserInfo() {
                     style={styles.checkbox}
                     value={isChecked.male}
                     onValueChange={() => onSetCheckBox("male")}
-                    color={isChecked ? Colors.dark.tint : undefined}
+                    color={
+                      isChecked
+                        ? Colors[colorScheme ?? "light"].tint
+                        : undefined
+                    }
                   />
-                  <Text style={{ fontFamily: "sb-l", color: Colors.dark.tint }}>
+                  <Text
+                    style={{
+                      fontFamily: "sb-l",
+                      color: Colors[colorScheme ?? "light"].tint,
+                    }}
+                  >
                     남자
                   </Text>
                 </View>
@@ -126,9 +168,18 @@ export default function UserInfo() {
                     style={styles.checkbox}
                     value={isChecked.female}
                     onValueChange={() => onSetCheckBox("female")}
-                    color={isChecked ? Colors.dark.tint : undefined}
+                    color={
+                      isChecked
+                        ? Colors[colorScheme ?? "light"].tint
+                        : undefined
+                    }
                   />
-                  <Text style={{ fontFamily: "sb-l", color: Colors.dark.tint }}>
+                  <Text
+                    style={{
+                      fontFamily: "sb-l",
+                      color: Colors[colorScheme ?? "light"].tint,
+                    }}
+                  >
                     여자
                   </Text>
                 </View>
@@ -156,14 +207,12 @@ const styles = StyleSheet.create({
   },
   main: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
     paddingTop: 36,
     flexDirection: "row",
   },
   container: {
     flexDirection: "row",
     borderWidth: 2,
-    borderColor: Colors.dark.subText,
     alignSelf: "flex-start",
     paddingVertical: 8,
     gap: 4,
@@ -174,14 +223,13 @@ const styles = StyleSheet.create({
   },
   input: {
     textAlign: "right",
-    color: Colors.dark.tint,
     minWidth: 40,
     fontSize: 16,
     fontFamily: "sb-l",
   },
   sqBpDlO: {
     paddingBottom: 24,
-    gap: 36,
+    gap: 50,
   },
   itemContainer: {
     gap: 6,

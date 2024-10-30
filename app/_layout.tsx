@@ -6,7 +6,7 @@ import {
   ThemeProvider,
 } from "@react-navigation/native"
 import { useFonts } from "expo-font"
-import { Stack } from "expo-router"
+import { Stack, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect } from "react"
 import { TouchableOpacity, useColorScheme } from "react-native"
@@ -26,6 +26,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query"
 import { supabase } from "@/lib/supabase"
+import { useUserStore } from "@/hooks/use-user-store"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -67,6 +68,24 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
+
+  const { theme } = useUserStore()
+
+  const getTheme = () => {
+    let result
+    switch (theme) {
+      case "dark":
+        result = "dark"
+        break
+      case "light":
+        result = "light"
+        break
+      default:
+        result = colorScheme
+        break
+    }
+    return result
+  }
   //   const { setUser } = useUser()
 
   //   useEffect(() => {
@@ -76,7 +95,7 @@ function RootLayoutNav() {
   //   }, [])
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
           <Stack
@@ -96,7 +115,7 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: "#1a1a1a",
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
                 },
                 headerShadowVisible: false,
 
@@ -120,12 +139,15 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: "#1a1a1a",
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
                 },
                 headerShadowVisible: false,
 
                 headerLeft: () => (
-                  <TouchableOpacity style={{ marginLeft: 3, marginTop: 18 }}>
+                  <TouchableOpacity
+                    style={{ marginLeft: 3, marginTop: 18 }}
+                    onPress={() => navigation.goBack()}
+                  >
                     <XIcon
                       name="x"
                       size={30}
@@ -136,6 +158,7 @@ function RootLayoutNav() {
                 headerRight: () => {
                   const { title, content } = useNoteStore()
                   const { setPlanValue } = usePlanStore()
+
                   return (
                     <TouchableOpacity
                       onPress={() => {
@@ -163,7 +186,7 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: Colors.dark.background,
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
                 },
                 headerShadowVisible: false,
                 // headerBlurEffect: "regular",
@@ -200,7 +223,7 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: "#1a1a1a",
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
                 },
                 headerShadowVisible: false,
                 animation: "slide_from_bottom",
@@ -227,7 +250,7 @@ function RootLayoutNav() {
                   borderBottomWidth: 0,
                   elevation: 0,
                   shadowOpacity: 0,
-                  backgroundColor: "#1a1a1a",
+                  backgroundColor: Colors[colorScheme ?? "light"].background,
                 },
                 headerTitleStyle: {
                   fontFamily: "sb-m",
@@ -278,7 +301,7 @@ function RootLayoutNav() {
                     <ArrowIcon
                       name="down"
                       size={30}
-                      color={Colors.dark.subText}
+                      color={Colors[colorScheme ?? "light"].subText}
                     />
                   </TouchableOpacity>
                 ),
@@ -313,7 +336,7 @@ function RootLayoutNav() {
                     <ArrowIcon
                       name="down"
                       size={30}
-                      color={Colors.dark.subText}
+                      color={Colors[colorScheme ?? "light"].subText}
                     />
                   </TouchableOpacity>
                 ),
@@ -348,7 +371,42 @@ function RootLayoutNav() {
                     <ArrowIcon
                       name="down"
                       size={30}
-                      color={Colors.dark.subText}
+                      color={Colors[colorScheme ?? "light"].subText}
+                    />
+                  </TouchableOpacity>
+                ),
+                // headerRight: () => (
+                //   <TouchableOpacity
+                //     onPress={() => navigation.goBack()}
+                //     style={{ marginRight: 8 }}
+                //   >
+                //     <Checkcircle
+                //       name="checkcircle"
+                //       size={30}
+                //       color={Colors[colorScheme ?? "light"].tint}
+                //     />
+                //   </TouchableOpacity>
+                // ),
+              })}
+            />
+            <Stack.Screen
+              name="mypage/reset-data"
+              options={({ navigation }) => ({
+                headerTitle: "데이터 초기화",
+                headerTitleStyle: {
+                  fontFamily: "sb-m",
+                },
+                headerShadowVisible: false,
+                animation: "slide_from_bottom",
+                headerLeft: () => (
+                  <TouchableOpacity
+                    style={{ marginLeft: 4 }}
+                    onPress={() => navigation.goBack()}
+                  >
+                    <ArrowIcon
+                      name="down"
+                      size={30}
+                      color={Colors[colorScheme ?? "light"].subText}
                     />
                   </TouchableOpacity>
                 ),

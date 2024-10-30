@@ -4,6 +4,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableOpacityProps,
+  useColorScheme,
 } from "react-native"
 import { Text } from "./Themed"
 import Colors from "@/constants/Colors"
@@ -20,6 +21,7 @@ interface ButtonProps extends TouchableOpacityProps {
 
 export const Button = ({ type, children, style, ...props }: ButtonProps) => {
   const isVisible = useKeyboardVisible() // 여기서 키보드가 켜졌는지 안켜졌는지 확인함
+  const colorScheme = useColorScheme()
 
   const marginAnim = useRef(new Animated.Value(24)).current
 
@@ -39,14 +41,34 @@ export const Button = ({ type, children, style, ...props }: ButtonProps) => {
         },
       ]}
     >
-      <TouchableOpacity style={[styles(isVisible)[type], style]} {...props}>
+      <TouchableOpacity
+        style={[
+          styles(isVisible)[type],
+          type === "solid" && {
+            backgroundColor: Colors[colorScheme ?? "light"].tint,
+          },
+          type === "bordered" && {
+            borderColor: Colors[colorScheme ?? "light"].tint,
+          },
+          type === "submit" && {
+            backgroundColor: Colors[colorScheme ?? "light"].tint,
+          },
+          type === "icon" && {
+            borderColor: Colors[colorScheme ?? "light"].tabBar,
+          },
+          style,
+        ]}
+        {...props}
+      >
         {type === "icon" ? (
           children
         ) : (
           <Text
             style={[
               styles().title,
-              type === "bordered" && { color: Colors.dark.tint },
+              type === "bordered" && {
+                color: Colors[colorScheme ?? "light"].tint,
+              },
             ]}
           >
             {children}
@@ -63,11 +85,9 @@ const styles = (props?: boolean) =>
       fontSize: 16,
       fontFamily: "sb-m",
       textAlign: "center",
-      color: Colors.dark.text,
     },
 
     solid: {
-      backgroundColor: Colors.dark.tint,
       paddingVertical: 14,
       marginHorizontal: 24,
       borderRadius: 12,
@@ -75,14 +95,13 @@ const styles = (props?: boolean) =>
     bordered: {
       backgroundColor: "transparent",
       borderWidth: 2,
-      borderColor: Colors.dark.tint,
+
       paddingVertical: 14,
       marginHorizontal: 24,
 
       borderRadius: 12,
     },
     submit: {
-      backgroundColor: Colors.dark.tint,
       paddingVertical: 14,
       marginBottom: 44,
       borderRadius: props ? 0 : 12,
@@ -90,7 +109,7 @@ const styles = (props?: boolean) =>
     icon: {
       backgroundColor: "transparent",
       borderWidth: 2,
-      borderColor: Colors.dark.tabBar,
+
       gap: 8,
       flexDirection: "row",
       justifyContent: "center",

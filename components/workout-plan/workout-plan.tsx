@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import Back from "@/assets/images/svg/back_icon.svg"
@@ -22,6 +22,7 @@ interface WorkoutPlanProps {
 }
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
+  const colorScheme = useColorScheme()
   const getWorkoutIcon = (type: string) => {
     let result
     switch (type) {
@@ -49,11 +50,17 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
     <View
       style={[
         styles.container,
-        index === 0 && { paddingTop: 16 },
-        index === totalLength - 1 && { paddingBottom: 24 },
+        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+        index === 0 && { paddingTop: 18 },
+        index === totalLength - 1 && { paddingBottom: 18 },
       ]}
     >
-      <View style={styles.iconLine}>
+      <View
+        style={[
+          styles.iconLine,
+          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+        ]}
+      >
         {getWorkoutIcon(item.type)}
         {index !== totalLength - 1 && (
           <View
@@ -61,12 +68,20 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               width: 2,
               height: 16,
               flex: 1,
-              backgroundColor: Colors.dark.subText,
+              backgroundColor: Colors[colorScheme ?? "light"].subText,
             }}
           />
         )}
       </View>
-      <View style={[styles.workoutContainer, { paddingBottom: 12 }]}>
+      <View
+        style={[
+          styles.workoutContainer,
+          {
+            paddingBottom: 12,
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+          },
+        ]}
+      >
         <WeightDate
           equipment={item.equipment}
           workout={item.workout}
@@ -75,7 +90,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         />
         {/* 컨디션 */}
         {item.condition.length > 0 && (
-          <View style={styles.conditionTagList}>
+          <View
+            style={[
+              styles.conditionTagList,
+              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+            ]}
+          >
             {item.condition.map((item, index) => (
               <ConditionIcon
                 key={index}
@@ -92,7 +112,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         {item.setWithCount.length > 0 && (
           <View
             style={{
-              backgroundColor: Colors.dark.itemColor,
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
               gap: 8,
             }}
           >
@@ -111,7 +131,6 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 24,
     paddingTop: 8,
     paddingHorizontal: 16,
-    backgroundColor: Colors.dark.itemColor,
     // borderRadius: 12,
     gap: 14,
     flexDirection: "row",
@@ -119,27 +138,18 @@ const styles = StyleSheet.create({
     // borderWidth: 1,
   },
   iconLine: {
-    backgroundColor: Colors.dark.itemColor,
     // justifyContent: "center",
 
     alignItems: "center",
     gap: 8,
   },
   workoutContainer: {
-    backgroundColor: Colors.dark.itemColor,
     flex: 1,
     gap: 14,
   },
 
   conditionTagList: {
-    backgroundColor: Colors.dark.itemColor,
     flexDirection: "row",
     flexWrap: "wrap",
   },
-
-  //   line: {
-  //     width: 2,
-  //     height: "100%",
-  //     backgroundColor: Colors.dark.subText,
-  //   },
 })

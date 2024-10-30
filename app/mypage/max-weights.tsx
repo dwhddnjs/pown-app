@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, TextInput } from "react-native"
+import { ScrollView, StyleSheet, TextInput, useColorScheme } from "react-native"
 import React, { useState } from "react"
 import { Text, View } from "@/components/Themed"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
@@ -6,14 +6,17 @@ import Colors from "@/constants/Colors"
 import { Button } from "@/components/Button"
 import { useUserStore } from "@/hooks/use-user-store"
 import { useRouter } from "expo-router"
+import { toast } from "sonner-native"
 
 export default function MaxWeights() {
+  const { setUserData, ...result } = useUserStore()
   const [value, setValue] = useState({
-    sq: "",
-    bp: "",
-    dl: "",
+    sq: result.sq ?? "",
+    bp: result.bp ?? "",
+    dl: result.dl ?? "",
   })
-  const { setUserData } = useUserStore()
+  const colorScheme = useColorScheme()
+
   const { back } = useRouter()
 
   const onSetValue = (type: string, newValue: string) => {
@@ -25,18 +28,37 @@ export default function MaxWeights() {
 
   const onSubmitWeight = () => {
     setUserData({ ...value })
+    toast.success("3대중량이 추가 되었습니다!")
     back()
   }
 
   return (
-    <KeyBoardAvoid style={{ flex: 1, backgroundColor: Colors.dark.background }}>
-      <ScrollView style={styles.main}>
+    <KeyBoardAvoid
+      style={{
+        flex: 1,
+        backgroundColor: Colors[colorScheme ?? "light"].background,
+      }}
+    >
+      <ScrollView
+        style={[
+          styles.main,
+          { backgroundColor: Colors[colorScheme ?? "light"].background },
+        ]}
+      >
         <View style={styles.sqBpDlO}>
           <View style={styles.itemContainer}>
             <Text>스쿼트</Text>
-            <View style={styles.container}>
+            <View
+              style={[
+                styles.container,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  { color: Colors[colorScheme ?? "light"].tint },
+                ]}
                 keyboardType="numeric"
                 //   onFocus={(e) => onFocus(e.target)}
                 maxLength={3}
@@ -49,9 +71,17 @@ export default function MaxWeights() {
           </View>
           <View style={styles.itemContainer}>
             <Text>벤치프레스</Text>
-            <View style={styles.container}>
+            <View
+              style={[
+                styles.container,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  { color: Colors[colorScheme ?? "light"].tint },
+                ]}
                 keyboardType="numeric"
                 //   onFocus={(e) => onFocus(e.target)}
                 maxLength={3}
@@ -64,9 +94,17 @@ export default function MaxWeights() {
           </View>
           <View style={styles.itemContainer}>
             <Text>데드리프트</Text>
-            <View style={styles.container}>
+            <View
+              style={[
+                styles.container,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
               <TextInput
-                style={styles.input}
+                style={[
+                  styles.input,
+                  { color: Colors[colorScheme ?? "light"].tint },
+                ]}
                 keyboardType="numeric"
                 //   onFocus={(e) => onFocus(e.target)}
                 maxLength={3}
@@ -89,13 +127,13 @@ export default function MaxWeights() {
 const styles = StyleSheet.create({
   main: {
     flex: 1,
-    backgroundColor: Colors.dark.background,
+
     paddingTop: 36,
   },
   container: {
     flexDirection: "row",
     borderWidth: 2,
-    borderColor: Colors.dark.subText,
+
     alignSelf: "flex-start",
     paddingVertical: 8,
     gap: 4,
@@ -106,7 +144,7 @@ const styles = StyleSheet.create({
   },
   input: {
     textAlign: "right",
-    color: Colors.dark.tint,
+
     minWidth: 40,
     fontSize: 16,
     fontFamily: "sb-l",

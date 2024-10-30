@@ -3,6 +3,7 @@ import {
   TextInput,
   Touchable,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native"
 import React from "react"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
@@ -15,6 +16,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore()
+  const colorScheme = useColorScheme()
 
   const onPressEquipment = (item: string) => {
     setPlanValue("equipment", item)
@@ -26,19 +28,37 @@ export const EquipmentBox = () => {
         <MaterialCommunityIcons
           name="dumbbell"
           size={20}
-          color={Colors.dark.tint}
+          color={Colors[colorScheme ?? "light"].tint}
         />
         <Text style={{ fontSize: 16 }}>기구 종류</Text>
       </IconTitle>
-      <View style={styles.box}>
+      <View
+        style={[
+          styles.box,
+          { borderColor: Colors[colorScheme ?? "light"].tint },
+        ]}
+      >
         {equipmentData.map((item) => (
           <TouchableOpacity
             key={item}
-            style={[styles.item, equipment === item && styles.selected]}
+            style={[
+              styles.item,
+              equipment === item && {
+                paddingHorizontal: 12,
+                paddingVertical: 8,
+                backgroundColor: Colors[colorScheme ?? "light"].tint,
+                borderRadius: 8,
+              },
+            ]}
             onPress={() => onPressEquipment(item)}
           >
             <Text
-              style={[styles.text, equipment === item && styles.selectedText]}
+              style={[
+                { color: Colors[colorScheme ?? "light"].tint },
+                equipment === item && {
+                  color: Colors[colorScheme ?? "light"].text,
+                },
+              ]}
             >
               {item}
             </Text>
@@ -57,25 +77,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
 
-  selectedText: {
-    color: Colors.dark.text,
-  },
-
-  text: {
-    color: Colors.dark.tint,
-  },
+  text: {},
 
   item: {
     paddingHorizontal: 12,
     paddingVertical: 8,
-  },
-
-  selected: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-
-    backgroundColor: Colors.dark.tint,
-    borderRadius: 8,
   },
 
   box: {
@@ -83,7 +89,7 @@ const styles = StyleSheet.create({
     // alignSelf: "flex-start",
     justifyContent: "space-between",
     borderWidth: 2,
-    borderColor: Colors.dark.tint,
+
     borderRadius: 14,
     // marginHorizontal: 24,
     // flexWrap: "wrap",

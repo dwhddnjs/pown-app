@@ -1,6 +1,12 @@
 import { View, Text } from "@/components/Themed"
 import { StatusBar } from "expo-status-bar"
-import { Image, Platform, StyleSheet, TouchableOpacity } from "react-native"
+import {
+  Image,
+  Platform,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import Arm from "@/assets/images/svg/arm_icon.svg"
 import Back from "@/assets/images/svg/back_icon.svg"
 import Chest from "@/assets/images/svg/chest_icon.svg"
@@ -11,6 +17,7 @@ import { IconTitleButton } from "@/components/IconTitleButton"
 import { useRouter } from "expo-router"
 
 export default function ModalScreen() {
+  const colorScheme = useColorScheme()
   const iconButtonData = [
     {
       id: 1,
@@ -50,7 +57,13 @@ export default function ModalScreen() {
       <View style={styles.titleDate}>
         <Text style={styles.title}>지금 어느 부위를 조질까?</Text>
         <View>
-          <Text style={styles.date}>📆 2024년 10월 2일 19:30</Text>
+          <Text
+            style={
+              (styles.date, { color: Colors[colorScheme ?? "light"].tint })
+            }
+          >
+            📆 2024년 10월 2일 19:30
+          </Text>
         </View>
       </View>
 
@@ -94,7 +107,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
   },
   date: {
-    color: Colors.dark.tint,
     fontSize: 14,
     fontFamily: "sb-l",
   },

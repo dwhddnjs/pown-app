@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native"
+import { StyleSheet, Text, useColorScheme, View } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
@@ -18,20 +18,38 @@ export const WeightDate = ({
   date,
   equipment,
 }: WeightDateProps) => {
+  const colorScheme = useColorScheme()
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+      ]}
+    >
       <View style={styles.titleWeight}>
-        <Text style={styles.title}>{`${equipment} ${workout}`}</Text>
-        <Text style={styles.date}>{formatTime(date)}</Text>
+        <Text
+          style={[styles.title, { color: Colors[colorScheme ?? "light"].tint }]}
+        >{`${equipment} ${workout}`}</Text>
+        <Text
+          style={[
+            styles.date,
+            { color: Colors[colorScheme ?? "light"].subText },
+          ]}
+        >
+          {formatTime(date)}
+        </Text>
       </View>
-      <Text style={styles.weight}>{`목표 • ${weight}kg`} </Text>
+      <Text
+        style={[styles.weight, { color: Colors[colorScheme ?? "light"].text }]}
+      >
+        {`목표 • ${weight}kg`}{" "}
+      </Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.itemColor,
     flexDirection: "column",
     // alignItems: "flex-end",
     paddingTop: 8,
@@ -44,19 +62,16 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    color: Colors.dark.tint,
     fontSize: 18,
     fontFamily: "sb-m",
   },
 
   weight: {
     // fontSize: 16
-    color: Colors.dark.text,
     fontFamily: "sb-m",
   },
 
   date: {
-    color: Colors.dark.subText,
     fontFamily: "sb-l",
   },
 })

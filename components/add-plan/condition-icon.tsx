@@ -8,7 +8,7 @@ import LolIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import CoolIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import NeutralIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import AnoyIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { Text, View } from "@/components/Themed"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
@@ -23,6 +23,7 @@ interface ConditionIconProps {
 
 export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
   const { condition, setCondition, setFilterCondition } = usePlanStore()
+  const colorScheme = useColorScheme()
 
   const onPressCondition = () => {
     if (condition.includes(item.condition)) {
@@ -73,10 +74,11 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
       <TouchableOpacity
         style={[
           styles.icon,
+          { borderColor: Colors[colorScheme ?? "light"].tint },
           item.id === 1 && { marginLeft: 24 },
           item.id === 9 && { marginRight: 24 },
           condition.includes(item.condition) && {
-            backgroundColor: Colors.dark.tint,
+            backgroundColor: Colors[colorScheme ?? "light"].tint,
           },
         ]}
         key={item.id}
@@ -86,14 +88,15 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
           item.condition,
           26,
           condition.includes(item.condition)
-            ? Colors.dark.background
-            : Colors.dark.tint
+            ? Colors[colorScheme ?? "light"].background
+            : Colors[colorScheme ?? "light"].tint
         )}
         <Text
           style={[
             styles.text,
+            { color: Colors[colorScheme ?? "light"].tint },
             condition.includes(item.condition) && {
-              color: Colors.dark.background,
+              color: Colors[colorScheme ?? "light"].background,
             },
           ]}
         >
@@ -102,9 +105,25 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
       </TouchableOpacity>
     ),
     row: (
-      <View style={[styles.rowIcon]} key={item.id}>
-        {getIcon(item.condition, 16, Colors.dark.tint)}
-        <Text style={[styles.rowText]}>{item.condition}</Text>
+      <View
+        style={[
+          styles.rowIcon,
+          {
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            borderColor: Colors[colorScheme ?? "light"].tint,
+          },
+        ]}
+        key={item.id}
+      >
+        {getIcon(item.condition, 16, Colors[colorScheme ?? "light"].tint)}
+        <Text
+          style={[
+            styles.rowText,
+            { color: Colors[colorScheme ?? "light"].tint },
+          ]}
+        >
+          {item.condition}
+        </Text>
       </View>
     ),
   }
@@ -118,8 +137,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: Colors.dark.tint,
-    // backgroundColor: Colors.dark.tint,
     width: 50,
     height: 50,
     borderRadius: 50,
@@ -128,10 +145,9 @@ const styles = StyleSheet.create({
   },
 
   rowIcon: {
-    backgroundColor: Colors.dark.itemColor,
     borderWidth: 2,
     alignSelf: "flex-start",
-    borderColor: Colors.dark.tint,
+
     borderRadius: 50,
     paddingLeft: 2,
     paddingRight: 6,
@@ -144,12 +160,10 @@ const styles = StyleSheet.create({
   },
   rowText: {
     fontSize: 10,
-    color: Colors.dark.tint,
     fontFamily: "sb-l",
   },
 
   text: {
     fontSize: 8,
-    color: Colors.dark.tint,
   },
 })

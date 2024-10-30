@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, useColorScheme } from "react-native"
 import React, { forwardRef, useCallback, useMemo, useState } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import { Picker } from "@react-native-picker/picker"
@@ -20,6 +20,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
       count: "8 + α",
     })
     const { setSetWithCount, setWithCount } = usePlanStore()
+    const colorScheme = useColorScheme()
 
     const onSelectedPicker = (type: string, value: string) => {
       setPicker({
@@ -56,24 +57,35 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
         snapPoints={snapPoints}
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: Colors.dark.itemColor }}
-        handleIndicatorStyle={{ backgroundColor: Colors.dark.subText }}
+        backgroundStyle={{
+          backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: Colors[colorScheme ?? "light"].subText,
+        }}
       >
         <View
           style={{
             flex: 1,
             flexDirection: "row",
             paddingTop: 14,
-            backgroundColor: Colors.dark.itemColor,
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
           }}
         >
           <View
             style={{
               width: "50%",
-              backgroundColor: Colors.dark.itemColor,
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
             }}
           >
-            <Text style={styles.title}>세트 유형</Text>
+            <Text
+              style={[
+                styles.title,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
+              세트 유형
+            </Text>
             <Picker
               selectedValue={picker.set}
               onValueChange={(itemValue, itemIndex) =>
@@ -85,7 +97,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   key={item}
                   label={String(item)}
                   value={item}
-                  color={Colors.dark.text}
+                  color={Colors[colorScheme ?? "light"].text}
                   fontFamily="sb-b"
                 />
               ))}
@@ -95,10 +107,17 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           <View
             style={{
               width: "50%",
-              backgroundColor: Colors.dark.itemColor,
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
             }}
           >
-            <Text style={styles.title}>반복 횟수</Text>
+            <Text
+              style={[
+                styles.title,
+                { color: Colors[colorScheme ?? "light"].text },
+              ]}
+            >
+              반복 횟수
+            </Text>
             <Picker
               selectedValue={picker.count}
               onValueChange={(itemValue, itemIndex) =>
@@ -110,7 +129,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   key={item}
                   label={item}
                   value={item}
-                  color={Colors.dark.text}
+                  color={Colors[colorScheme ?? "light"].text}
                   fontFamily="sb-b"
                 />
               ))}
@@ -118,7 +137,10 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           </View>
         </View>
         <View
-          style={{ paddingBottom: 44, backgroundColor: Colors.dark.itemColor }}
+          style={{
+            paddingBottom: 44,
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+          }}
         >
           <Button type="solid" onPress={onSetPlanStore}>
             완료
@@ -130,20 +152,11 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
 )
 
 const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.dark.background,
-  },
+  container: {},
+
   title: {
     fontSize: 16,
     fontFamily: "sb-m",
     textAlign: "center",
-    color: Colors.dark.text,
-  },
-  successButton: {
-    backgroundColor: Colors.dark.tint,
-    paddingVertical: 14,
-    marginHorizontal: 24,
-    marginBottom: 44,
-    borderRadius: 12,
   },
 })

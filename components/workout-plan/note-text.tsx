@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native"
+import { StyleSheet, useColorScheme } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
 import { Text, View } from "../Themed"
@@ -9,8 +9,14 @@ interface NoteTextProps {
 }
 
 export const NoteText = ({ title, content }: NoteTextProps) => {
+  const colorScheme = useColorScheme()
   return (
-    <View style={styles.container}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+      ]}
+    >
       {title && <Text style={styles.title}>{title}</Text>}
       <Text style={styles.content}>{content}</Text>
     </View>
@@ -19,7 +25,6 @@ export const NoteText = ({ title, content }: NoteTextProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: Colors.dark.itemColor,
     gap: 2,
   },
   title: {

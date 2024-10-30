@@ -1,6 +1,12 @@
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
-import { PlatformColor, ScrollView, StyleSheet } from "react-native"
+import {
+  Image,
+  PlatformColor,
+  ScrollView,
+  StyleSheet,
+  useColorScheme,
+} from "react-native"
 import Colors from "@/constants/Colors"
 import { supabase } from "@/lib/supabase"
 import { useEffect } from "react"
@@ -15,16 +21,50 @@ import { BlurView } from "expo-blur"
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const sortWorkList = groupByDate(workoutPlanList)
-  console.log("sortWorkList: ", sortWorkList)
   const headerHeight = useHeaderHeight()
+  const colorScheme = useColorScheme()
+
+  if (workoutPlanList.length === 0) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 16,
+        }}
+      >
+        <Image
+          source={require("@/assets/images/empty.png")}
+          style={{ width: 150, height: 200 }}
+        />
+        <Text style={{ color: Colors.dark.subText, fontSize: 18 }}>
+          운동 계획을 작성해주세요!
+        </Text>
+      </View>
+    )
+  }
 
   return (
-    <ScrollView style={[styles.container, { paddingTop: headerHeight }]}>
+    <ScrollView
+      style={[
+        styles.container,
+        {
+          paddingTop: headerHeight,
+          backgroundColor: Colors[colorScheme ?? "light"].background,
+        },
+      ]}
+    >
       <View>
         {Object.entries(sortWorkList).map((item, index) => {
           return (
             <View style={styles.list} key={index}>
-              <Text style={styles.date}>{`🗓️  ${formatDate(item[0])}`}</Text>
+              <Text
+                style={[
+                  styles.date,
+                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                ]}
+              >{`🗓️  ${formatDate(item[0])}`}</Text>
               <View style={styles.workoutList}>
                 {item[1].map((data, index) => (
                   <WorkoutPlan
@@ -49,7 +89,6 @@ const styles = StyleSheet.create({
     flex: 1,
     // alignItems: "center",
     // justifyContent: "center",
-    backgroundColor: Colors.dark.background,
     // paddingHorizontal: 24,
   },
 
@@ -58,9 +97,8 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "sb-l",
     borderWidth: 2,
-    // color: Colors.dark.subText,
+
     alignSelf: "center",
-    borderColor: Colors.dark.subText,
     paddingHorizontal: 10,
     // paddingTop: 1,
     paddingBottom: 4,
@@ -86,5 +124,9 @@ const styles = StyleSheet.create({
     marginVertical: 30,
     height: 1,
     width: "80%",
+  },
+  empty: {
+    width: 100,
+    height: 150,
   },
 })

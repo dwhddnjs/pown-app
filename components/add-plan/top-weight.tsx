@@ -1,4 +1,9 @@
-import { StyleSheet, TextInput, useWindowDimensions } from "react-native"
+import {
+  StyleSheet,
+  TextInput,
+  useColorScheme,
+  useWindowDimensions,
+} from "react-native"
 import React, { useState } from "react"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { Text, View } from "../Themed"
@@ -8,16 +13,26 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 
 export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
   const { weight, setPlanValue } = usePlanStore()
+  const colorScheme = useColorScheme()
 
   return (
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 24 }}>
       <IconTitle style={{ gap: 8 }}>
-        <WeightIcon name="weight-kilogram" size={20} color={Colors.dark.tint} />
+        <WeightIcon
+          name="weight-kilogram"
+          size={20}
+          color={Colors[colorScheme ?? "light"].tint}
+        />
         <Text style={{ fontSize: 16 }}>목표 중량</Text>
       </IconTitle>
-      <View style={styles.container}>
+      <View
+        style={[
+          styles.container,
+          { borderColor: Colors[colorScheme ?? "light"].subText },
+        ]}
+      >
         <TextInput
-          style={styles.input}
+          style={[styles.input, { color: Colors[colorScheme ?? "light"].tint }]}
           keyboardType="numeric"
           onFocus={(e) => onFocus(e.target)}
           maxLength={3}
@@ -35,7 +50,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     borderWidth: 2,
-    borderColor: Colors.dark.subText,
     alignSelf: "flex-start",
     paddingVertical: 8,
     gap: 3,
@@ -46,7 +60,6 @@ const styles = StyleSheet.create({
   },
   input: {
     textAlign: "right",
-    color: Colors.dark.tint,
     minWidth: 40,
     fontSize: 16,
     fontFamily: "sb-l",

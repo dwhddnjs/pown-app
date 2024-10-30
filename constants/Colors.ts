@@ -11,7 +11,7 @@ export default {
     tabIconDefault: "#c4c4c4",
     tabIconSelected: "#00ccbb",
     tabBar: "#ededed",
-    itemColor: "#272727",
+    itemColor: "#c4c4c4",
   },
   dark: {
     text: "#fff",
@@ -27,3 +27,6 @@ export default {
     fail: "#F13C33",
   },
 }
+
+// Colors[colorScheme ?? "light"].background
+//const colorScheme = useColorScheme()

@@ -10,6 +10,7 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
+  useColorScheme,
 } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
@@ -51,6 +52,7 @@ export default function AddPlan() {
   const { slug } = useLocalSearchParams()
   const { back } = useRouter()
   const headerHeight = useHeaderHeight()
+  const colorScheme = useColorScheme()
 
   const onHideKeyboard = () => {
     Keyboard.dismiss()
@@ -101,7 +103,12 @@ export default function AddPlan() {
   }
 
   return (
-    <KeyBoardAvoid style={[styles.container]}>
+    <KeyBoardAvoid
+      style={[
+        styles.container,
+        { backgroundColor: Colors[colorScheme ?? "light"].background },
+      ]}
+    >
       <ScrollView
         ref={scrollRef}
         style={{
@@ -140,7 +147,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    backgroundColor: Colors.dark.background,
+
     paddingTop: 12,
   },
 

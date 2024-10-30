@@ -1,4 +1,9 @@
-import { StyleSheet, Switch, TouchableOpacity } from "react-native"
+import {
+  StyleSheet,
+  Switch,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 
 import { Text, View } from "@/components/Themed"
 import { Link, useRouter } from "expo-router"
@@ -19,7 +24,8 @@ export default function TabTwoScreen() {
   const { onResetPlanList } = userWorkoutPlanStore()
   const [value, setValue] = useState(true)
   const { onReset, ...result } = useUserStore()
-  console.log("result: ", result)
+  const colorScheme = useColorScheme()
+
   const { push } = useRouter()
 
   const weightMax = [
@@ -40,55 +46,112 @@ export default function TabTwoScreen() {
       <View style={styles.settingsContainer}>
         {/* 내정보 */}
         <TouchableOpacity
-          style={styles.settings}
+          style={[
+            styles.settings,
+            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          ]}
           onPress={() => push("/mypage/user-info")}
         >
-          <IconTitle style={{ backgroundColor: Colors.dark.itemColor }}>
+          <IconTitle
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            }}
+          >
             <MaterialCommunityIcons
               name="account-edit"
               size={20}
-              color={Colors.dark.tint}
+              color={Colors[colorScheme ?? "light"].tint}
             />
             <Text>내정보 작성</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={Colors.dark.subText} />
+          <AntDesign
+            name="up"
+            size={20}
+            color={Colors[colorScheme ?? "light"].subText}
+          />
         </TouchableOpacity>
 
         {/* 3대중량 */}
         <TouchableOpacity
-          style={styles.settings}
+          style={[
+            styles.settings,
+            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          ]}
           onPress={() => push("/mypage/max-weights")}
         >
-          <IconTitle style={{ backgroundColor: Colors.dark.itemColor }}>
+          <IconTitle
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            }}
+          >
             <MaterialCommunityIcons
               name="weight-kilogram"
               size={20}
-              color={Colors.dark.tint}
+              color={Colors[colorScheme ?? "light"].tint}
             />
             <Text>3대중량 기입</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={Colors.dark.subText} />
+          <AntDesign
+            name="up"
+            size={20}
+            color={Colors[colorScheme ?? "light"].subText}
+          />
         </TouchableOpacity>
 
         {/* 컬러모드 */}
         <TouchableOpacity
-          style={[styles.settings]}
+          style={[
+            styles.settings,
+            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          ]}
           onPress={() => push("/mypage/theme-mode")}
         >
-          <IconTitle style={{ backgroundColor: Colors.dark.itemColor }}>
+          <IconTitle
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            }}
+          >
             <MaterialCommunityIcons
               name="circle-half-full"
               size={20}
-              color={Colors.dark.tint}
+              color={Colors[colorScheme ?? "light"].tint}
             />
             <Text>컬러모드 선택</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={Colors.dark.subText} />
+          <AntDesign
+            name="up"
+            size={20}
+            color={Colors[colorScheme ?? "light"].subText}
+          />
+        </TouchableOpacity>
+
+        {/* 데이터 초기화 */}
+        <TouchableOpacity
+          style={[
+            styles.settings,
+            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          ]}
+          onPress={() => push("/mypage/reset-data")}
+        >
+          <IconTitle
+            style={{
+              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="database-remove"
+              size={20}
+              color={Colors[colorScheme ?? "light"].tint}
+            />
+            <Text>데이터 초기화</Text>
+          </IconTitle>
+          <AntDesign
+            name="up"
+            size={20}
+            color={Colors[colorScheme ?? "light"].subText}
+          />
         </TouchableOpacity>
       </View>
-      <Button type="solid" onPress={onReset}>
-        리셋
-      </Button>
     </View>
   )
 }
@@ -105,7 +168,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   settings: {
-    backgroundColor: Colors.dark.itemColor,
     borderRadius: 10,
     paddingHorizontal: 16,
     paddingVertical: 14,
