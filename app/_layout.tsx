@@ -42,6 +42,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
+  const { replace } = useRouter()
   const [loaded, error] = useFonts({
     "sb-b": require("../assets/fonts/SB_B.otf"),
     "sb-l": require("../assets/fonts/SB_L.otf"),
@@ -56,6 +57,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync()
+      replace("/(tabs)/workout")
     }
   }, [loaded])
 
@@ -95,13 +97,17 @@ function RootLayoutNav() {
   //   }, [])
 
   return (
-    <ThemeProvider value={theme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <BottomSheetModalProvider>
           <Stack
             screenOptions={{
               headerStyle: {
                 backgroundColor: Colors[colorScheme ?? "light"].background,
+              },
+              headerTitleStyle: {
+                color: Colors[colorScheme ?? "light"].text,
+                fontFamily: "sb-m",
               },
             }}
           >
@@ -290,7 +296,7 @@ function RootLayoutNav() {
                 headerTitleStyle: {
                   fontFamily: "sb-m",
                 },
-                headerShadowVisible: false,
+                // headerShadowVisible: false,
                 animation: "slide_from_bottom",
 
                 headerLeft: () => (
@@ -323,10 +329,7 @@ function RootLayoutNav() {
               name="mypage/max-weights"
               options={({ navigation }) => ({
                 headerTitle: "3대 중량",
-                headerTitleStyle: {
-                  fontFamily: "sb-m",
-                },
-                headerShadowVisible: false,
+                // headerShadowVisible: false,
                 animation: "slide_from_bottom",
                 headerLeft: () => (
                   <TouchableOpacity
@@ -358,10 +361,7 @@ function RootLayoutNav() {
               name="mypage/theme-mode"
               options={({ navigation }) => ({
                 headerTitle: "컬러 모드 선택",
-                headerTitleStyle: {
-                  fontFamily: "sb-m",
-                },
-                headerShadowVisible: false,
+                // headerShadowVisible: false,
                 animation: "slide_from_bottom",
                 headerLeft: () => (
                   <TouchableOpacity
@@ -393,10 +393,7 @@ function RootLayoutNav() {
               name="mypage/reset-data"
               options={({ navigation }) => ({
                 headerTitle: "데이터 초기화",
-                headerTitleStyle: {
-                  fontFamily: "sb-m",
-                },
-                headerShadowVisible: false,
+                // headerShadowVisible: false,
                 animation: "slide_from_bottom",
                 headerLeft: () => (
                   <TouchableOpacity

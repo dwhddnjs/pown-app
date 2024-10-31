@@ -1,6 +1,11 @@
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import {
+  Appearance,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import Entypo from "@expo/vector-icons/Entypo"
 import { useUserStore } from "@/hooks/use-user-store"
 import { useRouter } from "expo-router"
@@ -11,8 +16,13 @@ export default function ThemeMode() {
   const { back } = useRouter()
   const colorScheme = useColorScheme()
 
-  const onSubmitTheme = (theme: string) => {
+  const onSubmitTheme = (theme: "light" | "dark" | "system") => {
+    let result: "light" | "dark" | "system" | null = theme
+    if (theme === "system") {
+      result = null
+    }
     setUser("theme", theme)
+    Appearance.setColorScheme(result as Exclude<typeof result, "system">)
     back()
     toast.success("컬러모드가 변경 되었습니다!")
   }

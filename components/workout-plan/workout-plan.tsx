@@ -39,7 +39,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         result = <Arm />
         break
       default:
-        result = <Chest />
+        result = <Shoulder />
         break
     }
 
@@ -131,11 +131,12 @@ const styles = StyleSheet.create({
     // paddingHorizontal: 24,
     paddingTop: 8,
     paddingHorizontal: 16,
-    // borderRadius: 12,
+    overflow: "hidden",
     gap: 14,
     flexDirection: "row",
     alignItems: "flex-start",
     // borderWidth: 1,
+    flex: 1,
   },
   iconLine: {
     // justifyContent: "center",

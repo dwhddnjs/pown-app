@@ -72,13 +72,17 @@ export default function UserInfo() {
               <View
                 style={[
                   styles.container,
-                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                  {
+                    borderColor: Colors[colorScheme ?? "light"].subText,
+                  },
                 ]}
               >
                 <TextInput
                   style={[
                     styles.input,
-                    { color: Colors[colorScheme ?? "light"].tint },
+                    {
+                      color: Colors[colorScheme ?? "light"].tint,
+                    },
                   ]}
                   keyboardType="numeric"
                   //   onFocus={(e) => onFocus(e.target)}

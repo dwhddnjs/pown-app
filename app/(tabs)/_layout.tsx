@@ -36,11 +36,15 @@ export default function TabLayout() {
         },
         headerTitleStyle: {
           fontFamily: "sb-m",
+          color: Colors[colorScheme ?? "light"].text,
         },
+
+        // headerShadowVisible: false,
         tabBarStyle: {
           backgroundColor: Colors[colorScheme ?? "light"].tabBar,
+          borderTopWidth: 0,
         },
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tint,
+        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tabIconSelected,
         tabBarItemStyle: {
           paddingBottom: 3,
           paddingTop: 3,

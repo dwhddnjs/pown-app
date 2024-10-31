@@ -47,6 +47,7 @@ export const UserDataCard = () => {
       >
         {useData.map((item) => (
           <View
+            key={item.id}
             style={[
               styles.weightItem,
               { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
@@ -75,6 +76,7 @@ export const UserDataCard = () => {
       >
         {weightMax.map((item) => (
           <View
+            key={item.id}
             style={[
               styles.weightItem,
               { backgroundColor: Colors[colorScheme ?? "light"].itemColor },

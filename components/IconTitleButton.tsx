@@ -1,5 +1,12 @@
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native"
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import React from "react"
+import Colors from "@/constants/Colors"
 
 interface IconTitleButtonProps {
   Icon: any
@@ -12,10 +19,15 @@ export const IconTitleButton = ({
   title,
   onClick,
 }: IconTitleButtonProps) => {
+  const colorScheme = useColorScheme()
   return (
     <TouchableOpacity style={styles.container} onPress={onClick}>
       <Icon width={60} height={60} />
-      <Text style={styles.title}>{title}</Text>
+      <Text
+        style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}
+      >
+        {title}
+      </Text>
     </TouchableOpacity>
   )
 }
@@ -29,6 +41,5 @@ const styles = StyleSheet.create({
   title: {
     fontFamily: "sb-l",
     fontSize: 12,
-    color: "#ffffff",
   },
 })

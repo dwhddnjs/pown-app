@@ -60,7 +60,7 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           const result = [...newArr, newObj].sort((a, b) => b.id - a.id)
 
           return {
-            workoutPlanList: result as any,
+            workoutPlanList: result as WorkoutPlanTypes[],
           }
         }),
     }),

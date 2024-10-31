@@ -50,6 +50,7 @@ export default function AddPlan() {
   const { onReset, ...result } = usePlanStore()
   const { onReset: onResetNote } = useNoteStore()
   const { slug } = useLocalSearchParams()
+  console.log("slug: ", slug)
   const { back } = useRouter()
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
