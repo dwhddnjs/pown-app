@@ -8,10 +8,12 @@ import {
   TouchableOpacity,
   useColorScheme,
   View as Any,
+  FlatList,
+  Animated,
 } from "react-native"
 import Colors from "@/constants/Colors"
 import { supabase } from "@/lib/supabase"
-import { forwardRef, useEffect, useRef, useState } from "react"
+import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { Button } from "@/components/Button"
 import { formatDate, groupByDate } from "@/lib/function"
@@ -19,68 +21,35 @@ import { format } from "date-fns"
 import { Stack } from "expo-router"
 import { useHeaderHeight } from "@react-navigation/elements"
 import { BlurView } from "expo-blur"
+import { FlashList } from "@shopify/flash-list"
+import useAnimatedHeaderTitle from "@/hooks/use-animated-header-title"
+import { EmptyList } from "@/components/workout-plan/empty-list"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
-  const targetRef = useRef(null)
 
-  const [dataValue, setDataValue] = useState({
-    y: 0,
-    value: "",
+  const { scrollY } = useAnimatedHeaderTitle({
+    title: "오늘의 운동",
+    triggerPoint: 30,
   })
-  const [value, setValue] = useState("")
-  console.log("value: ", value)
-  console.log("dataValue: ", dataValue)
+  console.log("scrollY: ", scrollY)
+  const handleScroll = Animated.event(
+    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+    { useNativeDriver: false }
+  )
 
-  const handleScroll = (event: any) => {
-    console.log("event: ", event.nativeEvent.contentOffset.y)
-
-    if (event.nativeEvent.contentOffset.y > dataValue.y) {
-      setValue(dataValue.value)
-    }
-
-    // const layout = targetRef.current?.measure(
-    //   (x, y, width, height, pageX, pageY) => {
-    //     const isVisible =
-    //       pageY + height >= 0 &&
-    //       pageY <=
-    //         event.nativeEvent.contentOffset.y +
-    //           event.nativeEvent.layoutMeasurement.height
-
-    //     // 텍스트가 화면에서 사라질 때 값을 저장
-    //     if (!isVisible) {
-    //       setOutOfView("사라진 텍스트의 값")
-    //     }
-    //   }
-    // )
-  }
+  const [data, setData] = useState<any>()
 
   if (workoutPlanList.length === 0) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 16,
-        }}
-      >
-        <Image
-          source={require("@/assets/images/empty.png")}
-          style={{ width: 150, height: 200 }}
-        />
-        <Text style={{ color: Colors.dark.subText, fontSize: 18 }}>
-          운동 계획을 작성해주세요!
-        </Text>
-      </View>
-    )
+    return <EmptyList />
   }
 
   return (
     <ScrollView
+      //   onScroll={handleScroll}
       style={[
         styles.container,
         {
@@ -88,23 +57,23 @@ export default function TabOneScreen() {
           backgroundColor: Colors[colorScheme ?? "light"].background,
         },
       ]}
-      onScroll={handleScroll}
     >
-      <View>
-        {Object.entries(sortWorkList).map((item, index) => {
+      <FlashList
+        data={Object.entries(sortWorkList)}
+        // viewabilityConfig={viewabilityConfig.current}
+        scrollEventThrottle={16}
+        estimatedItemSize={50}
+        keyExtractor={(item) => item[0]}
+        renderItem={({ item, index }) => {
           return (
             <View style={styles.list} key={index}>
-              <Any ref={targetRef} collapsable={false}>
-                <Text
-                  onLayout={(e) =>
-                    setDataValue({ y: e.nativeEvent.layout.y, value: item[0] })
-                  }
-                  style={[
-                    styles.date,
-                    { borderColor: Colors[colorScheme ?? "light"].subText },
-                  ]}
-                >{`🗓️  ${formatDate(item[0])}`}</Text>
-              </Any>
+              <Text
+                style={[
+                  styles.date,
+                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                ]}
+              >{`🗓️  ${formatDate(item[0])}`}</Text>
+
               <View style={styles.workoutList}>
                 {item[1].map((data, index) => (
                   <WorkoutPlan
@@ -117,8 +86,8 @@ export default function TabOneScreen() {
               </View>
             </View>
           )
-        })}
-      </View>
+        }}
+      />
       <View style={{ height: 300 }} />
     </ScrollView>
   )
@@ -170,3 +139,80 @@ const styles = StyleSheet.create({
     height: 150,
   },
 })
+
+{
+  /* {Object.entries(sortWorkList).map((item, index) => {
+        return (
+          <View style={styles.list} key={index}>
+            <Text
+              onLayout={(e) =>
+                setDataValue({ y: e.nativeEvent.layout.y, value: item[0] })
+              }
+              style={[
+                styles.date,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >{`🗓️  ${formatDate(item[0])}`}</Text>
+
+            <View style={styles.workoutList}>
+              {item[1].map((data, index) => (
+                <WorkoutPlan
+                  key={data.id}
+                  item={data}
+                  index={index}
+                  totalLength={item[1].length}
+                />
+              ))}
+            </View>
+          </View>
+        )
+      })} */
+}
+
+// ;<ScrollView
+//   scrollEventThrottle={0}
+//   //   onScroll={handleScroll}
+//   onScroll={(e) => console.log("adsads", e.nativeEvent.contentOffset.y)}
+//   style={[
+//     styles.container,
+//     {
+//       paddingTop: headerHeight,
+//       backgroundColor: Colors[colorScheme ?? "light"].background,
+//     },
+//   ]}
+// >
+//   <FlatList
+//     data={Object.entries(sortWorkList)}
+//     // onViewableItemsChanged={onViewableItemsChanged}
+//     // viewabilityConfig={viewabilityConfig.current}
+
+//     scrollEventThrottle={16}
+//     // estimatedItemSize={50}
+//     keyExtractor={(item) => item[0]}
+//     renderItem={({ item, index }) => {
+//       return (
+//         <View style={styles.list} key={index}>
+//           <Text
+//             style={[
+//               styles.date,
+//               { borderColor: Colors[colorScheme ?? "light"].subText },
+//             ]}
+//           >{`🗓️  ${formatDate(item[0])}`}</Text>
+
+//           <View style={styles.workoutList}>
+//             {item[1].map((data, index) => (
+//               <WorkoutPlan
+//                 key={data.id}
+//                 item={data}
+//                 index={index}
+//                 totalLength={item[1].length}
+//               />
+//             ))}
+//           </View>
+//         </View>
+//       )
+//     }}
+//   />
+
+//   <View style={{ height: 300 }} />
+// </ScrollView>

@@ -57,7 +57,6 @@ export default function TabLayout() {
       <Tabs.Screen
         name="workout"
         options={{
-          title: "운동",
           tabBarIcon: ({ color }) => (
             // <DumbelIcon name="dumbbell" size={20} color={color} />
             <SymbolView
@@ -71,7 +70,7 @@ export default function TabLayout() {
             return (
               <BlurView
                 intensity={80}
-                tint="default"
+                tint="dark"
                 style={{
                   width: "100%",
                   paddingBottom: 10,
@@ -80,7 +79,7 @@ export default function TabLayout() {
               >
                 <SafeAreaView>
                   <Text style={{ fontSize: 18, textAlign: "center" }}>
-                    🔥 오늘의 운동
+                    {options.title}
                   </Text>
                 </SafeAreaView>
               </BlurView>
