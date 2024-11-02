@@ -7,7 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
-  View as Any,
+  View as RefView,
   FlatList,
   Animated,
 } from "react-native"
@@ -30,18 +30,42 @@ export default function TabOneScreen() {
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
+  const itemRef = useRef(new Map())
 
   const { scrollY } = useAnimatedHeaderTitle({
     title: "오늘의 운동",
     triggerPoint: 30,
   })
-  console.log("scrollY: ", scrollY)
+
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     { useNativeDriver: false }
   )
 
-  const [data, setData] = useState<any>()
+  const getYPosition = (key: string) => {
+    const ref = itemRef.current.get(key)
+    if (ref) {
+      ref.measureLayout(
+        null, // 필요하면 부모 뷰의 ref를 지정할 수 있음
+        (x: any, y: any) => {
+          console.log(`날짜 ${key}의 y 위치: ${y}`)
+        },
+        (error: Error) => {
+          console.error(`날짜 ${key}의 측정 중 오류:`, error)
+        }
+      )
+    }
+  }
+
+  // viewable 아이템이 변경될 때 호출되는 콜백
+  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+    viewableItems.forEach((viewableItem: any) => {
+      const [key] = viewableItem.item
+      getYPosition(key)
+    })
+  }, [])
+
+  const [data, setData] = useState<any>(null)
 
   if (workoutPlanList.length === 0) {
     return <EmptyList />
@@ -61,18 +85,29 @@ export default function TabOneScreen() {
       <FlashList
         data={Object.entries(sortWorkList)}
         // viewabilityConfig={viewabilityConfig.current}
+        // onViewableItemsChanged={onViewableItemsChanged}
         scrollEventThrottle={16}
         estimatedItemSize={50}
         keyExtractor={(item) => item[0]}
         renderItem={({ item, index }) => {
           return (
             <View style={styles.list} key={index}>
-              <Text
-                style={[
-                  styles.date,
-                  { borderColor: Colors[colorScheme ?? "light"].subText },
-                ]}
-              >{`🗓️  ${formatDate(item[0])}`}</Text>
+              <RefView
+                ref={(ref) => {
+                  if (ref) {
+                    itemRef.current.set(item[0], ref)
+                  } else {
+                    itemRef.current.delete(item[0])
+                  }
+                }}
+              >
+                <Text
+                  style={[
+                    styles.date,
+                    { borderColor: Colors[colorScheme ?? "light"].subText },
+                  ]}
+                >{`🗓️  ${formatDate(item[0])}`}</Text>
+              </RefView>
 
               <View style={styles.workoutList}>
                 {item[1].map((data, index) => (
@@ -216,3 +251,23 @@ const styles = StyleSheet.create({
 
 //   <View style={{ height: 300 }} />
 // </ScrollView>
+
+// onLayout={(e) => {
+//     // y 위치
+//     const y = e.nativeEvent.layout.y
+//     console.log("y: ", y)
+//     // 2024년 10월
+//     const splitItem = item[0].split(".")
+//     const date = `${splitItem[0]}-${splitItem[1]}`
+
+//     if (data) {
+//       const prevData = Object.keys(data)
+//       if (prevData.includes(date)) {
+//         return
+//       }
+//     }
+//     setData({
+//       ...data,
+//       [date]: y,
+//     })
+//   }}
