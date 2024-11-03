@@ -1,28 +1,14 @@
-import React, { useState } from "react"
-import {
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native"
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from "@react-native-google-signin/google-signin"
+import React from "react"
+import { ScrollView, StyleSheet, TextInput } from "react-native"
 import Logo from "@/assets/images/svg/pow_logo.svg"
-import Logo2 from "@/assets/images/svg/pow_logo2.svg"
 import SocialIcon from "@expo/vector-icons/AntDesign"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
 import { Controller, useForm } from "react-hook-form"
 import { Button } from "@/components/Button"
 import { Link } from "expo-router"
-import { useSignInMutation } from "@/hooks/mutation/user"
 
 export default function SignIn() {
-  const { mutate } = useSignInMutation()
-
   const {
     control,
     handleSubmit,
@@ -34,9 +20,7 @@ export default function SignIn() {
     },
   })
 
-  const onSubmit = (data: any) => {
-    mutate(data)
-  }
+  const onSubmit = (data: any) => {}
 
   return (
     <ScrollView style={styles.container}>

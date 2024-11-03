@@ -14,18 +14,11 @@ import XIcon from "@expo/vector-icons/Feather"
 import "react-native-reanimated"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { BottomSheetProvider } from "@gorhom/bottom-sheet/lib/typescript/contexts"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
 import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { Toaster } from "sonner-native"
-import {
-  onlineManager,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query"
-import { supabase } from "@/lib/supabase"
 import { useUserStore } from "@/hooks/use-user-store"
 
 export {

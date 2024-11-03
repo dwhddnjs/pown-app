@@ -1,17 +1,8 @@
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
-import BottomSheet, { BottomSheetModal } from "@gorhom/bottom-sheet"
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import {
-  Keyboard,
-  KeyboardAvoidingView,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
+import { BottomSheetModal } from "@gorhom/bottom-sheet"
+import React, { useRef } from "react"
+import { Keyboard, ScrollView, StyleSheet, useColorScheme } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
@@ -50,9 +41,7 @@ export default function AddPlan() {
   const { onReset, ...result } = usePlanStore()
   const { onReset: onResetNote } = useNoteStore()
   const { slug } = useLocalSearchParams()
-  console.log("slug: ", slug)
   const { back } = useRouter()
-  const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
 
   const onHideKeyboard = () => {

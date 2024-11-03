@@ -1,29 +1,14 @@
 import React from "react"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-import { Link, router, Tabs } from "expo-router"
-import { Pressable, SafeAreaView, useColorScheme } from "react-native"
-// import { GiMuscleUp } from "react-icons/gi"
-import DumbelIcon from "@expo/vector-icons/FontAwesome5"
+import { router, Tabs } from "expo-router"
+import { SafeAreaView, useColorScheme } from "react-native"
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import PlusIcon from "@expo/vector-icons/EvilIcons"
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
-import { SymbolView, SymbolViewProps, SFSymbol } from "expo-symbols"
-
+import { SymbolView } from "expo-symbols"
 import Colors from "@/constants/Colors"
-import ModalScreen from "../(modals)/select-type"
 import { BlurView } from "expo-blur"
 import { Text } from "@/components/Themed"
-import { useHeaderHeight } from "@react-navigation/elements"
-// import { useColorScheme } from '@/components/useColorScheme';
-// import { useClientOnlyValue } from '@/components/useClientOnlyValue';
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"]
-  color: string
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />
-}
 
 export default function TabLayout() {
   const colorScheme = useColorScheme()
@@ -58,14 +43,14 @@ export default function TabLayout() {
         name="workout"
         options={{
           tabBarIcon: ({ color }) => (
-            // <DumbelIcon name="dumbbell" size={20} color={color} />
             <SymbolView
               name="dumbbell.fill"
               type="hierarchical"
               tintColor={color}
-              //   size={24}
             />
           ),
+          tabBarLabel: "운동",
+
           header: ({ navigation, route, options }) => {
             return (
               <BlurView

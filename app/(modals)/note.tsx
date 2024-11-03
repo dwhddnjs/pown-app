@@ -1,8 +1,7 @@
 import { StyleSheet, TextInput, useColorScheme } from "react-native"
 import React from "react"
-import { Text, View } from "@/components/Themed"
+import { View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
-import { usePlanStore } from "@/hooks/use-plan-store"
 import { useNoteStore } from "@/hooks/use-note-store"
 
 export default function note() {

@@ -1,23 +1,10 @@
 import React, { useState } from "react"
-import {
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-} from "react-native"
-import {
-  GoogleSignin,
-  GoogleSigninButton,
-  statusCodes,
-} from "@react-native-google-signin/google-signin"
-import { supabase } from "@/lib/supabase"
+import { ScrollView, StyleSheet, TextInput } from "react-native"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
 import { Controller, useForm } from "react-hook-form"
 import { Button } from "@/components/Button"
 import { Link } from "expo-router"
-import Logo from "@/assets/images/svg/pow_logo.svg"
-import { useSignUpMutation } from "@/hooks/mutation/user"
 
 export default function SignUp() {
   const {
@@ -31,11 +18,8 @@ export default function SignUp() {
       name: "",
     },
   })
-  const { mutate } = useSignUpMutation()
 
-  const onSubmit = (formData: any) => {
-    mutate(formData)
-  }
+  const onSubmit = (formData: any) => {}
 
   return (
     <ScrollView style={styles.container}>

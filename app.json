@@ -26,11 +26,11 @@
       "splash": {
         "image": "./assets/images/splash.png",
         "resizeMode": "contain",
-        "backgroundColor": "#ffffff",
+        "backgroundColor": "#1a1a1a",
         "dark": {
           "image": "./assets/images/splash.png",
           "resizeMode": "contain",
-          "backgroundColor": "#1a1a1a"
+          "backgroundColor": "#ffffff"
         }
       }
     },

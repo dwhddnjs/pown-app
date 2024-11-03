@@ -1,12 +1,6 @@
 import { View, Text } from "@/components/Themed"
 import { StatusBar } from "expo-status-bar"
-import {
-  Image,
-  Platform,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
+import { Platform, StyleSheet, useColorScheme } from "react-native"
 import Arm from "@/assets/images/svg/arm_icon.svg"
 import Back from "@/assets/images/svg/back_icon.svg"
 import Chest from "@/assets/images/svg/chest_icon.svg"

@@ -1,71 +1,77 @@
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
 import {
-  Image,
-  PlatformColor,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   useColorScheme,
   View as RefView,
-  FlatList,
-  Animated,
+  findNodeHandle,
 } from "react-native"
 import Colors from "@/constants/Colors"
-import { supabase } from "@/lib/supabase"
-import { forwardRef, useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { Button } from "@/components/Button"
 import { formatDate, groupByDate } from "@/lib/function"
-import { format } from "date-fns"
-import { Stack } from "expo-router"
+import { useNavigation } from "expo-router"
 import { useHeaderHeight } from "@react-navigation/elements"
-import { BlurView } from "expo-blur"
 import { FlashList } from "@shopify/flash-list"
-import useAnimatedHeaderTitle from "@/hooks/use-animated-header-title"
 import { EmptyList } from "@/components/workout-plan/empty-list"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
+
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
+  const navigation = useNavigation()
   const itemRef = useRef(new Map())
+  const scrollRef = useRef(null)
+  const scrollY = useRef(0)
 
-  const { scrollY } = useAnimatedHeaderTitle({
-    title: "오늘의 운동",
-    triggerPoint: 30,
-  })
+  const measureView = useCallback((date: string, ref: any) => {
+    if (!ref || !scrollRef.current) return
 
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: false }
-  )
+    const handle = findNodeHandle(scrollRef.current)
+    if (!handle) return
 
-  const getYPosition = (key: string) => {
-    const ref = itemRef.current.get(key)
-    if (ref) {
-      ref.measureLayout(
-        null, // 필요하면 부모 뷰의 ref를 지정할 수 있음
-        (x: any, y: any) => {
-          console.log(`날짜 ${key}의 y 위치: ${y}`)
-        },
-        (error: Error) => {
-          console.error(`날짜 ${key}의 측정 중 오류:`, error)
+    ref.measureLayout(
+      handle,
+      (x: number, y: number, width: number, height: number) => {
+        const actualY = y - scrollY.current
+        if (actualY <= headerHeight + 20 && actualY >= -height) {
+          const splitData = date.split(".")
+          navigation.setOptions({
+            title: `${splitData[0]}년  ${splitData[1]}월`,
+          })
         }
-      )
-    }
-  }
-
-  // viewable 아이템이 변경될 때 호출되는 콜백
-  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    viewableItems.forEach((viewableItem: any) => {
-      const [key] = viewableItem.item
-      getYPosition(key)
-    })
+      },
+      (error: Error) => {
+        console.log("에러", error)
+      }
+    )
   }, [])
 
-  const [data, setData] = useState<any>(null)
+  const handleScroll = useCallback(
+    (event: any) => {
+      const offsetY = event.nativeEvent.contentOffset.y
+      scrollY.current = offsetY
+
+      // 약간의 디바운스 효과를 주기 위해 setTimeout 사용
+      setTimeout(() => {
+        itemRef.current.forEach((ref, date) => {
+          measureView(date, ref)
+        })
+      }, 10)
+    },
+    [measureView]
+  )
+
+  useEffect(() => {
+    setTimeout(() => {
+      itemRef.current.forEach((ref, date) => {
+        measureView(date, ref)
+      })
+    }, 100)
+  }, [])
 
   if (workoutPlanList.length === 0) {
     return <EmptyList />
@@ -73,7 +79,9 @@ export default function TabOneScreen() {
 
   return (
     <ScrollView
-      //   onScroll={handleScroll}
+      ref={scrollRef}
+      onScroll={handleScroll}
+      scrollEventThrottle={16}
       style={[
         styles.container,
         {
@@ -84,9 +92,6 @@ export default function TabOneScreen() {
     >
       <FlashList
         data={Object.entries(sortWorkList)}
-        // viewabilityConfig={viewabilityConfig.current}
-        // onViewableItemsChanged={onViewableItemsChanged}
-        scrollEventThrottle={16}
         estimatedItemSize={50}
         keyExtractor={(item) => item[0]}
         renderItem={({ item, index }) => {
@@ -96,8 +101,16 @@ export default function TabOneScreen() {
                 ref={(ref) => {
                   if (ref) {
                     itemRef.current.set(item[0], ref)
+                    // ref가 설정된 직후 측정
+                    setTimeout(() => measureView(item[0], ref), 0)
                   } else {
                     itemRef.current.delete(item[0])
+                  }
+                }}
+                onLayout={() => {
+                  const ref = itemRef.current.get(item[0])
+                  if (ref) {
+                    measureView(item[0], ref)
                   }
                 }}
               >
