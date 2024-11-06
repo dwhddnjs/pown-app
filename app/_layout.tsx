@@ -8,8 +8,14 @@ import {
 import { useFonts } from "expo-font"
 import { Stack, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
-import { useEffect } from "react"
-import { TouchableOpacity, useColorScheme } from "react-native"
+import { useEffect, useState } from "react"
+import {
+  Keyboard,
+  NativeSyntheticEvent,
+  TextInputFocusEventData,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import XIcon from "@expo/vector-icons/Feather"
 import "react-native-reanimated"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
@@ -20,6 +26,9 @@ import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { Toaster } from "sonner-native"
 import { useUserStore } from "@/hooks/use-user-store"
+import { SearchBarProps } from "react-native-screens"
+import { useSearchInputStore } from "@/hooks/use-search-input-store"
+import { useKeyboardVisible } from "@/hooks/use-keyboard-visible"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -63,24 +72,8 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const colorScheme = useColorScheme()
+  const isKeyboardVisible = useKeyboardVisible()
 
-  const { theme } = useUserStore()
-
-  const getTheme = () => {
-    let result
-    switch (theme) {
-      case "dark":
-        result = "dark"
-        break
-      case "light":
-        result = "light"
-        break
-      default:
-        result = colorScheme
-        break
-    }
-    return result
-  }
   //   const { setUser } = useUser()
 
   //   useEffect(() => {
@@ -386,8 +379,6 @@ function RootLayoutNav() {
               name="mypage/reset-data"
               options={({ navigation }) => ({
                 headerTitle: "데이터 초기화",
-                // headerShadowVisible: false,
-
                 animation: "slide_from_bottom",
                 headerLeft: () => (
                   <TouchableOpacity
@@ -401,19 +392,31 @@ function RootLayoutNav() {
                     />
                   </TouchableOpacity>
                 ),
-                // headerRight: () => (
-                //   <TouchableOpacity
-                //     onPress={() => navigation.goBack()}
-                //     style={{ marginRight: 8 }}
-                //   >
-                //     <Checkcircle
-                //       name="checkcircle"
-                //       size={30}
-                //       color={Colors[colorScheme ?? "light"].tint}
-                //     />
-                //   </TouchableOpacity>
-                // ),
               })}
+            />
+            <Stack.Screen
+              name="workout/search"
+              options={({ navigation }) => {
+                return {
+                  headerTitle: "운동 검색",
+                  headerShadowVisible: false,
+                  gestureEnabled: false,
+
+                  //   headerShown: false,
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      style={{ marginLeft: 4 }}
+                      onPress={() => navigation.goBack()}
+                    >
+                      <ArrowIcon
+                        name="left"
+                        size={24}
+                        color={Colors[colorScheme ?? "light"].subText}
+                      />
+                    </TouchableOpacity>
+                  ),
+                }
+              }}
             />
           </Stack>
           <Toaster />

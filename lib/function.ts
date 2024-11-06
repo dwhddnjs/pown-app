@@ -1,3 +1,4 @@
+import Colors from "@/constants/Colors"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import { format } from "date-fns"
 
@@ -21,4 +22,10 @@ export const formatTime = (value: string) => {
 export const formatDate = (value: string) => {
   const splitValue = value.split(".")
   return `${splitValue[0]}년 ${splitValue[1]}월 ${splitValue[2]}일`
+}
+
+export const setColor = (color: string, type: string) => {
+  return {
+    [type]: color,
+  }
 }

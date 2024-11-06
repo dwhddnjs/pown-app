@@ -1,5 +1,5 @@
 import React from "react"
-import { router, Tabs } from "expo-router"
+import { router, Tabs, useRouter } from "expo-router"
 import { SafeAreaView, TouchableOpacity, useColorScheme } from "react-native"
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import PlusIcon from "@expo/vector-icons/EvilIcons"
@@ -53,6 +53,7 @@ export default function TabLayout() {
           tabBarLabel: "운동",
 
           header: ({ navigation, route, options }) => {
+            const { push } = useRouter()
             return (
               <BlurView
                 intensity={80}
@@ -86,7 +87,7 @@ export default function TabLayout() {
                     <Text style={{ fontSize: 18, textAlign: "center" }}>
                       {options.title}
                     </Text>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={() => push("/workout/search")}>
                       <FontAwesome
                         name="search"
                         size={24}
