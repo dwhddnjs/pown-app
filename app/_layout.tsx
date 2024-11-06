@@ -387,6 +387,7 @@ function RootLayoutNav() {
               options={({ navigation }) => ({
                 headerTitle: "데이터 초기화",
                 // headerShadowVisible: false,
+
                 animation: "slide_from_bottom",
                 headerLeft: () => (
                   <TouchableOpacity

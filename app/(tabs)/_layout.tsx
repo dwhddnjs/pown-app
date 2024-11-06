@@ -1,12 +1,13 @@
 import React from "react"
 import { router, Tabs } from "expo-router"
-import { SafeAreaView, useColorScheme } from "react-native"
+import { SafeAreaView, TouchableOpacity, useColorScheme } from "react-native"
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import PlusIcon from "@expo/vector-icons/EvilIcons"
 import { SymbolView } from "expo-symbols"
 import Colors from "@/constants/Colors"
 import { BlurView } from "expo-blur"
-import { Text } from "@/components/Themed"
+import { Text, View } from "@/components/Themed"
+import FontAwesome from "@expo/vector-icons/FontAwesome"
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 
@@ -55,7 +56,7 @@ export default function TabLayout() {
             return (
               <BlurView
                 intensity={80}
-                tint="dark"
+                tint="default"
                 style={{
                   width: "100%",
                   paddingBottom: 10,
@@ -63,9 +64,36 @@ export default function TabLayout() {
                 }}
               >
                 <SafeAreaView>
-                  <Text style={{ fontSize: 18, textAlign: "center" }}>
-                    {options.title}
-                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: "transparent",
+                      width: "100%",
+                      paddingVertical: 4,
+                      paddingHorizontal: 26,
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      //   borderColor: 1,
+                    }}
+                  >
+                    <TouchableOpacity>
+                      <FontAwesome
+                        name="navicon"
+                        size={24}
+                        color={Colors[colorScheme ?? "light"].text}
+                      />
+                    </TouchableOpacity>
+                    <Text style={{ fontSize: 18, textAlign: "center" }}>
+                      {options.title}
+                    </Text>
+                    <TouchableOpacity>
+                      <FontAwesome
+                        name="search"
+                        size={24}
+                        color={Colors[colorScheme ?? "light"].text}
+                      />
+                    </TouchableOpacity>
+                  </View>
                 </SafeAreaView>
               </BlurView>
             )

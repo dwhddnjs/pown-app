@@ -80,6 +80,7 @@ export default function TabOneScreen() {
   return (
     <ScrollView
       ref={scrollRef}
+      //   contentInsetAdjustmentBehavior="automatic"
       onScroll={handleScroll}
       scrollEventThrottle={16}
       style={[
@@ -136,7 +137,17 @@ export default function TabOneScreen() {
           )
         }}
       />
-      <View style={{ height: 300 }} />
+      <View
+        style={{
+          height: 300,
+          alignItems: "center",
+          paddingTop: 80,
+        }}
+      >
+        <Text style={{ color: Colors[colorScheme ?? "light"].subText }}>
+          마지막 운동계획입니다.
+        </Text>
+      </View>
     </ScrollView>
   )
 }
