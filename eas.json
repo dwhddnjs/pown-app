@@ -1,0 +1,27 @@
+{
+  "cli": {
+    "version": ">= 12.6.2",
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal"
+    },
+    "preview": {
+      "distribution": "internal"
+    },
+    "production": {
+      "autoIncrement": true
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "per1215@naver.com",
+        "ascAppId": "6737919723",
+        "appleTeamId": "W6FUWFHBPW"
+      }
+    }
+  }
+}
