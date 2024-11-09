@@ -50,7 +50,7 @@ export default function TabLayout() {
               tintColor={color}
             />
           ),
-          tabBarLabel: "운동",
+          tabBarLabel: "운동계획",
 
           header: ({ navigation, route, options }) => {
             const { push } = useRouter()

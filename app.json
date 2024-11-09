@@ -3,7 +3,6 @@
     "name": "pown",
     "slug": "pown",
     "version": "1.0.1",
-    "platforms": ["ios"],
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -79,6 +78,12 @@
       "eas": {
         "projectId": "3cb3e29d-14bd-4783-849d-48be3148abd6"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/3cb3e29d-14bd-4783-849d-48be3148abd6"
     }
   }
 }
