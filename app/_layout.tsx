@@ -29,6 +29,7 @@ import { useUserStore } from "@/hooks/use-user-store"
 import { SearchBarProps } from "react-native-screens"
 import { useSearchInputStore } from "@/hooks/use-search-input-store"
 import { useKeyboardVisible } from "@/hooks/use-keyboard-visible"
+import * as Updates from "expo-updates"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -64,6 +65,21 @@ export default function RootLayout() {
       replace("/(tabs)/workout")
     }
   }, [loaded])
+
+  useEffect(() => {
+    ;(async () => {
+      try {
+        const update = await Updates.checkForUpdateAsync()
+        if (update.isAvailable) {
+          await Updates.fetchUpdateAsync()
+
+          await Updates.reloadAsync()
+        }
+      } catch (error) {
+        console.log("업데이트 확인 중 에러:", error)
+      }
+    })()
+  }, [])
 
   if (!loaded) {
     return null
