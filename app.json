@@ -86,7 +86,7 @@
       }
     },
     "runtimeVersion": {
-      "policy": "sdkVersion"
+      "policy": "1.0.1 (4)"
     },
     "updates": {
       "enabled": true,
