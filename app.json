@@ -86,7 +86,7 @@
       }
     },
     "runtimeVersion": {
-      "policy": "1.0.1 (4)"
+      "policy": "appVersion"
     },
     "updates": {
       "enabled": true,
