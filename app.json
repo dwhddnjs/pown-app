@@ -2,7 +2,7 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -32,8 +32,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#1a1a1a"
         }
-      },
-      "buildNumber": "2"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -69,12 +68,6 @@
         {
           "fonts": ["./assets/fonts/SB_M.otf"]
         }
-      ],
-      [
-        "expo-updates",
-        {
-          "usename": "dwhddnjs"
-        }
       ]
     ],
     "experiments": {
@@ -89,7 +82,6 @@
       "policy": "appVersion"
     },
     "updates": {
-      "enabled": true,
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/3cb3e29d-14bd-4783-849d-48be3148abd6"
     }

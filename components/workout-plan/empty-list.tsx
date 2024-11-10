@@ -18,7 +18,7 @@ export const EmptyList = () => {
         style={{ width: 150, height: 200 }}
       />
       <Text style={{ color: Colors.dark.subText, fontSize: 18 }}>
-        안되는 이유를 누군가 설명해줬으면 함
+        운동계획이 없습니다. 추가해주세요!
       </Text>
     </View>
   )
