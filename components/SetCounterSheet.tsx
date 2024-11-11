@@ -35,7 +35,6 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
         id: setWithCount.length + 1,
         progress: "진행중",
       })
-      onClose()
     }
 
     const snapPoints = useMemo(() => ["50%"], [])

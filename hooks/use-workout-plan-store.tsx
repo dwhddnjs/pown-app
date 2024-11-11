@@ -20,6 +20,8 @@ type WorkoutPlanStoreTypes = {
   setWorkoutPlan: (value: WorkoutPlanTypes) => void
   onResetPlanList: () => void
   setCompleteProgress: (id: number, itemId: number) => void
+  setRemovePlan: (id: number) => void
+  setEditPlan: (value: any) => void
 }
 
 export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
@@ -56,11 +58,30 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           }
 
           const newArr = newWorkoutList.filter((item) => item.id !== id)
-
           const result = [...newArr, newObj].sort((a, b) => b.id - a.id)
 
           return {
             workoutPlanList: result as WorkoutPlanTypes[],
+          }
+        }),
+      setRemovePlan: (id: number) =>
+        set((prev) => ({
+          workoutPlanList: prev.workoutPlanList.filter(
+            (item) => item.id !== id
+          ),
+        })),
+      setEditPlan: (value) =>
+        set((prev) => {
+          const newWorkoutList = [...prev.workoutPlanList]
+          const filteredList = newWorkoutList.filter(
+            (item) => item.id !== value.id
+          )
+          const result = [...filteredList, { ...value }].sort(
+            (a, b) => b.id - a.id
+          )
+
+          return {
+            workoutPlanList: result,
           }
         }),
     }),

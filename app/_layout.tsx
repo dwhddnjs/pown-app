@@ -186,7 +186,7 @@ function RootLayoutNav() {
                   ),
                   headerRight: () => {
                     const { title, content } = useNoteStore()
-                    const { setPlanValue } = usePlanStore()
+                    const { setPlanValue, onReset } = usePlanStore()
 
                     return (
                       <TouchableOpacity
@@ -245,6 +245,57 @@ function RootLayoutNav() {
                 })}
               />
               <Stack.Screen
+                name="edit-plan/[...slug]"
+                options={({ navigation }) => ({
+                  headerTitle: "",
+                  headerStyle: {
+                    borderBottomWidth: 0,
+                    elevation: 0,
+                    shadowOpacity: 0,
+                    backgroundColor: Colors[colorScheme ?? "light"].background,
+                  },
+                  headerShadowVisible: false,
+                  //   gestureEnabled: false,
+                  //   gestureDirection: "horizaltal",
+                  // headerBlurEffect: "regular",
+                  // headerTransparent: true,
+
+                  headerLeft: () => {
+                    const { onReset } = usePlanStore()
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          onReset()
+                          navigation.goBack()
+                        }}
+                      >
+                        <ArrowIcon
+                          name="left"
+                          size={28}
+                          color={Colors[colorScheme ?? "light"].subText}
+                        />
+                      </TouchableOpacity>
+                    )
+                  },
+                  headerRight: () => {
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          navigation.goBack()
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        <Checkcircle
+                          name="checkcircle"
+                          size={30}
+                          color={Colors[colorScheme ?? "light"].tint}
+                        />
+                      </TouchableOpacity>
+                    )
+                  },
+                })}
+              />
+              <Stack.Screen
                 name="auth/sign-in"
                 options={({ navigation }) => ({
                   headerTitle: "",
@@ -260,7 +311,9 @@ function RootLayoutNav() {
                   headerLeft: () => (
                     <TouchableOpacity
                       style={{ marginLeft: 4 }}
-                      onPress={() => navigation.goBack()}
+                      onPress={() => {
+                        navigation.goBack()
+                      }}
                     >
                       <XIcon
                         name="x"

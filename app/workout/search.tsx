@@ -1,12 +1,19 @@
 import { Text, View } from "@/components/Themed"
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import Colors from "@/constants/Colors"
+import { usePlanStore } from "@/hooks/use-plan-store"
 import { useSearchInputStore } from "@/hooks/use-search-input-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { formatDate, groupByDate, setColor } from "@/lib/function"
 import { FlashList } from "@shopify/flash-list"
-import { useNavigation } from "expo-router"
-import { useLayoutEffect, useState } from "react"
+import { useFocusEffect, useNavigation } from "expo-router"
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react"
 import { ScrollView, StyleSheet, useColorScheme } from "react-native"
 
 export default function Search() {
@@ -14,6 +21,7 @@ export default function Search() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const navigation = useNavigation()
   const [inputValue, setInputValue] = useState("")
+  const { onReset, setPrevPlanValue, ...result } = usePlanStore()
 
   const filterWorkoutList = (value: string) => {
     const result = workoutPlanList.filter((workout) => {
@@ -44,6 +52,7 @@ export default function Search() {
         autoFocus: true,
         tintColor: Colors[colorScheme ?? "light"].tint,
         cancelButtonText: "취소",
+
         onChangeText: (e: any) => {
           setInputValue(e.nativeEvent.text)
         },
@@ -51,6 +60,16 @@ export default function Search() {
       },
     })
   }, [navigation])
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+        setInputValue("")
+      })
+
+      return unsubscribe
+    }, [navigation])
+  )
 
   return (
     <ScrollView

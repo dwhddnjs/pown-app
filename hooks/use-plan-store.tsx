@@ -15,6 +15,21 @@ export type PlanStoreType = {
   onReset: () => void
   setSetWithCount: (value: SetWithCountType) => void
   setFilterSetWithCount: (id: number) => void
+  setPrevPlanValue: (
+    value: Partial<
+      Pick<
+        PlanStoreType,
+        | "workout"
+        | "type"
+        | "equipment"
+        | "weight"
+        | "condition"
+        | "title"
+        | "content"
+        | "setWithCount"
+      >
+    >
+  ) => void
 }
 
 export type ConditionTypes = {
@@ -75,5 +90,17 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       equipment: "바벨",
       title: "",
       content: "",
+    }),
+
+  setPrevPlanValue: (value: any) =>
+    set({
+      workout: value.workout,
+      type: value.type,
+      setWithCount: value.setWithCount,
+      weight: value.weight,
+      condition: value.condition,
+      equipment: value.equipment,
+      title: value.title,
+      content: value.content,
     }),
 }))

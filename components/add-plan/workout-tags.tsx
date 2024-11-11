@@ -6,7 +6,11 @@ import Colors from "@/constants/Colors"
 import { useLocalSearchParams } from "expo-router"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
-export const WorkoutTags = () => {
+interface WorkoutTagsProps {
+  workoutList: string[]
+}
+
+export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const { workout, setPlanValue } = usePlanStore()
   const colorScheme = useColorScheme()
@@ -21,7 +25,7 @@ export const WorkoutTags = () => {
 
   return (
     <View style={styles.container}>
-      {workoutData[`${slug}`].map((item) => (
+      {workoutList.map((item) => (
         <TouchableOpacity
           key={item}
           style={[

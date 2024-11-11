@@ -7,34 +7,43 @@ import {
 } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
+import {
+  userWorkoutPlanStore,
+  WorkoutPlanTypes,
+} from "@/hooks/use-workout-plan-store"
 import { format, formatDate } from "date-fns"
 import { formatTime } from "@/lib/function"
 // import { DropDownMenu } from "../DropDownMenu"
 import { Ionicons } from "@expo/vector-icons"
 import { useActionSheet } from "@expo/react-native-action-sheet"
 import { useRouter } from "expo-router"
+import { toast } from "sonner-native"
 
 interface WeightDateProps {
+  id: number
   workout: string
   weight: string
   date: string
   equipment: string
+  type: string
 }
 
 export const WeightDate = ({
+  id,
   workout,
   weight,
   date,
+  type,
   equipment,
 }: WeightDateProps) => {
   const colorScheme = useColorScheme()
 
   const { showActionSheetWithOptions } = useActionSheet()
   const { push } = useRouter()
+  const { setRemovePlan } = userWorkoutPlanStore()
 
   const onPress = () => {
-    const options = ["삭제", "저장", "취소"]
+    const options = ["삭제", "수정", "취소"]
     const destructiveButtonIndex = 0
     const cancelButtonIndex = 2
 
@@ -47,13 +56,13 @@ export const WeightDate = ({
       (selectedIndex: number | undefined) => {
         switch (selectedIndex) {
           case 1:
-            // Save
-            console.log("뭐")
+            push(`/edit-plan/${type}/${id}`)
             break
 
           case destructiveButtonIndex:
             // Delete
-            console.log("삭제")
+            setRemovePlan(id)
+            toast.success("운동계획이 삭제 되었습니다!")
             break
 
           case cancelButtonIndex:
@@ -88,11 +97,9 @@ export const WeightDate = ({
           />
         </TouchableOpacity>
       </View>
-      <View style={styles.titleWeight}>
-        <Text
-          style={[styles.title, { color: Colors[colorScheme ?? "light"].tint }]}
-        >{`${equipment} ${workout}`}</Text>
-      </View>
+      <Text
+        style={[styles.title, { color: Colors[colorScheme ?? "light"].tint }]}
+      >{`${equipment} ${workout}`}</Text>
       <Text
         style={[styles.weight, { color: Colors[colorScheme ?? "light"].text }]}
       >

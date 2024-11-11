@@ -12,6 +12,7 @@ interface SetCounterItemProps {
 }
 
 export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
+  console.log("item: ", item)
   const { setFilterSetWithCount, setSetWithCount, setWithCount } =
     usePlanStore()
   const colorScheme = useColorScheme()

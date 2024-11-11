@@ -1,7 +1,7 @@
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import React, { useRef } from "react"
+import React, { useCallback, useEffect, useRef } from "react"
 import { Keyboard, ScrollView, StyleSheet, useColorScheme } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
@@ -14,7 +14,12 @@ import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router"
 import { format } from "date-fns"
 import { useHeaderHeight } from "@react-navigation/elements"
 import { toast } from "sonner-native"
@@ -34,36 +39,62 @@ interface InputRefObject {
   ) => void
 }
 
-export default function AddPlan() {
+export default function EditPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
-  const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore()
-  const { onReset, ...result } = usePlanStore()
+  const { workoutPlanList, setWorkoutPlan, setEditPlan } =
+    userWorkoutPlanStore()
+  const { onReset, setPrevPlanValue, ...result } = usePlanStore()
+  console.log("result: ", result.setWithCount)
   const { onReset: onResetNote } = useNoteStore()
   const { slug } = useLocalSearchParams()
+  const navigation = useNavigation()
+
   const { back } = useRouter()
   const colorScheme = useColorScheme()
+  const workoutList = workoutData[slug[0]]
+  const getWorkoutPlan = workoutPlanList.filter(
+    (item) => item.id === parseInt(slug[1])
+  )[0]
+
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+        onReset()
+      })
+
+      return unsubscribe
+    }, [navigation])
+  )
+
+  useEffect(() => {
+    if (slug[0]) {
+      setPrevPlanValue(getWorkoutPlan)
+    }
+  }, [slug[0]])
 
   const onHideKeyboard = () => {
     Keyboard.dismiss()
   }
 
-  const onSubmitWorkoutPlan = () => {
+  const onSubmitEditWorkoutPlan = () => {
     if (result.weight && result.workout) {
-      setWorkoutPlan({
-        id: workoutPlanList.length + 1,
+      setEditPlan({
+        id: parseInt(slug[1]),
         workout: result.workout,
-        type: slug as string,
+        type: slug[0],
         equipment: result.equipment,
         weight: result.weight,
         condition: result.condition,
         content: result.content,
         title: result.title,
-        setWithCount: result.setWithCount,
-        createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-
-        updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+        setWithCount: result.setWithCount.map((item, index) => ({
+          ...item,
+          id: index + 1,
+        })),
+        createdAt: getWorkoutPlan.createdAt,
+        updatedAt: getWorkoutPlan.updatedAt,
       })
       onReset()
       back()
@@ -108,7 +139,7 @@ export default function AddPlan() {
       >
         <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
         {/* 운동 태그 */}
-        <WorkoutTags workoutList={workoutData[slug as string]} />
+        <WorkoutTags workoutList={workoutList} />
 
         {/* 도구 선택 */}
         <EquipmentBox />
@@ -126,8 +157,8 @@ export default function AddPlan() {
         <PlanNote onFocus={onInputFocus} />
         <View style={{ height: 250 }} />
       </ScrollView>
-      <Button type="submit" onPress={onSubmitWorkoutPlan}>
-        저장
+      <Button type="submit" onPress={onSubmitEditWorkoutPlan}>
+        수정
       </Button>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>

@@ -17,7 +17,14 @@ export const EmptyList = () => {
         source={require("@/assets/images/empty.png")}
         style={{ width: 150, height: 200 }}
       />
-      <Text style={{ color: Colors.dark.subText, fontSize: 18 }}>
+      <Text
+        style={{
+          color: Colors.dark.subText,
+          fontSize: 18,
+          textAlign: "center",
+          lineHeight: 24,
+        }}
+      >
         운동계획이 없습니다. {"\n"}추가해주세요!
       </Text>
     </View>

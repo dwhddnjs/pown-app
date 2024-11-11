@@ -22,12 +22,6 @@ interface WorkoutPlanProps {
 }
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
-  const [open, setOpen] = useState(false)
-  const dropdownList = [
-    { key: "1", title: "수정", icon: "" },
-    { key: "2", title: "삭제", icon: "" },
-  ]
-
   const colorScheme = useColorScheme()
   const getWorkoutIcon = (type: string) => {
     let result
@@ -64,7 +58,9 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
       <View
         style={[
           styles.iconLine,
-          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          {
+            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+          },
         ]}
       >
         {getWorkoutIcon(item.type)}
@@ -89,10 +85,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         ]}
       >
         <WeightDate
+          id={item.id}
           equipment={item.equipment}
           workout={item.workout}
           weight={item.weight}
           date={item.createdAt as string}
+          type={item.type}
         />
         {/* 컨디션 */}
         {item.condition.length > 0 && (
