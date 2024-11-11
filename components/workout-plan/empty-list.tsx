@@ -18,7 +18,7 @@ export const EmptyList = () => {
         style={{ width: 150, height: 200 }}
       />
       <Text style={{ color: Colors.dark.subText, fontSize: 18 }}>
-        운동계획이 없습니다. 추가해주세요!
+        운동계획이 없습니다. {"\n"}추가해주세요!
       </Text>
     </View>
   )

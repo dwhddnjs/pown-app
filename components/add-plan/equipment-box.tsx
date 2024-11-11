@@ -19,6 +19,10 @@ export const EquipmentBox = () => {
   const colorScheme = useColorScheme()
 
   const onPressEquipment = (item: string) => {
+    if (item === "맨몸") {
+      setPlanValue("equipment", item)
+      setPlanValue("weight", "0")
+    }
     setPlanValue("equipment", item)
   }
 

@@ -1,5 +1,5 @@
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import React from "react"
+import React, { useState } from "react"
 import { Text, View } from "../Themed"
 import Back from "@/assets/images/svg/back_icon.svg"
 import Colors from "@/constants/Colors"
@@ -22,6 +22,12 @@ interface WorkoutPlanProps {
 }
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
+  const [open, setOpen] = useState(false)
+  const dropdownList = [
+    { key: "1", title: "수정", icon: "" },
+    { key: "2", title: "삭제", icon: "" },
+  ]
+
   const colorScheme = useColorScheme()
   const getWorkoutIcon = (type: string) => {
     let result
@@ -122,6 +128,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           </View>
         )}
       </View>
+      {/* <DropDownMenu
+        items={dropdownList}
+        onSelect={() => {}}
+        open={open}
+        onOpenChange={() => setOpen(true)}
+      /> */}
     </View>
   )
 }
@@ -140,7 +152,6 @@ const styles = StyleSheet.create({
   },
   iconLine: {
     // justifyContent: "center",
-
     alignItems: "center",
     gap: 8,
   },
