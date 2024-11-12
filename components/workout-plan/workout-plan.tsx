@@ -126,12 +126,6 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           </View>
         )}
       </View>
-      {/* <DropDownMenu
-        items={dropdownList}
-        onSelect={() => {}}
-        open={open}
-        onOpenChange={() => setOpen(true)}
-      /> */}
     </View>
   )
 }

@@ -11,7 +11,6 @@ interface WorkoutTagsProps {
 }
 
 export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
-  const { slug } = useLocalSearchParams<{ slug: string }>()
   const { workout, setPlanValue } = usePlanStore()
   const colorScheme = useColorScheme()
 
@@ -62,6 +61,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
     paddingVertical: 12,
+    paddingHorizontal: 12,
   },
   tag: {
     paddingVertical: 4,

@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors"
 import { Text, View } from "../Themed"
-import TrashIcon from "@expo/vector-icons/Ionicons"
+import Ionicons from "@expo/vector-icons/Ionicons"
 import PlusIcon from "@expo/vector-icons/AntDesign"
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store"
@@ -12,7 +12,6 @@ interface SetCounterItemProps {
 }
 
 export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
-  console.log("item: ", item)
   const { setFilterSetWithCount, setSetWithCount, setWithCount } =
     usePlanStore()
   const colorScheme = useColorScheme()
@@ -58,23 +57,32 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
             { backgroundColor: Colors[colorScheme ?? "light"].background },
           ]}
         >
-          <TouchableOpacity onPress={() => setFilterSetWithCount(item.id)}>
-            <TrashIcon
+          <TouchableOpacity
+            onPress={() => setFilterSetWithCount(item.id)}
+            style={{ paddingLeft: 12 }}
+          >
+            <Ionicons
               name="trash"
-              size={24}
+              size={22}
               color={Colors[colorScheme ?? "light"].text}
             />
           </TouchableOpacity>
           <TouchableOpacity
+            style={{ paddingLeft: 12, paddingRight: 4 }}
             onPress={() =>
               setSetWithCount({ ...item, id: setWithCount.length + 1 })
             }
           >
-            <PlusIcon
+            <Ionicons
+              name="copy"
+              size={20}
+              color={Colors[colorScheme ?? "light"].tint}
+            />
+            {/* <PlusIcon
               name="pluscircle"
               size={24}
               color={Colors[colorScheme ?? "light"].tint}
-            />
+            /> */}
           </TouchableOpacity>
         </View>
       </View>
@@ -118,6 +126,6 @@ const styles = StyleSheet.create({
   },
   iconWrapper: {
     flexDirection: "row",
-    gap: 10,
+    alignItems: "center",
   },
 })

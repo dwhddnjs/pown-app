@@ -9,9 +9,10 @@ import { SetCounterItem } from "./set-counter-item"
 
 interface SetCounterProps {
   onOpen: () => void
+  onFocus: (value: any) => void
 }
 
-export const SetCounter = ({ onOpen }: SetCounterProps) => {
+export const SetCounter = ({ onOpen, onFocus }: SetCounterProps) => {
   const { setWithCount } = usePlanStore()
   const colorScheme = useColorScheme()
 
@@ -35,12 +36,18 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
           (선택)
         </Text>
       </View>
-      <Button type="bordered" onPress={onOpen}>
+      <Button
+        type="bordered"
+        onPress={(e) => {
+          onOpen()
+          onFocus(e.target)
+        }}
+      >
         선택하기
       </Button>
       {setWithCount.length > 0 && (
         <View style={{ gap: 8 }}>
-          {setWithCount.map((item, index) => (
+          {setWithCount?.map((item, index) => (
             <SetCounterItem key={item.id} item={item} index={index} />
           ))}
         </View>

@@ -1,7 +1,7 @@
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import React, { useRef } from "react"
+import React, { useCallback, useRef } from "react"
 import { Keyboard, ScrollView, StyleSheet, useColorScheme } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
@@ -14,7 +14,12 @@ import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { useLocalSearchParams, useRouter } from "expo-router"
+import {
+  useFocusEffect,
+  useLocalSearchParams,
+  useNavigation,
+  useRouter,
+} from "expo-router"
 import { format } from "date-fns"
 import { useHeaderHeight } from "@react-navigation/elements"
 import { toast } from "sonner-native"
@@ -44,6 +49,7 @@ export default function AddPlan() {
   const { slug } = useLocalSearchParams()
   const { back } = useRouter()
   const colorScheme = useColorScheme()
+  const navigation = useNavigation()
 
   const onHideKeyboard = () => {
     Keyboard.dismiss()
@@ -93,6 +99,16 @@ export default function AddPlan() {
     }
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+        onReset()
+      })
+
+      return unsubscribe
+    }, [navigation])
+  )
+
   return (
     <KeyBoardAvoid
       style={[
@@ -117,7 +133,7 @@ export default function AddPlan() {
         <TopWeight onFocus={onInputFocus} />
 
         {/* 세트와 횟수 */}
-        <SetCounter onOpen={onSheetOpen} />
+        <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
 
         {/* 컨디션 */}
         <ConditionList />

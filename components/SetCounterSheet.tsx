@@ -142,7 +142,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           }}
         >
           <Button type="solid" onPress={onSetPlanStore}>
-            완료
+            추가
           </Button>
         </View>
       </BottomSheet>

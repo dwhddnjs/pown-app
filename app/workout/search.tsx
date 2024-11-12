@@ -61,15 +61,15 @@ export default function Search() {
     })
   }, [navigation])
 
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-        setInputValue("")
-      })
+  //   useFocusEffect(
+  //     useCallback(() => {
+  //       const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+  //         setInputValue("")
+  //       })
 
-      return unsubscribe
-    }, [navigation])
-  )
+  //       return unsubscribe
+  //     }, [navigation])
+  //   )
 
   return (
     <ScrollView

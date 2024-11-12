@@ -4,18 +4,20 @@ const tintColorDark = "#fff"
 export default {
   light: {
     text: "#27272a",
-    subText: "#c4c4c4",
+    subText: "#aaaaaa",
     background: "#EFEEF3",
-    tint: "#00ccbb",
+    tint: "#00BAAB",
     pressed: "#15e5d3",
     tabIconDefault: "#EFEEF3",
     tabIconSelected: "#009488",
     tabBar: "#ffffff",
     itemColor: "#ffffff",
+    success: "#3A76E2",
+    fail: "#F13C33",
   },
   dark: {
     text: "#fff",
-    subText: "#555555",
+    subText: "#666666",
     background: "#1a1a1a",
     tint: "#00ccbb",
     pressed: "#12b5a7",

@@ -46,11 +46,10 @@ export default function EditPlan() {
   const { workoutPlanList, setWorkoutPlan, setEditPlan } =
     userWorkoutPlanStore()
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
-  console.log("result: ", result.setWithCount)
+
   const { onReset: onResetNote } = useNoteStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
-
   const { back } = useRouter()
   const colorScheme = useColorScheme()
   const workoutList = workoutData[slug[0]]
@@ -99,7 +98,7 @@ export default function EditPlan() {
       onReset()
       back()
       onResetNote()
-      return toast.success("운동 계획을 추가되었습니다!!")
+      return toast.success("운동 계획을 수정되었습니다!!")
     }
     return toast.error("운동과 목표 중량은 필수에요..")
   }
@@ -148,7 +147,7 @@ export default function EditPlan() {
         <TopWeight onFocus={onInputFocus} />
 
         {/* 세트와 횟수 */}
-        <SetCounter onOpen={onSheetOpen} />
+        <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
 
         {/* 컨디션 */}
         <ConditionList />

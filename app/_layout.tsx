@@ -6,7 +6,12 @@ import {
   ThemeProvider,
 } from "@react-navigation/native"
 import { useFonts } from "expo-font"
-import { Stack, useRouter } from "expo-router"
+import {
+  Stack,
+  useGlobalSearchParams,
+  useLocalSearchParams,
+  useRouter,
+} from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { useEffect, useState } from "react"
 import {
@@ -25,13 +30,15 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
 import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { Toaster } from "sonner-native"
+import { toast, Toaster } from "sonner-native"
 import { useUserStore } from "@/hooks/use-user-store"
 import { SearchBarProps } from "react-native-screens"
 import { useSearchInputStore } from "@/hooks/use-search-input-store"
 import { useKeyboardVisible } from "@/hooks/use-keyboard-visible"
 import * as Updates from "expo-updates"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import { format } from "date-fns"
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -209,7 +216,7 @@ function RootLayoutNav() {
               />
               <Stack.Screen
                 name="add-plan/[slug]"
-                options={({ navigation }) => ({
+                options={({ navigation, route }) => ({
                   headerTitle: "",
                   headerStyle: {
                     borderBottomWidth: 0,
@@ -221,27 +228,71 @@ function RootLayoutNav() {
                   // headerBlurEffect: "regular",
                   // headerTransparent: true,
 
-                  headerLeft: () => (
-                    <TouchableOpacity onPress={() => navigation.goBack()}>
-                      <ArrowIcon
-                        name="left"
-                        size={28}
-                        color={Colors[colorScheme ?? "light"].subText}
-                      />
-                    </TouchableOpacity>
-                  ),
-                  headerRight: () => (
-                    <TouchableOpacity
-                      onPress={() => navigation.goBack()}
-                      style={{ marginRight: 8 }}
-                    >
-                      <Checkcircle
-                        name="checkcircle"
-                        size={30}
-                        color={Colors[colorScheme ?? "light"].tint}
-                      />
-                    </TouchableOpacity>
-                  ),
+                  headerLeft: () => {
+                    const { onReset } = usePlanStore()
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          onReset()
+                          navigation.goBack()
+                        }}
+                      >
+                        <ArrowIcon
+                          name="left"
+                          size={28}
+                          color={Colors[colorScheme ?? "light"].subText}
+                        />
+                      </TouchableOpacity>
+                    )
+                  },
+                  headerRight: () => {
+                    const { workoutPlanList, setWorkoutPlan } =
+                      userWorkoutPlanStore()
+                    const { onReset, ...result } = usePlanStore()
+                    const { onReset: onResetNote } = useNoteStore()
+                    const { slug } = useGlobalSearchParams()
+
+                    return (
+                      <TouchableOpacity
+                        onPress={() => {
+                          if (result.weight && result.workout && route.params) {
+                            setWorkoutPlan({
+                              id: workoutPlanList.length + 1,
+                              workout: result.workout,
+                              type: slug as string,
+                              equipment: result.equipment,
+                              weight: result.weight,
+                              condition: result.condition,
+                              content: result.content,
+                              title: result.title,
+                              setWithCount: result.setWithCount,
+                              createdAt: format(
+                                new Date(),
+                                "yyyy.MM.dd HH:mm:ss"
+                              ),
+
+                              updatedAt: format(
+                                new Date(),
+                                "yyyy.MM.dd HH:mm:ss"
+                              ),
+                            })
+                            onReset()
+                            navigation.goBack()
+                            onResetNote()
+                            return toast.success("운동 계획을 추가되었습니다!!")
+                          }
+                          return toast.error("운동과 목표 중량은 필수에요..")
+                        }}
+                        style={{ marginRight: 8 }}
+                      >
+                        <Checkcircle
+                          name="checkcircle"
+                          size={30}
+                          color={Colors[colorScheme ?? "light"].tint}
+                        />
+                      </TouchableOpacity>
+                    )
+                  },
                 })}
               />
               <Stack.Screen
@@ -278,10 +329,44 @@ function RootLayoutNav() {
                     )
                   },
                   headerRight: () => {
+                    const { workoutPlanList, setWorkoutPlan, setEditPlan } =
+                      userWorkoutPlanStore()
+                    const { back } = useRouter()
+                    const { onReset, setPrevPlanValue, ...result } =
+                      usePlanStore()
+                    const { onReset: onResetNote } = useNoteStore()
+                    const { slug } = useGlobalSearchParams()
+                    const getWorkoutPlan = workoutPlanList.filter(
+                      (item) => slug && item.id === parseInt(slug[1])
+                    )[0]
                     return (
                       <TouchableOpacity
                         onPress={() => {
-                          navigation.goBack()
+                          if (result.weight && result.workout) {
+                            setEditPlan({
+                              id: parseInt(slug[1]),
+                              workout: result.workout,
+                              type: slug[0],
+                              equipment: result.equipment,
+                              weight: result.weight,
+                              condition: result.condition,
+                              content: result.content,
+                              title: result.title,
+                              setWithCount: result.setWithCount.map(
+                                (item, index) => ({
+                                  ...item,
+                                  id: index + 1,
+                                })
+                              ),
+                              createdAt: getWorkoutPlan.createdAt,
+                              updatedAt: getWorkoutPlan.updatedAt,
+                            })
+                            onReset()
+                            back()
+                            onResetNote()
+                            return toast.success("운동 계획을 수정되었습니다!!")
+                          }
+                          return toast.error("운동과 목표 중량은 필수에요..")
                         }}
                         style={{ marginRight: 8 }}
                       >
