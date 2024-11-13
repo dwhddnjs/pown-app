@@ -21,7 +21,7 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 ### 키워드
 
 운동, 피트니스, 3대운동, 중량, 스트렝스, 근력, 운동계획, 점진적과부화, workout, planner, strength, 간단
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 42 33](https://github.com/user-attachments/assets/dd134ea4-8547-426c-a4f7-81e1f55fa5d7)
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 40 26](https://github.com/user-attachments/assets/6c93ed36-f198-45e6-aedd-dca035ab6171)
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/0e02fa98-8968-49bf-aa93-4234e0f6deb4)
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 43 25](https://github.com/user-attachments/assets/e5a6ca3c-7988-4a7a-964d-1a245e94fa3e)
+
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 42 33 1](https://github.com/user-attachments/assets/c953a2cc-b898-4d62-b8a5-e7a908075995)
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 40 26](https://github.com/user-attachments/assets/4d86b96a-064a-480d-abd6-89286730047f)
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/4358c990-6d4d-43d4-9c33-d03997e34e82)
