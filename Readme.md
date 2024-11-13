@@ -14,6 +14,9 @@ Pown은 Progressive Overload Workout plaN 의 약자로
 3. 저장 버튼을 클릭하면 오늘 날짜 기준으로 운동계획이 아래로 쌓이게 됩니다
 4. 내 정보에서 당신의 3대 중량, 신체 정보를 기록할 수 있습니다
 
+### 배포
+https://apps.apple.com/us/app/pown-%ED%8F%AC%EC%9A%B4-%EC%9A%B4%EB%8F%99-%EA%B3%84%ED%9A%8D-%EA%B8%B0%EB%A1%9D-%ED%97%AC%EC%8A%A4/id6737919723
+
 ### 개인정보보호방침
 
 https://sites.google.com/view/pown-privacy/%ED%99%88
