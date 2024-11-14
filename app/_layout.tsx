@@ -47,7 +47,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(tabs)",
+  initialRouteName: "(drawer)/(tab)/workout",
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -69,9 +69,9 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       setTimeout(() => {
-        SplashScreen.hideAsync()
+        SplashScreen.hideAsync().then(() => {})
       }, 3000)
-      replace("/(tabs)/workout")
+      replace("/(drawer)/(tabs)/workout")
     }
   }, [loaded])
 
@@ -141,7 +141,7 @@ function RootLayoutNav() {
                 },
               }}
             >
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
               <Stack.Screen
                 name="(modals)/select-type"
                 options={({ navigation }) => ({

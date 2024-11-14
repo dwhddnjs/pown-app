@@ -8,6 +8,7 @@ import Colors from "@/constants/Colors"
 import { BlurView } from "expo-blur"
 import { Text, View } from "@/components/Themed"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+import { DrawerToggleButton } from "@react-navigation/drawer"
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
 
@@ -69,28 +70,32 @@ export default function TabLayout() {
                     style={{
                       backgroundColor: "transparent",
                       width: "100%",
-                      paddingVertical: 4,
-                      paddingHorizontal: 26,
+                      paddingVertical: 2,
+                      paddingLeft: 8,
+                      paddingRight: 25,
                       flexDirection: "row",
                       justifyContent: "space-between",
                       alignItems: "center",
                       //   borderColor: 1,
                     }}
                   >
-                    <TouchableOpacity>
+                    <DrawerToggleButton
+                      tintColor={Colors[colorScheme ?? "light"].text}
+                    />
+                    {/* <TouchableOpacity>
                       <FontAwesome
                         name="navicon"
                         size={24}
                         color={Colors[colorScheme ?? "light"].text}
                       />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                     <Text style={{ fontSize: 18, textAlign: "center" }}>
                       {options.title}
                     </Text>
                     <TouchableOpacity onPress={() => push("/workout/search")}>
                       <FontAwesome
                         name="search"
-                        size={24}
+                        size={20}
                         color={Colors[colorScheme ?? "light"].text}
                       />
                     </TouchableOpacity>
