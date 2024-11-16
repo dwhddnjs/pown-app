@@ -18,6 +18,7 @@ import { EmptyList } from "@/components/workout-plan/empty-list"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
+
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()

@@ -22,6 +22,7 @@ type WorkoutPlanStoreTypes = {
   setCompleteProgress: (id: number, itemId: number) => void
   setRemovePlan: (id: number) => void
   setEditPlan: (value: any) => void
+  onSetMockout: (value: WorkoutPlanTypes[]) => void
 }
 
 export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
@@ -83,6 +84,10 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           return {
             workoutPlanList: result,
           }
+        }),
+      onSetMockout: (value) =>
+        set({
+          workoutPlanList: value,
         }),
     }),
     {

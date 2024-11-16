@@ -1,14 +1,18 @@
 import { Button } from "@/components/Button"
 import { Text, View } from "@/components/Themed"
 import Colors from "@/constants/Colors"
+import { mockupData } from "@/constants/constants"
 import { useUserStore } from "@/hooks/use-user-store"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import {
+  userWorkoutPlanStore,
+  WorkoutPlanTypes,
+} from "@/hooks/use-workout-plan-store"
 import { useRouter } from "expo-router"
 import { StyleSheet, useColorScheme } from "react-native"
 import { toast } from "sonner-native"
 
 export default function ResetData() {
-  const { onResetPlanList } = userWorkoutPlanStore()
+  const { onResetPlanList, onSetMockout } = userWorkoutPlanStore()
   const { onReset } = useUserStore()
   const colorScheme = useColorScheme()
   const { back } = useRouter()
@@ -35,6 +39,9 @@ export default function ResetData() {
       </View>
       <Button type="bordered" onPress={onSubmit}>
         초기화
+      </Button>
+      <Button type="bordered" onPress={() => onSetMockout(mockupData as any)}>
+        목업데이터
       </Button>
     </View>
   )
