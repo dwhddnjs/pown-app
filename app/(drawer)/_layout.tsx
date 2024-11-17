@@ -9,36 +9,12 @@ import {
   StyleSheet,
   TouchableOpacity,
   useColorScheme,
+  Pressable,
 } from "react-native"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import Colors from "@/constants/Colors"
 import { transformWorkoutData } from "@/lib/function"
-
-const BACON_IPSUM =
-  "Bacon ipsum dolor amet chuck turducken landjaeger tongue spare ribs. Picanha beef prosciutto meatball turkey shoulder shank salami cupim doner jowl pork belly cow. Chicken shankle rump swine tail frankfurter meatloaf ground round flank ham hock tongue shank andouille boudin brisket. "
-
-const CONTENT = [
-  {
-    title: "First",
-    content: BACON_IPSUM,
-  },
-  {
-    title: "Second",
-    content: BACON_IPSUM,
-  },
-  {
-    title: "Third",
-    content: BACON_IPSUM,
-  },
-  {
-    title: "Fourth",
-    content: BACON_IPSUM,
-  },
-  {
-    title: "Fifth",
-    content: BACON_IPSUM,
-  },
-]
+import FontAwesome from "@expo/vector-icons/FontAwesome"
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([])
@@ -47,16 +23,58 @@ const CustomDrawerContent = (props: any) => {
   const { workoutPlanList } = userWorkoutPlanStore()
   const colorScheme = useColorScheme()
   const sortData = transformWorkoutData(workoutPlanList)
-  console.log("sortData: ", sortData)
-
   const [activeSections2, setActiveSections2] = useState<number[]>([])
   const [multipleSelect2, setMultipleSelect2] = useState(false)
+  const [selectedTitle, setSelectedTitle] = useState<string[]>([])
+
+  // 특정 레벨의 title을 업데이트하는 함수
+  const updateTitleAtLevel = (level: number, newTitle: string) => {
+    setSelectedTitle((prev) => {
+      const newTitles = [...prev]
+      // 해당 레벨의 title 업데이트
+      newTitles[level] = newTitle
+      // 해당 레벨 이후의 title들은 제거
+      return newTitles.slice(0, level + 1)
+    })
+  }
+
+  const handleSetActiveSections = (sections: number[]) => {
+    setActiveSections(sections)
+    if (sections.length > 0) {
+      // section 배열의 첫 번째 인덱스를 사용하여 sortData에서 해당하는 섹션 데이터를 가져옴
+      const section = sortData[sections[0]]
+      updateTitleAtLevel(0, section.title)
+    } else {
+      // 섹션이 닫힐 때 모든 선택된 title 제거
+      setSelectedTitle([])
+    }
+  }
+
+  const handleSetActiveSections2 = (sections: number[]) => {
+    setActiveSections2(sections)
+    if (activeSections.length > 0 && sections.length > 0) {
+      // 첫 번째 레벨의 선택된 섹션 데이터
+      const firstLevelSection = sortData[activeSections[0]]
+      // 두 번째 레벨의 선택된 섹션 데이터
+      const secondLevelSection = firstLevelSection.content[sections[0]]
+      updateTitleAtLevel(1, secondLevelSection.title)
+    } else if (sections.length === 0) {
+      // 두 번째 레벨의 섹션이 닫힐 때 해당 레벨 이후의 title 제거
+      setSelectedTitle((prev) => prev.slice(0, 1))
+    }
+  }
+
+  const handleItemSelect = (item: string) => {
+    updateTitleAtLevel(2, item)
+    props.navigation.closeDrawer()
+  }
 
   return (
     <DrawerContentScrollView
       {...props}
       style={{
-        paddingHorizontal: 12,
+        paddingHorizontal: 24,
+        paddingTop: 24,
         backgroundColor: Colors[colorScheme ?? "light"].background,
       }}
     >
@@ -69,7 +87,19 @@ const CustomDrawerContent = (props: any) => {
           <View
             style={[styles.header, isActive ? styles.active : styles.inactive]}
           >
-            <Text style={styles.headerText}>{section.title}</Text>
+            <FontAwesome
+              name={isActive ? "folder-open" : "folder"}
+              size={24}
+              color={Colors[colorScheme ?? "light"].subText}
+            />
+            <Text
+              style={[
+                styles.headerText,
+                { color: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
+              {section.title}
+            </Text>
           </View>
         )}
         renderContent={(section, _, isActive) => (
@@ -81,36 +111,66 @@ const CustomDrawerContent = (props: any) => {
               sections={section.content}
               touchableComponent={TouchableOpacity}
               expandMultiple={multipleSelect2}
-              renderHeader={(section2, _, isActive) => (
+              renderHeader={(section2, _, isActive2) => (
                 <View
                   style={[
                     styles.header,
-                    isActive ? styles.active : styles.inactive,
+                    isActive2 ? styles.active : styles.inactive,
                   ]}
                 >
-                  <Text style={styles.headerText}>{section2.title}</Text>
+                  <FontAwesome
+                    name={isActive2 ? "folder-open" : "folder"}
+                    size={24}
+                    color={Colors[colorScheme ?? "light"].subText}
+                  />
+                  <Text
+                    style={[
+                      styles.headerText,
+                      { color: Colors[colorScheme ?? "light"].subText },
+                    ]}
+                  >
+                    {section2.title}
+                  </Text>
                 </View>
               )}
-              renderContent={(section3, _, isActive) => (
+              renderContent={(section2, _, isActive2) => (
                 <View
                   style={[
                     styles.content,
-                    isActive ? styles.active : styles.inactive,
+                    isActive2 ? styles.active : styles.inactive,
                   ]}
                 >
-                  {section3.content.map((item) => (
-                    <Text key={item}>{item}</Text>
+                  {section2.content.map((item) => (
+                    <TouchableOpacity
+                      style={[styles.header]}
+                      onPress={() => handleItemSelect(item)}
+                    >
+                      <FontAwesome
+                        name="file-text"
+                        size={20}
+                        color={Colors[colorScheme ?? "light"].subText}
+                      />
+                      <Text
+                        key={item}
+                        style={[
+                          styles.headerText,
+                          { color: Colors[colorScheme ?? "light"].subText },
+                        ]}
+                      >
+                        {item}
+                      </Text>
+                    </TouchableOpacity>
                   ))}
                 </View>
               )}
-              onChange={setActiveSections2}
+              onChange={handleSetActiveSections2}
               renderAsFlatList={false}
               duration={400}
             />
           </View>
         )}
         duration={400}
-        onChange={setActiveSections}
+        onChange={handleSetActiveSections}
         renderAsFlatList={false}
       />
     </DrawerContentScrollView>
@@ -138,8 +198,12 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   header: {
-    backgroundColor: "#F5FCFF",
+    backgroundColor: "#1a1a1a",
     paddingLeft: 10,
+    gap: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
   },
   headerText: {
     // textAlign: "center",
@@ -148,7 +212,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingLeft: 36,
-    paddingVertical: 12,
+    paddingVertical: 6,
     gap: 8,
     backgroundColor: "#fff",
   },
