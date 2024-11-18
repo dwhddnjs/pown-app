@@ -15,16 +15,17 @@ import { useNavigation } from "expo-router"
 import { useHeaderHeight } from "@react-navigation/elements"
 import { FlashList } from "@shopify/flash-list"
 import { EmptyList } from "@/components/workout-plan/empty-list"
+import { useSelectDateStore } from "@/hooks/use-select-date-store"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
-
+  const { date: selectedDate } = useSelectDateStore()
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const colorScheme = useColorScheme()
   const navigation = useNavigation()
   const itemRef = useRef(new Map())
-  const scrollRef = useRef(null)
+  const scrollRef = useRef<ScrollView | null>(null)
   const scrollY = useRef(0)
 
   const measureView = useCallback((date: string, ref: any) => {
@@ -50,6 +51,25 @@ export default function TabOneScreen() {
     )
   }, [])
 
+  const scrollToSelectedDate = useCallback(() => {
+    if (!selectedDate) return
+
+    const targetRef = itemRef.current.get(selectedDate)
+
+    if (targetRef) {
+      targetRef.measureLayout(
+        findNodeHandle(scrollRef.current) as number,
+        (x: number, y: number) => {
+          scrollRef.current?.scrollTo({
+            y: y - headerHeight - 20,
+            animated: true,
+          })
+        },
+        (error: Error) => console.log("Scroll error:", error)
+      )
+    }
+  }, [selectedDate, headerHeight])
+
   const handleScroll = useCallback(
     (event: any) => {
       const offsetY = event.nativeEvent.contentOffset.y
@@ -72,6 +92,10 @@ export default function TabOneScreen() {
       })
     }, 100)
   }, [])
+
+  useEffect(() => {
+    setTimeout(scrollToSelectedDate, 200)
+  }, [selectedDate, scrollToSelectedDate])
 
   if (workoutPlanList.length === 0) {
     return <EmptyList />

@@ -47,7 +47,7 @@ export {
 
 export const unstable_settings = {
   // Ensure that reloading on `/modal` keeps a back button present.
-  initialRouteName: "(drawer)/(tab)/workout",
+  initialRouteName: "(drawer)/(tabs)/workout",
 }
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
@@ -55,6 +55,7 @@ SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const { replace } = useRouter()
+
   const [loaded, error] = useFonts({
     "sb-b": require("../assets/fonts/SB_B.otf"),
     "sb-l": require("../assets/fonts/SB_L.otf"),
@@ -68,27 +69,9 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      setTimeout(() => {
-        SplashScreen.hideAsync().then(() => {})
-      }, 3000)
-      replace("/(drawer)/(tabs)/workout")
+      SplashScreen.hideAsync()
     }
   }, [loaded])
-
-  //   useEffect(() => {
-  //     ;(async () => {
-  //       try {
-  //         const update = await Updates.checkForUpdateAsync()
-  //         if (update.isAvailable) {
-  //           await Updates.fetchUpdateAsync()
-
-  //           await Updates.reloadAsync()
-  //         }
-  //       } catch (error) {
-  //         console.log("업데이트 확인 중 에러:", error)
-  //       }
-  //     })()
-  //   }, [])
 
   if (!loaded) {
     return null

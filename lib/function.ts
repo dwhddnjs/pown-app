@@ -49,6 +49,7 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]): YearGroup[] => {
   const groupedByYear = sortedData.reduce<YearGroup[]>((acc, item) => {
     const year = item.createdAt.substring(0, 4)
     const month = item.createdAt.substring(5, 7)
+
     const day = item.createdAt.substring(8, 10)
 
     // Find or create year group
@@ -66,9 +67,10 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]): YearGroup[] => {
     let monthGroup = yearGroup.content.find(
       (m) => m.title === `${monthNumber}월`
     )
+
     if (!monthGroup) {
       monthGroup = {
-        title: `${monthNumber}월`,
+        title: `${month}월`,
         content: [],
       }
       yearGroup.content.push(monthGroup)
@@ -77,7 +79,7 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]): YearGroup[] => {
     // Add day if not already present
     const dayString = `${parseInt(day)}일`
     if (!monthGroup.content.includes(dayString)) {
-      monthGroup.content.push(dayString)
+      monthGroup.content.push(`${day}일`)
     }
 
     return acc

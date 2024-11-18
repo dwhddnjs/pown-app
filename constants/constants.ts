@@ -468,7 +468,7 @@ export const mockupData = [
   {
     condition: [],
     content: "",
-    createdAt: "2023.10.08 03:40:35",
+    createdAt: "2023.10.07 03:40:35",
     equipment: "바벨",
     id: 1,
     setWithCount: [],

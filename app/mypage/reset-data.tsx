@@ -8,7 +8,7 @@ import {
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store"
 import { useRouter } from "expo-router"
-import { StyleSheet, useColorScheme } from "react-native"
+import { Pressable, StyleSheet, useColorScheme } from "react-native"
 import { toast } from "sonner-native"
 
 export default function ResetData() {
@@ -40,9 +40,19 @@ export default function ResetData() {
       <Button type="bordered" onPress={onSubmit}>
         초기화
       </Button>
-      <Button type="bordered" onPress={() => onSetMockout(mockupData as any)}>
-        목업데이터
-      </Button>
+      <Pressable
+        style={{
+          alignSelf: "flex-end",
+          marginTop: 400,
+          width: 50,
+          height: 50,
+        }}
+        onPress={() => {
+          onSetMockout(mockupData as WorkoutPlanTypes[])
+          toast.success("목업데이터 생성 되었습니다")
+          back()
+        }}
+      ></Pressable>
     </View>
   )
 }

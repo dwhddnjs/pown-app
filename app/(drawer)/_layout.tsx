@@ -15,6 +15,7 @@ import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import Colors from "@/constants/Colors"
 import { transformWorkoutData } from "@/lib/function"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+import { useSelectDateStore } from "@/hooks/use-select-date-store"
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([])
@@ -26,6 +27,7 @@ const CustomDrawerContent = (props: any) => {
   const [activeSections2, setActiveSections2] = useState<number[]>([])
   const [multipleSelect2, setMultipleSelect2] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState<string[]>([])
+  const { date, onSetDate } = useSelectDateStore()
 
   // 특정 레벨의 title을 업데이트하는 함수
   const updateTitleAtLevel = (level: number, newTitle: string) => {
@@ -65,7 +67,19 @@ const CustomDrawerContent = (props: any) => {
   }
 
   const handleItemSelect = (item: string) => {
-    updateTitleAtLevel(2, item)
+    const selectedDate = [...selectedTitle, item]
+
+    if (selectedDate.length === 0) return
+
+    const result = `${selectedDate[0].slice(0, -1)}.${selectedDate[1].slice(
+      0,
+      -1
+    )}.${selectedDate[2].slice(0, -1)}`
+
+    onSetDate(result)
+    setSelectedTitle([])
+    setActiveSections([])
+    setActiveSections2([])
     props.navigation.closeDrawer()
   }
 
@@ -85,11 +99,15 @@ const CustomDrawerContent = (props: any) => {
         expandMultiple={multipleSelect}
         renderHeader={(section, _, isActive) => (
           <View
-            style={[styles.header, isActive ? styles.active : styles.inactive]}
+            style={[
+              styles.header,
+              isActive ? styles.active : styles.inactive,
+              { backgroundColor: Colors[colorScheme ?? "light"].background },
+            ]}
           >
             <FontAwesome
               name={isActive ? "folder-open" : "folder"}
-              size={24}
+              size={20}
               color={Colors[colorScheme ?? "light"].subText}
             />
             <Text
@@ -104,7 +122,11 @@ const CustomDrawerContent = (props: any) => {
         )}
         renderContent={(section, _, isActive) => (
           <View
-            style={[styles.content, isActive ? styles.active : styles.inactive]}
+            style={[
+              styles.content,
+              isActive ? styles.active : styles.inactive,
+              { backgroundColor: Colors[colorScheme ?? "light"].background },
+            ]}
           >
             <Accordion
               activeSections={activeSections2}
@@ -116,11 +138,15 @@ const CustomDrawerContent = (props: any) => {
                   style={[
                     styles.header,
                     isActive2 ? styles.active : styles.inactive,
+                    {
+                      backgroundColor:
+                        Colors[colorScheme ?? "light"].background,
+                    },
                   ]}
                 >
                   <FontAwesome
                     name={isActive2 ? "folder-open" : "folder"}
-                    size={24}
+                    size={20}
                     color={Colors[colorScheme ?? "light"].subText}
                   />
                   <Text
@@ -138,20 +164,30 @@ const CustomDrawerContent = (props: any) => {
                   style={[
                     styles.content,
                     isActive2 ? styles.active : styles.inactive,
+                    {
+                      backgroundColor:
+                        Colors[colorScheme ?? "light"].background,
+                    },
                   ]}
                 >
-                  {section2.content.map((item) => (
+                  {section2.content.map((item, index) => (
                     <TouchableOpacity
-                      style={[styles.header]}
+                      key={item}
+                      style={[
+                        styles.header,
+                        {
+                          backgroundColor:
+                            Colors[colorScheme ?? "light"].background,
+                        },
+                      ]}
                       onPress={() => handleItemSelect(item)}
                     >
                       <FontAwesome
                         name="file-text"
-                        size={20}
+                        size={18}
                         color={Colors[colorScheme ?? "light"].subText}
                       />
                       <Text
-                        key={item}
                         style={[
                           styles.headerText,
                           { color: Colors[colorScheme ?? "light"].subText },
@@ -207,7 +243,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     // textAlign: "center",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "500",
   },
   content: {
