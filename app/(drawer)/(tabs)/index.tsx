@@ -1,4 +1,4 @@
-// index.tsx
+// expo
 import { Redirect } from "expo-router"
 
 const Index = () => {

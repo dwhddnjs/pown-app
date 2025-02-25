@@ -1,46 +1,43 @@
 import React from "react"
-import { router, Tabs, useRouter } from "expo-router"
-import { SafeAreaView, TouchableOpacity, useColorScheme } from "react-native"
+// compoents
+import { StyleSheet } from "react-native"
+import { View } from "@/components/Themed"
+import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header"
+// expo
+import { router, Tabs } from "expo-router"
+// icon
 import UserIcon from "@expo/vector-icons/FontAwesome"
-import PlusIcon from "@expo/vector-icons/EvilIcons"
+import AntDesign from "@expo/vector-icons/AntDesign"
 import { SymbolView } from "expo-symbols"
-import Colors from "@/constants/Colors"
-import { BlurView } from "expo-blur"
-import { Text, View } from "@/components/Themed"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-import { DrawerToggleButton } from "@react-navigation/drawer"
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
+//color
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme()
+  const themColor = useCurrneThemeColor()
+  const tabOption = {
+    headerStyle: {
+      backgroundColor: themColor.background,
+    },
+    headerTitleStyle: {
+      fontFamily: "sb-m",
+      color: themColor.text,
+    },
+    tabBarStyle: {
+      backgroundColor: themColor.tabBar,
+      borderTopWidth: 0,
+    },
+    tabBarActiveTintColor: themColor.tabIconSelected,
+    tabBarItemStyle: {
+      paddingBottom: 3,
+      paddingTop: 3,
+    },
+    tabBarLabelStyle: {
+      fontFamily: "sb-m",
+    },
+  }
 
   return (
-    <Tabs
-      screenOptions={{
-        headerStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
-        },
-        headerTitleStyle: {
-          fontFamily: "sb-m",
-          color: Colors[colorScheme ?? "light"].text,
-        },
-
-        // headerShadowVisible: false,
-        tabBarStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].tabBar,
-          borderTopWidth: 0,
-        },
-        tabBarActiveTintColor: Colors[colorScheme ?? "light"].tabIconSelected,
-        tabBarItemStyle: {
-          paddingBottom: 3,
-          paddingTop: 3,
-        },
-        tabBarLabelStyle: {
-          fontFamily: "sb-m",
-        },
-      }}
-    >
+    <Tabs screenOptions={tabOption}>
       <Tabs.Screen
         name="workout"
         options={{
@@ -49,61 +46,13 @@ export default function TabLayout() {
               name="dumbbell.fill"
               type="hierarchical"
               tintColor={color}
+              size={32}
             />
           ),
           tabBarLabel: "운동계획",
-
-          header: ({ navigation, route, options }) => {
-            const { push } = useRouter()
-            return (
-              <BlurView
-                intensity={80}
-                tint="default"
-                style={{
-                  width: "100%",
-                  paddingBottom: 10,
-                  alignItems: "center",
-                }}
-              >
-                <SafeAreaView>
-                  <View
-                    style={{
-                      backgroundColor: "transparent",
-                      width: "100%",
-                      paddingVertical: 2,
-                      paddingLeft: 8,
-                      paddingRight: 25,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      //   borderColor: 1,
-                    }}
-                  >
-                    <DrawerToggleButton
-                      tintColor={Colors[colorScheme ?? "light"].text}
-                    />
-                    {/* <TouchableOpacity>
-                      <FontAwesome
-                        name="navicon"
-                        size={24}
-                        color={Colors[colorScheme ?? "light"].text}
-                      />
-                    </TouchableOpacity> */}
-                    <Text style={{ fontSize: 18, textAlign: "center" }}>
-                      {options.title}
-                    </Text>
-                    <TouchableOpacity onPress={() => push("/workout/search")}>
-                      <FontAwesome
-                        name="search"
-                        size={20}
-                        color={Colors[colorScheme ?? "light"].text}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </SafeAreaView>
-              </BlurView>
-            )
-          },
+          header: ({ navigation, route, options }) => (
+            <WorkoutTabHeader title={options.title} />
+          ),
           headerTransparent: true,
         }}
       />
@@ -111,11 +60,9 @@ export default function TabLayout() {
         name="add"
         options={{
           tabBarIcon: ({ color }) => (
-            <PlusIcon
-              name="plus"
-              size={54}
-              color={colorScheme === "dark" ? "#ffffff" : "#000000"}
-            />
+            <View style={styles.addButton}>
+              <AntDesign name="pluscircle" size={48} color={themColor.tint} />
+            </View>
           ),
           tabBarLabel: () => null,
         }}
@@ -135,8 +82,17 @@ export default function TabLayout() {
           ),
         }}
       />
-
       <Tabs.Screen name="index" redirect />
     </Tabs>
   )
 }
+
+const styles = StyleSheet.create({
+  addButton: {
+    width: 48,
+    height: 48,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "transparent",
+  },
+})

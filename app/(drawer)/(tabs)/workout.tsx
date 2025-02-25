@@ -1,3 +1,5 @@
+import { useCallback, useEffect, useRef, useState } from "react"
+// component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
 import {
@@ -8,21 +10,25 @@ import {
   findNodeHandle,
 } from "react-native"
 import Colors from "@/constants/Colors"
-import { useCallback, useEffect, useRef, useState } from "react"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { formatDate, groupByDate } from "@/lib/function"
-import { useNavigation } from "expo-router"
-import { useHeaderHeight } from "@react-navigation/elements"
 import { FlashList } from "@shopify/flash-list"
 import { EmptyList } from "@/components/workout-plan/empty-list"
+// zustand
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { useSelectDateStore } from "@/hooks/use-select-date-store"
+// lib
+import { formatDate, groupByDate } from "@/lib/function"
+// expo
+import { useNavigation } from "expo-router"
+// navigation
+import { useHeaderHeight } from "@react-navigation/elements"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const { date: selectedDate } = useSelectDateStore()
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
   const navigation = useNavigation()
   const itemRef = useRef(new Map())
   const scrollRef = useRef<ScrollView | null>(null)
@@ -111,7 +117,7 @@ export default function TabOneScreen() {
         styles.container,
         {
           paddingTop: headerHeight,
-          backgroundColor: Colors[colorScheme ?? "light"].background,
+          backgroundColor: themeColor.background,
         },
       ]}
     >
@@ -140,10 +146,7 @@ export default function TabOneScreen() {
                 }}
               >
                 <Text
-                  style={[
-                    styles.date,
-                    { borderColor: Colors[colorScheme ?? "light"].subText },
-                  ]}
+                  style={[styles.date, { borderColor: themeColor.subText }]}
                 >{`🗓️  ${formatDate(item[0])}`}</Text>
               </RefView>
 
@@ -168,7 +171,7 @@ export default function TabOneScreen() {
           paddingTop: 80,
         }}
       >
-        <Text style={{ color: Colors[colorScheme ?? "light"].subText }}>
+        <Text style={{ color: themeColor.subText }}>
           마지막 운동계획입니다.
         </Text>
       </View>
@@ -222,100 +225,3 @@ const styles = StyleSheet.create({
     height: 150,
   },
 })
-
-{
-  /* {Object.entries(sortWorkList).map((item, index) => {
-        return (
-          <View style={styles.list} key={index}>
-            <Text
-              onLayout={(e) =>
-                setDataValue({ y: e.nativeEvent.layout.y, value: item[0] })
-              }
-              style={[
-                styles.date,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >{`🗓️  ${formatDate(item[0])}`}</Text>
-
-            <View style={styles.workoutList}>
-              {item[1].map((data, index) => (
-                <WorkoutPlan
-                  key={data.id}
-                  item={data}
-                  index={index}
-                  totalLength={item[1].length}
-                />
-              ))}
-            </View>
-          </View>
-        )
-      })} */
-}
-
-// ;<ScrollView
-//   scrollEventThrottle={0}
-//   //   onScroll={handleScroll}
-//   onScroll={(e) => console.log("adsads", e.nativeEvent.contentOffset.y)}
-//   style={[
-//     styles.container,
-//     {
-//       paddingTop: headerHeight,
-//       backgroundColor: Colors[colorScheme ?? "light"].background,
-//     },
-//   ]}
-// >
-//   <FlatList
-//     data={Object.entries(sortWorkList)}
-//     // onViewableItemsChanged={onViewableItemsChanged}
-//     // viewabilityConfig={viewabilityConfig.current}
-
-//     scrollEventThrottle={16}
-//     // estimatedItemSize={50}
-//     keyExtractor={(item) => item[0]}
-//     renderItem={({ item, index }) => {
-//       return (
-//         <View style={styles.list} key={index}>
-//           <Text
-//             style={[
-//               styles.date,
-//               { borderColor: Colors[colorScheme ?? "light"].subText },
-//             ]}
-//           >{`🗓️  ${formatDate(item[0])}`}</Text>
-
-//           <View style={styles.workoutList}>
-//             {item[1].map((data, index) => (
-//               <WorkoutPlan
-//                 key={data.id}
-//                 item={data}
-//                 index={index}
-//                 totalLength={item[1].length}
-//               />
-//             ))}
-//           </View>
-//         </View>
-//       )
-//     }}
-//   />
-
-//   <View style={{ height: 300 }} />
-// </ScrollView>
-
-// onLayout={(e) => {
-//     // y 위치
-//     const y = e.nativeEvent.layout.y
-//     console.log("y: ", y)
-//     // 2024년 10월
-//     const splitItem = item[0].split(".")
-//     const date = `${splitItem[0]}-${splitItem[1]}`
-
-//     if (data) {
-//       const prevData = Object.keys(data)
-//       if (prevData.includes(date)) {
-//         return
-//       }
-//     }
-//     setData({
-//       ...data,
-//       [date]: y,
-//     })
-//   }}

@@ -3,14 +3,7 @@ import { DrawerContentScrollView } from "@react-navigation/drawer"
 import { Drawer } from "expo-router/drawer"
 import { useState } from "react"
 import Accordion from "react-native-collapsible/Accordion"
-import {
-  Switch,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  Pressable,
-} from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import Colors from "@/constants/Colors"
 import { transformWorkoutData } from "@/lib/function"
