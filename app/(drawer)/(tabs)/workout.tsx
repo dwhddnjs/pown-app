@@ -1,15 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef } from "react"
 // component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
 import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
-  useColorScheme,
-  View as RefView,
-  findNodeHandle,
 } from "react-native"
-import Colors from "@/constants/Colors"
 import { FlashList } from "@shopify/flash-list"
 import { EmptyList } from "@/components/workout-plan/empty-list"
 // zustand
@@ -22,6 +20,7 @@ import { useNavigation } from "expo-router"
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { RefView } from "@/components/RefView"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
@@ -30,41 +29,37 @@ export default function TabOneScreen() {
   const headerHeight = useHeaderHeight()
   const themeColor = useCurrneThemeColor()
   const navigation = useNavigation()
+
   const itemRef = useRef(new Map())
   const scrollRef = useRef<ScrollView | null>(null)
   const scrollY = useRef(0)
 
-  const measureView = useCallback((date: string, ref: any) => {
-    if (!ref || !scrollRef.current) return
-
-    const handle = findNodeHandle(scrollRef.current)
-    if (!handle) return
-
+  const measureView = (ref: any, date: string) => {
     ref.measureLayout(
-      handle,
+      scrollRef.current,
       (x: number, y: number, width: number, height: number) => {
-        const actualY = y - scrollY.current
-        if (actualY <= headerHeight + 20 && actualY >= -height) {
+        if (scrollY.current === 0) {
           const splitData = date.split(".")
           navigation.setOptions({
             title: `${splitData[0]}년  ${splitData[1]}월`,
           })
         }
-      },
-      (error: Error) => {
-        console.log("에러", error)
+        if (y - scrollY.current < headerHeight - 30) {
+          const splitData = date.split(".")
+          navigation.setOptions({
+            title: `${splitData[0]}년  ${splitData[1]}월`,
+          })
+        }
       }
     )
-  }, [])
+  }
 
   const scrollToSelectedDate = useCallback(() => {
     if (!selectedDate) return
-
     const targetRef = itemRef.current.get(selectedDate)
-
     if (targetRef) {
       targetRef.measureLayout(
-        findNodeHandle(scrollRef.current) as number,
+        scrollRef.current,
         (x: number, y: number) => {
           scrollRef.current?.scrollTo({
             y: y - headerHeight - 20,
@@ -76,41 +71,25 @@ export default function TabOneScreen() {
     }
   }, [selectedDate, headerHeight])
 
-  const handleScroll = useCallback(
-    (event: any) => {
-      const offsetY = event.nativeEvent.contentOffset.y
-      scrollY.current = offsetY
-
-      // 약간의 디바운스 효과를 주기 위해 setTimeout 사용
-      setTimeout(() => {
-        itemRef.current.forEach((ref, date) => {
-          measureView(date, ref)
-        })
-      }, 10)
-    },
-    [measureView]
-  )
-
-  useEffect(() => {
-    setTimeout(() => {
-      itemRef.current.forEach((ref, date) => {
-        measureView(date, ref)
-      })
-    }, 100)
-  }, [])
-
-  useEffect(() => {
-    setTimeout(scrollToSelectedDate, 200)
-  }, [selectedDate, scrollToSelectedDate])
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y
+    scrollY.current = offsetY
+    itemRef.current.forEach((ref, date: string) => {
+      measureView(ref, date)
+    })
+  }
 
   if (workoutPlanList.length === 0) {
     return <EmptyList />
   }
 
+  useEffect(() => {
+    setTimeout(scrollToSelectedDate, 200)
+  }, [selectedDate, scrollToSelectedDate])
+
   return (
     <ScrollView
       ref={scrollRef}
-      //   contentInsetAdjustmentBehavior="automatic"
       onScroll={handleScroll}
       scrollEventThrottle={16}
       style={[
@@ -130,18 +109,9 @@ export default function TabOneScreen() {
             <View style={styles.list} key={index}>
               <RefView
                 ref={(ref) => {
-                  if (ref) {
-                    itemRef.current.set(item[0], ref)
-                    // ref가 설정된 직후 측정
-                    setTimeout(() => measureView(item[0], ref), 0)
-                  } else {
-                    itemRef.current.delete(item[0])
-                  }
-                }}
-                onLayout={() => {
-                  const ref = itemRef.current.get(item[0])
-                  if (ref) {
-                    measureView(item[0], ref)
+                  itemRef.current.set(item[0], ref)
+                  if (ref && index === 0) {
+                    measureView(ref, item[0])
                   }
                 }}
               >
@@ -182,9 +152,6 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // alignItems: "center",
-    // justifyContent: "center",
-    // paddingHorizontal: 24,
   },
 
   date: {

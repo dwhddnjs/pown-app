@@ -12,23 +12,30 @@ import { DrawerToggleButton } from "@react-navigation/drawer"
 import { useRouter } from "expo-router"
 import Colors from "@/constants/Colors"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
-  const colorScheme = useColorScheme()
+  console.log("title: ", title)
+  const themeColor = useCurrneThemeColor()
   const { push } = useRouter()
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          <DrawerToggleButton tintColor={Colors[colorScheme ?? "light"].text} />
-          <Text style={{ fontSize: 18, textAlign: "center" }}>{title}</Text>
+          <DrawerToggleButton tintColor={themeColor.text} />
+          <Text
+            style={{
+              fontSize: 18,
+              color: themeColor.text,
+              textAlign: "center",
+              fontFamily: "sb-m",
+            }}
+          >
+            {title}
+          </Text>
           <TouchableOpacity onPress={() => push("/workout/search")}>
-            <FontAwesome
-              name="search"
-              size={20}
-              color={Colors[colorScheme ?? "light"].text}
-            />
+            <FontAwesome name="search" size={20} color={themeColor.text} />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
