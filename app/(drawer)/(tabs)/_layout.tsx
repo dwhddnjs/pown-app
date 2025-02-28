@@ -14,6 +14,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function TabLayout() {
   const themColor = useCurrneThemeColor()
+
   const tabOption = {
     headerStyle: {
       backgroundColor: themColor.background,

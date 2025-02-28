@@ -1,27 +1,33 @@
-import Colors from "@/constants/Colors"
+import { useEffect, useState } from "react"
+// component
 import {
   DarkTheme,
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native"
+import { Appearance, TouchableOpacity, useColorScheme } from "react-native"
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
+import { toast, Toaster } from "sonner-native"
+//expo
 import { useFonts } from "expo-font"
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
-import { useEffect, useState } from "react"
-import { Appearance, TouchableOpacity, useColorScheme } from "react-native"
+import { ActionSheetProvider } from "@expo/react-native-action-sheet"
+// style
+import Colors from "@/constants/Colors"
+// icons
 import XIcon from "@expo/vector-icons/Feather"
-import "react-native-reanimated"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
-import { GestureHandlerRootView } from "react-native-gesture-handler"
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import Checkcircle from "@expo/vector-icons/AntDesign"
+// lib
+import { GestureHandlerRootView } from "react-native-gesture-handler"
+import { format } from "date-fns"
+// zustand
 import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { toast, Toaster } from "sonner-native"
 import { useUserStore } from "@/hooks/use-user-store"
-import { ActionSheetProvider } from "@expo/react-native-action-sheet"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { format } from "date-fns"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export { ErrorBoundary } from "expo-router"
 
@@ -72,7 +78,7 @@ export default function RootLayout() {
       <GestureHandlerRootView style={{ flex: 1 }}>
         <ActionSheetProvider>
           <BottomSheetModalProvider>
-            <RootLayoutNav colorScheme={colorScheme} />
+            <RootLayoutNav />
           </BottomSheetModalProvider>
         </ActionSheetProvider>
       </GestureHandlerRootView>
@@ -81,19 +87,16 @@ export default function RootLayout() {
   )
 }
 
-function RootLayoutNav({
-  colorScheme,
-}: {
-  colorScheme?: "light" | "dark" | null
-}) {
+function RootLayoutNav() {
+  const themeColor = useCurrneThemeColor()
   return (
     <Stack
       screenOptions={{
         headerStyle: {
-          backgroundColor: Colors[colorScheme ?? "light"].background,
+          backgroundColor: themeColor.background,
         },
         headerTitleStyle: {
-          color: Colors[colorScheme ?? "light"].text,
+          color: themeColor.text,
           fontFamily: "sb-m",
         },
       }}
@@ -108,17 +111,13 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
 
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon
-                name="x"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <XIcon name="x" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -132,7 +131,7 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
 
@@ -141,11 +140,7 @@ function RootLayoutNav({
               style={{ marginLeft: 3, marginTop: 18 }}
               onPress={() => navigation.goBack()}
             >
-              <XIcon
-                name="x"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <XIcon name="x" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
           headerRight: () => {
@@ -164,7 +159,7 @@ function RootLayoutNav({
                 <Checkcircle
                   name="checkcircle"
                   size={30}
-                  color={Colors[colorScheme ?? "light"].tint}
+                  color={themeColor.tint}
                 />
               </TouchableOpacity>
             )
@@ -179,11 +174,12 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
           headerLeft: () => {
             const { onReset } = usePlanStore()
+            const
             return (
               <TouchableOpacity
                 onPress={() => {
@@ -191,11 +187,7 @@ function RootLayoutNav({
                   navigation.goBack()
                 }}
               >
-                <ArrowIcon
-                  name="left"
-                  size={28}
-                  color={Colors[colorScheme ?? "light"].subText}
-                />
+                <ArrowIcon name="left" size={28} color={themeColor.subText} />
               </TouchableOpacity>
             )
           },
@@ -235,7 +227,7 @@ function RootLayoutNav({
                 <Checkcircle
                   name="checkcircle"
                   size={30}
-                  color={Colors[colorScheme ?? "light"].tint}
+                  color={themeColor.tint}
                 />
               </TouchableOpacity>
             )
@@ -250,7 +242,7 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
           headerLeft: () => {
@@ -262,11 +254,7 @@ function RootLayoutNav({
                   navigation.goBack()
                 }}
               >
-                <ArrowIcon
-                  name="left"
-                  size={28}
-                  color={Colors[colorScheme ?? "light"].subText}
-                />
+                <ArrowIcon name="left" size={28} color={themeColor.subText} />
               </TouchableOpacity>
             )
           },
@@ -312,7 +300,7 @@ function RootLayoutNav({
                 <Checkcircle
                   name="checkcircle"
                   size={30}
-                  color={Colors[colorScheme ?? "light"].tint}
+                  color={themeColor.tint}
                 />
               </TouchableOpacity>
             )
@@ -327,7 +315,7 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
           animation: "slide_from_bottom",
@@ -338,11 +326,7 @@ function RootLayoutNav({
                 navigation.goBack()
               }}
             >
-              <XIcon
-                name="x"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <XIcon name="x" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -355,7 +339,7 @@ function RootLayoutNav({
             borderBottomWidth: 0,
             elevation: 0,
             shadowOpacity: 0,
-            backgroundColor: Colors[colorScheme ?? "light"].background,
+            backgroundColor: themeColor.background,
           },
           headerTitleStyle: {
             fontFamily: "sb-m",
@@ -365,11 +349,7 @@ function RootLayoutNav({
               style={{ marginLeft: 6 }}
               onPress={() => navigation.goBack()}
             >
-              <ArrowIcon
-                name="left"
-                size={24}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <ArrowIcon name="left" size={24} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -387,11 +367,7 @@ function RootLayoutNav({
               style={{ marginLeft: 4 }}
               onPress={() => navigation.goBack()}
             >
-              <ArrowIcon
-                name="down"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -407,11 +383,7 @@ function RootLayoutNav({
               style={{ marginLeft: 4 }}
               onPress={() => navigation.goBack()}
             >
-              <ArrowIcon
-                name="down"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -426,11 +398,7 @@ function RootLayoutNav({
               style={{ marginLeft: 4 }}
               onPress={() => navigation.goBack()}
             >
-              <ArrowIcon
-                name="down"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -445,11 +413,7 @@ function RootLayoutNav({
               style={{ marginLeft: 4 }}
               onPress={() => navigation.goBack()}
             >
-              <ArrowIcon
-                name="down"
-                size={30}
-                color={Colors[colorScheme ?? "light"].subText}
-              />
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -466,11 +430,7 @@ function RootLayoutNav({
                 style={{ marginLeft: 4 }}
                 onPress={() => navigation.goBack()}
               >
-                <ArrowIcon
-                  name="left"
-                  size={24}
-                  color={Colors[colorScheme ?? "light"].subText}
-                />
+                <ArrowIcon name="left" size={24} color={themeColor.subText} />
               </TouchableOpacity>
             ),
           }

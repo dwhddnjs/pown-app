@@ -10,6 +10,7 @@ import {
 } from "react-native"
 import { FlashList } from "@shopify/flash-list"
 import { EmptyList } from "@/components/workout-plan/empty-list"
+import { RefView } from "@/components/RefView"
 // zustand
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { useSelectDateStore } from "@/hooks/use-select-date-store"
@@ -19,8 +20,8 @@ import { formatDate, groupByDate } from "@/lib/function"
 import { useNavigation } from "expo-router"
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements"
+// hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { RefView } from "@/components/RefView"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
