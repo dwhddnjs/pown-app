@@ -1,4 +1,9 @@
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import {
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  FlatList,
+} from "react-native"
 import React from "react"
 import { Text, View } from "../Themed"
 import EmotionIcon from "@expo/vector-icons/MaterialIcons"
@@ -33,13 +38,13 @@ export const ConditionList = () => {
         </Text>
       </View>
       <View style={styles.container}>
-        <FlashList
+        <FlatList
           data={conditionData}
           horizontal
           renderItem={({ item, index }) => (
             <ConditionIcon item={item} type="column" />
           )}
-          estimatedItemSize={65}
+          // estimatedItemSize={65}
         />
       </View>
     </View>

@@ -1,19 +1,20 @@
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import React, { useState } from "react"
+// component
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { Text, View } from "../Themed"
-import Back from "@/assets/images/svg/back_icon.svg"
-import Colors from "@/constants/Colors"
-import GoodIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import { WeightDate } from "./weight-date"
-import { conditionData } from "@/constants/constants"
-import { ConditionIcon } from "../add-plan/condition-icon"
 import { NoteText } from "./note-text"
 import { SetListItem } from "./set-list-item"
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
+// icon
+import Back from "@/assets/images/svg/back_icon.svg"
+import { ConditionIcon } from "../add-plan/condition-icon"
+import { WeightDate } from "./weight-date"
 import Arm from "@/assets/images/svg/arm_icon.svg"
 import Chest from "@/assets/images/svg/chest_icon.svg"
 import Leg from "@/assets/images/svg/leg_icon.svg"
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
+// zustand
+import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes
@@ -23,6 +24,7 @@ interface WorkoutPlanProps {
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
   const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
   const getWorkoutIcon = (type: string) => {
     let result
     switch (type) {
@@ -50,7 +52,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
     <View
       style={[
         styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+        { backgroundColor: themeColor.itemColor },
         index === 0 && { paddingTop: 18 },
         index === totalLength - 1 && { paddingBottom: 18 },
       ]}
@@ -59,7 +61,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         style={[
           styles.iconLine,
           {
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            backgroundColor: themeColor.itemColor,
           },
         ]}
       >
@@ -70,7 +72,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               width: 2,
               height: 16,
               flex: 1,
-              backgroundColor: Colors[colorScheme ?? "light"].subText,
+              backgroundColor: themeColor.subText,
             }}
           />
         )}
@@ -80,7 +82,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           styles.workoutContainer,
           {
             paddingBottom: 12,
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            backgroundColor: themeColor.itemColor,
           },
         ]}
       >
@@ -97,7 +99,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           <View
             style={[
               styles.conditionTagList,
-              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+              { backgroundColor: themeColor.itemColor },
             ]}
           >
             {item.condition.map((item, index) => (
@@ -116,7 +118,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         {item.setWithCount.length > 0 && (
           <View
             style={{
-              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+              backgroundColor: themeColor.itemColor,
               gap: 8,
             }}
           >

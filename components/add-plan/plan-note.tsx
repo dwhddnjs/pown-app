@@ -4,15 +4,17 @@ import {
   useColorScheme,
   useWindowDimensions,
 } from "react-native"
-import React from "react"
+import React, { useRef } from "react"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import Colors from "@/constants/Colors"
 import { Link } from "expo-router"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { InputRefObject } from "@/app/add-plan/[slug]"
+import { KeyBoardAvoid } from "../KeyBoardAvoid"
 
-export const PlanNote = ({ onFocus }: { onFocus: (value: any) => void }) => {
+export const PlanNote = () => {
   const { title, content, setPlanValue } = usePlanStore()
   const colorScheme = useColorScheme()
 
@@ -50,12 +52,12 @@ export const PlanNote = ({ onFocus }: { onFocus: (value: any) => void }) => {
               color: Colors[colorScheme ?? "light"].text,
             },
           ]}
-          onFocus={(e) => onFocus(e.target)}
           placeholder="특이사항을 적어주세요 (선택)"
           value={content}
           onChangeText={(value) => setPlanValue("content", value)}
         />
       )}
+      <View style={{ height: 250 }} />
     </View>
   )
 }

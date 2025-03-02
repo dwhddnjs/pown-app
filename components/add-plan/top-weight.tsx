@@ -1,22 +1,27 @@
 import {
+  Pressable,
   StyleSheet,
   TextInput,
   useColorScheme,
   useWindowDimensions,
 } from "react-native"
-import React, { useState } from "react"
+import React, { useRef, useState } from "react"
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
 import Colors from "@/constants/Colors"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
-export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
+export const TopWeight = () => {
   const { weight, setPlanValue } = usePlanStore()
   const colorScheme = useColorScheme()
+  const inputRef = useRef<TextInput>(null)
 
   return (
-    <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 24 }}>
+    <Pressable
+      onPress={() => inputRef.current?.focus()}
+      style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 24 }}
+    >
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon
           name="weight-kilogram"
@@ -32,9 +37,9 @@ export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
         ]}
       >
         <TextInput
+          ref={inputRef}
           style={[styles.input, { color: Colors[colorScheme ?? "light"].tint }]}
           keyboardType="numeric"
-          onFocus={(e) => onFocus(e.target)}
           maxLength={3}
           value={weight}
           onChangeText={(value) => setPlanValue("weight", value)}
@@ -42,7 +47,7 @@ export const TopWeight = ({ onFocus }: { onFocus: (value: any) => void }) => {
         />
         <Text>kg</Text>
       </View>
-    </View>
+    </Pressable>
   )
 }
 

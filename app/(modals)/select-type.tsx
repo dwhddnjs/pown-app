@@ -9,6 +9,7 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 import Colors from "@/constants/Colors"
 import { IconTitleButton } from "@/components/IconTitleButton"
 import { useRouter } from "expo-router"
+import { format } from "date-fns"
 
 export default function ModalScreen() {
   const colorScheme = useColorScheme()
@@ -56,7 +57,7 @@ export default function ModalScreen() {
               (styles.date, { color: Colors[colorScheme ?? "light"].tint })
             }
           >
-            📆 2024년 10월 2일 19:30
+            {`📆 ${format(new Date(), "yyyy년 M월 d일 h시 m분")}`}
           </Text>
         </View>
       </View>
@@ -90,7 +91,7 @@ const styles = StyleSheet.create({
   titleDate: {
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: 6,
   },
 
   iconContainer: {

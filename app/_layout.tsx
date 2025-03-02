@@ -81,8 +81,8 @@ export default function RootLayout() {
             <RootLayoutNav />
           </BottomSheetModalProvider>
         </ActionSheetProvider>
+        <Toaster />
       </GestureHandlerRootView>
-      <Toaster />
     </ThemeProvider>
   )
 }
@@ -179,7 +179,6 @@ function RootLayoutNav() {
           headerShadowVisible: false,
           headerLeft: () => {
             const { onReset } = usePlanStore()
-            const
             return (
               <TouchableOpacity
                 onPress={() => {
@@ -212,7 +211,6 @@ function RootLayoutNav() {
                       title: result.title,
                       setWithCount: result.setWithCount,
                       createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-
                       updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
                     })
                     onReset()

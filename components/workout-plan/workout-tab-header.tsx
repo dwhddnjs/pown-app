@@ -15,7 +15,6 @@ import FontAwesome from "@expo/vector-icons/FontAwesome"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
-  console.log("title: ", title)
   const themeColor = useCurrneThemeColor()
   const { push } = useRouter()
 

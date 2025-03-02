@@ -80,13 +80,13 @@ export default function TabOneScreen() {
     })
   }
 
-  if (workoutPlanList.length === 0) {
-    return <EmptyList />
-  }
-
   useEffect(() => {
     setTimeout(scrollToSelectedDate, 200)
   }, [selectedDate, scrollToSelectedDate])
+
+  if (workoutPlanList.length === 0) {
+    return <EmptyList />
+  }
 
   return (
     <ScrollView
@@ -120,7 +120,6 @@ export default function TabOneScreen() {
                   style={[styles.date, { borderColor: themeColor.subText }]}
                 >{`🗓️  ${formatDate(item[0])}`}</Text>
               </RefView>
-
               <View style={styles.workoutList}>
                 {item[1].map((data, index) => (
                   <WorkoutPlan
@@ -168,7 +167,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   workoutList: {
-    borderRadius: 14,
+    borderRadius: 12,
     overflow: "hidden",
   },
 

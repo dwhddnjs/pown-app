@@ -73,37 +73,6 @@ export default function EditPlan() {
     }
   }, [slug[0]])
 
-  const onHideKeyboard = () => {
-    Keyboard.dismiss()
-  }
-
-  const onSubmitEditWorkoutPlan = () => {
-    if (result.weight && result.workout) {
-      setEditPlan({
-        id: parseInt(slug[1]),
-        workout: result.workout,
-        type: slug[0],
-        equipment: result.equipment,
-        weight: result.weight,
-        condition: result.condition,
-        content: result.content,
-        title: result.title,
-        setWithCount: result.setWithCount.map((item, index) => ({
-          ...item,
-          id: index + 1,
-        })),
-        createdAt: getWorkoutPlan.createdAt,
-        updatedAt: getWorkoutPlan.updatedAt,
-      })
-      onReset()
-      back()
-      onResetNote()
-      return toast.success("운동 계획을 수정되었습니다!!")
-    }
-    return toast.error("운동과 목표 중량은 필수에요..")
-  }
-  //   createdAt: "2024.10.27 02:52:43",
-
   const scrollRef = useRef<ScrollView>(null)
 
   const onInputFocus = (node: InputRefObject) => {
@@ -144,7 +113,7 @@ export default function EditPlan() {
         <EquipmentBox />
 
         {/* 목표중량 */}
-        <TopWeight onFocus={onInputFocus} />
+        <TopWeight />
 
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
@@ -153,12 +122,8 @@ export default function EditPlan() {
         <ConditionList />
 
         {/* 퀵노트 전체 노트 */}
-        <PlanNote onFocus={onInputFocus} />
-        <View style={{ height: 250 }} />
+        <PlanNote />
       </ScrollView>
-      <Button type="submit" onPress={onSubmitEditWorkoutPlan}>
-        수정
-      </Button>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>
   )

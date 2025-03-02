@@ -6,18 +6,24 @@ import { Button } from "../Button"
 import { IconTitle } from "../IconTitle"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { SetCounterItem } from "./set-counter-item"
+import { useRef, useState } from "react"
+import { InputRefObject } from "@/app/add-plan/[slug]"
 
 interface SetCounterProps {
   onOpen: () => void
-  onFocus: (value: any) => void
+  onFocus: (value: InputRefObject) => void
 }
 
 export const SetCounter = ({ onOpen, onFocus }: SetCounterProps) => {
   const { setWithCount } = usePlanStore()
   const colorScheme = useColorScheme()
+  const [layout, setLayout] = useState(0)
 
   return (
-    <View style={styles.container}>
+    <View
+      style={styles.container}
+      onLayout={(e) => setLayout(e.nativeEvent.layout.y)}
+    >
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 24 }}>
           <Octicons

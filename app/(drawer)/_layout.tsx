@@ -1,22 +1,29 @@
+import { useState } from "react"
+// component
 import { Text, View } from "@/components/Themed"
 import { DrawerContentScrollView } from "@react-navigation/drawer"
 import { Drawer } from "expo-router/drawer"
-import { useState } from "react"
 import Accordion from "react-native-collapsible/Accordion"
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+// zustand
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import Colors from "@/constants/Colors"
-import { transformWorkoutData } from "@/lib/function"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { useSelectDateStore } from "@/hooks/use-select-date-store"
+// lib
+import { transformWorkoutData } from "@/lib/function"
+// icons
+import FontAwesome from "@expo/vector-icons/FontAwesome"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([])
   const [collapsed, setCollapsed] = useState(true)
   const [multipleSelect, setMultipleSelect] = useState(false)
+
   const { workoutPlanList } = userWorkoutPlanStore()
-  const colorScheme = useColorScheme()
+
+  const themeColor = useCurrneThemeColor()
   const sortData = transformWorkoutData(workoutPlanList)
+  console.log("sortData: ", sortData)
   const [activeSections2, setActiveSections2] = useState<number[]>([])
   const [multipleSelect2, setMultipleSelect2] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState<string[]>([])
@@ -80,9 +87,9 @@ const CustomDrawerContent = (props: any) => {
     <DrawerContentScrollView
       {...props}
       style={{
-        paddingHorizontal: 24,
+        paddingHorizontal: 12,
         paddingTop: 24,
-        backgroundColor: Colors[colorScheme ?? "light"].background,
+        backgroundColor: themeColor.background,
       }}
     >
       <Accordion
@@ -95,109 +102,100 @@ const CustomDrawerContent = (props: any) => {
             style={[
               styles.header,
               isActive ? styles.active : styles.inactive,
-              { backgroundColor: Colors[colorScheme ?? "light"].background },
+              { backgroundColor: themeColor.background },
             ]}
           >
             <FontAwesome
               name={isActive ? "folder-open" : "folder"}
               size={20}
-              color={Colors[colorScheme ?? "light"].subText}
+              color={themeColor.subText}
             />
-            <Text
-              style={[
-                styles.headerText,
-                { color: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >
+            <Text style={[styles.headerText, { color: themeColor.subText }]}>
               {section.title}
             </Text>
           </View>
         )}
-        renderContent={(section, _, isActive) => (
-          <View
-            style={[
-              styles.content,
-              isActive ? styles.active : styles.inactive,
-              { backgroundColor: Colors[colorScheme ?? "light"].background },
-            ]}
-          >
-            <Accordion
-              activeSections={activeSections2}
-              sections={section.content}
-              touchableComponent={TouchableOpacity}
-              expandMultiple={multipleSelect2}
-              renderHeader={(section2, _, isActive2) => (
-                <View
-                  style={[
-                    styles.header,
-                    isActive2 ? styles.active : styles.inactive,
-                    {
-                      backgroundColor:
-                        Colors[colorScheme ?? "light"].background,
-                    },
-                  ]}
-                >
-                  <FontAwesome
-                    name={isActive2 ? "folder-open" : "folder"}
-                    size={20}
-                    color={Colors[colorScheme ?? "light"].subText}
-                  />
-                  <Text
+        renderContent={(section, _, isActive) => {
+          return (
+            <View
+              style={[
+                styles.content,
+                isActive ? styles.active : styles.inactive,
+                { backgroundColor: themeColor.background },
+              ]}
+            >
+              <Accordion
+                activeSections={activeSections2}
+                sections={section.content}
+                touchableComponent={TouchableOpacity}
+                expandMultiple={multipleSelect2}
+                renderHeader={(section2, _, isActive2) => (
+                  <View
                     style={[
-                      styles.headerText,
-                      { color: Colors[colorScheme ?? "light"].subText },
+                      styles.header,
+                      isActive2 ? styles.active : styles.inactive,
+                      {
+                        backgroundColor: themeColor.background,
+                      },
                     ]}
                   >
-                    {section2.title}
-                  </Text>
-                </View>
-              )}
-              renderContent={(section2, _, isActive2) => (
-                <View
-                  style={[
-                    styles.content,
-                    isActive2 ? styles.active : styles.inactive,
-                    {
-                      backgroundColor:
-                        Colors[colorScheme ?? "light"].background,
-                    },
-                  ]}
-                >
-                  {section2.content.map((item, index) => (
-                    <TouchableOpacity
-                      key={item}
-                      style={[
-                        styles.header,
-                        {
-                          backgroundColor:
-                            Colors[colorScheme ?? "light"].background,
-                        },
-                      ]}
-                      onPress={() => handleItemSelect(item)}
+                    <FontAwesome
+                      name={isActive2 ? "folder-open" : "folder"}
+                      size={20}
+                      color={themeColor.subText}
+                    />
+                    <Text
+                      style={[styles.headerText, { color: themeColor.subText }]}
                     >
-                      <FontAwesome
-                        name="file-text"
-                        size={18}
-                        color={Colors[colorScheme ?? "light"].subText}
-                      />
-                      <Text
+                      {section2.title}
+                    </Text>
+                  </View>
+                )}
+                renderContent={(section2, _, isActive2) => (
+                  <View
+                    style={[
+                      styles.content,
+                      isActive2 ? styles.active : styles.inactive,
+                      {
+                        backgroundColor: themeColor.background,
+                      },
+                    ]}
+                  >
+                    {section2.content.map((item, index) => (
+                      <TouchableOpacity
+                        key={item}
                         style={[
-                          styles.headerText,
-                          { color: Colors[colorScheme ?? "light"].subText },
+                          styles.header,
+                          {
+                            backgroundColor: themeColor.background,
+                          },
                         ]}
+                        onPress={() => handleItemSelect(item)}
                       >
-                        {item}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-              onChange={handleSetActiveSections2}
-              renderAsFlatList={false}
-              duration={400}
-            />
-          </View>
-        )}
+                        <FontAwesome
+                          name="file-text"
+                          size={18}
+                          color={themeColor.subText}
+                        />
+                        <Text
+                          style={[
+                            styles.headerText,
+                            { color: themeColor.subText },
+                          ]}
+                        >
+                          {item}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+                onChange={handleSetActiveSections2}
+                renderAsFlatList={false}
+                duration={400}
+              />
+            </View>
+          )
+        }}
         duration={400}
         onChange={handleSetActiveSections}
         renderAsFlatList={false}
