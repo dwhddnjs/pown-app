@@ -46,6 +46,7 @@ export default function ResetData() {
           marginTop: 400,
           width: 50,
           height: 50,
+          borderWidth: 1,
         }}
         onPress={() => {
           onSetMockout(mockupData as WorkoutPlanTypes[])

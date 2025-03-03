@@ -40,69 +40,34 @@ interface YearGroup {
   content: MonthGroup[]
 }
 
-export const transformWorkoutData = (data: WorkoutPlanTypes[]): YearGroup[] => {
-  // Sort data by createdAt in descending order
-  const sortedData = [...data].sort((a, b) =>
-    a.createdAt > b.createdAt ? -1 : 1
-  )
+export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
+  const groupedData: Record<string, Record<string, Set<string>>> = {}
 
-  const groupedByYear = sortedData.reduce<YearGroup[]>((acc, item) => {
-    const year = item.createdAt.substring(0, 4)
-    const month = item.createdAt.substring(5, 7)
+  data.forEach((item) => {
+    const date = new Date(item.createdAt.replace(".", "-").replace(".", "-"))
+    const year = `${date.getFullYear()}년`
+    const month = `${date.getMonth() + 1}월`
+    const day = `${date.getDate()}일`
 
-    const day = item.createdAt.substring(8, 10)
-
-    // Find or create year group
-    let yearGroup = acc.find((y) => y.title === `${year}년`)
-    if (!yearGroup) {
-      yearGroup = {
-        title: `${year}년`,
-        content: [],
-      }
-      acc.push(yearGroup)
+    if (!groupedData[year]) {
+      groupedData[year] = {}
+    }
+    if (!groupedData[year][month]) {
+      groupedData[year][month] = new Set()
     }
 
-    // Find or create month group
-    const monthNumber = parseInt(month)
-    let monthGroup = yearGroup.content.find(
-      (m) => m.title === `${monthNumber}월`
-    )
-
-    if (!monthGroup) {
-      monthGroup = {
-        title: `${month}월`,
-        content: [],
-      }
-      yearGroup.content.push(monthGroup)
-    }
-
-    // Add day if not already present
-    const dayString = `${parseInt(day)}일`
-    if (!monthGroup.content.includes(dayString)) {
-      monthGroup.content.push(`${day}일`)
-    }
-
-    return acc
-  }, [])
-
-  // Sort everything in descending order
-  groupedByYear.forEach((year) => {
-    // Sort months
-    year.content.sort((a, b) => {
-      const monthA = parseInt(a.title)
-      const monthB = parseInt(b.title)
-      return monthB - monthA
-    })
-
-    // Sort days within each month
-    year.content.forEach((month) => {
-      month.content.sort((a, b) => {
-        const dayA = parseInt(a)
-        const dayB = parseInt(b)
-        return dayB - dayA
-      })
-    })
+    groupedData[year][month].add(day)
   })
 
-  return groupedByYear
+  return Object.entries(groupedData)
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .map(([year, months]) => ({
+      title: year,
+      content: Object.entries(months)
+        .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
+        .map(([month, days]) => ({
+          title: month,
+          content: Array.from(days).sort((a, b) => parseInt(b) - parseInt(a)),
+        })),
+    }))
 }

@@ -23,7 +23,7 @@ const CustomDrawerContent = (props: any) => {
 
   const themeColor = useCurrneThemeColor()
   const sortData = transformWorkoutData(workoutPlanList)
-  console.log("sortData: ", sortData)
+
   const [activeSections2, setActiveSections2] = useState<number[]>([])
   const [multipleSelect2, setMultipleSelect2] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState<string[]>([])
