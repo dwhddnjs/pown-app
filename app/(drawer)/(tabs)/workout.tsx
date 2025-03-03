@@ -26,12 +26,14 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
   const { date: selectedDate } = useSelectDateStore()
+
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const themeColor = useCurrneThemeColor()
   const navigation = useNavigation()
 
   const itemRef = useRef(new Map())
+
   const scrollRef = useRef<ScrollView | null>(null)
   const scrollY = useRef(0)
 
@@ -58,10 +60,12 @@ export default function TabOneScreen() {
   const scrollToSelectedDate = useCallback(() => {
     if (!selectedDate) return
     const targetRef = itemRef.current.get(selectedDate)
+    console.log("targetRef: ", targetRef)
     if (targetRef) {
       targetRef.measureLayout(
         scrollRef.current,
         (x: number, y: number) => {
+          console.log("y: ", y)
           scrollRef.current?.scrollTo({
             y: y - headerHeight - 20,
             animated: true,

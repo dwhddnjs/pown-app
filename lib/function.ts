@@ -46,8 +46,8 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
   data.forEach((item) => {
     const date = new Date(item.createdAt.replace(".", "-").replace(".", "-"))
     const year = `${date.getFullYear()}년`
-    const month = `${date.getMonth() + 1}월`
-    const day = `${date.getDate()}일`
+    const month = `${String(date.getMonth() + 1).padStart(2, "0")}월` // 월을 2자리로 변환
+    const day = `${String(date.getDate()).padStart(2, "0")}일` // 일을 2자리로 변환
 
     if (!groupedData[year]) {
       groupedData[year] = {}

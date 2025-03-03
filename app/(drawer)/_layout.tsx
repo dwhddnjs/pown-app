@@ -20,7 +20,6 @@ const CustomDrawerContent = (props: any) => {
   const [multipleSelect, setMultipleSelect] = useState(false)
 
   const { workoutPlanList } = userWorkoutPlanStore()
-
   const themeColor = useCurrneThemeColor()
   const sortData = transformWorkoutData(workoutPlanList)
 
