@@ -33,94 +33,90 @@ export default function MaxWeights() {
   }
 
   return (
-    <KeyBoardAvoid
-      style={{
-        flex: 1,
-        backgroundColor: Colors[colorScheme ?? "light"].background,
+    <ScrollView
+      style={[
+        styles.main,
+        { backgroundColor: Colors[colorScheme ?? "light"].background },
+      ]}
+      contentContainerStyle={{
+        gap: 48,
       }}
     >
-      <ScrollView
-        style={[
-          styles.main,
-          { backgroundColor: Colors[colorScheme ?? "light"].background },
-        ]}
-      >
-        <View style={styles.sqBpDlO}>
-          <View style={styles.itemContainer}>
-            <Text>스쿼트</Text>
-            <View
+      <View style={styles.sqBpDlO}>
+        <View style={styles.itemContainer}>
+          <Text>스쿼트</Text>
+          <View
+            style={[
+              styles.container,
+              { borderColor: Colors[colorScheme ?? "light"].subText },
+            ]}
+          >
+            <TextInput
               style={[
-                styles.container,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
+                styles.input,
+                { color: Colors[colorScheme ?? "light"].tint },
               ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: Colors[colorScheme ?? "light"].tint },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.sq}
-                onChangeText={(value) => onSetValue("sq", value)}
-                placeholder="0"
-              />
-              <Text>kg</Text>
-            </View>
-          </View>
-          <View style={styles.itemContainer}>
-            <Text>벤치프레스</Text>
-            <View
-              style={[
-                styles.container,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: Colors[colorScheme ?? "light"].tint },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.bp}
-                onChangeText={(value) => onSetValue("bp", value)}
-                placeholder="0"
-              />
-              <Text>kg</Text>
-            </View>
-          </View>
-          <View style={styles.itemContainer}>
-            <Text>데드리프트</Text>
-            <View
-              style={[
-                styles.container,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: Colors[colorScheme ?? "light"].tint },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.dl}
-                onChangeText={(value) => onSetValue("dl", value)}
-                placeholder="0"
-              />
-              <Text>kg</Text>
-            </View>
+              keyboardType="numeric"
+              //   onFocus={(e) => onFocus(e.target)}
+              maxLength={3}
+              value={value.sq}
+              onChangeText={(value) => onSetValue("sq", value)}
+              placeholder="0"
+            />
+            <Text>kg</Text>
           </View>
         </View>
-      </ScrollView>
-      <Button type="submit" onPress={onSubmitWeight}>
+        <View style={styles.itemContainer}>
+          <Text>벤치프레스</Text>
+          <View
+            style={[
+              styles.container,
+              { borderColor: Colors[colorScheme ?? "light"].subText },
+            ]}
+          >
+            <TextInput
+              style={[
+                styles.input,
+                { color: Colors[colorScheme ?? "light"].tint },
+              ]}
+              keyboardType="numeric"
+              //   onFocus={(e) => onFocus(e.target)}
+              maxLength={3}
+              value={value.bp}
+              onChangeText={(value) => onSetValue("bp", value)}
+              placeholder="0"
+            />
+            <Text>kg</Text>
+          </View>
+        </View>
+        <View style={styles.itemContainer}>
+          <Text>데드리프트</Text>
+          <View
+            style={[
+              styles.container,
+              { borderColor: Colors[colorScheme ?? "light"].subText },
+            ]}
+          >
+            <TextInput
+              style={[
+                styles.input,
+                { color: Colors[colorScheme ?? "light"].tint },
+              ]}
+              keyboardType="numeric"
+              //   onFocus={(e) => onFocus(e.target)}
+              maxLength={3}
+              value={value.dl}
+              onChangeText={(value) => onSetValue("dl", value)}
+              placeholder="0"
+            />
+            <Text>kg</Text>
+          </View>
+        </View>
+      </View>
+      <Button type="solid" onPress={onSubmitWeight}>
         저장
       </Button>
-    </KeyBoardAvoid>
+    </ScrollView>
   )
 }
 

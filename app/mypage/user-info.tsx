@@ -57,145 +57,139 @@ export default function UserInfo() {
   }
 
   return (
-    <KeyBoardAvoid
-      style={{
-        flex: 1,
-        backgroundColor: Colors[colorScheme ?? "light"].background,
+    <ScrollView
+      style={[{ backgroundColor: Colors[colorScheme ?? "light"].background }]}
+      contentContainerStyle={{
+        gap: 48,
       }}
     >
-      <ScrollView>
-        {/* 좌 */}
-        <View style={styles.contentContainer}>
-          <View style={styles.sqBpDlO}>
-            <View style={styles.itemContainer}>
-              <Text>키</Text>
-              <View
+      {/* 좌 */}
+      <View style={styles.contentContainer}>
+        <View style={styles.sqBpDlO}>
+          <View style={styles.itemContainer}>
+            <Text>키</Text>
+            <View
+              style={[
+                styles.container,
+                {
+                  borderColor: Colors[colorScheme ?? "light"].subText,
+                },
+              ]}
+            >
+              <TextInput
                 style={[
-                  styles.container,
+                  styles.input,
                   {
-                    borderColor: Colors[colorScheme ?? "light"].subText,
+                    color: Colors[colorScheme ?? "light"].tint,
                   },
                 ]}
-              >
-                <TextInput
-                  style={[
-                    styles.input,
-                    {
-                      color: Colors[colorScheme ?? "light"].tint,
-                    },
-                  ]}
-                  keyboardType="numeric"
-                  //   onFocus={(e) => onFocus(e.target)}
-                  maxLength={3}
-                  value={value.height}
-                  onChangeText={(value) => onSetValue("height", value)}
-                  placeholder="0"
-                />
-                <Text>cm</Text>
-              </View>
-            </View>
-            <View style={styles.itemContainer}>
-              <Text>몸무게</Text>
-              <View
-                style={[
-                  styles.container,
-                  { borderColor: Colors[colorScheme ?? "light"].subText },
-                ]}
-              >
-                <TextInput
-                  style={[
-                    styles.input,
-                    { color: Colors[colorScheme ?? "light"].tint },
-                  ]}
-                  keyboardType="numeric"
-                  //   onFocus={(e) => onFocus(e.target)}
-                  maxLength={3}
-                  value={value.weight}
-                  onChangeText={(value) => onSetValue("weight", value)}
-                  placeholder="0"
-                />
-                <Text>kg</Text>
-              </View>
+                keyboardType="numeric"
+                //   onFocus={(e) => onFocus(e.target)}
+                maxLength={3}
+                value={value.height}
+                onChangeText={(value) => onSetValue("height", value)}
+                placeholder="0"
+              />
+              <Text>cm</Text>
             </View>
           </View>
-
-          {/* 우 */}
-          <View style={styles.sqBpDlO}>
-            <View style={styles.itemContainer}>
-              <Text>나이</Text>
-              <View
+          <View style={styles.itemContainer}>
+            <Text>몸무게</Text>
+            <View
+              style={[
+                styles.container,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
+              <TextInput
                 style={[
-                  styles.container,
-                  { borderColor: Colors[colorScheme ?? "light"].subText },
+                  styles.input,
+                  { color: Colors[colorScheme ?? "light"].tint },
                 ]}
-              >
-                <TextInput
-                  style={[
-                    styles.input,
-                    { color: Colors[colorScheme ?? "light"].tint },
-                  ]}
-                  keyboardType="numeric"
-                  //   onFocus={(e) => onFocus(e.target)}
-                  maxLength={3}
-                  value={value.age}
-                  onChangeText={(value) => onSetValue("age", value)}
-                  placeholder="0"
-                />
-                <Text>살</Text>
-              </View>
+                keyboardType="numeric"
+                //   onFocus={(e) => onFocus(e.target)}
+                maxLength={3}
+                value={value.weight}
+                onChangeText={(value) => onSetValue("weight", value)}
+                placeholder="0"
+              />
+              <Text>kg</Text>
             </View>
-            <View style={[styles.itemContainer, { gap: 10 }]}>
-              <Text>성별</Text>
-              <View style={{ gap: 18 }}>
-                <View style={styles.section}>
-                  <Checkbox
-                    style={styles.checkbox}
-                    value={isChecked.male}
-                    onValueChange={() => onSetCheckBox("male")}
-                    color={
-                      isChecked
-                        ? Colors[colorScheme ?? "light"].tint
-                        : undefined
-                    }
-                  />
-                  <Text
-                    style={{
-                      fontFamily: "sb-l",
-                      color: Colors[colorScheme ?? "light"].tint,
-                    }}
-                  >
-                    남자
-                  </Text>
-                </View>
-                <View style={styles.section}>
-                  <Checkbox
-                    style={styles.checkbox}
-                    value={isChecked.female}
-                    onValueChange={() => onSetCheckBox("female")}
-                    color={
-                      isChecked
-                        ? Colors[colorScheme ?? "light"].tint
-                        : undefined
-                    }
-                  />
-                  <Text
-                    style={{
-                      fontFamily: "sb-l",
-                      color: Colors[colorScheme ?? "light"].tint,
-                    }}
-                  >
-                    여자
-                  </Text>
-                </View>
+          </View>
+        </View>
+
+        {/* 우 */}
+        <View style={styles.sqBpDlO}>
+          <View style={styles.itemContainer}>
+            <Text>나이</Text>
+            <View
+              style={[
+                styles.container,
+                { borderColor: Colors[colorScheme ?? "light"].subText },
+              ]}
+            >
+              <TextInput
+                style={[
+                  styles.input,
+                  { color: Colors[colorScheme ?? "light"].tint },
+                ]}
+                keyboardType="numeric"
+                //   onFocus={(e) => onFocus(e.target)}
+                maxLength={3}
+                value={value.age}
+                onChangeText={(value) => onSetValue("age", value)}
+                placeholder="0"
+              />
+              <Text>살</Text>
+            </View>
+          </View>
+          <View style={[styles.itemContainer, { gap: 10 }]}>
+            <Text>성별</Text>
+            <View style={{ gap: 18 }}>
+              <View style={styles.section}>
+                <Checkbox
+                  style={styles.checkbox}
+                  value={isChecked.male}
+                  onValueChange={() => onSetCheckBox("male")}
+                  color={
+                    isChecked ? Colors[colorScheme ?? "light"].tint : undefined
+                  }
+                />
+                <Text
+                  style={{
+                    fontFamily: "sb-l",
+                    color: Colors[colorScheme ?? "light"].tint,
+                  }}
+                >
+                  남자
+                </Text>
+              </View>
+              <View style={styles.section}>
+                <Checkbox
+                  style={styles.checkbox}
+                  value={isChecked.female}
+                  onValueChange={() => onSetCheckBox("female")}
+                  color={
+                    isChecked ? Colors[colorScheme ?? "light"].tint : undefined
+                  }
+                />
+                <Text
+                  style={{
+                    fontFamily: "sb-l",
+                    color: Colors[colorScheme ?? "light"].tint,
+                  }}
+                >
+                  여자
+                </Text>
               </View>
             </View>
           </View>
         </View>
-      </ScrollView>
-      <Button type="submit" onPress={onSubmitValue}>
+      </View>
+      <Button type="solid" onPress={onSubmitValue}>
         저장
       </Button>
-    </KeyBoardAvoid>
+    </ScrollView>
   )
 }
 
@@ -205,13 +199,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8,
   },
-
   checkbox: {
     // margin: 8,
   },
   main: {
     flex: 1,
     paddingTop: 36,
+    borderWidth: 1,
     flexDirection: "row",
   },
   container: {

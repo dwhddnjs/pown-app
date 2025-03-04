@@ -102,7 +102,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   settings: {
-    borderRadius: 10,
+    borderRadius: 8,
     paddingHorizontal: 16,
     paddingVertical: 14,
     flexDirection: "row",
