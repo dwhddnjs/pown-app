@@ -1,21 +1,72 @@
-import { Button } from "@/components/Button"
+// component
+import {
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import { Text, View } from "@/components/Themed"
-import Colors from "@/constants/Colors"
 import { mockupData } from "@/constants/constants"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { toast } from "sonner-native"
+// zustand
 import { useUserStore } from "@/hooks/use-user-store"
 import {
   userWorkoutPlanStore,
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store"
+// expo
 import { useRouter } from "expo-router"
-import { Pressable, StyleSheet, useColorScheme } from "react-native"
-import { toast } from "sonner-native"
+import * as DocumentPicker from "expo-document-picker"
+import { shareAsync, isAvailableAsync } from "expo-sharing"
+import * as FileSystem from "expo-file-system"
 
 export default function ResetData() {
-  const { onResetPlanList, onSetMockout } = userWorkoutPlanStore()
+  const { onResetPlanList, onSetMockout, workoutPlanList } =
+    userWorkoutPlanStore()
   const { onReset } = useUserStore()
-  const colorScheme = useColorScheme()
   const { back } = useRouter()
+  const themeColor = useCurrneThemeColor()
+  const jsonData = JSON.stringify(workoutPlanList, null, 2)
+  const fileUri = FileSystem.documentDirectory + "pown.json"
+
+  const saveJsonFile = async () => {
+    try {
+      await FileSystem.writeAsStringAsync(fileUri, jsonData, {
+        encoding: FileSystem.EncodingType.UTF8,
+      })
+      if (await isAvailableAsync()) {
+        const res = await shareAsync(fileUri, {
+          mimeType: "application/json",
+        })
+      } else {
+        console.log("공유 안됨")
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  const pickJsonFile = async () => {
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: "application/json",
+      })
+
+      if (result?.assets) {
+        const jsonData = await FileSystem.readAsStringAsync(
+          result?.assets[0]?.uri,
+          {
+            encoding: FileSystem.EncodingType.UTF8,
+          }
+        )
+        onSetMockout(JSON.parse(jsonData))
+        toast.success("운동계획 파일을 불러왔습니다!")
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
   const onSubmit = () => {
     onResetPlanList()
@@ -27,23 +78,57 @@ export default function ResetData() {
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text
-          style={[styles.title, { color: Colors[colorScheme ?? "light"].tint }]}
-        >
-          정말 모든 데이터를 초기화하시겠습니까?
+        <Text style={[styles.title, { color: themeColor.tint }]}>
+          당신이 기록한 운동 계획을 보관하세요.
         </Text>
         <Text style={styles.desc}>
-          기존에 있던 운동 및 유저 정보가 모두 삭제가 됩니다 {"\n"} 그럼에도
-          불구하고 초기화를 진행 하시겠습니까?
+          앱을 삭제하면 기록 했던 모든 운동 계획이 삭제됩니다.{"\n"}나중에
+          당신이 돌아올 수 있다는 여지를 두기 위해{"\n"}백업 파일로 저장해서
+          보관하는건 어떨까요 ?
         </Text>
       </View>
-      <Button type="bordered" onPress={onSubmit}>
-        초기화
-      </Button>
+      <View>
+        <TouchableOpacity
+          style={[
+            styles.item,
+            {
+              backgroundColor: themeColor.itemColor,
+              borderBottomColor: themeColor.background,
+            },
+          ]}
+          onPress={() => saveJsonFile()}
+        >
+          <Text>백업</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.item,
+            {
+              backgroundColor: themeColor.itemColor,
+              borderBottomColor: themeColor.background,
+            },
+          ]}
+          onPress={() => pickJsonFile()}
+        >
+          <Text>복원</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.item,
+            {
+              backgroundColor: themeColor.itemColor,
+              borderBottomColor: themeColor.background,
+            },
+          ]}
+          onPress={() => onSubmit()}
+        >
+          <Text>초기화</Text>
+        </TouchableOpacity>
+      </View>
       <Pressable
         style={{
           alignSelf: "flex-end",
-          marginTop: 400,
+          marginTop: 300,
           width: 50,
           height: 50,
         }}
@@ -61,7 +146,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 36,
-    gap: 48,
+    gap: 36,
   },
 
   textContainer: {
@@ -73,5 +158,14 @@ const styles = StyleSheet.create({
   },
   desc: {
     fontFamily: "sb-l",
+  },
+  item: {
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderBottomWidth: 2,
+
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 })

@@ -36,6 +36,11 @@ export const unstable_settings = {
 }
 SplashScreen.preventAutoHideAsync()
 
+SplashScreen.setOptions({
+  duration: 1000,
+  fade: true,
+})
+
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     "sb-b": require("../assets/fonts/SB_B.otf"),
@@ -51,7 +56,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (loaded) {
-      SplashScreen.hideAsync()
+      SplashScreen.hide()
     }
   }, [loaded])
 

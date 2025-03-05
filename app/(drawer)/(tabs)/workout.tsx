@@ -60,12 +60,10 @@ export default function TabOneScreen() {
   const scrollToSelectedDate = useCallback(() => {
     if (!selectedDate) return
     const targetRef = itemRef.current.get(selectedDate)
-    console.log("targetRef: ", targetRef)
     if (targetRef) {
       targetRef.measureLayout(
         scrollRef.current,
         (x: number, y: number) => {
-          console.log("y: ", y)
           scrollRef.current?.scrollTo({
             y: y - headerHeight - 20,
             animated: true,

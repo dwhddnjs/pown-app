@@ -8,38 +8,18 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff",
-      "dark": {
-        "image": "./assets/images/splash.png",
-        "resizeMode": "contain",
-        "backgroundColor": "#1a1a1a"
-      }
-    },
     "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "jsEngine": "hermes",
-      "bundleIdentifier": "com.anonymous.workout-app",
-      "splash": {
-        "image": "./assets/images/splash.png",
-        "supportsTablet": false,
-        "resizeMode": "contain",
-        "backgroundColor": "#ffffff",
-        "dark": {
-          "image": "./assets/images/splash.png",
-          "resizeMode": "contain",
-          "backgroundColor": "#1a1a1a"
-        }
-      }
+      "bundleIdentifier": "com.anonymous.workout-app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.workoutapp"
     },
     "web": {
       "bundler": "metro",
@@ -68,6 +48,22 @@
         "expo-font",
         {
           "fonts": ["./assets/fonts/SB_M.otf"]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "supportsTablet": false,
+          "backgroundColor": "#ffffff",
+          "image": "./assets/images/icon2.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "dark": {
+            "image": "./assets/images/icon.png",
+            "backgroundColor": "#1a1a1a",
+            "imageWidth": 200,
+            "resizeMode": "contain"
+          }
         }
       ]
     ],

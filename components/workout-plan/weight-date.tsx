@@ -67,7 +67,6 @@ export const WeightDate = ({
 
           case cancelButtonIndex:
             console.log("취소")
-          // Canceled
         }
       }
     )
