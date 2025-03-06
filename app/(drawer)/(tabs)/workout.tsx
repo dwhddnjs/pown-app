@@ -22,6 +22,8 @@ import { useNavigation } from "expo-router"
 import { useHeaderHeight } from "@react-navigation/elements"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// icon
+import InfoIcon from "@expo/vector-icons/FontAwesome6"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
@@ -38,8 +40,8 @@ export default function TabOneScreen() {
   const scrollY = useRef(0)
 
   const measureView = (ref: any, date: string) => {
-    ref.measureLayout(
-      scrollRef.current,
+    ref?.measureLayout(
+      scrollRef?.current,
       (x: number, y: number, width: number, height: number) => {
         if (scrollY.current === 0) {
           const splitData = date.split(".")
@@ -138,14 +140,17 @@ export default function TabOneScreen() {
       />
       <View
         style={{
-          height: 300,
+          height: 200,
           alignItems: "center",
           paddingTop: 80,
         }}
       >
-        <Text style={{ color: themeColor.subText }}>
-          마지막 운동계획입니다.
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+          <Text style={{ color: themeColor.subText }}>
+            마지막 운동계획입니다.
+          </Text>
+        </View>
       </View>
     </ScrollView>
   )

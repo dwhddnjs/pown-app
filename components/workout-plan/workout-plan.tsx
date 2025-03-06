@@ -23,7 +23,6 @@ interface WorkoutPlanProps {
 }
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
-  const colorScheme = useColorScheme()
   const themeColor = useCurrneThemeColor()
   const getWorkoutIcon = (type: string) => {
     let result

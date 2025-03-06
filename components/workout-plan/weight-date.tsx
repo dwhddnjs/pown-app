@@ -1,3 +1,5 @@
+import React from "react"
+// component
 import {
   StyleSheet,
   Text,
@@ -5,19 +7,20 @@ import {
   useColorScheme,
   View,
 } from "react-native"
-import React from "react"
-import Colors from "@/constants/Colors"
+import { toast } from "sonner-native"
+// zustand
 import {
   userWorkoutPlanStore,
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store"
-import { format, formatDate } from "date-fns"
+// lib
 import { formatTime } from "@/lib/function"
-// import { DropDownMenu } from "../DropDownMenu"
+// expo
 import { Ionicons } from "@expo/vector-icons"
 import { useActionSheet } from "@expo/react-native-action-sheet"
 import { useRouter } from "expo-router"
-import { toast } from "sonner-native"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 interface WeightDateProps {
   id: number
@@ -36,7 +39,7 @@ export const WeightDate = ({
   type,
   equipment,
 }: WeightDateProps) => {
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
 
   const { showActionSheetWithOptions } = useActionSheet()
   const { push } = useRouter()
@@ -73,35 +76,23 @@ export const WeightDate = ({
   }
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <View style={styles.dateDropDown}>
-        <Text
-          style={[
-            styles.date,
-            { color: Colors[colorScheme ?? "light"].subText },
-          ]}
-        >
+        <Text style={[styles.date, { color: themeColor.subText }]}>
           {formatTime(date)}
         </Text>
-        <TouchableOpacity onPress={onPress}>
+        <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
           <Ionicons
             name="ellipsis-horizontal"
             size={20}
-            color={Colors[colorScheme ?? "light"].text}
+            color={themeColor.text}
           />
         </TouchableOpacity>
       </View>
       <Text
-        style={[styles.title, { color: Colors[colorScheme ?? "light"].tint }]}
+        style={[styles.title, { color: themeColor.tint }]}
       >{`${equipment} ${workout}`}</Text>
-      <Text
-        style={[styles.weight, { color: Colors[colorScheme ?? "light"].text }]}
-      >
+      <Text style={[styles.weight, { color: themeColor.text }]}>
         {`목표 • ${weight}kg`}{" "}
       </Text>
     </View>
@@ -115,7 +106,6 @@ const styles = StyleSheet.create({
 
   dateDropDown: {
     flexDirection: "row",
-    // alignItems: "flex-end",
     justifyContent: "space-between",
   },
 

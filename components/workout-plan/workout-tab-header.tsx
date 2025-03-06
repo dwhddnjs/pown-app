@@ -22,7 +22,9 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          <DrawerToggleButton tintColor={themeColor.text} />
+          <TouchableOpacity>
+            <DrawerToggleButton tintColor={themeColor.text} />
+          </TouchableOpacity>
           <Text
             style={{
               fontSize: 18,
@@ -33,7 +35,13 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
           >
             {title}
           </Text>
-          <TouchableOpacity onPress={() => push("/workout/search")}>
+          <TouchableOpacity
+            style={{
+              paddingLeft: 12,
+              paddingVertical: 8,
+            }}
+            onPress={() => push("/workout/search")}
+          >
             <FontAwesome name="search" size={20} color={themeColor.text} />
           </TouchableOpacity>
         </View>

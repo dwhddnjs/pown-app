@@ -1,40 +1,28 @@
 import React, { useCallback, useRef, useState } from "react"
 // component
 import { SetCounterSheet } from "@/components/SetCounterSheet"
-import { Text, View } from "@/components/Themed"
+import { Text } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import {
-  Keyboard,
-  ScrollView,
-  StyleSheet,
-  useColorScheme,
-  Dimensions,
-} from "react-native"
+import { ScrollView, StyleSheet } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
 import { ConditionList } from "@/components/add-plan/condition-list"
 import { PlanNote } from "@/components/add-plan/plan-note"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
-import { toast } from "sonner-native"
 // zustand
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { useNoteStore } from "@/hooks/use-note-store"
 // expo
 import {
   useFocusEffect,
   useLocalSearchParams,
   useNavigation,
-  useRouter,
 } from "expo-router"
 // lib
-import { format } from "date-fns"
 import { workoutData } from "@/constants/constants"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
-import { useKeyboardVisible } from "@/hooks/use-keyboard-visible"
 
 export interface InputRefObject {
   measure: (
@@ -49,20 +37,16 @@ export interface InputRefObject {
   ) => void
 }
 
-const { height } = Dimensions.get("window")
-
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
-  const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore()
-  const { onReset, ...result } = usePlanStore()
+  const { onReset } = usePlanStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
 
   const scrollRef = useRef<ScrollView>(null)
   const themeColor = useCurrneThemeColor()
-  const isKeyboardVisible = useKeyboardVisible()
 
   useFocusEffect(
     useCallback(() => {

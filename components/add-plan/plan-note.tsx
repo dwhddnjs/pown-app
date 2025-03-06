@@ -1,37 +1,30 @@
-import {
-  StyleSheet,
-  TextInput,
-  useColorScheme,
-  useWindowDimensions,
-} from "react-native"
 import React, { useRef } from "react"
+// component
+import { StyleSheet, TextInput } from "react-native"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
+// icon
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import Colors from "@/constants/Colors"
 import { Link } from "expo-router"
+// zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
-import { InputRefObject } from "@/app/add-plan/[slug]"
-import { KeyBoardAvoid } from "../KeyBoardAvoid"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const PlanNote = () => {
   const { title, content, setPlanValue } = usePlanStore()
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
 
   return (
     <View style={styles.main}>
       <View style={styles.container}>
-        <IconTitle style={{ gap: 7, paddingLeft: 24 }}>
-          <NoteIcon
-            name="note-text"
-            size={20}
-            color={Colors[colorScheme ?? "light"].tint}
-          />
+        <IconTitle style={{ gap: 7, paddingLeft: 24, paddingBottom: 10 }}>
+          <NoteIcon name="note-text" size={20} color={themeColor.tint} />
           <Text style={{ fontSize: 16 }}>퀵 노트</Text>
         </IconTitle>
         <Link
           href="/(modals)/note"
-          style={[styles.link, { color: Colors[colorScheme ?? "light"].tint }]}
+          style={[styles.link, { color: themeColor.tint }]}
           onPress={() => setPlanValue("content", "")}
         >
           전체노트 열기
@@ -48,8 +41,8 @@ export const PlanNote = () => {
           style={[
             styles.input,
             {
-              borderColor: Colors[colorScheme ?? "light"].subText,
-              color: Colors[colorScheme ?? "light"].text,
+              borderColor: themeColor.subText,
+              color: themeColor.text,
             },
           ]}
           placeholder="특이사항을 적어주세요 (선택)"
@@ -65,7 +58,6 @@ export const PlanNote = () => {
 const styles = StyleSheet.create({
   main: {
     paddingVertical: 12,
-    gap: 10,
   },
   container: {
     flexDirection: "row",
@@ -77,6 +69,8 @@ const styles = StyleSheet.create({
   link: {
     fontSize: 14,
     fontFamily: "sb-l",
+    paddingBottom: 10,
+    paddingLeft: 12,
   },
 
   input: {

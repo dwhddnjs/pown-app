@@ -37,7 +37,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync()
 
 SplashScreen.setOptions({
-  duration: 2000,
+  duration: 1500,
   fade: true,
 })
 
@@ -142,7 +142,7 @@ function RootLayoutNav() {
 
           headerLeft: () => (
             <TouchableOpacity
-              style={{ marginLeft: 3, marginTop: 18 }}
+              style={{ paddingLeft: 3, paddingTop: 18 }}
               onPress={() => navigation.goBack()}
             >
               <XIcon name="x" size={30} color={themeColor.subText} />
@@ -159,7 +159,7 @@ function RootLayoutNav() {
                   setPlanValue("content", content)
                   navigation.goBack()
                 }}
-                style={{ marginRight: 8, marginTop: 18 }}
+                style={{ paddingRight: 8, paddingTop: 18 }}
               >
                 <Checkcircle
                   name="checkcircle"
@@ -186,6 +186,9 @@ function RootLayoutNav() {
             const { onReset } = usePlanStore()
             return (
               <TouchableOpacity
+                style={{
+                  paddingRight: 16,
+                }}
                 onPress={() => {
                   onReset()
                   navigation.goBack()
@@ -225,7 +228,10 @@ function RootLayoutNav() {
                   }
                   return toast.error("운동과 목표 중량은 필수에요..")
                 }}
-                style={{ marginRight: 8 }}
+                style={{
+                  paddingRight: 8,
+                  paddingLeft: 16,
+                }}
               >
                 <Checkcircle
                   name="checkcircle"
@@ -252,6 +258,9 @@ function RootLayoutNav() {
             const { onReset } = usePlanStore()
             return (
               <TouchableOpacity
+                style={{
+                  paddingRight: 16,
+                }}
                 onPress={() => {
                   onReset()
                   navigation.goBack()
@@ -298,7 +307,10 @@ function RootLayoutNav() {
                   }
                   return toast.error("운동과 목표 중량은 필수에요..")
                 }}
-                style={{ marginRight: 8 }}
+                style={{
+                  paddingRight: 8,
+                  paddingLeft: 16,
+                }}
               >
                 <Checkcircle
                   name="checkcircle"
@@ -367,7 +379,11 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity
-              style={{ marginLeft: 4 }}
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
               onPress={() => navigation.goBack()}
             >
               <ArrowIcon name="down" size={30} color={themeColor.subText} />
@@ -383,7 +399,11 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity
-              style={{ marginLeft: 4 }}
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
               onPress={() => navigation.goBack()}
             >
               <ArrowIcon name="down" size={30} color={themeColor.subText} />
@@ -398,7 +418,11 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity
-              style={{ marginLeft: 4 }}
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
               onPress={() => navigation.goBack()}
             >
               <ArrowIcon name="down" size={30} color={themeColor.subText} />
@@ -413,7 +437,11 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity
-              style={{ marginLeft: 4 }}
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
               onPress={() => navigation.goBack()}
             >
               <ArrowIcon name="down" size={30} color={themeColor.subText} />
