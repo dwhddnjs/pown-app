@@ -2,7 +2,7 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -54,7 +54,7 @@
         "expo-splash-screen",
         {
           "supportsTablet": false,
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#EFEEF3",
           "image": "./assets/images/icon2.png",
           "imageWidth": 200,
           "resizeMode": "contain",

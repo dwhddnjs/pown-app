@@ -25,7 +25,6 @@ export default function ThemeMode() {
     setUser("theme", theme)
     Appearance.setColorScheme(result as Exclude<typeof result, "system">)
     back()
-    toast.success("컬러모드가 변경 되었습니다!")
   }
 
   return (

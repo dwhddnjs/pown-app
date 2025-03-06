@@ -6,7 +6,7 @@ export const KeyBoardAvoid = ({ children, aosOffset = 0, ...props }: any) => {
   const [statusBarHeight, setStatusBarHeight] = useState(0)
   useEffect(() => {
     if (Platform.OS === "ios") {
-      StatusBarManager.getHeight((statusBarFrameData: any) => {
+      StatusBarManager?.getHeight((statusBarFrameData: any) => {
         setStatusBarHeight(statusBarFrameData.height)
       })
     }

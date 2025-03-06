@@ -37,7 +37,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync()
 
 SplashScreen.setOptions({
-  duration: 1000,
+  duration: 2000,
   fade: true,
 })
 
@@ -409,7 +409,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="mypage/reset-data"
         options={({ navigation }) => ({
-          headerTitle: "데이터 초기화",
+          headerTitle: "데이터 관리",
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity

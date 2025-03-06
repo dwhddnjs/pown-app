@@ -87,7 +87,7 @@ export default function TabTwoScreen() {
               size={20}
               color={themeColor.tint}
             />
-            <Text>데이터 초기화</Text>
+            <Text>데이터 관리</Text>
           </IconTitle>
           <AntDesign name="up" size={20} color={themeColor.subText} />
         </TouchableOpacity>
