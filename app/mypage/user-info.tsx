@@ -1,26 +1,33 @@
-import { ScrollView, StyleSheet, TextInput, useColorScheme } from "react-native"
 import React, { useState } from "react"
-import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
-import Colors from "@/constants/Colors"
+// component
+import { ScrollView, StyleSheet } from "react-native"
 import { Button } from "@/components/Button"
 import { Text, View } from "@/components/Themed"
-import Checkbox from "expo-checkbox"
-import { useUserStore } from "@/hooks/use-user-store"
-import { router, useRouter } from "expo-router"
 import { toast } from "sonner-native"
+import { TitleInput } from "@/components/mypage/title-input"
+// expo
+import Checkbox from "expo-checkbox"
+import { router, useRouter } from "expo-router"
+// zustand
+import { useUserStore } from "@/hooks/use-user-store"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function UserInfo() {
   const { setUserData, ...result } = useUserStore()
-  const colorScheme = useColorScheme()
   const [value, setValue] = useState({
     height: result.weight ?? "",
     age: result.age ?? "",
     weight: result.weight ?? "",
+    sq: result.sq ?? "",
+    bp: result.bp ?? "",
+    dl: result.dl ?? "",
   })
   const [isChecked, setChecked] = useState({
     male: result.gender === "male" ? true : false,
     female: result.gender === "female" ? true : false,
   })
+  const themeColor = useCurrneThemeColor()
 
   const { back } = useRouter()
 
@@ -48,6 +55,16 @@ export default function UserInfo() {
   }
 
   const onSubmitValue = () => {
+    if (
+      !value.height ||
+      !value.age ||
+      !value.weight ||
+      !value.sq ||
+      !value.bp ||
+      !value.dl
+    ) {
+      return toast.error("정보를 모두 기입해주세요!")
+    }
     setUserData({
       ...value,
       gender: isChecked.male ? "male" : isChecked.female ? "female" : null,
@@ -57,139 +74,123 @@ export default function UserInfo() {
   }
 
   return (
-    <ScrollView
-      style={[{ backgroundColor: Colors[colorScheme ?? "light"].background }]}
-      contentContainerStyle={{
-        gap: 48,
-      }}
-    >
-      {/* 좌 */}
-      <View style={styles.contentContainer}>
-        <View style={styles.sqBpDlO}>
-          <View style={styles.itemContainer}>
-            <Text>키</Text>
-            <View
-              style={[
-                styles.container,
-                {
-                  borderColor: Colors[colorScheme ?? "light"].subText,
-                },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    color: Colors[colorScheme ?? "light"].tint,
-                  },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.height}
-                onChangeText={(value) => onSetValue("height", value)}
-                placeholder="0"
+    <View style={{ flex: 1, paddingBottom: 48 }}>
+      <ScrollView
+        style={[{ backgroundColor: themeColor.background }]}
+        contentContainerStyle={{
+          gap: 24,
+          paddingTop: 24,
+          paddingHorizontal: 24,
+        }}
+      >
+        <View style={styles.textContainer}>
+          <Text style={[styles.title, { color: themeColor.tint }]}>
+            당신의 정보를 입력하세요.
+          </Text>
+          <Text style={styles.desc}>
+            3대 중량, 나이, 성별, 신체 정보를 기입해보세요. 또한 중량을 늘때
+            마다 기록을 갱신 해보세요. 그리고 뭐 혹시 키가 클수도 있지 않을까요
+            성장기라면?
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <TitleInput
+            title="스쿼트"
+            label="kg"
+            value={value.sq}
+            onChangeValue={onSetValue}
+            type="sq"
+          />
+          <TitleInput
+            title="벤치프레스"
+            label="kg"
+            value={value.bp}
+            onChangeValue={onSetValue}
+            type="bp"
+          />
+          <TitleInput
+            title="데드리프트"
+            label="kg"
+            value={value.dl}
+            onChangeValue={onSetValue}
+            type="dl"
+          />
+        </View>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          <TitleInput
+            title="키"
+            label="cm"
+            value={value.height}
+            onChangeValue={onSetValue}
+            type="height"
+          />
+          <TitleInput
+            title="몸무게"
+            label="kg"
+            value={value.weight}
+            onChangeValue={onSetValue}
+            type="weight"
+          />
+          <TitleInput
+            title="나이"
+            label="살"
+            value={value.age}
+            onChangeValue={onSetValue}
+            type="age"
+          />
+        </View>
+        <View style={{ gap: 8 }}>
+          <Text>성별</Text>
+          <View style={{ gap: 18, flexDirection: "row" }}>
+            <View style={styles.section}>
+              <Checkbox
+                style={styles.checkbox}
+                value={isChecked.male}
+                onValueChange={() => onSetCheckBox("male")}
+                color={isChecked ? themeColor.tint : undefined}
               />
-              <Text>cm</Text>
+              <Text
+                style={{
+                  fontFamily: "sb-l",
+                  color: themeColor.tint,
+                }}
+              >
+                남자
+              </Text>
             </View>
-          </View>
-          <View style={styles.itemContainer}>
-            <Text>몸무게</Text>
-            <View
-              style={[
-                styles.container,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: Colors[colorScheme ?? "light"].tint },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.weight}
-                onChangeText={(value) => onSetValue("weight", value)}
-                placeholder="0"
+            <View style={styles.section}>
+              <Checkbox
+                style={styles.checkbox}
+                value={isChecked.female}
+                onValueChange={() => onSetCheckBox("female")}
+                color={isChecked ? themeColor.tint : undefined}
               />
-              <Text>kg</Text>
+              <Text
+                style={{
+                  fontFamily: "sb-l",
+                  color: themeColor.tint,
+                }}
+              >
+                여자
+              </Text>
             </View>
           </View>
         </View>
-
-        {/* 우 */}
-        <View style={styles.sqBpDlO}>
-          <View style={styles.itemContainer}>
-            <Text>나이</Text>
-            <View
-              style={[
-                styles.container,
-                { borderColor: Colors[colorScheme ?? "light"].subText },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  { color: Colors[colorScheme ?? "light"].tint },
-                ]}
-                keyboardType="numeric"
-                //   onFocus={(e) => onFocus(e.target)}
-                maxLength={3}
-                value={value.age}
-                onChangeText={(value) => onSetValue("age", value)}
-                placeholder="0"
-              />
-              <Text>살</Text>
-            </View>
-          </View>
-          <View style={[styles.itemContainer, { gap: 10 }]}>
-            <Text>성별</Text>
-            <View style={{ gap: 18 }}>
-              <View style={styles.section}>
-                <Checkbox
-                  style={styles.checkbox}
-                  value={isChecked.male}
-                  onValueChange={() => onSetCheckBox("male")}
-                  color={
-                    isChecked ? Colors[colorScheme ?? "light"].tint : undefined
-                  }
-                />
-                <Text
-                  style={{
-                    fontFamily: "sb-l",
-                    color: Colors[colorScheme ?? "light"].tint,
-                  }}
-                >
-                  남자
-                </Text>
-              </View>
-              <View style={styles.section}>
-                <Checkbox
-                  style={styles.checkbox}
-                  value={isChecked.female}
-                  onValueChange={() => onSetCheckBox("female")}
-                  color={
-                    isChecked ? Colors[colorScheme ?? "light"].tint : undefined
-                  }
-                />
-                <Text
-                  style={{
-                    fontFamily: "sb-l",
-                    color: Colors[colorScheme ?? "light"].tint,
-                  }}
-                >
-                  여자
-                </Text>
-              </View>
-            </View>
-          </View>
-        </View>
-      </View>
+      </ScrollView>
       <Button type="solid" onPress={onSubmitValue}>
         저장
       </Button>
-    </ScrollView>
+    </View>
   )
 }
 
@@ -198,6 +199,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
+  },
+  textContainer: {
+    gap: 12,
+  },
+  title: {
+    fontSize: 18,
+  },
+  desc: {
+    fontFamily: "sb-l",
   },
   checkbox: {
     // margin: 8,

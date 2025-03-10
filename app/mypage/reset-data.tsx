@@ -145,8 +145,8 @@ export default function ResetData() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 36,
-    gap: 36,
+    paddingTop: 24,
+    gap: 24,
   },
 
   textContainer: {

@@ -1,12 +1,15 @@
-import { StyleSheet, useColorScheme } from "react-native"
 import React from "react"
-import Colors from "@/constants/Colors"
+// component
+import { StyleSheet, useColorScheme } from "react-native"
 import { Text, View } from "../Themed"
+// zustand
 import { useUserStore } from "@/hooks/use-user-store"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const UserDataCard = () => {
   const { ...result } = useUserStore()
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
   const weightMax = [
     { id: 1, title: "스쿼트", weight: result.sq ?? 0 },
     { id: 2, title: "벤치프레스", weight: result.bp ?? 0 },
@@ -29,48 +32,13 @@ export const UserDataCard = () => {
   ]
 
   return (
-    <View
-      style={[
-        styles.userData,
-        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
-      ]}
-    >
-      {/* 무게 */}
-      <View
-        style={[
-          styles.weight,
-          {
-            gap: 52,
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
-          },
-        ]}
-      >
-        {useData.map((item) => (
-          <View
-            key={item.id}
-            style={[
-              styles.weightItem,
-              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
-            ]}
-          >
-            <Text
-              style={[
-                styles.weightTitle,
-                { color: Colors[colorScheme ?? "light"].tint },
-              ]}
-            >
-              {item.title}
-            </Text>
-            <Text style={styles.weightKg}>{`${item.weight}`}</Text>
-          </View>
-        ))}
-      </View>
+    <View style={[styles.userData, { backgroundColor: themeColor.itemColor }]}>
       <View
         style={[
           styles.weight,
           {
             gap: 46,
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            backgroundColor: themeColor.itemColor,
           },
         ]}
       >
@@ -79,15 +47,35 @@ export const UserDataCard = () => {
             key={item.id}
             style={[
               styles.weightItem,
-              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+              { backgroundColor: themeColor.itemColor },
             ]}
           >
-            <Text
-              style={[
-                styles.weightTitle,
-                { color: Colors[colorScheme ?? "light"].tint },
-              ]}
-            >
+            <Text style={[styles.weightTitle, { color: themeColor.tint }]}>
+              {item.title}
+            </Text>
+            <Text style={styles.weightKg}>{`${item.weight}`}</Text>
+          </View>
+        ))}
+      </View>
+      {/* 무게 */}
+      <View
+        style={[
+          styles.weight,
+          {
+            gap: 52,
+            backgroundColor: themeColor.itemColor,
+          },
+        ]}
+      >
+        {useData.map((item) => (
+          <View
+            key={item.id}
+            style={[
+              styles.weightItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
+            <Text style={[styles.weightTitle, { color: themeColor.tint }]}>
               {item.title}
             </Text>
             <Text style={styles.weightKg}>{`${item.weight}`}</Text>

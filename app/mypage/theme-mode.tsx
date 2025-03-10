@@ -29,6 +29,15 @@ export default function ThemeMode() {
 
   return (
     <View style={styles.main}>
+      <View style={styles.textContainer}>
+        <Text style={[styles.title, { color: themeColor.tint }]}>
+          컬러모드를 선택해 보세요!
+        </Text>
+        <Text style={styles.desc}>
+          다크모드가 마음에 안 들면 라이트모드로 사용해보세요 밝은 화면과 좋은
+          눈뽕이 당신과 함께 할 것 입니다 하지만 다크모드를 권장합니다.
+        </Text>
+      </View>
       <TouchableOpacity
         style={[
           styles.item,
@@ -80,7 +89,7 @@ export default function ThemeMode() {
 
 const styles = StyleSheet.create({
   main: {
-    paddingTop: 36,
+    paddingTop: 24,
     flex: 1,
   },
   item: {
@@ -91,5 +100,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+  },
+  textContainer: {
+    gap: 12,
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  title: {
+    fontSize: 18,
+  },
+  desc: {
+    fontFamily: "sb-l",
   },
 })

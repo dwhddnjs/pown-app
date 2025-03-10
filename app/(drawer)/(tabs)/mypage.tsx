@@ -44,22 +44,6 @@ export default function TabTwoScreen() {
           <AntDesign name="up" size={20} color={themeColor.subText} />
         </TouchableOpacity>
 
-        {/* 3대중량 */}
-        <TouchableOpacity
-          style={[styles.settings, { backgroundColor: themeColor.itemColor }]}
-          onPress={() => push("/mypage/max-weights")}
-        >
-          <IconTitle style={{ backgroundColor: themeColor.itemColor }}>
-            <MaterialCommunityIcons
-              name="weight-kilogram"
-              size={20}
-              color={themeColor.tint}
-            />
-            <Text>3대중량 기입</Text>
-          </IconTitle>
-          <AntDesign name="up" size={20} color={themeColor.subText} />
-        </TouchableOpacity>
-
         {/* 컬러모드 */}
         <TouchableOpacity
           style={[styles.settings, { backgroundColor: themeColor.itemColor }]}

@@ -13,8 +13,6 @@ import { useFonts } from "expo-font"
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
-// style
-import Colors from "@/constants/Colors"
 // icons
 import XIcon from "@expo/vector-icons/Feather"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
@@ -27,6 +25,7 @@ import { useNoteStore } from "@/hooks/use-note-store"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { useUserStore } from "@/hooks/use-user-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+// hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export { ErrorBoundary } from "expo-router"
@@ -37,7 +36,7 @@ export const unstable_settings = {
 SplashScreen.preventAutoHideAsync()
 
 SplashScreen.setOptions({
-  duration: 1500,
+  duration: 1000,
   fade: true,
 })
 
@@ -49,10 +48,6 @@ export default function RootLayout() {
   })
   const colorScheme = useColorScheme()
   const { theme } = useUserStore()
-
-  useEffect(() => {
-    if (error) throw error
-  }, [error])
 
   useEffect(() => {
     if (loaded) {
@@ -73,6 +68,10 @@ export default function RootLayout() {
       Appearance.setColorScheme("light")
     }
   }, [])
+
+  useEffect(() => {
+    if (error) throw error
+  }, [error])
 
   if (!loaded) {
     return null
@@ -376,26 +375,6 @@ function RootLayoutNav() {
           headerTitleStyle: {
             fontFamily: "sb-m",
           },
-          animation: "slide_from_bottom",
-          headerLeft: () => (
-            <TouchableOpacity
-              style={{
-                paddingLeft: 4,
-                paddingRight: 12,
-                paddingVertical: 4,
-              }}
-              onPress={() => navigation.goBack()}
-            >
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      <Stack.Screen
-        name="mypage/max-weights"
-        options={({ navigation }) => ({
-          headerTitle: "3대 중량",
-          // headerShadowVisible: false,
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity
