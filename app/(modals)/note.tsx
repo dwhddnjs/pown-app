@@ -1,13 +1,15 @@
-import { StyleSheet, TextInput, useColorScheme } from "react-native"
 import React from "react"
+// component
+import { StyleSheet, TextInput, useColorScheme } from "react-native"
 import { View } from "@/components/Themed"
-import Colors from "@/constants/Colors"
+// zustand
 import { useNoteStore } from "@/hooks/use-note-store"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function note() {
   const { title, content, setValue } = useNoteStore()
-  const colorScheme = useColorScheme()
-
+  const themeColor = useCurrneThemeColor()
   return (
     <View style={styles.container}>
       <TextInput
@@ -16,8 +18,8 @@ export default function note() {
         style={[
           styles.titleInput,
           {
-            color: Colors[colorScheme ?? "light"].text,
-            borderBottomColor: Colors[colorScheme ?? "light"].subText,
+            color: themeColor.text,
+            borderBottomColor: themeColor.subText,
           },
         ]}
         onChangeText={(value) => setValue("title", value)}
@@ -29,7 +31,7 @@ export default function note() {
         style={[
           styles.descInput,
           {
-            color: Colors[colorScheme ?? "light"].text,
+            color: themeColor.text,
           },
         ]}
         placeholder="설명을 넣어주세요..."

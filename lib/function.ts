@@ -71,3 +71,25 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
         })),
     }))
 }
+
+export const sortWorkoutPlanList = (list: WorkoutPlanTypes[]) => {
+  const result = { chest: 0, back: 0, arm: 0, leg: 0, shoulder: 0 }
+  return list.reduce((acc: any, item) => {
+    acc[item.type] = (acc[item.type] || 0) + 1
+    return acc
+  }, result)
+}
+
+export const convertChartValuesToPercentage = (
+  data: { value: number; color: string }[]
+) => {
+  const total = data.reduce((sum, item) => sum + item.value, 0)
+
+  if (total === 0) return data
+
+  return data.map((item) => ({
+    ...item,
+    value: Math.round(parseFloat(((item.value / total) * 100).toFixed(2))),
+    text: `${Math.round(parseFloat(((item.value / total) * 100).toFixed(2)))}%`,
+  }))
+}

@@ -9,6 +9,8 @@ import { router, Tabs } from "expo-router"
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { SymbolView } from "expo-symbols"
+import Entypo from "@expo/vector-icons/Entypo"
+
 //color
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
@@ -34,6 +36,7 @@ export default function TabLayout() {
     },
     tabBarLabelStyle: {
       fontFamily: "sb-m",
+      fontSize: 8,
     },
   }
 
@@ -58,6 +61,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="chart"
+        options={{
+          title: "차트",
+          tabBarIcon: ({ color }) => (
+            <AntDesign name="piechart" size={24} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="add"
         options={{
           tabBarIcon: ({ color }) => (
@@ -73,6 +86,15 @@ export default function TabLayout() {
             router.push("/(modals)/select-type")
           },
         })}
+      />
+      <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "캘린더",
+          tabBarIcon: ({ color }) => (
+            <Entypo name="calendar" size={24} color={color} />
+          ),
+        }}
       />
       <Tabs.Screen
         name="mypage"
