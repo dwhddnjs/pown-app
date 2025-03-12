@@ -2,7 +2,7 @@ import { storage } from "@/lib/storage"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
-export type UserTypes = {
+export type UserInfoTypes = {
   height: string | null
   age: string | null
   weight: string | null
@@ -10,46 +10,34 @@ export type UserTypes = {
   bp: string | null
   sq: string | null
   dl: string | null
+  createdAt: string
+}
+
+export type UserTypes = {
+  userInfo: UserInfoTypes[]
   theme: "light" | "dark" | "system"
   setUser: (type: string, value: string) => void
-  setUserData: (
-    value:
-      | Pick<UserTypes, "bp" | "sq" | "dl">
-      | Pick<UserTypes, "height" | "age" | "gender" | "weight">
-  ) => void
+  setUserData: (value: UserInfoTypes) => void
   onReset: () => void
 }
 
 export const useUserStore = create<UserTypes>()(
   persist(
     (set) => ({
-      height: null,
-      age: null,
-      weight: null,
-      gender: null,
-      bp: null,
-      sq: null,
-      dl: null,
+      userInfo: [],
       theme: "system",
       setUserData: (value) =>
         set((prev) => ({
           ...prev,
-          ...value,
+          userInfo: [...prev.userInfo, value],
         })),
       setUser: (type, value) =>
         set({
           [type]: value,
         }),
-
       onReset: () =>
         set({
-          height: null,
-          age: null,
-          weight: null,
-          gender: null,
-          bp: null,
-          sq: null,
-          dl: null,
+          userInfo: [],
           theme: "system",
         }),
     }),

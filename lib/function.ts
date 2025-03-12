@@ -93,3 +93,108 @@ export const convertChartValuesToPercentage = (
     text: `${Math.round(parseFloat(((item.value / total) * 100).toFixed(2)))}%`,
   }))
 }
+
+export const getConditionCount = (workoutPlanList: WorkoutPlanTypes[]) => {
+  const result = {
+    good: 0,
+    tired: 0,
+    angry: 0,
+    sick: 0,
+    sad: 0,
+    lol: 0,
+    cool: 0,
+    neutral: 0,
+    anoy: 0,
+  }
+  const getConditionList = workoutPlanList
+    .map((item: WorkoutPlanTypes) => item.condition)
+    .flat()
+
+  return getConditionList.reduce((acc: any, item: string) => {
+    if (item === "좋음") {
+      acc["good"] = (acc["good"] || 0) + 1
+    }
+    if (item === "피곤함") {
+      acc["tired"] = (acc["tired"] || 0) + 1
+    }
+    if (item === "화남") {
+      acc["angry"] = (acc["angry"] || 0) + 1
+    }
+    if (item === "아픔") {
+      acc["sick"] = (acc["sick"] || 0) + 1
+    }
+    if (item === "슬픔") {
+      acc["sad"] = (acc["sad"] || 0) + 1
+    }
+    if (item === "신남") {
+      acc["lol"] = (acc["lol"] || 0) + 1
+    }
+    if (item === "상쾌함") {
+      acc["cool"] = (acc["cool"] || 0) + 1
+    }
+    if (item === "양호함") {
+      acc["neutral"] = (acc["neutral"] || 0) + 1
+    }
+    if (item === "짜증남") {
+      acc["anoy"] = (acc["anoy"] || 0) + 1
+    }
+    return acc
+  }, result)
+}
+
+export const convertConditionType = (type: string) => {
+  switch (type) {
+    case "좋음":
+      return "good"
+    case "피곤함":
+      return "tired"
+    case "화남":
+      return "angry"
+    case "아픔":
+      return "sick"
+    case "슬픔":
+      return "sad"
+    case "신남":
+      return "lol"
+    case "상쾌함":
+      return "cool"
+    case "양호함":
+      return "neutral"
+    case "짜증남":
+      return "anoy"
+  }
+}
+
+export const getEquipmentCount = (data: WorkoutPlanTypes[]) => {
+  const result = {
+    babel: 0,
+    dumbel: 0,
+    machine: 0,
+    smith: 0,
+    cable: 0,
+    body: 0,
+  }
+  const equipmentList = data.map((item: WorkoutPlanTypes) => item.equipment)
+
+  return equipmentList.reduce((acc: any, item: string) => {
+    if (item === "바벨") {
+      acc["babel"] = (acc["babel"] || 0) + 1
+    }
+    if (item === "덤벨") {
+      acc["dumbel"] = (acc["dumbel"] || 0) + 1
+    }
+    if (item === "머신") {
+      acc["machine"] = (acc["machine"] || 0) + 1
+    }
+    if (item === "스미스") {
+      acc["smith"] = (acc["smith"] || 0) + 1
+    }
+    if (item === "케이블") {
+      acc["cable"] = (acc["cable"] || 0) + 1
+    }
+    if (item === "맨몸") {
+      acc["body"] = (acc["body"] || 0) + 1
+    }
+    return acc
+  }, result)
+}

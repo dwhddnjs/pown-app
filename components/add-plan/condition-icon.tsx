@@ -14,6 +14,7 @@ import SadIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import LolIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import NeutralIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import AnoyIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import CoolIcon from "@expo/vector-icons/MaterialCommunityIcons"
 
 interface ConditionIconProps {
   item: {
@@ -42,10 +43,10 @@ export const getIcon = (value: string, size: number, color: string) => {
       result = <SadIcon name="emoticon-cry" size={size} color={color} />
       break
     case "신남":
-      result = <SadIcon name="emoticon-cry" size={size} color={color} />
+      result = <LolIcon name="emoticon-lol" size={size} color={color} />
       break
     case "상쾌함":
-      result = <LolIcon name="emoticon-lol" size={size} color={color} />
+      result = <CoolIcon name="emoticon-cool" size={size} color={color} />
       break
     case "양호함":
       result = <NeutralIcon name="emoticon-neutral" size={size} color={color} />

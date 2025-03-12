@@ -8,24 +8,25 @@ import { useUserStore } from "@/hooks/use-user-store"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const UserDataCard = () => {
-  const { ...result } = useUserStore()
+  const { userInfo } = useUserStore()
+  const currentUserInfo = userInfo[userInfo.length - 1]
   const themeColor = useCurrneThemeColor()
   const weightMax = [
-    { id: 1, title: "스쿼트", weight: result.sq ?? 0 },
-    { id: 2, title: "벤치프레스", weight: result.bp ?? 0 },
-    { id: 3, title: "데드리프트", weight: result.dl ?? 0 },
+    { id: 1, title: "스쿼트", weight: currentUserInfo.sq ?? 0 },
+    { id: 2, title: "벤치프레스", weight: currentUserInfo.bp ?? 0 },
+    { id: 3, title: "데드리프트", weight: currentUserInfo.dl ?? 0 },
   ]
   const useData = [
-    { id: 1, title: "키", weight: result.height ?? 0 },
-    { id: 2, title: "몸무게", weight: result.weight ?? 0 },
-    { id: 3, title: "나이", weight: result.age ?? 0 },
+    { id: 1, title: "키", weight: currentUserInfo.height ?? 0 },
+    { id: 2, title: "몸무게", weight: currentUserInfo.weight ?? 0 },
+    { id: 3, title: "나이", weight: currentUserInfo.age ?? 0 },
     {
       id: 4,
       title: "성별",
       weight:
-        result.gender === "male"
+        currentUserInfo.gender === "male"
           ? "남자"
-          : result.gender === "female"
+          : currentUserInfo.gender === "female"
           ? "여자"
           : "없음",
     },

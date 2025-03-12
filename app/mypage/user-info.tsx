@@ -12,20 +12,26 @@ import { router, useRouter } from "expo-router"
 import { useUserStore } from "@/hooks/use-user-store"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+//lib
+import { format } from "date-fns"
 
 export default function UserInfo() {
-  const { setUserData, ...result } = useUserStore()
+  const { setUserData, userInfo } = useUserStore()
+
+  const lastestUserInfo = userInfo[userInfo.length - 1]
+
   const [value, setValue] = useState({
-    height: result.weight ?? "",
-    age: result.age ?? "",
-    weight: result.weight ?? "",
-    sq: result.sq ?? "",
-    bp: result.bp ?? "",
-    dl: result.dl ?? "",
+    height: lastestUserInfo?.weight ?? "",
+    age: lastestUserInfo?.age ?? "",
+    weight: lastestUserInfo?.weight ?? "",
+    sq: lastestUserInfo?.sq ?? "",
+    bp: lastestUserInfo?.bp ?? "",
+    dl: lastestUserInfo?.dl ?? "",
   })
+
   const [isChecked, setChecked] = useState({
-    male: result.gender === "male" ? true : false,
-    female: result.gender === "female" ? true : false,
+    male: lastestUserInfo?.gender === "male" ? true : false,
+    female: lastestUserInfo?.gender === "female" ? true : false,
   })
   const themeColor = useCurrneThemeColor()
 
@@ -68,6 +74,7 @@ export default function UserInfo() {
     setUserData({
       ...value,
       gender: isChecked.male ? "male" : isChecked.female ? "female" : null,
+      createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
     })
     toast.success("내정보가 추가 되었습니다!")
     back()

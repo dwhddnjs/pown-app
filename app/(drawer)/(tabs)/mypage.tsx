@@ -22,6 +22,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 export default function TabTwoScreen() {
   const { onReset, ...result } = useUserStore()
   const themeColor = useCurrneThemeColor()
+
   const { push } = useRouter()
 
   return (

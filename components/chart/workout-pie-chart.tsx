@@ -48,6 +48,7 @@ const WorkoutPieChart = () => {
                 flexDirection: "row",
                 backgroundColor: themeColor.itemColor,
               }}
+              key={item.title}
             >
               <Text style={{ color: item.color, fontSize: 12 }}>
                 {item.title} :{" "}
