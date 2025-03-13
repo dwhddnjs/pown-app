@@ -1,56 +1,50 @@
-import { StyleSheet } from "react-native"
 import React from "react"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// component
+import { StyleSheet } from "react-native"
 import { Text, View } from "../Themed"
 import { BarChart, ruleTypes } from "react-native-gifted-charts"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// zustand
+import { useUserStore } from "@/hooks/use-user-store"
 
 const SbdChart = () => {
+  const { userInfo } = useUserStore()
+  const firstWeight = userInfo[0]
+  const lastestWeight = userInfo[userInfo.length - 1]
+
   const themeColor = useCurrneThemeColor()
   const data = [
     {
-      value: 2500,
-      frontColor: "#006DFF",
-      gradientColor: "#009FFF",
-      spacing: 6,
-      label: "Jan",
+      value: firstWeight?.sq,
+      frontColor: themeColor?.subText,
+      spacing: 8,
+      label: "스쿼트",
     },
-    { value: 2400, frontColor: "#3BE9DE", gradientColor: "#93FCF8" },
-
     {
-      value: 3500,
-      frontColor: "#006DFF",
-      gradientColor: "#009FFF",
-      spacing: 6,
-      label: "Feb",
+      value: lastestWeight?.sq,
+      frontColor: themeColor?.tint,
     },
-    { value: 3000, frontColor: "#3BE9DE", gradientColor: "#93FCF8" },
-
     {
-      value: 4500,
-      frontColor: "#006DFF",
-      gradientColor: "#009FFF",
-      spacing: 6,
-      label: "Mar",
+      value: firstWeight?.bp,
+      frontColor: themeColor?.subText,
+      spacing: 8,
+      label: "벤치프레스",
     },
-    { value: 4000, frontColor: "#3BE9DE", gradientColor: "#93FCF8" },
-
     {
-      value: 5200,
-      frontColor: "#006DFF",
-      gradientColor: "#009FFF",
-      spacing: 6,
-      label: "Apr",
+      value: lastestWeight?.bp,
+      frontColor: themeColor?.tint,
     },
-    { value: 4900, frontColor: "#3BE9DE", gradientColor: "#93FCF8" },
-
     {
-      value: 3000,
-      frontColor: "#006DFF",
-      gradientColor: "#009FFF",
-      spacing: 6,
-      label: "May",
+      value: firstWeight?.dl,
+      frontColor: themeColor?.subText,
+      spacing: 8,
+      label: "데드리프트",
     },
-    { value: 2800, frontColor: "#3BE9DE", gradientColor: "#93FCF8" },
+    {
+      value: lastestWeight?.dl,
+      frontColor: themeColor?.tint,
+    },
   ]
   return (
     <View style={[styles(themeColor).container]}>
@@ -64,30 +58,38 @@ const SbdChart = () => {
         }}
       >
         <BarChart
-          data={data}
-          barWidth={16}
-          initialSpacing={10}
-          spacing={14}
+          data={data as any}
+          barWidth={28}
+          disableScroll
           barBorderRadius={4}
-          showGradient
-          yAxisThickness={0}
-          xAxisType={ruleTypes.DASHED}
-          xAxisColor={"lightgray"}
-          yAxisTextStyle={{ color: "lightgray" }}
-          stepValue={1000}
-          maxValue={6000}
-          noOfSections={6}
-          yAxisLabelTexts={["0", "1k", "2k", "3k", "4k", "5k", "6k"]}
-          labelWidth={40}
-          xAxisLabelTextStyle={{ color: "lightgray", textAlign: "center" }}
+          yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
+          stepValue={50}
+          maxValue={300}
+          yAxisLabelTexts={["0", "50", "100", "150", "200", "250"]}
+          labelWidth={65}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
+          barInnerComponent={(item) => (
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
+          )}
+          xAxisLabelTextStyle={{
+            color: themeColor.text,
+            textAlign: "center",
+            fontFamily: "sb-l",
+          }}
           showLine
           lineConfig={{
-            color: "#F29C6E",
+            color: themeColor.success,
             thickness: 3,
             curved: true,
             hideDataPoints: true,
-            shiftY: 20,
-            initialSpacing: -30,
+            shiftY: 60,
+            initialSpacing: 2,
           }}
         />
       </View>
@@ -120,3 +122,12 @@ const styles = (color: any) =>
       paddingVertical: 4,
     },
   })
+
+// <Button
+//         type="solid"
+//         onPress={async () => {
+//           AsyncStorage.removeItem("user")
+//         }}
+//       >
+//         asdsdadsa
+//       </Button>

@@ -1,9 +1,13 @@
-import { StyleSheet } from "react-native"
 import React from "react"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+// component
+import { StyleSheet } from "react-native"
 import { Text, View } from "../Themed"
 import { BarChart, ruleTypes, yAxisSides } from "react-native-gifted-charts"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// zustand
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+// lib
 import { getEquipmentCount } from "@/lib/function"
 
 const EquipmentChart = () => {
@@ -12,7 +16,11 @@ const EquipmentChart = () => {
   const equipmentCount = getEquipmentCount(workoutPlanList)
 
   const barData1 = [
-    { value: equipmentCount.babel, label: "바벨", frontColor: themeColor.tint },
+    {
+      value: equipmentCount.babel,
+      label: "바벨",
+      frontColor: themeColor.tint,
+    },
     {
       value: equipmentCount.dumbel,
       label: "덤벨",
@@ -33,13 +41,22 @@ const EquipmentChart = () => {
       label: "케이블",
       frontColor: themeColor.tint,
     },
-    { value: equipmentCount.body, label: "맨몸", frontColor: themeColor.tint },
+    {
+      value: equipmentCount.body,
+      label: "맨몸",
+      frontColor: themeColor.tint,
+    },
   ]
 
   return (
     <View style={styles(themeColor).container}>
       <Text style={{ fontSize: 18 }}>주로 뭐로 운동했지?</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <View
+        style={{
+          height: 1,
+          backgroundColor: themeColor.tabIconDefault,
+        }}
+      />
       <View
         style={{
           overflow: "hidden",
@@ -49,15 +66,22 @@ const EquipmentChart = () => {
       >
         <BarChart
           barWidth={24}
-          noOfSections={3}
+          noOfSections={5}
           barBorderRadius={4}
           frontColor={themeColor.subText}
           disableScroll
           data={barData1}
-          yAxisThickness={0}
-          xAxisThickness={0}
+          shiftY={10}
+          sideWidth={15}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
           barInnerComponent={(item) => (
-            <Text style={{ textAlign: "center" }}>{item?.value}</Text>
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
           )}
           xAxisLabelTextStyle={{
             color: themeColor.text,

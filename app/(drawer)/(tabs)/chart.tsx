@@ -1,11 +1,11 @@
 import React from "react"
 // component
 import { ScrollView, StyleSheet } from "react-native"
-import { Text, View } from "@/components/Themed"
-
+import { View } from "@/components/Themed"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import {
+  BodyChart,
   ConditionCount,
   EquipmentChart,
   SbdChart,
@@ -31,6 +31,7 @@ export default function chart() {
         <ConditionCount />
         <EquipmentChart />
         <SbdChart />
+        <BodyChart />
       </ScrollView>
     </View>
   )
