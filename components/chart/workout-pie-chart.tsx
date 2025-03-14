@@ -11,13 +11,16 @@ import {
   convertChartValuesToPercentage,
   sortWorkoutPlanList,
 } from "@/lib/function"
+import { useChartStore } from "@/hooks/use-chart-store"
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
 
 const WorkoutPieChart = () => {
   const themeColor = useCurrneThemeColor()
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const listCount = sortWorkoutPlanList(workoutPlanList)
+  const { date } = useChartStore()
+  const { monthlyPlanData } = useMonthlyPlanData(date)
+  const listCount = sortWorkoutPlanList(monthlyPlanData)
 
-  const chartValue = workoutPlanList && [
+  const chartValue = monthlyPlanData && [
     { value: listCount.back, color: "#F13C33", title: "등" },
     { value: listCount.chest, color: "#FFC134", title: "가슴" },
     { value: listCount.shoulder, color: "#3CC42E", title: "어깨" },

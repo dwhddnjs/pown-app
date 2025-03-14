@@ -5,15 +5,15 @@ import { Text, View } from "../Themed"
 import { BarChart, ruleTypes, yAxisSides } from "react-native-gifted-charts"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-// zustand
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-// lib
 import { getEquipmentCount } from "@/lib/function"
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
+import { useChartStore } from "@/hooks/use-chart-store"
 
 const EquipmentChart = () => {
   const themeColor = useCurrneThemeColor()
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const equipmentCount = getEquipmentCount(workoutPlanList)
+  const { date } = useChartStore()
+  const { monthlyPlanData } = useMonthlyPlanData(date)
+  const equipmentCount = getEquipmentCount(monthlyPlanData)
 
   const barData1 = [
     {

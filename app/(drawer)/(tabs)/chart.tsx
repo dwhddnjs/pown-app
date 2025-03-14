@@ -2,8 +2,6 @@ import React from "react"
 // component
 import { ScrollView, StyleSheet } from "react-native"
 import { View } from "@/components/Themed"
-// hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import {
   BodyChart,
   ConditionCount,
@@ -12,9 +10,15 @@ import {
   WorkoutCount,
   WorkoutPieChart,
 } from "@/components/chart"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// lib
+import { useHeaderHeight } from "@react-navigation/elements"
 
 export default function chart() {
   const themeColor = useCurrneThemeColor()
+  const headerHeight = useHeaderHeight()
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView
@@ -22,7 +26,9 @@ export default function chart() {
         style={{ flex: 1 }}
         contentContainerStyle={{
           gap: 24,
-          padding: 24,
+          paddingTop: headerHeight,
+          paddingHorizontal: 24,
+          paddingBottom: 24,
           backgroundColor: themeColor.background,
         }}
       >
@@ -37,4 +43,4 @@ export default function chart() {
   )
 }
 
-const styles = () => StyleSheet.create({})
+const styles = (color: any) => StyleSheet.create({})

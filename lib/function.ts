@@ -198,3 +198,67 @@ export const getEquipmentCount = (data: WorkoutPlanTypes[]) => {
     return acc
   }, result)
 }
+
+export const convertChartDate = (date: string) => {
+  const year = date.slice(0, 4)
+  const month = date.slice(4, 6)
+  return `${year}년 ${month}월`
+}
+
+type RawData = {
+  age: string
+  bp: string
+  createdAt: string
+  dl: string
+  gender: string
+  height: string
+  sq: string
+  weight: string
+}
+
+type ProcessedData = { id: number; value: number; date: string }
+
+export const getMonthlyBodyData = (
+  rawData: any[],
+  yearMonth: string
+): ProcessedData[] => {
+  const year = yearMonth.slice(0, 4) // "2025"
+  const month = yearMonth.slice(4, 6) // "03"
+
+  // 날짜별 가장 마지막 데이터만 남기기
+  const latestDataByDate = rawData.reduce((acc, item) => {
+    const date = item.createdAt.split(" ")[0] // "2025.03.10"
+    if (!acc[date] || acc[date].createdAt < item.createdAt) {
+      acc[date] = item
+    }
+    return acc
+  }, {} as Record<string, RawData>)
+
+  // 첫 번째 날짜 데이터 (최초의 데이터)
+  const firstDate = Object.keys(latestDataByDate)[0]
+  const baseData = latestDataByDate[firstDate]
+
+  const filledData: ProcessedData[] = []
+  let fillData = baseData // 기본으로 채울 데이터
+  const lastDate = Object.keys(latestDataByDate).pop()
+  const lastData = latestDataByDate[lastDate as any]
+
+  for (let day = 1; day <= 31; day++) {
+    const formattedDate = `${year}.${month}.${String(day).padStart(2, "0")}`
+    const displayDate = `${year}년 ${Number(month)}월 ${day}일` // "2025년 3월 1일"
+
+    // 해당 날짜에 데이터가 있다면 그 데이터 사용
+    if (latestDataByDate[formattedDate]) {
+      fillData = latestDataByDate[formattedDate]
+    }
+
+    // 데이터가 없으면 가장 최근 데이터를 채움
+    filledData.push({
+      id: day,
+      value: Number(fillData.weight),
+      date: displayDate,
+    })
+  }
+
+  return filledData
+}

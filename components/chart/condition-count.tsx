@@ -9,16 +9,15 @@ import { conditionData } from "@/constants/constants"
 // lib
 import { getIcon } from "../add-plan/condition-icon"
 import { convertConditionType, getConditionCount } from "@/lib/function"
-// zustand
-import {
-  userWorkoutPlanStore,
-  WorkoutPlanTypes,
-} from "@/hooks/use-workout-plan-store"
+// hook
+import { useChartStore } from "@/hooks/use-chart-store"
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
 
 const ConditionCount = () => {
   const themeColor = useCurrneThemeColor()
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const getCount = getConditionCount(workoutPlanList)
+  const { date } = useChartStore()
+  const { monthlyPlanData } = useMonthlyPlanData(date)
+  const getCount = getConditionCount(monthlyPlanData)
 
   return (
     <View style={styles(themeColor).container}>

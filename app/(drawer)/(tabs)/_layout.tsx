@@ -3,6 +3,7 @@ import React from "react"
 import { StyleSheet } from "react-native"
 import { View } from "@/components/Themed"
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header"
+import { ChartHeader } from "@/components/chart"
 // expo
 import { router, Tabs } from "expo-router"
 // icon
@@ -10,8 +11,7 @@ import UserIcon from "@expo/vector-icons/FontAwesome"
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { SymbolView } from "expo-symbols"
 import Entypo from "@expo/vector-icons/Entypo"
-
-//color
+// hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function TabLayout() {
@@ -67,6 +67,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <AntDesign name="piechart" size={24} color={color} />
           ),
+          header: ({ navigation, route, options }) => {
+            return <ChartHeader />
+          },
+          headerTransparent: true,
         }}
       />
 

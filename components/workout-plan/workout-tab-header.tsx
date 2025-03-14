@@ -1,17 +1,18 @@
+import React from "react"
+// component
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  useColorScheme,
   View,
 } from "react-native"
-import React from "react"
-import { BlurView } from "expo-blur"
 import { DrawerToggleButton } from "@react-navigation/drawer"
+// expo
+import { BlurView } from "expo-blur"
 import { useRouter } from "expo-router"
-import Colors from "@/constants/Colors"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+// hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
@@ -61,7 +62,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     width: "100%",
-    paddingVertical: 2,
+
     paddingLeft: 8,
     paddingRight: 25,
     flexDirection: "row",

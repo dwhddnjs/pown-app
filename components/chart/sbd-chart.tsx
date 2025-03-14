@@ -5,13 +5,16 @@ import { Text, View } from "../Themed"
 import { BarChart, ruleTypes } from "react-native-gifted-charts"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-// zustand
 import { useUserStore } from "@/hooks/use-user-store"
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
+import { useChartStore } from "@/hooks/use-chart-store"
 
 const SbdChart = () => {
   const { userInfo } = useUserStore()
+  const { date } = useChartStore()
+  const { monthlyUserInfoData } = useMonthlyPlanData(date)
   const firstWeight = userInfo[0]
-  const lastestWeight = userInfo[userInfo.length - 1]
+  const lastestWeight = monthlyUserInfoData[monthlyUserInfoData.length - 1]
 
   const themeColor = useCurrneThemeColor()
   const data = [

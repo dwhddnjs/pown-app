@@ -10,13 +10,15 @@ import Leg from "@/assets/images/svg/leg_icon.svg"
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { sortWorkoutPlanList } from "@/lib/function"
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
+import { useChartStore } from "@/hooks/use-chart-store"
 
 const WorkoutCount = () => {
   const themeColor = useCurrneThemeColor()
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const listCount = sortWorkoutPlanList(workoutPlanList)
+  const { date } = useChartStore()
+  const { monthlyPlanData } = useMonthlyPlanData(date)
+  const listCount = sortWorkoutPlanList(monthlyPlanData)
 
   return (
     <View style={[styles(themeColor).container]}>
@@ -57,6 +59,7 @@ const styles = (color: any) =>
       padding: 18,
       borderRadius: 12,
       gap: 12,
+      marginTop: 12,
     },
     iconItem: {
       backgroundColor: color.itemColor,
