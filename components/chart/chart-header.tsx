@@ -7,11 +7,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
-import { DrawerToggleButton } from "@react-navigation/drawer"
 // expo
 import { BlurView } from "expo-blur"
-import { useRouter } from "expo-router"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { useChartStore } from "@/hooks/use-chart-store"

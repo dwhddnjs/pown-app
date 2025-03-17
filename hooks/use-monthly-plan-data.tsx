@@ -1,5 +1,3 @@
-import { StyleSheet, Text, View } from "react-native"
-import React from "react"
 import { userWorkoutPlanStore } from "./use-workout-plan-store"
 import { useUserStore } from "./use-user-store"
 

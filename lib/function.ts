@@ -1,6 +1,6 @@
 import Colors from "@/constants/Colors"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import { format, parseISO } from "date-fns"
+import { addDays, format, parse, parseISO } from "date-fns"
 
 export const groupByDate = (arr: WorkoutPlanTypes[]) => {
   return arr.reduce<Record<string, WorkoutPlanTypes[]>>((acc, cur) => {
@@ -218,47 +218,115 @@ type RawData = {
 
 type ProcessedData = { id: number; value: number; date: string }
 
-export const getMonthlyBodyData = (
-  rawData: any[],
-  yearMonth: string
-): ProcessedData[] => {
+export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
   const year = yearMonth.slice(0, 4) // "2025"
   const month = yearMonth.slice(4, 6) // "03"
 
-  // 날짜별 가장 마지막 데이터만 남기기
-  const latestDataByDate = rawData.reduce((acc, item) => {
-    const date = item.createdAt.split(" ")[0] // "2025.03.10"
-    if (!acc[date] || acc[date].createdAt < item.createdAt) {
-      acc[date] = item
+  // 해당 월만 가져오기
+  const filterPlanListData = rawData.filter((item) => {
+    return (
+      item.createdAt.slice(0, 4) === year &&
+      item.createdAt.slice(5, 7) === month
+    )
+  })
+
+  // 중복제거
+  const removeSameDateItem = filterPlanListData.reduce((acc, item) => {
+    const dateKey = item.createdAt.split(" ")[0] // YYYY.MM.DD만 추출
+    const parsedDate = parse(
+      item.createdAt,
+      "yyyy.MM.dd HH:mm:ss",
+      new Date()
+    ).valueOf()
+
+    const existingIndex = acc.findIndex((el: any) =>
+      el.createdAt.startsWith(dateKey)
+    )
+    if (existingIndex === -1) {
+      acc.push(item)
+    } else {
+      const existingDate = parse(
+        acc[existingIndex].createdAt,
+        "yyyy.MM.dd HH:mm:ss",
+        new Date()
+      ).valueOf()
+
+      if (parsedDate > existingDate) {
+        acc[existingIndex] = item
+      }
+    }
+
+    return acc
+  }, [])
+
+  //불필요한 데이터 삭제
+  const removeUselessDate = removeSameDateItem.map((item: any, index: any) => {
+    const year = item.createdAt.slice(0, 4)
+    const month = item.createdAt.slice(5, 7)
+    const day = item.createdAt.slice(8, 10)
+    return {
+      value: item.weight,
+      date: `${year}년 ${month}월 ${day}일`,
+    }
+  })
+  const startDate = parse("2025년 03월 01일", "yyyy년 MM월 dd일", new Date())
+
+  const sortedInput = removeUselessDate.sort(
+    (a: any, b: any) =>
+      parse(a.date, "yyyy년 MM월 dd일", new Date()).getTime() -
+      parse(b.date, "yyyy년 MM월 dd일", new Date()).getTime()
+  )
+
+  const result = sortedInput.reduce((acc: any, { date, value }: any) => {
+    const targetDate = parse(date, "yyyy년 MM월 dd일", new Date())
+    let currentDate =
+      acc.length > 0
+        ? parse(acc[acc.length - 1].date, "yyyy년 MM월 dd일", new Date())
+        : startDate
+
+    // 날짜 간격을 채운다
+    while (currentDate.getTime() < targetDate.getTime()) {
+      const lastValue =
+        acc.length > 0 && acc[acc.length - 1].value !== null
+          ? acc[acc.length - 1].value
+          : value || null
+
+      const formattedDate = format(currentDate, "yyyy년 MM월 dd일")
+
+      if (!acc.some((item: any) => item.date === formattedDate)) {
+        acc.push({ date: formattedDate, value: lastValue })
+      }
+
+      currentDate = addDays(currentDate, 1)
+    }
+    if (!acc.some((item: any) => item.date === date)) {
+      acc.push({ date, value })
     }
     return acc
-  }, {} as Record<string, RawData>)
-
-  // 첫 번째 날짜 데이터 (최초의 데이터)
-  const firstDate = Object.keys(latestDataByDate)[0]
-  const baseData = latestDataByDate[firstDate]
-
-  const filledData: ProcessedData[] = []
-  let fillData = baseData // 기본으로 채울 데이터
-  const lastDate = Object.keys(latestDataByDate).pop()
-  const lastData = latestDataByDate[lastDate as any]
-
-  for (let day = 1; day <= 31; day++) {
-    const formattedDate = `${year}.${month}.${String(day).padStart(2, "0")}`
-    const displayDate = `${year}년 ${Number(month)}월 ${day}일` // "2025년 3월 1일"
-
-    // 해당 날짜에 데이터가 있다면 그 데이터 사용
-    if (latestDataByDate[formattedDate]) {
-      fillData = latestDataByDate[formattedDate]
-    }
-
-    // 데이터가 없으면 가장 최근 데이터를 채움
-    filledData.push({
-      id: day,
-      value: Number(fillData.weight),
-      date: displayDate,
-    })
-  }
-
-  return filledData
+  }, [])
+  return result.map((item: any, index: any) => ({
+    ...item,
+    id: index + 1,
+    value: parseInt(item.value),
+  }))
 }
+// const mockup = [
+//   { date: "2025년 03월 01일", value: "70" },
+//   { date: "2025년 03월 02일", value: "70" },
+//   { date: "2025년 03월 03일", value: "70" },
+//   { date: "2025년 03월 04일", value: "70" },
+//   { date: "2025년 03월 05일", value: "70" },
+//   { date: "2025년 03월 06일", value: "70" },
+//   { date: "2025년 03월 07일", value: "70" },
+//   { date: "2025년 03월 08일", value: "70" },
+//   { date: "2025년 03월 09일", value: "70" },
+//   { date: "2025년 03월 10일", value: "70" },
+//   { date: "2025년 03월 11일", value: "70" },
+//   { date: "2025년 03월 12일", value: "70" },
+//   { date: "2025년 03월 13일", value: "70" },
+//   { date: "2025년 03월 14일", value: "70" },
+//   { date: "2025년 03월 15일", value: "80" },
+//   { date: "2025년 03월 16일", value: "80" },
+//   { date: "2025년 03월 17일", value: "80" },
+//   { date: "2025년 03월 18일", value: "90" },
+// ]
