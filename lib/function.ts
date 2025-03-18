@@ -1,4 +1,3 @@
-import Colors from "@/constants/Colors"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import { addDays, format, parse, parseISO } from "date-fns"
 
@@ -310,6 +309,7 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
     value: parseInt(item.value),
   }))
 }
+
 // const mockup = [
 //   { date: "2025년 03월 01일", value: "70" },
 //   { date: "2025년 03월 02일", value: "70" },

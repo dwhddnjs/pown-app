@@ -13,6 +13,7 @@ import { SymbolView } from "expo-symbols"
 import Entypo from "@expo/vector-icons/Entypo"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { CalendarHeader } from "@/components/calendar"
 
 export default function TabLayout() {
   const themColor = useCurrneThemeColor()
@@ -98,6 +99,10 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => (
             <Entypo name="calendar" size={24} color={color} />
           ),
+          header: ({ navigation, route, options }) => {
+            return <CalendarHeader />
+          },
+          headerTransparent: true,
         }}
       />
       <Tabs.Screen

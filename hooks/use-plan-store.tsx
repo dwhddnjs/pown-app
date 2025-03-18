@@ -1,5 +1,7 @@
 import { create } from "zustand"
 
+export type WorkoutTypes = "chest" | "back" | "shoulder" | "leg" | "arm"
+
 export type PlanStoreType = {
   workout: string
   type: string
