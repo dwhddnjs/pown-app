@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   item: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 2,
 
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   },
   textContainer: {
     gap: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingBottom: 24,
   },
   title: {

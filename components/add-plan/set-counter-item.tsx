@@ -92,7 +92,7 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     flexDirection: "row",
   },
 

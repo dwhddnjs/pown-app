@@ -25,7 +25,7 @@ export const SetCounter = ({ onOpen, onFocus }: SetCounterProps) => {
       onLayout={(e) => setLayout(e.nativeEvent.layout.y)}
     >
       <View style={styles.titleContainer}>
-        <IconTitle style={{ paddingLeft: 24 }}>
+        <IconTitle style={{ paddingLeft: 20 }}>
           <Octicons
             name="number"
             size={20}
@@ -75,7 +75,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingRight: 24,
+    paddingRight: 20,
     alignItems: "flex-end",
   },
 })

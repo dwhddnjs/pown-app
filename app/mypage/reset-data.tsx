@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
 
   textContainer: {
     gap: 12,
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 18,
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
   },
   item: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
     paddingVertical: 14,
     borderBottomWidth: 2,
 

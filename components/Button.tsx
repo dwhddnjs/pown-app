@@ -64,7 +64,7 @@ const styles = () =>
     },
     solid: {
       paddingVertical: 14,
-      marginHorizontal: 24,
+      marginHorizontal: 20,
       borderRadius: 12,
     },
     bordered: {
@@ -72,7 +72,7 @@ const styles = () =>
       borderWidth: 2,
 
       paddingVertical: 14,
-      marginHorizontal: 24,
+      marginHorizontal: 20,
 
       borderRadius: 12,
     },
@@ -84,7 +84,7 @@ const styles = () =>
       justifyContent: "center",
       alignItems: "center",
       paddingVertical: 14,
-      marginHorizontal: 24,
+      marginHorizontal: 20,
       borderRadius: 12,
     },
   })

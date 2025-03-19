@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
   },
 
   list: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 12,
     gap: 18,
     paddingTop: 18,
     // paddingBottom: 12,

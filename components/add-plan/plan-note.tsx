@@ -18,7 +18,7 @@ export const PlanNote = () => {
   return (
     <View style={styles.main}>
       <View style={styles.container}>
-        <IconTitle style={{ gap: 7, paddingLeft: 24, paddingBottom: 10 }}>
+        <IconTitle style={{ gap: 7, paddingLeft: 20, paddingBottom: 10 }}>
           <NoteIcon name="note-text" size={20} color={themeColor.tint} />
           <Text style={{ fontSize: 16 }}>퀵 노트</Text>
         </IconTitle>
@@ -32,7 +32,7 @@ export const PlanNote = () => {
       </View>
 
       {title && content ? (
-        <View style={{ paddingHorizontal: 24, gap: 4 }}>
+        <View style={{ paddingHorizontal: 20, gap: 4 }}>
           <Text style={{ fontSize: 18 }}>{title}</Text>
           <Text style={{ fontSize: 14, fontFamily: "sb-l" }}>{content}</Text>
         </View>
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
-    paddingRight: 24,
+    paddingRight: 20,
   },
 
   link: {
@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
     paddingLeft: 12,
     fontSize: 14,
     fontFamily: "sb-l",
-    marginHorizontal: 24,
+    marginHorizontal: 20,
   },
 })

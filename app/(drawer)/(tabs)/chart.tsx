@@ -27,7 +27,7 @@ export default function chart() {
         contentContainerStyle={{
           gap: 24,
           paddingTop: headerHeight,
-          paddingHorizontal: 24,
+          paddingHorizontal: 12,
           paddingBottom: 24,
           backgroundColor: themeColor.background,
         }}

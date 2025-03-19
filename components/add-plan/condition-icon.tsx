@@ -76,8 +76,8 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
         style={[
           styles.icon,
           { borderColor: themeColor.tint },
-          item.id === 1 && { marginLeft: 24 },
-          item.id === 9 && { marginRight: 24 },
+          item.id === 1 && { marginLeft: 20 },
+          item.id === 9 && { marginRight: 20 },
           condition.includes(item.condition) && {
             backgroundColor: themeColor.tint,
           },

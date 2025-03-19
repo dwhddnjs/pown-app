@@ -20,7 +20,7 @@ export const TopWeight = () => {
   return (
     <Pressable
       onPress={() => inputRef.current?.focus()}
-      style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 24 }}
+      style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}
     >
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon

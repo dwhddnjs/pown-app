@@ -1,41 +1,32 @@
-import {
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  FlatList,
-} from "react-native"
 import React from "react"
+// component
+import { StyleSheet, useColorScheme, FlatList } from "react-native"
 import { Text, View } from "../Themed"
-import EmotionIcon from "@expo/vector-icons/MaterialIcons"
-import { FlashList } from "@shopify/flash-list"
 import { ConditionIcon } from "@/components/add-plan/condition-icon"
-import Colors from "@/constants/Colors"
 import { IconTitle } from "../IconTitle"
+// color
+import Colors from "@/constants/Colors"
+// lib
 import { conditionData } from "@/constants/constants"
-import { usePlanStore } from "@/hooks/use-plan-store"
+// icon
 import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const ConditionList = () => {
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrneThemeColor()
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>
-        <IconTitle style={{ gap: 7, paddingLeft: 24 }}>
+        <IconTitle style={{ gap: 7, paddingLeft: 20 }}>
           <BatteryIcon
             name="battery-heart-variant"
             size={20}
-            color={Colors[colorScheme ?? "light"].tint}
+            color={themeColor.tint}
           />
           <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
         </IconTitle>
-        <Text
-          style={[
-            styles.subText,
-            { color: Colors[colorScheme ?? "light"].tint },
-          ]}
-        >
-          (선택)
-        </Text>
+        <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
       </View>
       <View style={styles.container}>
         <FlatList
@@ -70,7 +61,7 @@ const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingRight: 24,
+    paddingRight: 20,
     alignItems: "flex-end",
   },
 })

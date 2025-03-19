@@ -59,7 +59,7 @@ export default function calendar() {
         scrollEventThrottle={16}
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingHorizontal: 24,
+          paddingHorizontal: 12,
           paddingTop: headerHeight,
           backgroundColor: themeColor.background,
         }}
@@ -124,11 +124,12 @@ export default function calendar() {
 const styles = (color: any) =>
   StyleSheet.create({
     calendarContainer: {
-      paddingVertical: 24,
+      paddingVertical: 20,
+
       backgroundColor: color.itemColor,
       gap: 12,
       borderRadius: 12,
-      paddingHorizontal: 8,
+      paddingHorizontal: 12,
     },
     numberIcon: {
       flex: 1,

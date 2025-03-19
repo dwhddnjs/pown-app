@@ -87,7 +87,7 @@ export default function UserInfo() {
         contentContainerStyle={{
           gap: 24,
           paddingTop: 24,
-          paddingHorizontal: 24,
+          paddingHorizontal: 20,
         }}
       >
         <View style={styles.textContainer}>
