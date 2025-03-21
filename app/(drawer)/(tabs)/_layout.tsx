@@ -29,6 +29,7 @@ export default function TabLayout() {
     tabBarStyle: {
       backgroundColor: themColor.tabBar,
       borderTopWidth: 0,
+      paddingHorizontal: 12,
     },
     tabBarActiveTintColor: themColor.tabIconSelected,
     tabBarItemStyle: {

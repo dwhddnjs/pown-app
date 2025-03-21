@@ -16,11 +16,13 @@ import { convertChartDate } from "@/lib/function"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { useCalendarStore } from "@/hooks/use-calendar-store"
+import { format } from "date-fns"
 
 const CalenderHeader = () => {
   const themeColor = useCurrneThemeColor()
   const { date, nextMonth, prevMonth } = useCalendarStore()
-  const title = `${date.getFullYear()}년 ${date.getMonth() + 1}월`
+
+  const title = format(date, "yyyy년 MM월")
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
@@ -52,7 +54,7 @@ export default CalenderHeader
 const styles = StyleSheet.create({
   blur: {
     width: "100%",
-    paddingBottom: 4,
+    paddingBottom: 6,
     alignItems: "center",
   },
   container: {

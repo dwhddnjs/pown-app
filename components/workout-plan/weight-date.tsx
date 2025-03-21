@@ -18,7 +18,7 @@ import { formatTime } from "@/lib/function"
 // expo
 import { Ionicons } from "@expo/vector-icons"
 import { useActionSheet } from "@expo/react-native-action-sheet"
-import { useRouter } from "expo-router"
+import { usePathname, useRouter } from "expo-router"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
@@ -40,10 +40,10 @@ export const WeightDate = ({
   equipment,
 }: WeightDateProps) => {
   const themeColor = useCurrneThemeColor()
-
   const { showActionSheetWithOptions } = useActionSheet()
   const { push } = useRouter()
   const { setRemovePlan } = userWorkoutPlanStore()
+  const pathname = usePathname()
 
   const onPress = () => {
     const options = ["삭제", "수정", "취소"]
@@ -81,13 +81,15 @@ export const WeightDate = ({
         <Text style={[styles.date, { color: themeColor.subText }]}>
           {formatTime(date)}
         </Text>
-        <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
-          <Ionicons
-            name="ellipsis-horizontal"
-            size={20}
-            color={themeColor.text}
-          />
-        </TouchableOpacity>
+        {pathname !== "/calendar-workout" && (
+          <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
+            <Ionicons
+              name="ellipsis-horizontal"
+              size={20}
+              color={themeColor.text}
+            />
+          </TouchableOpacity>
+        )}
       </View>
       <Text
         style={[styles.title, { color: themeColor.tint }]}

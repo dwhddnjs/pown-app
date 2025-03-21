@@ -30,7 +30,7 @@ const WorkoutPieChart = () => {
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18 }}>난 어떤운동을 많이 했지?</Text>
+      <Text style={{ fontSize: 18 }}>주로 어느 부위 운동을 했지?</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       <View style={styles(themeColor).itemContainer}>
         <PieChart
@@ -71,7 +71,8 @@ const styles = (color: any) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,
-      padding: 18,
+      paddingHorizontal: 12,
+      paddingVertical: 20,
       borderRadius: 12,
       gap: 12,
     },

@@ -11,7 +11,6 @@ export const groupByDate = (arr: WorkoutPlanTypes[]) => {
     return acc
   }, {})
 }
-
 export const formatTime = (value: string) => {
   const splitValue = value.split(" ")
   const splitValueAgain = splitValue[1].split(":")
@@ -217,27 +216,14 @@ type RawData = {
 
 type ProcessedData = { id: number; value: number; date: string }
 
-export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
-  const year = yearMonth.slice(0, 4) // "2025"
-  const month = yearMonth.slice(4, 6) // "03"
-
-  // 해당 월만 가져오기
-  const filterPlanListData = rawData.filter((item) => {
-    return (
-      item.createdAt.slice(0, 4) === year &&
-      item.createdAt.slice(5, 7) === month
-    )
-  })
-
-  // 중복제거
-  const removeSameDateItem = filterPlanListData.reduce((acc, item) => {
+export const removeSameItem = (arr: any) => {
+  return arr.reduce((acc: any, item: any) => {
     const dateKey = item.createdAt.split(" ")[0] // YYYY.MM.DD만 추출
     const parsedDate = parse(
       item.createdAt,
       "yyyy.MM.dd HH:mm:ss",
       new Date()
     ).valueOf()
-
     const existingIndex = acc.findIndex((el: any) =>
       el.createdAt.startsWith(dateKey)
     )
@@ -254,9 +240,24 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
         acc[existingIndex] = item
       }
     }
-
     return acc
   }, [])
+}
+
+export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
+  const year = yearMonth.slice(0, 4) // "2025"
+  const month = yearMonth.slice(4, 6) // "03"
+
+  // 해당 월만 가져오기
+  const filterPlanListData = rawData.filter((item) => {
+    return (
+      item.createdAt.slice(0, 4) === year &&
+      item.createdAt.slice(5, 7) === month
+    )
+  })
+
+  // 중복제거
+  const removeSameDateItem = removeSameItem(filterPlanListData)
 
   //불필요한 데이터 삭제
   const removeUselessDate = removeSameDateItem.map((item: any, index: any) => {

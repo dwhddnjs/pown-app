@@ -54,7 +54,7 @@ export default ChartHeader
 const styles = StyleSheet.create({
   blur: {
     width: "100%",
-    paddingBottom: 4,
+    paddingBottom: 6,
     alignItems: "center",
   },
   container: {

@@ -18,21 +18,21 @@ const BodyChart = () => {
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18, paddingHorizontal: 18, paddingTop: 18 }}>
+      <Text style={{ fontSize: 18, paddingHorizontal: 12, paddingTop: 20 }}>
         몸무게의 변화
       </Text>
       <View
         style={{
           height: 1,
           backgroundColor: themeColor.tabIconDefault,
-          marginHorizontal: 18,
+          marginHorizontal: 12,
         }}
       />
       <View
         style={{
           backgroundColor: themeColor.itemColor,
           paddingVertical: 4,
-          paddingLeft: 10,
+          paddingLeft: 12,
         }}
       >
         <LineChart
@@ -77,7 +77,8 @@ const BodyChart = () => {
                   style={{
                     borderRadius: 8,
                     backgroundColor: themeColor.background,
-                    padding: 6,
+                    paddingVertical: 6,
+                    paddingHorizontal: 4,
                     gap: 4,
                     position: "absolute",
                     left: items[0].id >= 21 ? -60 : 5,

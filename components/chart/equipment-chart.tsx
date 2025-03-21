@@ -105,7 +105,8 @@ const styles = (color: any) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,
-      padding: 18,
+      paddingVertical: 20,
+      paddingHorizontal: 12,
       borderRadius: 12,
       gap: 12,
       overflow: "hidden",

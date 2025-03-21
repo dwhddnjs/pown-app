@@ -14,6 +14,7 @@ export default {
     itemColor: "#ffffff",
     success: "#3A76E2",
     fail: "#F13C33",
+    empty: "#EFEEF3",
   },
   dark: {
     text: "#fff",
@@ -27,6 +28,7 @@ export default {
     itemColor: "#27272a",
     success: "#3A76E2",
     fail: "#F13C33",
+    empty: "#1e1e1e",
   },
 }
 

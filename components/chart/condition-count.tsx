@@ -46,7 +46,8 @@ const styles = (color: any) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,
-      padding: 18,
+      paddingHorizontal: 12,
+      paddingVertical: 20,
       borderRadius: 12,
       gap: 12,
     },

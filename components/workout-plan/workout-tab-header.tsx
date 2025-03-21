@@ -29,7 +29,10 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
           <Text
             style={{
               fontSize: 18,
-              color: themeColor.text,
+              color:
+                title === "🔥 오늘도 화이팅!"
+                  ? themeColor.tint
+                  : themeColor.text,
               textAlign: "center",
               fontFamily: "sb-m",
             }}
@@ -56,7 +59,7 @@ export default WorkoutTabHeader
 const styles = StyleSheet.create({
   blur: {
     width: "100%",
-    paddingBottom: 10,
+    paddingBottom: 6,
     alignItems: "center",
   },
   container: {

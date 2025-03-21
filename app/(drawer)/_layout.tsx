@@ -5,20 +5,22 @@ import { DrawerContentScrollView } from "@react-navigation/drawer"
 import { Drawer } from "expo-router/drawer"
 import Accordion from "react-native-collapsible/Accordion"
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-// zustand
+// hook
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { useSelectDateStore } from "@/hooks/use-select-date-store"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // lib
 import { transformWorkoutData } from "@/lib/function"
 // icons
 import FontAwesome from "@expo/vector-icons/FontAwesome"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+
+// expo;
+import { usePathname } from "expo-router"
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([])
   const [collapsed, setCollapsed] = useState(true)
   const [multipleSelect, setMultipleSelect] = useState(false)
-
   const { workoutPlanList } = userWorkoutPlanStore()
   const themeColor = useCurrneThemeColor()
   const sortData = transformWorkoutData(workoutPlanList)
@@ -27,6 +29,14 @@ const CustomDrawerContent = (props: any) => {
   const [multipleSelect2, setMultipleSelect2] = useState(false)
   const [selectedTitle, setSelectedTitle] = useState<string[]>([])
   const { date, onSetDate } = useSelectDateStore()
+  const yearCount = sortData.length
+  const monthCount = sortData.reduce((acc: number, item) => {
+    return acc + item.content.length
+  }, 0)
+  const dayCount = sortData
+    .map((item) => item.content)
+    .flat()
+    .reduce((acc, item) => acc + item.content.length, 0)
 
   // 특정 레벨의 title을 업데이트하는 함수
   const updateTitleAtLevel = (level: number, newTitle: string) => {
@@ -83,131 +93,154 @@ const CustomDrawerContent = (props: any) => {
   }
 
   return (
-    <DrawerContentScrollView
-      {...props}
-      style={{
-        paddingHorizontal: 12,
-        paddingTop: 24,
-        backgroundColor: themeColor.background,
-      }}
-    >
-      <Accordion
-        activeSections={activeSections}
-        sections={sortData}
-        touchableComponent={TouchableOpacity}
-        expandMultiple={multipleSelect}
-        renderHeader={(section, _, isActive) => (
-          <View
-            style={[
-              styles.header,
-              isActive ? styles.active : styles.inactive,
-              { backgroundColor: themeColor.background },
-            ]}
-          >
-            <FontAwesome
-              name={isActive ? "folder-open" : "folder"}
-              size={20}
-              color={themeColor.subText}
-            />
-            <Text style={[styles.headerText, { color: themeColor.subText }]}>
-              {section.title}
-            </Text>
-          </View>
-        )}
-        renderContent={(section, _, isActive) => {
-          return (
+    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+      <View style={{ paddingTop: 72, paddingBottom: 12, gap: 4 }}>
+        <Text style={{ fontSize: 18 }}>나의 운동 기록</Text>
+        <Text
+          style={{
+            color: themeColor.subText,
+            fontFamily: "sb-l",
+            fontSize: 12,
+          }}
+        >
+          {`폴더 ${yearCount + monthCount}개,  파일 ${dayCount}개`}
+        </Text>
+      </View>
+      <DrawerContentScrollView
+        {...props}
+        style={{
+          backgroundColor: themeColor.background,
+        }}
+        contentContainerStyle={{
+          paddingTop: 12,
+        }}
+      >
+        <Accordion
+          activeSections={activeSections}
+          sections={sortData}
+          touchableComponent={TouchableOpacity}
+          expandMultiple={multipleSelect}
+          renderHeader={(section, _, isActive) => (
             <View
               style={[
-                styles.content,
+                styles.header,
                 isActive ? styles.active : styles.inactive,
                 { backgroundColor: themeColor.background },
               ]}
             >
-              <Accordion
-                activeSections={activeSections2}
-                sections={section.content}
-                touchableComponent={TouchableOpacity}
-                expandMultiple={multipleSelect2}
-                renderHeader={(section2, _, isActive2) => (
-                  <View
-                    style={[
-                      styles.header,
-                      isActive2 ? styles.active : styles.inactive,
-                      {
-                        backgroundColor: themeColor.background,
-                      },
-                    ]}
-                  >
-                    <FontAwesome
-                      name={isActive2 ? "folder-open" : "folder"}
-                      size={20}
-                      color={themeColor.subText}
-                    />
-                    <Text
-                      style={[styles.headerText, { color: themeColor.subText }]}
-                    >
-                      {section2.title}
-                    </Text>
-                  </View>
-                )}
-                renderContent={(section2, _, isActive2) => (
-                  <View
-                    style={[
-                      styles.content,
-                      isActive2 ? styles.active : styles.inactive,
-                      {
-                        backgroundColor: themeColor.background,
-                      },
-                    ]}
-                  >
-                    {section2.content.map((item, index) => (
-                      <TouchableOpacity
-                        key={item}
-                        style={[
-                          styles.header,
-                          {
-                            backgroundColor: themeColor.background,
-                          },
-                        ]}
-                        onPress={() => handleItemSelect(item)}
-                      >
-                        <FontAwesome
-                          name="file-text"
-                          size={18}
-                          color={themeColor.subText}
-                        />
-                        <Text
-                          style={[
-                            styles.headerText,
-                            { color: themeColor.subText },
-                          ]}
-                        >
-                          {item}
-                        </Text>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                )}
-                onChange={handleSetActiveSections2}
-                renderAsFlatList={false}
-                duration={400}
+              <FontAwesome
+                name={isActive ? "folder-open" : "folder"}
+                size={20}
+                color={themeColor.subText}
               />
+              <Text style={[styles.headerText, { color: themeColor.subText }]}>
+                {section.title}
+              </Text>
             </View>
-          )
-        }}
-        duration={400}
-        onChange={handleSetActiveSections}
-        renderAsFlatList={false}
-      />
-    </DrawerContentScrollView>
+          )}
+          renderContent={(section, _, isActive) => {
+            return (
+              <View
+                style={[
+                  styles.content,
+                  isActive ? styles.active : styles.inactive,
+                  { backgroundColor: themeColor.background },
+                ]}
+              >
+                <Accordion
+                  activeSections={activeSections2}
+                  sections={section.content}
+                  touchableComponent={TouchableOpacity}
+                  expandMultiple={multipleSelect2}
+                  renderHeader={(section2, _, isActive2) => (
+                    <View
+                      style={[
+                        styles.header,
+                        isActive2 ? styles.active : styles.inactive,
+                        {
+                          backgroundColor: themeColor.background,
+                        },
+                      ]}
+                    >
+                      <FontAwesome
+                        name={isActive2 ? "folder-open" : "folder"}
+                        size={20}
+                        color={themeColor.subText}
+                      />
+                      <Text
+                        style={[
+                          styles.headerText,
+                          { color: themeColor.subText },
+                        ]}
+                      >
+                        {section2.title}
+                      </Text>
+                    </View>
+                  )}
+                  renderContent={(section2, _, isActive2) => (
+                    <View
+                      style={[
+                        styles.content,
+                        isActive2 ? styles.active : styles.inactive,
+                        {
+                          backgroundColor: themeColor.background,
+                        },
+                      ]}
+                    >
+                      {section2.content.map((item, index) => (
+                        <TouchableOpacity
+                          key={item}
+                          style={[
+                            styles.header,
+                            {
+                              backgroundColor: themeColor.background,
+                            },
+                          ]}
+                          onPress={() => handleItemSelect(item)}
+                        >
+                          <FontAwesome
+                            name="file-text"
+                            size={18}
+                            color={themeColor.subText}
+                          />
+                          <Text
+                            style={[
+                              styles.headerText,
+                              { color: themeColor.subText },
+                            ]}
+                          >
+                            {item}
+                          </Text>
+                        </TouchableOpacity>
+                      ))}
+                    </View>
+                  )}
+                  onChange={handleSetActiveSections2}
+                  renderAsFlatList={false}
+                  duration={400}
+                />
+              </View>
+            )
+          }}
+          duration={400}
+          onChange={handleSetActiveSections}
+          renderAsFlatList={false}
+        />
+      </DrawerContentScrollView>
+    </View>
   )
 }
 
 export default function Layout() {
+  const pathname = usePathname()
+
   return (
     <Drawer
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{ headerShown: false }}
+      screenOptions={{
+        headerShown: false,
+        swipeEnabled: pathname === "/workout",
+      }}
     />
   )
 }
@@ -225,7 +258,7 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#1a1a1a",
-    paddingLeft: 10,
+    // paddingLeft: 10,
     gap: 10,
     flexDirection: "row",
     alignItems: "center",

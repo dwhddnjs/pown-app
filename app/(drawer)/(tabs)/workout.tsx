@@ -7,8 +7,9 @@ import {
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
+  FlatList,
 } from "react-native"
-import { FlashList } from "@shopify/flash-list"
+
 import { EmptyList } from "@/components/workout-plan/empty-list"
 import { RefView } from "@/components/RefView"
 // zustand
@@ -24,6 +25,7 @@ import { useHeaderHeight } from "@react-navigation/elements"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import { FlashList } from "@shopify/flash-list"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
@@ -46,7 +48,7 @@ export default function TabOneScreen() {
         if (scrollY.current === 0) {
           const splitData = date.split(".")
           navigation.setOptions({
-            title: `${splitData[0]}년  ${splitData[1]}월`,
+            title: `🔥 오늘도 화이팅!`,
           })
         }
         if (y - scrollY.current < headerHeight - 30) {
@@ -121,10 +123,21 @@ export default function TabOneScreen() {
                 }}
               >
                 <Text
-                  style={[styles.date, { borderColor: themeColor.subText }]}
+                  style={[
+                    styles.date,
+                    {
+                      backgroundColor: themeColor.tint,
+                      color: themeColor.background,
+                    },
+                  ]}
                 >{`🗓️  ${formatDate(item[0])}`}</Text>
               </RefView>
-              <View style={styles.workoutList}>
+              <View
+                style={[
+                  styles.workoutList,
+                  { backgroundColor: themeColor.itemColor },
+                ]}
+              >
                 {item[1].map((data, index) => (
                   <WorkoutPlan
                     key={data.id}
@@ -142,7 +155,7 @@ export default function TabOneScreen() {
         style={{
           height: 200,
           alignItems: "center",
-          paddingTop: 80,
+          paddingTop: 64,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -160,29 +173,26 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
   date: {
     fontSize: 14,
-    textAlign: "center",
     fontFamily: "sb-l",
-    borderWidth: 2,
-
-    alignSelf: "center",
-    paddingHorizontal: 10,
-    // paddingTop: 1,
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
+    paddingTop: 2,
     paddingBottom: 4,
-    borderRadius: 16,
+    paddingHorizontal: 12,
   },
   workoutList: {
-    borderRadius: 12,
+    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    paddingTop: 4,
+
     overflow: "hidden",
   },
 
   list: {
-    paddingHorizontal: 12,
-    gap: 18,
-    paddingTop: 18,
-    // paddingBottom: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
   },
 
   title: {

@@ -1,27 +1,24 @@
+import { useLayoutEffect, useState } from "react"
+// component
+import { ScrollView, StyleSheet, useColorScheme } from "react-native"
 import { Text, View } from "@/components/Themed"
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
-import Colors from "@/constants/Colors"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { useSearchInputStore } from "@/hooks/use-search-input-store"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { formatDate, groupByDate, setColor } from "@/lib/function"
 import { FlashList } from "@shopify/flash-list"
-import { useFocusEffect, useNavigation } from "expo-router"
-import {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-} from "react"
-import { ScrollView, StyleSheet, useColorScheme } from "react-native"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { usePlanStore } from "@/hooks/use-plan-store"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+// lib
+import { formatDate, groupByDate, setColor } from "@/lib/function"
+// expo
+import { useNavigation } from "expo-router"
 
 export default function Search() {
-  const colorScheme = useColorScheme()
-  const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
+  const { workoutPlanList } = userWorkoutPlanStore()
   const navigation = useNavigation()
   const [inputValue, setInputValue] = useState("")
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
+  const themeColor = useCurrneThemeColor()
 
   const filterWorkoutList = (value: string) => {
     const result = workoutPlanList.filter((workout) => {
@@ -50,7 +47,7 @@ export default function Search() {
         visable: true,
         placeHolder: "Search",
         autoFocus: true,
-        tintColor: Colors[colorScheme ?? "light"].tint,
+        tintColor: themeColor.tint,
         cancelButtonText: "취소",
 
         onChangeText: (e: any) => {
@@ -61,21 +58,11 @@ export default function Search() {
     })
   }, [navigation])
 
-  //   useFocusEffect(
-  //     useCallback(() => {
-  //       const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-  //         setInputValue("")
-  //       })
-
-  //       return unsubscribe
-  //     }, [navigation])
-  //   )
-
   return (
     <ScrollView
       style={[
         styles.container,
-        setColor(Colors[colorScheme ?? "light"].background, "backgroundColor"),
+        setColor(themeColor.background, "backgroundColor"),
       ]}
       keyboardDismissMode="on-drag"
     >
@@ -90,14 +77,19 @@ export default function Search() {
                 <Text
                   style={[
                     styles.date,
-                    setColor(
-                      Colors[colorScheme ?? "light"].subText,
-                      "borderColor"
-                    ),
+                    {
+                      backgroundColor: themeColor.tint,
+                      color: themeColor.background,
+                    },
                   ]}
                 >{`🗓️  ${formatDate(item[0])}`}</Text>
 
-                <View style={styles.workoutList}>
+                <View
+                  style={[
+                    styles.workoutList,
+                    { backgroundColor: themeColor.itemColor },
+                  ]}
+                >
                   {item[1].map((data, index) => (
                     <WorkoutPlan
                       key={data.id}
@@ -121,7 +113,7 @@ export default function Search() {
       >
         <Text
           style={{
-            color: Colors[colorScheme ?? "light"].subText,
+            color: themeColor.subText,
             textAlign: "center",
             lineHeight: 24,
             fontSize: 16,
@@ -142,26 +134,23 @@ const styles = StyleSheet.create({
     paddingTop: 110,
   },
   workoutList: {
-    borderRadius: 14,
+    borderBottomRightRadius: 12,
+    borderBottomLeftRadius: 12,
+    paddingTop: 4,
     overflow: "hidden",
   },
 
   date: {
     fontSize: 14,
-    textAlign: "center",
     fontFamily: "sb-l",
-    borderWidth: 2,
-
-    alignSelf: "center",
-    paddingHorizontal: 10,
-    // paddingTop: 1,
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
+    paddingTop: 2,
     paddingBottom: 4,
-    borderRadius: 16,
+    paddingHorizontal: 12,
   },
   list: {
-    paddingHorizontal: 24,
-    gap: 18,
-    paddingTop: 18,
-    // paddingBottom: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 24,
   },
 })
