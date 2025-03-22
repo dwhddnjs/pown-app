@@ -109,7 +109,7 @@ export default function calendar() {
           paddingHorizontal: 20,
           paddingTop: headerHeight,
           backgroundColor: themeColor.background,
-          gap: 20,
+          gap: 24,
         }}
         nestedScrollEnabled={true}
       >

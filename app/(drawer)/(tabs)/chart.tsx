@@ -25,7 +25,7 @@ export default function chart() {
         scrollEventThrottle={16}
         style={{ flex: 1 }}
         contentContainerStyle={{
-          gap: 20,
+          gap: 24,
           paddingTop: headerHeight,
           paddingHorizontal: 20,
           paddingBottom: 24,
