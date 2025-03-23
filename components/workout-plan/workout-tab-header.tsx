@@ -30,7 +30,7 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
             style={{
               fontSize: 18,
               color:
-                title === "🔥 오늘도 화이팅!"
+                title === "🔥오늘도 화이팅!"
                   ? themeColor.tint
                   : themeColor.text,
               textAlign: "center",
@@ -41,7 +41,7 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
           </Text>
           <TouchableOpacity
             style={{
-              paddingLeft: 12,
+              paddingLeft: 18,
               paddingVertical: 8,
             }}
             onPress={() => push("/workout/search")}
@@ -65,7 +65,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "transparent",
     width: "100%",
-
     paddingLeft: 8,
     paddingRight: 25,
     flexDirection: "row",

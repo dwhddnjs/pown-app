@@ -107,6 +107,26 @@ function RootLayoutNav() {
     >
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
       <Stack.Screen
+        name="(modals)/calculate"
+        options={({ navigation }) => ({
+          presentation: "modal",
+          headerTitle: "",
+          headerStyle: {
+            borderBottomWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+            backgroundColor: themeColor.background,
+          },
+          headerShadowVisible: false,
+
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <XIcon name="x" size={30} color={themeColor.subText} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
         name="(modals)/calendar-workout"
         options={({ navigation }) => ({
           presentation: "modal",

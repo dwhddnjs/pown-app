@@ -8,24 +8,26 @@ import {
   ScrollView,
   StyleSheet,
   FlatList,
+  TouchableOpacity,
 } from "react-native"
-
 import { EmptyList } from "@/components/workout-plan/empty-list"
 import { RefView } from "@/components/RefView"
+import { FlashList } from "@shopify/flash-list"
 // zustand
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 import { useSelectDateStore } from "@/hooks/use-select-date-store"
 // lib
 import { formatDate, groupByDate } from "@/lib/function"
 // expo
-import { useNavigation } from "expo-router"
+import { useNavigation, useRouter } from "expo-router"
+
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6"
-import { FlashList } from "@shopify/flash-list"
+import MaterialIcons from "@expo/vector-icons/MaterialIcons"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
@@ -35,6 +37,7 @@ export default function TabOneScreen() {
   const headerHeight = useHeaderHeight()
   const themeColor = useCurrneThemeColor()
   const navigation = useNavigation()
+  const router = useRouter()
 
   const itemRef = useRef(new Map())
 
@@ -48,7 +51,7 @@ export default function TabOneScreen() {
         if (scrollY.current === 0) {
           const splitData = date.split(".")
           navigation.setOptions({
-            title: `🔥 오늘도 화이팅!`,
+            title: `🔥오늘도 화이팅!`,
           })
         }
         if (y - scrollY.current < headerHeight - 30) {
@@ -95,77 +98,94 @@ export default function TabOneScreen() {
   }
 
   return (
-    <ScrollView
-      ref={scrollRef}
-      onScroll={handleScroll}
-      scrollEventThrottle={16}
-      style={[
-        styles.container,
-        {
-          paddingTop: headerHeight,
-          backgroundColor: themeColor.background,
-        },
-      ]}
-    >
-      <FlashList
-        data={Object.entries(sortWorkList)}
-        estimatedItemSize={50}
-        keyExtractor={(item) => item[0]}
-        renderItem={({ item, index }) => {
-          return (
-            <View style={styles.list} key={index}>
-              <RefView
-                ref={(ref) => {
-                  itemRef.current.set(item[0], ref)
-                  if (ref && index === 0) {
-                    measureView(ref, item[0])
-                  }
-                }}
-              >
-                <Text
-                  style={[
-                    styles.date,
-                    {
-                      backgroundColor: themeColor.tint,
-                      color: themeColor.background,
-                    },
-                  ]}
-                >{`🗓️  ${formatDate(item[0])}`}</Text>
-              </RefView>
-              <View
-                style={[
-                  styles.workoutList,
-                  { backgroundColor: themeColor.itemColor },
-                ]}
-              >
-                {item[1].map((data, index) => (
-                  <WorkoutPlan
-                    key={data.id}
-                    item={data}
-                    index={index}
-                    totalLength={item[1].length}
-                  />
-                ))}
-              </View>
-            </View>
-          )
-        }}
-      />
-      <View
-        style={{
-          height: 200,
-          alignItems: "center",
-          paddingTop: 64,
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        ref={scrollRef}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={[
+          styles.container,
+          {
+            paddingTop: headerHeight,
+            backgroundColor: themeColor.background,
+          },
+        ]}
+        contentContainerStyle={{
+          position: "relative",
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text style={{ color: themeColor.subText }}>
-            마지막 운동계획입니다.
-          </Text>
+        <FlashList
+          data={Object.entries(sortWorkList)}
+          estimatedItemSize={50}
+          keyExtractor={(item) => item[0]}
+          renderItem={({ item, index }) => {
+            return (
+              <View style={styles.list} key={index}>
+                <RefView
+                  ref={(ref) => {
+                    itemRef.current.set(item[0], ref)
+                    if (ref && index === 0) {
+                      measureView(ref, item[0])
+                    }
+                  }}
+                >
+                  <Text
+                    style={[
+                      styles.date,
+                      {
+                        backgroundColor: themeColor.tint,
+                        color: themeColor.background,
+                      },
+                    ]}
+                  >{`🗓️  ${formatDate(item[0])}`}</Text>
+                </RefView>
+                <View
+                  style={[
+                    styles.workoutList,
+                    { backgroundColor: themeColor.itemColor },
+                  ]}
+                >
+                  {item[1].map((data, index) => (
+                    <WorkoutPlan
+                      key={data.id}
+                      item={data}
+                      index={index}
+                      totalLength={item[1].length}
+                    />
+                  ))}
+                </View>
+              </View>
+            )
+          }}
+        />
+        <View
+          style={{
+            height: 200,
+            alignItems: "center",
+            paddingTop: 64,
+          }}
+        >
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+            <Text style={{ color: themeColor.subText }}>
+              마지막 운동계획입니다.
+            </Text>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+      <TouchableOpacity
+        onPress={() => router.push("/(modals)/calculate")}
+        style={[
+          styles.calculateButton,
+          {
+            backgroundColor: themeColor.background,
+            borderColor: themeColor.subText,
+          },
+        ]}
+      >
+        <MaterialIcons name="calculate" size={40} color={themeColor.tint} />
+      </TouchableOpacity>
+    </View>
   )
 }
 
@@ -207,5 +227,18 @@ const styles = StyleSheet.create({
   empty: {
     width: 100,
     height: 150,
+  },
+  calculateButton: {
+    width: 64,
+    height: 64,
+    opacity: 0.8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderRadius: 50,
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    zIndex: 1000,
   },
 })

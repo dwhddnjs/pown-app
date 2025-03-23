@@ -13,8 +13,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { transformWorkoutData } from "@/lib/function"
 // icons
 import FontAwesome from "@expo/vector-icons/FontAwesome"
-
-// expo;
+// expo
 import { usePathname } from "expo-router"
 
 const CustomDrawerContent = (props: any) => {
@@ -93,7 +92,12 @@ const CustomDrawerContent = (props: any) => {
   }
 
   return (
-    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+    <View
+      style={{
+        flex: 1,
+        paddingHorizontal: 20,
+      }}
+    >
       <View style={{ paddingTop: 72, paddingBottom: 12, gap: 4 }}>
         <Text style={{ fontSize: 18 }}>나의 운동 기록</Text>
         <Text

@@ -43,80 +43,82 @@ export default function TabLayout() {
   }
 
   return (
-    <Tabs screenOptions={tabOption}>
-      <Tabs.Screen
-        name="workout"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <SymbolView
-              name="dumbbell.fill"
-              type="hierarchical"
-              tintColor={color}
-              size={32}
-            />
-          ),
-          tabBarLabel: "운동계획",
-          header: ({ navigation, route, options }) => (
-            <WorkoutTabHeader title={options.title} />
-          ),
-          headerTransparent: true,
-        }}
-      />
-      <Tabs.Screen
-        name="chart"
-        options={{
-          title: "차트",
-          tabBarIcon: ({ color }) => (
-            <AntDesign name="piechart" size={24} color={color} />
-          ),
-          header: ({ navigation, route, options }) => {
-            return <ChartHeader />
-          },
-          headerTransparent: true,
-        }}
-      />
+    <View style={{ flex: 1 }}>
+      <Tabs screenOptions={tabOption}>
+        <Tabs.Screen
+          name="workout"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <SymbolView
+                name="dumbbell.fill"
+                type="hierarchical"
+                tintColor={color}
+                size={32}
+              />
+            ),
+            tabBarLabel: "운동계획",
+            header: ({ navigation, route, options }) => (
+              <WorkoutTabHeader title={options.title} />
+            ),
+            headerTransparent: true,
+          }}
+        />
+        <Tabs.Screen
+          name="chart"
+          options={{
+            title: "차트",
+            tabBarIcon: ({ color }) => (
+              <AntDesign name="piechart" size={24} color={color} />
+            ),
+            header: ({ navigation, route, options }) => {
+              return <ChartHeader />
+            },
+            headerTransparent: true,
+          }}
+        />
 
-      <Tabs.Screen
-        name="add"
-        options={{
-          tabBarIcon: ({ color }) => (
-            <View style={styles.addButton}>
-              <AntDesign name="pluscircle" size={48} color={themColor.tint} />
-            </View>
-          ),
-          tabBarLabel: () => null,
-        }}
-        listeners={({ navigation }) => ({
-          tabPress: (e) => {
-            e.preventDefault()
-            router.push("/(modals)/select-type")
-          },
-        })}
-      />
-      <Tabs.Screen
-        name="calendar"
-        options={{
-          title: "캘린더",
-          tabBarIcon: ({ color }) => (
-            <Entypo name="calendar" size={24} color={color} />
-          ),
-          header: ({ navigation, route, options }) => {
-            return <CalendarHeader />
-          },
-          headerTransparent: true,
-        }}
-      />
-      <Tabs.Screen
-        name="mypage"
-        options={{
-          title: "마이페이지",
-          tabBarIcon: ({ color }) => (
-            <UserIcon name="user" size={24} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen name="index" redirect />
-    </Tabs>
+        <Tabs.Screen
+          name="add"
+          options={{
+            tabBarIcon: ({ color }) => (
+              <View style={styles.addButton}>
+                <AntDesign name="pluscircle" size={48} color={themColor.tint} />
+              </View>
+            ),
+            tabBarLabel: () => null,
+          }}
+          listeners={({ navigation }) => ({
+            tabPress: (e) => {
+              e.preventDefault()
+              router.push("/(modals)/select-type")
+            },
+          })}
+        />
+        <Tabs.Screen
+          name="calendar"
+          options={{
+            title: "캘린더",
+            tabBarIcon: ({ color }) => (
+              <Entypo name="calendar" size={24} color={color} />
+            ),
+            header: ({ navigation, route, options }) => {
+              return <CalendarHeader />
+            },
+            headerTransparent: true,
+          }}
+        />
+        <Tabs.Screen
+          name="mypage"
+          options={{
+            title: "마이페이지",
+            tabBarIcon: ({ color }) => (
+              <UserIcon name="user" size={24} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen name="index" redirect />
+      </Tabs>
+    </View>
   )
 }
 
