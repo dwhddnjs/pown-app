@@ -129,15 +129,30 @@ export default function TabOneScreen() {
                     }
                   }}
                 >
-                  <Text
+                  <View
                     style={[
-                      styles.date,
+                      styles.planContainer,
                       {
                         backgroundColor: themeColor.tint,
-                        color: themeColor.background,
                       },
                     ]}
-                  >{`🗓️  ${formatDate(item[0])}`}</Text>
+                  >
+                    <Text
+                      style={[
+                        styles.dateText,
+                        { color: themeColor.background },
+                      ]}
+                    >{`🗓️  ${formatDate(item[0])}`}</Text>
+
+                    <View
+                      style={[
+                        styles.dot,
+                        {
+                          backgroundColor: themeColor.background,
+                        },
+                      ]}
+                    />
+                  </View>
                 </RefView>
                 <View
                   style={[
@@ -205,7 +220,7 @@ const styles = StyleSheet.create({
   workoutList: {
     borderBottomRightRadius: 12,
     borderBottomLeftRadius: 12,
-    paddingTop: 4,
+    paddingTop: 2,
 
     overflow: "hidden",
   },
@@ -213,6 +228,7 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 20,
     paddingVertical: 24,
+    flex: 1,
   },
 
   title: {
@@ -240,5 +256,25 @@ const styles = StyleSheet.create({
     bottom: 20,
     right: 20,
     zIndex: 1000,
+  },
+  planContainer: {
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
+    paddingTop: 2,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dateText: {
+    fontSize: 14,
+    fontFamily: "sb-l",
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 50,
+    marginTop: 4,
   },
 })

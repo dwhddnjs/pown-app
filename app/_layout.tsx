@@ -27,6 +27,7 @@ import { useUserStore } from "@/hooks/use-user-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 export { ErrorBoundary } from "expo-router"
 
@@ -54,6 +55,11 @@ export default function RootLayout() {
       SplashScreen.hide()
     }
   }, [loaded])
+  // useEffect(() => {
+  //   ;(async () => {
+  //     await AsyncStorage.clear()
+  //   })()
+  // }, [])
 
   useEffect(() => {
     if (theme === "system") {

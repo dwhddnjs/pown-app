@@ -46,6 +46,7 @@ export const PlanNote = () => {
             },
           ]}
           placeholder="특이사항을 적어주세요 (선택)"
+          placeholderTextColor={themeColor.subText}
           value={content}
           onChangeText={(value) => setPlanValue("content", value)}
         />

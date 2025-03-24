@@ -24,10 +24,16 @@ import * as FileSystem from "expo-file-system"
 export default function ResetData() {
   const { onResetPlanList, onSetMockout, workoutPlanList } =
     userWorkoutPlanStore()
-  const { onReset } = useUserStore()
+
+  const { userInfo, onReset, setUser } = useUserStore()
   const { back } = useRouter()
   const themeColor = useCurrneThemeColor()
-  const jsonData = JSON.stringify(workoutPlanList, null, 2)
+
+  const jsonFile = {
+    user: userInfo,
+    workoutPlan: workoutPlanList,
+  }
+  const jsonData = JSON.stringify(jsonFile, null, 2)
   const fileUri = FileSystem.documentDirectory + "pown.json"
 
   const saveJsonFile = async () => {
@@ -60,7 +66,11 @@ export default function ResetData() {
             encoding: FileSystem.EncodingType.UTF8,
           }
         )
-        onSetMockout(JSON.parse(jsonData))
+        const { user, workoutPlan } = JSON.parse(jsonData)
+        console.log("workoutPlan: ", workoutPlan)
+        console.log("user: ", user)
+        setUser("userInfo", user)
+        onSetMockout(workoutPlan)
         toast.success("운동계획 파일을 불러왔습니다!")
       }
     } catch (error) {

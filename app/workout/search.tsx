@@ -74,15 +74,26 @@ export default function Search() {
           renderItem={({ item, index }) => {
             return (
               <View style={styles.list} key={index}>
-                <Text
+                <View
                   style={[
-                    styles.date,
+                    styles.planContainer,
                     {
                       backgroundColor: themeColor.tint,
-                      color: themeColor.background,
                     },
                   ]}
-                >{`🗓️  ${formatDate(item[0])}`}</Text>
+                >
+                  <Text
+                    style={[styles.dateText, { color: themeColor.background }]}
+                  >{`🗓️  ${formatDate(item[0])}`}</Text>
+                  <View
+                    style={[
+                      styles.dot,
+                      {
+                        backgroundColor: themeColor.background,
+                      },
+                    ]}
+                  />
+                </View>
 
                 <View
                   style={[
@@ -136,7 +147,7 @@ const styles = StyleSheet.create({
   workoutList: {
     borderBottomRightRadius: 12,
     borderBottomLeftRadius: 12,
-    paddingTop: 4,
+    paddingTop: 2,
     overflow: "hidden",
   },
 
@@ -152,5 +163,25 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 20,
     paddingVertical: 24,
+  },
+  planContainer: {
+    borderTopRightRadius: 12,
+    borderTopLeftRadius: 12,
+    paddingTop: 2,
+    paddingBottom: 4,
+    paddingHorizontal: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dateText: {
+    fontSize: 14,
+    fontFamily: "sb-l",
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 50,
+    marginTop: 4,
   },
 })

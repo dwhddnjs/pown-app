@@ -25,12 +25,29 @@ export default function calendarWorkout() {
         renderItem={({ item, index }) => {
           return (
             <View style={styles(themeColor).list} key={index}>
-              <Text
+              <View
                 style={[
-                  styles(themeColor).date,
-                  { borderColor: themeColor.subText },
+                  styles(themeColor).planContainer,
+                  {
+                    backgroundColor: themeColor.tint,
+                  },
                 ]}
-              >{`🗓️  ${formatDate(item[0])}`}</Text>
+              >
+                <Text
+                  style={[
+                    styles(themeColor).dateText,
+                    { color: themeColor.background },
+                  ]}
+                >{`🗓️  ${formatDate(item[0])}`}</Text>
+                <View
+                  style={[
+                    styles(themeColor).dot,
+                    {
+                      backgroundColor: themeColor.background,
+                    },
+                  ]}
+                />
+              </View>
               <View style={styles(themeColor).workoutList}>
                 {item[1].map((data, index) => (
                   <WorkoutPlan
@@ -59,7 +76,7 @@ const styles = (color: any) =>
     workoutList: {
       borderBottomRightRadius: 12,
       borderBottomLeftRadius: 12,
-      paddingTop: 4,
+      paddingTop: 2,
       overflow: "hidden",
       backgroundColor: color.itemColor,
     },
@@ -76,5 +93,25 @@ const styles = (color: any) =>
       backgroundColor: color.tint,
       color: color.background,
       paddingHorizontal: 12,
+    },
+    planContainer: {
+      borderTopRightRadius: 12,
+      borderTopLeftRadius: 12,
+      paddingTop: 2,
+      paddingBottom: 4,
+      paddingHorizontal: 12,
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
+    dateText: {
+      fontSize: 14,
+      fontFamily: "sb-l",
+    },
+    dot: {
+      width: 12,
+      height: 12,
+      borderRadius: 50,
+      marginTop: 4,
     },
   })

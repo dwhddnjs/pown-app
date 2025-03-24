@@ -7,17 +7,18 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native"
+import { toast } from "sonner-native"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function calculate() {
   const themeColor = useCurrneThemeColor()
   const [selected, setSelected] = useState("kg")
-  const [inputNumber, setInputNumber] = useState("0")
+  const [inputNumber, setInputNumber] = useState("")
 
   const generatePercentageValues = (input: string) => {
-    const num = parseFloat(input)
-    if (isNaN(num)) return []
+    const value = !input ? "0" : input
+    const num = parseFloat(value)
 
     return Array.from({ length: 22 }, (_, i) => {
       const percent = 110 - i * 5
@@ -44,6 +45,9 @@ export default function calculate() {
   }
 
   const onSelectedTab = (type: "lb" | "kg") => {
+    if (!inputNumber) {
+      return toast.error("숫자를 기입해주세요!")
+    }
     const num = parseFloat(inputNumber)
     if (type === "lb") {
       const pound = Math.round(num * 2.20462).toString()
@@ -91,8 +95,8 @@ export default function calculate() {
           textAlign="right"
           style={styles(themeColor).input}
           value={inputNumber}
-          onChangeText={(value) => setInputNumber(value === "" ? "0" : value)}
-          placeholderTextColor={themeColor.text}
+          onChangeText={(value) => setInputNumber(value)}
+          placeholderTextColor={themeColor.subText}
           returnKeyType="done"
         />
         <Text style={{ fontSize: 18 }}>{selected === "kg" ? "kg" : "lb"}</Text>
@@ -104,8 +108,8 @@ export default function calculate() {
           paddingHorizontal: 20,
         }}
       >
-        {generatePercentageValues(inputNumber).map((item) => (
-          <View style={styles(themeColor).listItem}>
+        {generatePercentageValues(inputNumber)?.map((item) => (
+          <View style={styles(themeColor).listItem} key={item.title}>
             <Text style={{ fontSize: 16, color: themeColor.text }}>
               {item.title}
             </Text>

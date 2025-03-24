@@ -1,53 +1,44 @@
-import {
-  Pressable,
-  StyleSheet,
-  TextInput,
-  useColorScheme,
-  useWindowDimensions,
-} from "react-native"
 import React, { useRef, useState } from "react"
-import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
+// component
+import { Pressable, StyleSheet, TextInput } from "react-native"
 import { Text, View } from "../Themed"
 import { IconTitle } from "../IconTitle"
-import Colors from "@/constants/Colors"
+// icon
+import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
+// hook
 import { usePlanStore } from "@/hooks/use-plan-store"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const TopWeight = () => {
   const { weight, setPlanValue } = usePlanStore()
-  const colorScheme = useColorScheme()
   const inputRef = useRef<TextInput>(null)
+  const themeColor = useCurrneThemeColor()
 
   return (
-    <Pressable
-      onPress={() => inputRef.current?.focus()}
-      style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}
-    >
+    <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
       <IconTitle style={{ gap: 8 }}>
-        <WeightIcon
-          name="weight-kilogram"
-          size={20}
-          color={Colors[colorScheme ?? "light"].tint}
-        />
+        <WeightIcon name="weight-kilogram" size={20} color={themeColor.tint} />
         <Text style={{ fontSize: 16 }}>목표 중량</Text>
       </IconTitle>
-      <View
-        style={[
-          styles.container,
-          { borderColor: Colors[colorScheme ?? "light"].subText },
-        ]}
+
+      <Pressable
+        onPress={() => inputRef.current?.focus()}
+        style={[styles.container, { borderColor: themeColor.subText }]}
       >
         <TextInput
           ref={inputRef}
-          style={[styles.input, { color: Colors[colorScheme ?? "light"].tint }]}
+          style={[styles.input, { color: themeColor.tint }]}
           keyboardType="numeric"
           maxLength={3}
           value={weight}
           onChangeText={(value) => setPlanValue("weight", value)}
           placeholder="0"
+          returnKeyType="done"
+          placeholderTextColor={themeColor.subText}
         />
         <Text>kg</Text>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   )
 }
 
@@ -65,7 +56,7 @@ const styles = StyleSheet.create({
   },
   input: {
     textAlign: "right",
-    minWidth: 40,
+    minWidth: 45,
     fontSize: 16,
     fontFamily: "sb-l",
   },
