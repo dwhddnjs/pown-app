@@ -51,7 +51,6 @@ export const PlanNote = () => {
           onChangeText={(value) => setPlanValue("content", value)}
         />
       )}
-      <View style={{ height: 250 }} />
     </View>
   )
 }
@@ -66,7 +65,6 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     paddingRight: 20,
   },
-
   link: {
     fontSize: 14,
     fontFamily: "sb-l",

@@ -7,7 +7,6 @@ import {
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
-  FlatList,
   TouchableOpacity,
 } from "react-native"
 import { EmptyList } from "@/components/workout-plan/empty-list"

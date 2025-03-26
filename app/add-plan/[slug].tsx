@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from "react"
 // component
 import { SetCounterSheet } from "@/components/SetCounterSheet"
-import { Text } from "@/components/Themed"
+import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
 import { ScrollView, StyleSheet } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
@@ -23,6 +23,8 @@ import { workoutData } from "@/constants/constants"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
+import { Button } from "@/components/Button"
+import { CameraImage } from "@/components/add-plan/camera-image"
 
 export interface InputRefObject {
   measure: (
@@ -99,6 +101,9 @@ export default function AddPlan() {
         <ConditionList />
         {/* 퀵노트 전체 노트 */}
         <PlanNote />
+        {/* 사진   */}
+        <CameraImage />
+        <View style={{ height: 250 }} />
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>

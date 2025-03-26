@@ -24,7 +24,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
 
   return (
     <View style={styles.container}>
-      {workoutList.map((item) => (
+      {workoutList?.map((item) => (
         <TouchableOpacity
           key={item}
           style={[

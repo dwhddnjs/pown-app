@@ -492,6 +492,29 @@ function RootLayoutNav() {
           }
         }}
       />
+      <Stack.Screen
+        name="add-plan/camera"
+        options={({ navigation }) => ({
+          headerTitle: "사진 찍기",
+          headerShown: false,
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          animation: "slide_from_bottom",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
+              onPress={() => navigation.goBack()}
+            >
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
     </Stack>
   )
 }
