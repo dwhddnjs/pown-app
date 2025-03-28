@@ -1,24 +1,21 @@
-import {
-  Dimensions,
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native"
+import { useRef, useState } from "react"
+// component
+import { Pressable, StyleSheet } from "react-native"
+import { Text, View } from "@/components/Themed"
+//expo
 import {
   CameraMode,
   CameraType,
   CameraView,
   useCameraPermissions,
 } from "expo-camera"
-import { useRef, useState } from "react"
 import { Image } from "expo-image"
-import { FontAwesome6 } from "@expo/vector-icons"
 import { useRouter } from "expo-router"
+// icon
+import { FontAwesome6 } from "@expo/vector-icons"
+// hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useHeaderHeight } from "@react-navigation/elements"
-import { Text, View } from "@/components/Themed"
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window")
+import { useImageUriStore } from "@/hooks/use-image-uri-store"
 
 const Camera = () => {
   const ref = useRef<CameraView>(null)
@@ -27,13 +24,22 @@ const Camera = () => {
   const [facing, setFacing] = useState<CameraType>("back")
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
+  const { uri: imageUri, setImageUri } = useImageUriStore()
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync()
-    setUri(photo?.uri as any)
+    setUri(photo?.uri as string)
   }
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"))
+  }
+
+  const selectImageUri = () => {
+    if (uri) {
+      setImageUri({ id: imageUri.length + 1, uri })
+      setUri("")
+    }
+    router.back()
   }
 
   const renderPicture = () => {
@@ -66,7 +72,10 @@ const Camera = () => {
               다시 찍기
             </Text>
           </Pressable>
-          <Pressable style={{ paddingTop: 24 }}>
+          <Pressable
+            style={{ paddingTop: 24 }}
+            onPress={() => selectImageUri()}
+          >
             <Text
               style={{
                 fontSize: 16,

@@ -1,21 +1,21 @@
+// component
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { Text, View } from "../Themed"
-import AntDesign from "@expo/vector-icons/AntDesign"
-
-import Colors from "@/constants/Colors"
 import { Button } from "../Button"
 import { IconTitle } from "../IconTitle"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { useRef, useState } from "react"
-import { InputRefObject } from "@/app/add-plan/[slug]"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// expo
 import { useRouter } from "expo-router"
+import { Image } from "expo-image"
 import {
   CameraMode,
   CameraType,
   CameraView,
   useCameraPermissions,
 } from "expo-camera"
+import AntDesign from "@expo/vector-icons/AntDesign"
+// hook
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { useImageUriStore } from "@/hooks/use-image-uri-store"
 
 interface CameraImageProps {}
 
@@ -23,6 +23,8 @@ export const CameraImage = ({}: CameraImageProps) => {
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
   const [permission, requestPermission] = useCameraPermissions()
+  const { uri } = useImageUriStore()
+  console.log("uri: ", uri)
 
   if (!permission) {
     return null
@@ -31,9 +33,7 @@ export const CameraImage = ({}: CameraImageProps) => {
   if (!permission.granted) {
     return (
       <View style={styles.container}>
-        <Text style={{ textAlign: "center" }}>
-          We need your permission to use the camera
-        </Text>
+        <Text style={{ textAlign: "center" }}>카메라 허용이 필요합니다!</Text>
         <Button onPress={requestPermission} type={"solid"}>
           saddsa
         </Button>
@@ -53,12 +53,30 @@ export const CameraImage = ({}: CameraImageProps) => {
       <Button
         type="bordered"
         onPress={() => {
-          console.log("asdadsdas")
           router.push("/add-plan/camera")
         }}
       >
         선택하기
       </Button>
+      <View
+        style={{
+          // paddingHorizontal: 20,
+          paddingVertical: 12,
+          flexDirection: "row",
+          gap: 12,
+          flexWrap: "nowrap",
+          borderWidth: 1,
+        }}
+      >
+        {uri.map((item) => (
+          <Image
+            key={item.id}
+            source={{ uri: item.uri }}
+            contentFit="cover"
+            style={{ width: "50%", aspectRatio: 1, borderRadius: 16 }}
+          />
+        ))}
+      </View>
     </View>
   )
 }
