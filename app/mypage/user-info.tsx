@@ -21,7 +21,7 @@ export default function UserInfo() {
   const lastestUserInfo = userInfo[userInfo.length - 1]
 
   const [value, setValue] = useState({
-    height: lastestUserInfo?.weight ?? "",
+    height: lastestUserInfo?.height ?? "",
     age: lastestUserInfo?.age ?? "",
     weight: lastestUserInfo?.weight ?? "",
     sq: lastestUserInfo?.sq ?? "",

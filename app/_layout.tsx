@@ -13,6 +13,7 @@ import { useFonts } from "expo-font"
 import { Stack, useGlobalSearchParams, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
+import * as MediaLibrary from "expo-media-library"
 // icons
 import XIcon from "@expo/vector-icons/Feather"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
@@ -249,9 +250,32 @@ function RootLayoutNav() {
             const { onReset: onResetNote } = useNoteStore()
             const { slug } = useGlobalSearchParams()
 
-            return (
-              <TouchableOpacity
-                onPress={() => {
+            const onSubmitWorkoutPlan = async () => {
+              try {
+                const { status: mediaStatus } =
+                  await MediaLibrary.requestPermissionsAsync()
+                if (mediaStatus === "granted") {
+                  const imageUri = await Promise.all(
+                    result.imageUri.map(async (item) => {
+                      const asset = await MediaLibrary.createAssetAsync(
+                        item.imageUri as string
+                      )
+                      const photoLib = await MediaLibrary.getAssetsAsync({
+                        mediaType: "photo",
+                      })
+                      const findAsset = photoLib.assets.find(
+                        (a) => a.uri === asset.uri
+                      )
+                      const assetInfo =
+                        findAsset &&
+                        (await MediaLibrary.getAssetInfoAsync(findAsset.id))
+
+                      return {
+                        id: item.id,
+                        imageUri: assetInfo?.localUri,
+                      }
+                    })
+                  )
                   if (result.weight && result.workout && route.params) {
                     setWorkoutPlan({
                       id: workoutPlanList.length + 1,
@@ -265,6 +289,7 @@ function RootLayoutNav() {
                       setWithCount: result.setWithCount,
                       createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
                       updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+                      imageUri: imageUri,
                     })
                     onReset()
                     navigation.goBack()
@@ -272,7 +297,15 @@ function RootLayoutNav() {
                     return toast.success("운동 계획을 추가되었습니다!!")
                   }
                   return toast.error("운동과 목표 중량은 필수에요..")
-                }}
+                }
+              } catch (error) {
+                console.log("error: ", error)
+              }
+            }
+
+            return (
+              <TouchableOpacity
+                onPress={() => onSubmitWorkoutPlan()}
                 style={{
                   paddingRight: 8,
                   paddingLeft: 16,

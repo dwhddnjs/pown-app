@@ -13,6 +13,7 @@ export type WorkoutPlanTypes = Pick<
   | "content"
   | "title"
   | "setWithCount"
+  | "imageUri"
 > & { id: number; createdAt: string; updatedAt: string }
 
 type WorkoutPlanStoreTypes = {

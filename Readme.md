@@ -15,6 +15,7 @@ Pown은 Progressive Overload Workout plaN 의 약자로
 4. 내 정보에서 당신의 3대 중량, 신체 정보를 기록할 수 있습니다
 
 ### 배포
+
 https://apps.apple.com/us/app/pown-%ED%8F%AC%EC%9A%B4-%EC%9A%B4%EB%8F%99-%EA%B3%84%ED%9A%8D-%EA%B8%B0%EB%A1%9D-%ED%97%AC%EC%8A%A4/id6737919723
 
 ### 개인정보보호방침
@@ -28,3 +29,12 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 ![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 42 33 1](https://github.com/user-attachments/assets/c953a2cc-b898-4d62-b8a5-e7a908075995)
 ![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 40 26](https://github.com/user-attachments/assets/4d86b96a-064a-480d-abd6-89286730047f)
 ![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/4358c990-6d4d-43d4-9c33-d03997e34e82)
+
+TODO
+카메라, 라이브러리 권한 요청로직 작성
+이미지 확대 모달 추가
+아 이미지 수정
+데이터 백업 했을때 이미지 잘 나오는지 테스트
+차트 데이터 없는 월 차단
+계산기 무게 단위 탭 개선
+앱스토어 배포시 설명 및 이미지 변경

@@ -1,6 +1,11 @@
 import React, { useState } from "react"
 // component
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import {
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import { Text, View } from "../Themed"
 import { NoteText } from "./note-text"
 import { SetListItem } from "./set-list-item"
@@ -15,6 +20,8 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 // zustand
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// expo
+import * as MediaLibrary from "expo-media-library"
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes
@@ -24,6 +31,7 @@ interface WorkoutPlanProps {
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
   const themeColor = useCurrneThemeColor()
+
   const getWorkoutIcon = (type: string) => {
     let result
     switch (type) {
@@ -124,6 +132,34 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
             {item.setWithCount.map((setCount) => (
               <SetListItem key={setCount.id} planId={item.id} item={setCount} />
             ))}
+          </View>
+        )}
+        {item.imageUri && (
+          <View
+            style={{
+              flexDirection: "row",
+              gap: 4,
+              flexWrap: "nowrap",
+              backgroundColor: themeColor.itemColor,
+            }}
+          >
+            {item.imageUri.map((item) => {
+              return (
+                <View
+                  style={{ flex: 4, backgroundColor: themeColor.itemColor }}
+                >
+                  <Image
+                    source={{ uri: item.imageUri }}
+                    style={{
+                      aspectRatio: 1,
+                      borderRadius: 12,
+                      borderWidth: 1,
+                      borderColor: themeColor.itemColor,
+                    }}
+                  />
+                </View>
+              )
+            })}
           </View>
         )}
       </View>

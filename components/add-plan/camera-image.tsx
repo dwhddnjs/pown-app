@@ -12,10 +12,12 @@ import {
   CameraView,
   useCameraPermissions,
 } from "expo-camera"
-import AntDesign from "@expo/vector-icons/AntDesign"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import { usePlanStore } from "@/hooks/use-plan-store"
+// icon
+import AntDesign from "@expo/vector-icons/AntDesign"
+import { toast } from "sonner-native"
 
 interface CameraImageProps {}
 
@@ -23,8 +25,11 @@ export const CameraImage = ({}: CameraImageProps) => {
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
   const [permission, requestPermission] = useCameraPermissions()
-  const { uri } = useImageUriStore()
-  console.log("uri: ", uri)
+  const { imageUri, setRemoveImageUri } = usePlanStore()
+
+  const onRemoveImageUri = (id: number) => {
+    setRemoveImageUri(id)
+  }
 
   if (!permission) {
     return null
@@ -35,7 +40,7 @@ export const CameraImage = ({}: CameraImageProps) => {
       <View style={styles.container}>
         <Text style={{ textAlign: "center" }}>카메라 허용이 필요합니다!</Text>
         <Button onPress={requestPermission} type={"solid"}>
-          saddsa
+          허용
         </Button>
       </View>
     )
@@ -46,35 +51,59 @@ export const CameraImage = ({}: CameraImageProps) => {
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
           <AntDesign name="camera" size={20} color={themeColor.tint} />
-          <Text style={{ fontSize: 16 }}>사진 올리기</Text>
+          <Text style={{ fontSize: 16 }}>사진 추가</Text>
         </IconTitle>
         <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
       </View>
       <Button
         type="bordered"
         onPress={() => {
+          if (imageUri.length === 4) {
+            return toast.error("최대 4개까지 가능합니다")
+          }
           router.push("/add-plan/camera")
         }}
       >
-        선택하기
+        사진찍기
       </Button>
       <View
         style={{
-          // paddingHorizontal: 20,
+          paddingHorizontal: 20,
           paddingVertical: 12,
           flexDirection: "row",
-          gap: 12,
+          gap: 8,
           flexWrap: "nowrap",
-          borderWidth: 1,
         }}
       >
-        {uri.map((item) => (
-          <Image
-            key={item.id}
-            source={{ uri: item.uri }}
-            contentFit="cover"
-            style={{ width: "50%", aspectRatio: 1, borderRadius: 16 }}
-          />
+        {imageUri.map((item) => (
+          <View style={{ flex: 4, position: "relative" }}>
+            <Image
+              key={item.id}
+              source={{ uri: item.imageUri }}
+              contentFit="cover"
+              style={{
+                aspectRatio: 1,
+                borderRadius: 16,
+                borderWidth: 1,
+                borderColor: themeColor.itemColor,
+              }}
+            />
+            <TouchableOpacity
+              onPress={() => onRemoveImageUri(item.id)}
+              style={{
+                flex: 4,
+                position: "absolute",
+                right: -4,
+                top: -4,
+              }}
+            >
+              <AntDesign
+                name="closecircle"
+                size={24}
+                color={themeColor.pressed}
+              />
+            </TouchableOpacity>
+          </View>
         ))}
       </View>
     </View>

@@ -77,6 +77,14 @@
           "microphonePermission": "Allow Pown to access your microphone",
           "recordAudioAndroid": true
         }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow Pown to access your photos.",
+          "savePhotosPermission": "Allow Pown to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
       ]
     ],
     "experiments": {

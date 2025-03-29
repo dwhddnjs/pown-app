@@ -2,6 +2,23 @@ import { create } from "zustand"
 
 export type WorkoutTypes = "chest" | "back" | "shoulder" | "leg" | "arm"
 
+type ImageUriType = {
+  id: number
+  imageUri?: string
+}
+
+export type ConditionTypes = {
+  id: number
+  condition: string
+}
+
+export type SetWithCountType = {
+  id: number
+  set: string
+  count: string
+  progress: "진행중" | "완료"
+}
+
 export type PlanStoreType = {
   workout: string
   type: string
@@ -11,6 +28,10 @@ export type PlanStoreType = {
   title: string
   content: string
   setWithCount: SetWithCountType[]
+  imageUri: ImageUriType[]
+
+  setImageUri: (uri: ImageUriType) => void
+  setRemoveImageUri: (id: number) => void
   setPlanValue: (type: string, value: string | string[]) => void
   setCondition: (value: string) => void
   setFilterCondition: (value: string) => void
@@ -29,21 +50,10 @@ export type PlanStoreType = {
         | "title"
         | "content"
         | "setWithCount"
+        | "imageUri"
       >
     >
   ) => void
-}
-
-export type ConditionTypes = {
-  id: number
-  condition: string
-}
-
-export type SetWithCountType = {
-  id: number
-  set: string
-  count: string
-  progress: "진행중" | "완료"
 }
 
 export const usePlanStore = create<PlanStoreType>((set) => ({
@@ -55,6 +65,17 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
   condition: [],
   title: "",
   content: "",
+  imageUri: [],
+
+  setImageUri: (uri) =>
+    set((prev) => ({
+      imageUri: [...prev.imageUri, uri],
+    })),
+
+  setRemoveImageUri: (id) =>
+    set((prev) => ({
+      imageUri: prev.imageUri.filter((item) => item.id !== id),
+    })),
 
   setSetWithCount: (value) => {
     set((prev) => ({
@@ -92,6 +113,7 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       equipment: "바벨",
       title: "",
       content: "",
+      imageUri: [],
     }),
 
   setPrevPlanValue: (value: any) =>
@@ -104,5 +126,6 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       equipment: value.equipment,
       title: value.title,
       content: value.content,
+      imageUri: value.imageUri,
     }),
 }))

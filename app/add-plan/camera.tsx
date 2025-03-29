@@ -16,6 +16,8 @@ import { FontAwesome6 } from "@expo/vector-icons"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import { toast } from "sonner-native"
+import { usePlanStore } from "@/hooks/use-plan-store"
 
 const Camera = () => {
   const ref = useRef<CameraView>(null)
@@ -24,7 +26,7 @@ const Camera = () => {
   const [facing, setFacing] = useState<CameraType>("back")
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
-  const { uri: imageUri, setImageUri } = useImageUriStore()
+  const { imageUri, setImageUri } = usePlanStore()
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync()
@@ -36,7 +38,7 @@ const Camera = () => {
 
   const selectImageUri = () => {
     if (uri) {
-      setImageUri({ id: imageUri.length + 1, uri })
+      setImageUri({ id: imageUri.length + 1, imageUri: uri })
       setUri("")
     }
     router.back()
