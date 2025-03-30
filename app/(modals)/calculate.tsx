@@ -15,6 +15,7 @@ export default function calculate() {
   const themeColor = useCurrneThemeColor()
   const [selected, setSelected] = useState("kg")
   const [inputNumber, setInputNumber] = useState("")
+  console.log("inputNumber: ", inputNumber)
 
   const generatePercentageValues = (input: string) => {
     const value = !input ? "0" : input
@@ -46,7 +47,9 @@ export default function calculate() {
 
   const onSelectedTab = (type: "lb" | "kg") => {
     if (!inputNumber) {
-      return toast.error("숫자를 기입해주세요!")
+      setInputNumber("0")
+      setSelected(type)
+      return
     }
     const num = parseFloat(inputNumber)
     if (type === "lb") {
@@ -98,6 +101,7 @@ export default function calculate() {
           onChangeText={(value) => setInputNumber(value)}
           placeholderTextColor={themeColor.subText}
           returnKeyType="done"
+          onFocus={() => setInputNumber("")}
         />
         <Text style={{ fontSize: 18 }}>{selected === "kg" ? "kg" : "lb"}</Text>
       </View>

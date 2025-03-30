@@ -5,7 +5,12 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native"
-import { Appearance, TouchableOpacity, useColorScheme } from "react-native"
+import {
+  Alert,
+  Appearance,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet"
 import { toast, Toaster } from "sonner-native"
 //expo
@@ -14,6 +19,7 @@ import { Stack, useGlobalSearchParams, useRouter } from "expo-router"
 import * as SplashScreen from "expo-splash-screen"
 import { ActionSheetProvider } from "@expo/react-native-action-sheet"
 import * as MediaLibrary from "expo-media-library"
+import { Camera } from "expo-camera"
 // icons
 import XIcon from "@expo/vector-icons/Feather"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
@@ -29,6 +35,7 @@ import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { useCameraPermissions } from "expo-camera"
 
 export { ErrorBoundary } from "expo-router"
 
@@ -49,13 +56,14 @@ export default function RootLayout() {
     "sb-m": require("../assets/fonts/SB_M.otf"),
   })
   const colorScheme = useColorScheme()
-  const { theme } = useUserStore()
+  const { theme, setUser } = useUserStore()
 
   useEffect(() => {
     if (loaded) {
       SplashScreen.hide()
     }
   }, [loaded])
+
   // useEffect(() => {
   //   ;(async () => {
   //     await AsyncStorage.clear()
@@ -74,6 +82,28 @@ export default function RootLayout() {
     if (theme == "light") {
       Appearance.setColorScheme("light")
     }
+  }, [])
+
+  useEffect(() => {
+    ;(async () => {
+      const { status: cameraStatus } =
+        await Camera.requestCameraPermissionsAsync()
+      const { status: mediaStatus } =
+        await MediaLibrary.requestPermissionsAsync()
+
+      if (cameraStatus !== "granted" || mediaStatus !== "granted") {
+        Alert.alert(
+          "권한 필요",
+          "앱을 사용하려면 카메라 및 갤러리 권한이 필요합니다."
+        )
+      }
+      if (cameraStatus === "granted") {
+        setUser("camera", true)
+      }
+      if (mediaStatus === "granted") {
+        setUser("mediaLibrary", true)
+      }
+    })()
   }, [])
 
   useEffect(() => {
@@ -249,12 +279,11 @@ function RootLayoutNav() {
             const { onReset, ...result } = usePlanStore()
             const { onReset: onResetNote } = useNoteStore()
             const { slug } = useGlobalSearchParams()
+            const { mediaLibrary } = useUserStore()
 
             const onSubmitWorkoutPlan = async () => {
               try {
-                const { status: mediaStatus } =
-                  await MediaLibrary.requestPermissionsAsync()
-                if (mediaStatus === "granted") {
+                if (mediaLibrary) {
                   const imageUri = await Promise.all(
                     result.imageUri.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
@@ -358,9 +387,32 @@ function RootLayoutNav() {
             const getWorkoutPlan = workoutPlanList.filter(
               (item) => slug && item.id === parseInt(slug[1])
             )[0]
-            return (
-              <TouchableOpacity
-                onPress={() => {
+            const { mediaLibrary } = useUserStore()
+
+            const onSubmitWorkoutPlan = async () => {
+              try {
+                if (mediaLibrary) {
+                  const imageUri = await Promise.all(
+                    result.imageUri.map(async (item) => {
+                      const asset = await MediaLibrary.createAssetAsync(
+                        item.imageUri as string
+                      )
+                      const photoLib = await MediaLibrary.getAssetsAsync({
+                        mediaType: "photo",
+                      })
+                      const findAsset = photoLib.assets.find(
+                        (a) => a.uri === asset.uri
+                      )
+                      const assetInfo =
+                        findAsset &&
+                        (await MediaLibrary.getAssetInfoAsync(findAsset.id))
+
+                      return {
+                        id: item.id,
+                        imageUri: assetInfo?.localUri,
+                      }
+                    })
+                  )
                   if (result.weight && result.workout) {
                     setEditPlan({
                       id: parseInt(slug[1]),
@@ -377,6 +429,7 @@ function RootLayoutNav() {
                       })),
                       createdAt: getWorkoutPlan.createdAt,
                       updatedAt: getWorkoutPlan.updatedAt,
+                      imageUri: imageUri,
                     })
                     onReset()
                     back()
@@ -384,6 +437,16 @@ function RootLayoutNav() {
                     return toast.success("운동 계획을 수정되었습니다!!")
                   }
                   return toast.error("운동과 목표 중량은 필수에요..")
+                }
+              } catch (error) {
+                console.log("error: ", error)
+              }
+            }
+
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  onSubmitWorkoutPlan()
                 }}
                 style={{
                   paddingRight: 8,

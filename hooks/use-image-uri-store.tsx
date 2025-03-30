@@ -1,30 +1,19 @@
 import { create } from "zustand"
 
-type ImageUriType = {
-  id: number
-  uri: string
-}
-
 type ImageUriStoreType = {
-  uri: ImageUriType[]
-  setImageUri: (uri: ImageUriType) => void
-  setRemoveImageUri: (id: number) => void
+  uri: string
+  setImageUri: (uri: string) => void
+  onResetImageUri: () => void
 }
 
 export const useImageUriStore = create<ImageUriStoreType>((set) => ({
-  uri: [],
+  uri: "",
   setImageUri: (uri) =>
-    set((prev) => ({
-      uri: [...prev.uri, uri],
-    })),
-
-  setRemoveImageUri: (id) =>
-    set((prev) => ({
-      uri: prev.uri.filter((item) => item.id !== id),
-    })),
-
+    set({
+      uri: uri,
+    }),
   onResetImageUri: () =>
     set({
-      uri: [],
+      uri: "",
     }),
 }))

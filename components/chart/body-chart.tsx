@@ -51,7 +51,6 @@ const BodyChart = () => {
           endOpacity={0.2}
           initialSpacing={0}
           noOfSections={5}
-          maxValue={200}
           hideRules
           yAxisTextStyle={{ color: themeColor.text }}
           yAxisThickness={0}

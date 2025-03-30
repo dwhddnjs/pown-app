@@ -16,7 +16,9 @@ export type UserInfoTypes = {
 export type UserTypes = {
   userInfo: UserInfoTypes[]
   theme: "light" | "dark" | "system"
-  setUser: (type: string, value: string) => void
+  camera: boolean
+  mediaLibrary: boolean
+  setUser: (type: string, value: string | boolean) => void
   setUserData: (value: UserInfoTypes) => void
   onReset: () => void
 }
@@ -24,6 +26,8 @@ export type UserTypes = {
 export const useUserStore = create<UserTypes>()(
   persist(
     (set) => ({
+      camera: false,
+      mediaLibrary: false,
       userInfo: [],
       theme: "system",
       setUserData: (value) =>
@@ -39,6 +43,8 @@ export const useUserStore = create<UserTypes>()(
         set({
           userInfo: [],
           theme: "system",
+          camera: false,
+          mediaLibrary: false,
         }),
     }),
     {

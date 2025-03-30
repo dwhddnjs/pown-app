@@ -31,10 +31,7 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 ![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/4358c990-6d4d-43d4-9c33-d03997e34e82)
 
 TODO
-카메라, 라이브러리 권한 요청로직 작성
-이미지 확대 모달 추가
-아 이미지 수정
 데이터 백업 했을때 이미지 잘 나오는지 테스트
 차트 데이터 없는 월 차단
-계산기 무게 단위 탭 개선
+운동계획 수정시 사진찍기 기능 저장 버그 확인
 앱스토어 배포시 설명 및 이미지 변경

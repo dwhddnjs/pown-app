@@ -1,11 +1,12 @@
 import React from "react"
 // compoents
-import { StyleSheet } from "react-native"
+import { Pressable, StyleSheet, TouchableOpacity } from "react-native"
 import { View } from "@/components/Themed"
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header"
 import { ChartHeader } from "@/components/chart"
 // expo
 import { router, Tabs } from "expo-router"
+import { Image } from "expo-image"
 // icon
 import UserIcon from "@expo/vector-icons/FontAwesome"
 import AntDesign from "@expo/vector-icons/AntDesign"
@@ -14,9 +15,12 @@ import Entypo from "@expo/vector-icons/Entypo"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { CalendarHeader } from "@/components/calendar"
+import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import ImageModal from "@/components/workout-plan/image-modal"
 
 export default function TabLayout() {
   const themColor = useCurrneThemeColor()
+  const { uri, onResetImageUri } = useImageUriStore()
 
   const tabOption = {
     headerStyle: {
@@ -118,6 +122,7 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="index" redirect />
       </Tabs>
+      {uri && <ImageModal />}
     </View>
   )
 }

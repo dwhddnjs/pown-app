@@ -3,20 +3,13 @@ import { useRef, useState } from "react"
 import { Pressable, StyleSheet } from "react-native"
 import { Text, View } from "@/components/Themed"
 //expo
-import {
-  CameraMode,
-  CameraType,
-  CameraView,
-  useCameraPermissions,
-} from "expo-camera"
+import { CameraMode, CameraType, CameraView } from "expo-camera"
 import { Image } from "expo-image"
 import { useRouter } from "expo-router"
 // icon
 import { FontAwesome6 } from "@expo/vector-icons"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useImageUriStore } from "@/hooks/use-image-uri-store"
-import { toast } from "sonner-native"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
 const Camera = () => {

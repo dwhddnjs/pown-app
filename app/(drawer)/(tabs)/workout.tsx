@@ -97,7 +97,7 @@ export default function TabOneScreen() {
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, position: "relative" }}>
       <ScrollView
         ref={scrollRef}
         onScroll={handleScroll}

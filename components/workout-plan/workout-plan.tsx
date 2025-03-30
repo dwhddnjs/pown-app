@@ -1,11 +1,6 @@
 import React, { useState } from "react"
 // component
-import {
-  Image,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
 import { Text, View } from "../Themed"
 import { NoteText } from "./note-text"
 import { SetListItem } from "./set-list-item"
@@ -22,6 +17,9 @@ import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // expo
 import * as MediaLibrary from "expo-media-library"
+import { useUserStore } from "@/hooks/use-user-store"
+import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import { Image } from "expo-image"
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes
@@ -31,6 +29,8 @@ interface WorkoutPlanProps {
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
   const themeColor = useCurrneThemeColor()
+  const { mediaLibrary } = useUserStore()
+  const { setImageUri } = useImageUriStore()
 
   const getWorkoutIcon = (type: string) => {
     let result
@@ -134,7 +134,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
             ))}
           </View>
         )}
-        {item.imageUri && (
+        {!mediaLibrary && (
+          <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
+            갤러리 접근권한이 필요합니다.
+          </Text>
+        )}
+        {mediaLibrary && item.imageUri && (
           <View
             style={{
               flexDirection: "row",
@@ -145,10 +150,13 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
           >
             {item.imageUri.map((item) => {
               return (
-                <View
+                <TouchableOpacity
+                  key={item.id}
                   style={{ flex: 4, backgroundColor: themeColor.itemColor }}
+                  onPress={() => setImageUri(item.imageUri as string)}
                 >
                   <Image
+                    key={item.id}
                     source={{ uri: item.imageUri }}
                     style={{
                       aspectRatio: 1,
@@ -157,7 +165,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
                       borderColor: themeColor.itemColor,
                     }}
                   />
-                </View>
+                </TouchableOpacity>
               )
             })}
           </View>

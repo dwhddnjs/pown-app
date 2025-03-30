@@ -25,6 +25,7 @@ import { useHeaderHeight } from "@react-navigation/elements"
 import { toast } from "sonner-native"
 import { useNoteStore } from "@/hooks/use-note-store"
 import { workoutData } from "@/constants/constants"
+import { CameraImage } from "@/components/add-plan/camera-image"
 
 interface InputRefObject {
   measure: (
@@ -123,6 +124,9 @@ export default function EditPlan() {
 
         {/* 퀵노트 전체 노트 */}
         <PlanNote />
+        {/* 사진   */}
+        <CameraImage />
+        <View style={{ height: 250 }} />
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
     </KeyBoardAvoid>
