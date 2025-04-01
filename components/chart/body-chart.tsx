@@ -14,7 +14,15 @@ const BodyChart = () => {
   const themeColor = useCurrneThemeColor()
   const { userInfo } = useUserStore()
   const { date } = useChartStore()
-  const ptData2 = getMonthlyBodyData(userInfo, date)
+  const monthUserInfo = userInfo.filter((item) => {
+    const getYear = item.createdAt.slice(0, 4)
+    const getMonth = item.createdAt.slice(5, 7)
+    const selectedYear = date.slice(0, 4)
+    const selectedMonth = date.slice(4, 7)
+    return getYear === selectedYear && getMonth === selectedMonth
+  })
+
+  const ptData2 = getMonthlyBodyData(monthUserInfo, date)
 
   return (
     <View style={[styles(themeColor).container]}>
@@ -40,6 +48,7 @@ const BodyChart = () => {
           areaChart
           data={ptData2}
           rotateLabel
+          maxValue={ptData2[ptData2.length - 1]?.value + 50}
           width={310}
           hideDataPoints
           spacing={10}

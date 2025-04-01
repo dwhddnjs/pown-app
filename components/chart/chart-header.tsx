@@ -39,7 +39,9 @@ const ChartHeader = () => {
           </Text>
           <TouchableOpacity
             style={[styles.button, { paddingRight: 12 }]}
-            onPress={() => onClickDate("next")}
+            onPress={() => {
+              onClickDate("next")
+            }}
           >
             <AntDesign name="rightcircleo" size={28} color={themeColor.tint} />
           </TouchableOpacity>

@@ -40,7 +40,7 @@ export const TitleInput = ({
           ]}
           keyboardType="numeric"
           //   onFocus={(e) => onFocus(e.target)}
-          maxLength={3}
+
           value={value}
           onChangeText={(value) => onChangeValue(type, value)}
           placeholder="0"

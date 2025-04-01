@@ -1,5 +1,5 @@
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import { addDays, format, parse, parseISO } from "date-fns"
+import { addDays, format, lastDayOfMonth, parse, parseISO } from "date-fns"
 
 export const groupByDate = (arr: WorkoutPlanTypes[]) => {
   return arr.reduce<Record<string, WorkoutPlanTypes[]>>((acc, cur) => {
@@ -246,9 +246,11 @@ export const removeSameItem = (arr: any) => {
 
 export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
   const year = yearMonth.slice(0, 4) // "2025"
+  console.log("year: ", year)
   const month = yearMonth.slice(4, 6) // "03"
+  console.log("month: ", month)
 
-  // 해당 월만 가져오기
+  // 해당 월 데이터 필터링
   const filterPlanListData = rawData.filter((item) => {
     return (
       item.createdAt.slice(0, 4) === year &&
@@ -256,11 +258,11 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
     )
   })
 
-  // 중복제거
+  // 중복 제거 (함수 정의 필요)
   const removeSameDateItem = removeSameItem(filterPlanListData)
 
-  //불필요한 데이터 삭제
-  const removeUselessDate = removeSameDateItem.map((item: any, index: any) => {
+  // 필요한 데이터만 추출하여 변환
+  const processedData = removeSameDateItem.map((item: any) => {
     const year = item.createdAt.slice(0, 4)
     const month = item.createdAt.slice(5, 7)
     const day = item.createdAt.slice(8, 10)
@@ -269,45 +271,55 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
       date: `${year}년 ${month}월 ${day}일`,
     }
   })
-  const startDate = parse("2025년 03월 01일", "yyyy년 MM월 dd일", new Date())
 
-  const sortedInput = removeUselessDate.sort(
+  const startDate = parse(
+    `${year}년 ${month}월 01일`,
+    "yyyy년 MM월 dd일",
+    new Date()
+  )
+
+  const endDate = lastDayOfMonth(startDate) // 해당 월의 마지막 날
+
+  // 날짜 기준으로 정렬
+  const sortedInput = processedData.sort(
     (a: any, b: any) =>
       parse(a.date, "yyyy년 MM월 dd일", new Date()).getTime() -
       parse(b.date, "yyyy년 MM월 dd일", new Date()).getTime()
   )
 
+  console.log("sortedInput: ", sortedInput)
+
+  // 날짜 간격 채우기
   const result = sortedInput.reduce((acc: any, { date, value }: any) => {
     const targetDate = parse(date, "yyyy년 MM월 dd일", new Date())
+
     let currentDate =
       acc.length > 0
         ? parse(acc[acc.length - 1].date, "yyyy년 MM월 dd일", new Date())
         : startDate
 
-    // 날짜 간격을 채운다
+    // 중간 날짜를 채운다
     while (currentDate.getTime() < targetDate.getTime()) {
-      const lastValue =
-        acc.length > 0 && acc[acc.length - 1].value !== null
-          ? acc[acc.length - 1].value
-          : value || null
-
+      const lastValue = acc.length > 0 ? acc[acc.length - 1].value : value
       const formattedDate = format(currentDate, "yyyy년 MM월 dd일")
 
       if (!acc.some((item: any) => item.date === formattedDate)) {
         acc.push({ date: formattedDate, value: lastValue })
       }
-
       currentDate = addDays(currentDate, 1)
     }
+
     if (!acc.some((item: any) => item.date === date)) {
       acc.push({ date, value })
     }
     return acc
   }, [])
+
+  // ID 추가 및 정수 변환 후 반환
   return result.map((item: any, index: any) => ({
     ...item,
     id: index + 1,
-    value: parseInt(item.value),
+    value: parseInt(item.value, 10),
   }))
 }
 

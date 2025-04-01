@@ -392,8 +392,15 @@ function RootLayoutNav() {
             const onSubmitWorkoutPlan = async () => {
               try {
                 if (mediaLibrary) {
+                  const alreadySavedImages = result.imageUri.filter((item) =>
+                    item.imageUri?.includes("/DCIM/")
+                  )
+                  const newImages = result.imageUri.filter((item) =>
+                    item.imageUri?.includes("/pown/")
+                  )
+
                   const imageUri = await Promise.all(
-                    result.imageUri.map(async (item) => {
+                    newImages.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
                         item.imageUri as string
                       )
@@ -406,13 +413,13 @@ function RootLayoutNav() {
                       const assetInfo =
                         findAsset &&
                         (await MediaLibrary.getAssetInfoAsync(findAsset.id))
-
                       return {
                         id: item.id,
                         imageUri: assetInfo?.localUri,
                       }
                     })
                   )
+
                   if (result.weight && result.workout) {
                     setEditPlan({
                       id: parseInt(slug[1]),
@@ -429,7 +436,7 @@ function RootLayoutNav() {
                       })),
                       createdAt: getWorkoutPlan.createdAt,
                       updatedAt: getWorkoutPlan.updatedAt,
-                      imageUri: imageUri,
+                      imageUri: [...alreadySavedImages, ...imageUri],
                     })
                     onReset()
                     back()
