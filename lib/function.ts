@@ -245,10 +245,8 @@ export const removeSameItem = (arr: any) => {
 }
 
 export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
-  const year = yearMonth.slice(0, 4) // "2025"
-  console.log("year: ", year)
-  const month = yearMonth.slice(4, 6) // "03"
-  console.log("month: ", month)
+  const year = yearMonth.slice(0, 4)
+  const month = yearMonth.slice(4, 6)
 
   // 해당 월 데이터 필터링
   const filterPlanListData = rawData.filter((item) => {
@@ -286,8 +284,6 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
       parse(a.date, "yyyy년 MM월 dd일", new Date()).getTime() -
       parse(b.date, "yyyy년 MM월 dd일", new Date()).getTime()
   )
-
-  console.log("sortedInput: ", sortedInput)
 
   // 날짜 간격 채우기
   const result = sortedInput.reduce((acc: any, { date, value }: any) => {

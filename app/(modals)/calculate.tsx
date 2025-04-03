@@ -15,7 +15,6 @@ export default function calculate() {
   const themeColor = useCurrneThemeColor()
   const [selected, setSelected] = useState("kg")
   const [inputNumber, setInputNumber] = useState("")
-  console.log("inputNumber: ", inputNumber)
 
   const generatePercentageValues = (input: string) => {
     const value = !input ? "0" : input

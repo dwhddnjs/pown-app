@@ -67,8 +67,6 @@ export default function ResetData() {
           }
         )
         const { user, workoutPlan } = JSON.parse(jsonData)
-        console.log("workoutPlan: ", workoutPlan)
-        console.log("user: ", user)
         setUser("userInfo", user)
         onSetMockout(workoutPlan)
         toast.success("운동계획 파일을 불러왔습니다!")
