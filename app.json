@@ -14,6 +14,9 @@
       "supportsTablet": true,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
+      "entitlements": {
+        "aps-environment": "development"
+      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
