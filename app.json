@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "1.2.4",
-    "runtimeVersion": "1.2.4",
+    "version": "1.2.5",
+    "runtimeVersion": "1.2.5",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
       "entitlements": {
