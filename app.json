@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
       "entitlements": {
@@ -76,16 +76,14 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow Pown to access your camera",
-          "microphonePermission": "Allow Pown to access your microphone",
-          "recordAudioAndroid": true
+          "cameraPermission": "운동 기록을 위해 사진을 촬영하거나 업로드하려면 카메라 접근 권한이 필요합니다."
         }
       ],
       [
         "expo-media-library",
         {
-          "photosPermission": "Allow Pown to access your photos.",
-          "savePhotosPermission": "Allow Pown to save photos.",
+          "photosPermission": "운동 기록에 사용할 사진을 선택하거나 저장하려면 사진 라이브러리 접근 권한이 필요합니다.",
+          "savePhotosPermission": "운동 기록에 사용할 사진을 선택하거나 저장하려면 사진 라이브러리 접근 권한이 필요합니다.",
           "isAccessMediaLocationEnabled": true
         }
       ]
