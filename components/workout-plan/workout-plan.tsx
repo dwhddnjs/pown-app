@@ -134,7 +134,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
             ))}
           </View>
         )}
-        {!mediaLibrary && (
+        {item.imageUri?.length > 0 && !mediaLibrary && (
           <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
             갤러리 접근권한이 필요합니다.
           </Text>

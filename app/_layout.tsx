@@ -86,22 +86,20 @@ export default function RootLayout() {
 
   useEffect(() => {
     ;(async () => {
-      const { status: cameraStatus } =
-        await Camera.requestCameraPermissionsAsync()
-      const { status: mediaStatus } =
-        await MediaLibrary.requestPermissionsAsync()
+      try {
+        const { status: cameraStatus } =
+          await Camera.requestCameraPermissionsAsync()
+        const { status: mediaStatus } =
+          await MediaLibrary.requestPermissionsAsync()
 
-      if (cameraStatus !== "granted" || mediaStatus !== "granted") {
-        Alert.alert(
-          "권한 필요",
-          "앱을 사용하려면 카메라 및 갤러리 권한이 필요합니다."
-        )
-      }
-      if (cameraStatus === "granted") {
-        setUser("camera", true)
-      }
-      if (mediaStatus === "granted") {
-        setUser("mediaLibrary", true)
+        if (cameraStatus === "granted") {
+          setUser("camera", true)
+        }
+        if (mediaStatus === "granted") {
+          setUser("mediaLibrary", true)
+        }
+      } catch (error) {
+        console.log("error: ", error)
       }
     })()
   }, [])
@@ -283,8 +281,9 @@ function RootLayoutNav() {
 
             const onSubmitWorkoutPlan = async () => {
               try {
-                if (mediaLibrary) {
-                  const imageUri = await Promise.all(
+                const imageUri =
+                  mediaLibrary &&
+                  (await Promise.all(
                     result.imageUri.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
                         item.imageUri as string
@@ -304,29 +303,28 @@ function RootLayoutNav() {
                         imageUri: assetInfo?.localUri,
                       }
                     })
-                  )
-                  if (result.weight && result.workout && route.params) {
-                    setWorkoutPlan({
-                      id: workoutPlanList.length + 1,
-                      workout: result.workout,
-                      type: slug as string,
-                      equipment: result.equipment,
-                      weight: result.weight,
-                      condition: result.condition,
-                      content: result.content,
-                      title: result.title,
-                      setWithCount: result.setWithCount,
-                      createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-                      updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-                      imageUri: imageUri,
-                    })
-                    onReset()
-                    navigation.goBack()
-                    onResetNote()
-                    return toast.success("운동 계획을 추가되었습니다!!")
-                  }
-                  return toast.error("운동과 목표 중량은 필수에요..")
+                  ))
+                if (result.weight && result.workout && route.params) {
+                  setWorkoutPlan({
+                    id: workoutPlanList.length + 1,
+                    workout: result.workout,
+                    type: slug as string,
+                    equipment: result.equipment,
+                    weight: result.weight,
+                    condition: result.condition,
+                    content: result.content,
+                    title: result.title,
+                    setWithCount: result.setWithCount,
+                    createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+                    updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+                    imageUri: imageUri ? imageUri : [],
+                  })
+                  onReset()
+                  navigation.goBack()
+                  onResetNote()
+                  return toast.success("운동 계획을 추가되었습니다!!")
                 }
+                return toast.error("운동과 목표 중량은 필수에요..")
               } catch (error) {
                 console.log("error: ", error)
               }
@@ -391,15 +389,16 @@ function RootLayoutNav() {
 
             const onSubmitWorkoutPlan = async () => {
               try {
-                if (mediaLibrary) {
-                  const alreadySavedImages = result.imageUri.filter((item) =>
-                    item.imageUri?.includes("/DCIM/")
-                  )
-                  const newImages = result.imageUri.filter((item) =>
-                    item.imageUri?.includes("/pown/")
-                  )
+                const alreadySavedImages = result.imageUri?.filter((item) =>
+                  item.imageUri?.includes("/DCIM/")
+                )
+                const newImages = result.imageUri?.filter((item) =>
+                  item.imageUri?.includes("/pown/")
+                )
 
-                  const imageUri = await Promise.all(
+                const imageUri =
+                  mediaLibrary &&
+                  (await Promise.all(
                     newImages.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
                         item.imageUri as string
@@ -418,33 +417,36 @@ function RootLayoutNav() {
                         imageUri: assetInfo?.localUri,
                       }
                     })
-                  )
+                  ))
+                const newImagesList = [
+                  ...alreadySavedImages,
+                  ...(imageUri as any),
+                ]
 
-                  if (result.weight && result.workout) {
-                    setEditPlan({
-                      id: parseInt(slug[1]),
-                      workout: result.workout,
-                      type: slug[0],
-                      equipment: result.equipment,
-                      weight: result.weight,
-                      condition: result.condition,
-                      content: result.content,
-                      title: result.title,
-                      setWithCount: result.setWithCount.map((item, index) => ({
-                        ...item,
-                        id: index + 1,
-                      })),
-                      createdAt: getWorkoutPlan.createdAt,
-                      updatedAt: getWorkoutPlan.updatedAt,
-                      imageUri: [...alreadySavedImages, ...imageUri],
-                    })
-                    onReset()
-                    back()
-                    onResetNote()
-                    return toast.success("운동 계획을 수정되었습니다!!")
-                  }
-                  return toast.error("운동과 목표 중량은 필수에요..")
+                if (result.weight && result.workout) {
+                  setEditPlan({
+                    id: parseInt(slug[1]),
+                    workout: result.workout,
+                    type: slug[0],
+                    equipment: result.equipment,
+                    weight: result.weight,
+                    condition: result.condition,
+                    content: result.content,
+                    title: result.title,
+                    setWithCount: result.setWithCount.map((item, index) => ({
+                      ...item,
+                      id: index + 1,
+                    })),
+                    createdAt: getWorkoutPlan.createdAt,
+                    updatedAt: getWorkoutPlan.updatedAt,
+                    imageUri: newImagesList ? newImagesList : [],
+                  })
+                  onReset()
+                  back()
+                  onResetNote()
+                  return toast.success("운동 계획을 수정되었습니다!!")
                 }
+                return toast.error("운동과 목표 중량은 필수에요..")
               } catch (error) {
                 console.log("error: ", error)
               }
