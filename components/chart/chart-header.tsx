@@ -15,10 +15,12 @@ import { useChartStore } from "@/hooks/use-chart-store"
 import { convertChartDate } from "@/lib/function"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 
 const ChartHeader = () => {
   const themeColor = useCurrneThemeColor()
   const { date, setDate } = useChartStore()
+  const { workoutPlanList } = userWorkoutPlanStore()
 
   const onClickDate = (type: string) => {
     setDate(type)

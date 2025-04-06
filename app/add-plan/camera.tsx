@@ -31,7 +31,10 @@ const Camera = () => {
 
   const selectImageUri = () => {
     if (uri) {
-      setImageUri({ id: imageUri.length + 1, imageUri: uri })
+      setImageUri({
+        id: imageUri.length > 0 ? imageUri[imageUri.length - 1].id + 1 : 1,
+        imageUri: uri,
+      })
       setUri("")
     }
     router.back()

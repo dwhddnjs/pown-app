@@ -16,7 +16,6 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // expo
-import * as MediaLibrary from "expo-media-library"
 import { useUserStore } from "@/hooks/use-user-store"
 import { useImageUriStore } from "@/hooks/use-image-uri-store"
 import { Image } from "expo-image"
@@ -141,12 +140,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         )}
         {mediaLibrary && item.imageUri && (
           <View
-            style={{
-              flexDirection: "row",
-              gap: 4,
-              flexWrap: "nowrap",
-              backgroundColor: themeColor.itemColor,
-            }}
+            style={[
+              styles.imageList,
+              {
+                backgroundColor: themeColor.itemColor,
+              },
+            ]}
           >
             {item.imageUri.map((item) => {
               return (
@@ -158,12 +157,12 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
                   <Image
                     key={item.id}
                     source={{ uri: item.imageUri }}
-                    style={{
-                      aspectRatio: 1,
-                      borderRadius: 12,
-                      borderWidth: 1,
-                      borderColor: themeColor.itemColor,
-                    }}
+                    style={[
+                      styles.image,
+                      {
+                        borderColor: themeColor.itemColor,
+                      },
+                    ]}
                   />
                 </TouchableOpacity>
               )
@@ -200,5 +199,15 @@ const styles = StyleSheet.create({
   conditionTagList: {
     flexDirection: "row",
     flexWrap: "wrap",
+  },
+  imageList: {
+    flexDirection: "row",
+    gap: 6,
+    flexWrap: "nowrap",
+  },
+  image: {
+    aspectRatio: 1,
+    borderRadius: 14,
+    borderWidth: 1,
   },
 })

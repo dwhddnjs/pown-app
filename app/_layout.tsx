@@ -380,6 +380,7 @@ function RootLayoutNav() {
               userWorkoutPlanStore()
             const { back } = useRouter()
             const { onReset, setPrevPlanValue, ...result } = usePlanStore()
+
             const { onReset: onResetNote } = useNoteStore()
             const { slug } = useGlobalSearchParams()
             const getWorkoutPlan = workoutPlanList.filter(
@@ -392,8 +393,9 @@ function RootLayoutNav() {
                 const alreadySavedImages = result.imageUri?.filter((item) =>
                   item.imageUri?.includes("/DCIM/")
                 )
-                const newImages = result.imageUri?.filter((item) =>
-                  item.imageUri?.includes("/pown/")
+
+                const newImages = result.imageUri?.filter(
+                  (item) => !item.imageUri?.includes("/DCIM/")
                 )
 
                 const imageUri =
@@ -418,6 +420,7 @@ function RootLayoutNav() {
                       }
                     })
                   ))
+
                 const newImagesList = [
                   ...alreadySavedImages,
                   ...(imageUri as any),

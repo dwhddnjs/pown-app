@@ -8,7 +8,6 @@ import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
 import { ConditionList } from "@/components/add-plan/condition-list"
 import { PlanNote } from "@/components/add-plan/plan-note"
-import { Button } from "@/components/Button"
 import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
@@ -20,10 +19,6 @@ import {
   useNavigation,
   useRouter,
 } from "expo-router"
-import { format } from "date-fns"
-import { useHeaderHeight } from "@react-navigation/elements"
-import { toast } from "sonner-native"
-import { useNoteStore } from "@/hooks/use-note-store"
 import { workoutData } from "@/constants/constants"
 import { CameraImage } from "@/components/add-plan/camera-image"
 
@@ -47,11 +42,8 @@ export default function EditPlan() {
   const { workoutPlanList, setWorkoutPlan, setEditPlan } =
     userWorkoutPlanStore()
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
-
-  const { onReset: onResetNote } = useNoteStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
-  const { back } = useRouter()
   const colorScheme = useColorScheme()
   const workoutList = workoutData[slug[0]]
   const getWorkoutPlan = workoutPlanList.filter(
