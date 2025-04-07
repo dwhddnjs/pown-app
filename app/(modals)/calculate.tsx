@@ -7,7 +7,6 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native"
-import { toast } from "sonner-native"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
@@ -95,7 +94,7 @@ export default function calculate() {
           keyboardType="numeric"
           placeholder="0"
           textAlign="right"
-          style={styles(themeColor).input}
+          style={[styles(themeColor).input, { color: themeColor.text }]}
           value={inputNumber}
           onChangeText={(value) => setInputNumber(value)}
           placeholderTextColor={themeColor.subText}
@@ -104,7 +103,6 @@ export default function calculate() {
         />
         <Text style={{ fontSize: 18 }}>{selected === "kg" ? "kg" : "lb"}</Text>
       </View>
-
       <ScrollView
         scrollEventThrottle={16}
         contentContainerStyle={{
@@ -154,7 +152,7 @@ const styles = (color: any) =>
     },
     input: {
       fontSize: 36,
-      color: color.text,
+
       justifyContent: "flex-end",
       fontFamily: "sb-m",
       flex: 1,

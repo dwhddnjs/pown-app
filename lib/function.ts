@@ -198,6 +198,9 @@ export const getEquipmentCount = (data: WorkoutPlanTypes[]) => {
 }
 
 export const convertChartDate = (date: string) => {
+  if (!date) {
+    return ""
+  }
   const year = date.slice(0, 4)
   const month = date.slice(4, 6)
   return `${year}년 ${month}월`

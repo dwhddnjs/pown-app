@@ -23,7 +23,7 @@ const ChartHeader = () => {
   const { workoutPlanList } = userWorkoutPlanStore()
 
   const onClickDate = (type: string) => {
-    setDate(type)
+    setDate(type, workoutPlanList)
   }
 
   return (
