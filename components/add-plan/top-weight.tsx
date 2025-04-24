@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   },
   input: {
     textAlign: "right",
-    minWidth: 45,
+    minWidth: 52,
     fontSize: 16,
     fontFamily: "sb-l",
   },
