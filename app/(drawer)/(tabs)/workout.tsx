@@ -1,71 +1,72 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef } from "react";
 // component
-import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
-import { Text, View } from "@/components/Themed"
+import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { Text, View } from "@/components/Themed";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-} from "react-native"
-import { EmptyList } from "@/components/workout-plan/empty-list"
-import { RefView } from "@/components/RefView"
-import { FlashList } from "@shopify/flash-list"
+} from "react-native";
+import { EmptyList } from "@/components/workout-plan/empty-list";
+import { RefView } from "@/components/RefView";
+import { FlashList } from "@shopify/flash-list";
 // zustand
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { useSelectDateStore } from "@/hooks/use-select-date-store"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useSelectDateStore } from "@/hooks/use-select-date-store";
 // lib
-import { formatDate, groupByDate } from "@/lib/function"
+import { formatDate, groupByDate } from "@/lib/function";
 // expo
-import { useNavigation, useRouter } from "expo-router"
+import { useNavigation, useRouter } from "expo-router";
 
 // navigation
-import { useHeaderHeight } from "@react-navigation/elements"
+import { useHeaderHeight } from "@react-navigation/elements";
 // hooks
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
 // icon
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
-import MaterialIcons from "@expo/vector-icons/MaterialIcons"
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 export default function TabOneScreen() {
-  const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
-  const { date: selectedDate } = useSelectDateStore()
+  const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore();
 
-  const sortWorkList = groupByDate(workoutPlanList)
-  const headerHeight = useHeaderHeight()
-  const themeColor = useCurrneThemeColor()
-  const navigation = useNavigation()
-  const router = useRouter()
+  const { date: selectedDate } = useSelectDateStore();
 
-  const itemRef = useRef(new Map())
+  const sortWorkList = groupByDate(workoutPlanList);
+  const headerHeight = useHeaderHeight();
+  const themeColor = useCurrneThemeColor();
+  const navigation = useNavigation();
+  const router = useRouter();
 
-  const scrollRef = useRef<ScrollView | null>(null)
-  const scrollY = useRef(0)
+  const itemRef = useRef(new Map());
+
+  const scrollRef = useRef<ScrollView | null>(null);
+  const scrollY = useRef(0);
 
   const measureView = (ref: any, date: string) => {
     ref?.measureLayout(
       scrollRef?.current,
       (x: number, y: number, width: number, height: number) => {
         if (scrollY.current === 0) {
-          const splitData = date.split(".")
+          const splitData = date.split(".");
           navigation.setOptions({
             title: `🔥오늘도 화이팅!`,
-          })
+          });
         }
         if (y - scrollY.current < headerHeight - 30) {
-          const splitData = date.split(".")
+          const splitData = date.split(".");
           navigation.setOptions({
             title: `${splitData[0]}년  ${splitData[1]}월`,
-          })
+          });
         }
       }
-    )
-  }
+    );
+  };
 
   const scrollToSelectedDate = useCallback(() => {
-    if (!selectedDate) return
-    const targetRef = itemRef.current.get(selectedDate)
+    if (!selectedDate) return;
+    const targetRef = itemRef.current.get(selectedDate);
     if (targetRef) {
       targetRef.measureLayout(
         scrollRef.current,
@@ -73,27 +74,27 @@ export default function TabOneScreen() {
           scrollRef.current?.scrollTo({
             y: y - headerHeight - 20,
             animated: true,
-          })
+          });
         },
         (error: Error) => console.log("Scroll error:", error)
-      )
+      );
     }
-  }, [selectedDate, headerHeight])
+  }, [selectedDate, headerHeight]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const offsetY = event.nativeEvent.contentOffset.y
-    scrollY.current = offsetY
+    const offsetY = event.nativeEvent.contentOffset.y;
+    scrollY.current = offsetY;
     itemRef.current.forEach((ref, date: string) => {
-      measureView(ref, date)
-    })
-  }
+      measureView(ref, date);
+    });
+  };
 
   useEffect(() => {
-    setTimeout(scrollToSelectedDate, 200)
-  }, [selectedDate, scrollToSelectedDate])
+    setTimeout(scrollToSelectedDate, 200);
+  }, [selectedDate, scrollToSelectedDate]);
 
   if (workoutPlanList.length === 0) {
-    return <EmptyList />
+    return <EmptyList />;
   }
 
   return (
@@ -122,9 +123,9 @@ export default function TabOneScreen() {
               <View style={styles.list} key={index}>
                 <RefView
                   ref={(ref) => {
-                    itemRef.current.set(item[0], ref)
+                    itemRef.current.set(item[0], ref);
                     if (ref && index === 0) {
-                      measureView(ref, item[0])
+                      measureView(ref, item[0]);
                     }
                   }}
                 >
@@ -169,7 +170,7 @@ export default function TabOneScreen() {
                   ))}
                 </View>
               </View>
-            )
+            );
           }}
         />
         <View
@@ -200,7 +201,7 @@ export default function TabOneScreen() {
         <MaterialIcons name="calculate" size={40} color={themeColor.tint} />
       </TouchableOpacity>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -276,4 +277,4 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginTop: 4,
   },
-})
+});
