@@ -3,7 +3,7 @@ import React, { useCallback, useRef, useState } from "react"
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import { ScrollView, StyleSheet } from "react-native"
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
@@ -25,6 +25,8 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { Button } from "@/components/Button"
 import { CameraImage } from "@/components/add-plan/camera-image"
+import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet"
+import { FontAwesome } from "@expo/vector-icons"
 
 export interface InputRefObject {
   measure: (
@@ -41,6 +43,9 @@ export interface InputRefObject {
 
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
+  const workoutTagRef = useRef<BottomSheetModal>(null)
+  const onWorkoutTagSheetClose = () => workoutTagRef.current?.close()
+  const onWorkoutTagSheetOpen = () => workoutTagRef.current?.expand()
   const onSheetClose = () => bottomSheetModalRef.current?.close()
   const onSheetOpen = () => bottomSheetModalRef.current?.expand()
   const { onReset } = usePlanStore()
@@ -88,7 +93,22 @@ export default function AddPlan() {
           flex: 1,
         }}
       >
-        <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            paddingHorizontal: 20,
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+          <TouchableOpacity
+            onPress={onWorkoutTagSheetOpen}
+            style={{ padding: 8 }}
+          >
+            <FontAwesome name="search" size={20} color={themeColor.text} />
+          </TouchableOpacity>
+        </View>
         {/* 운동 태그 */}
         <WorkoutTags workoutList={workoutData[slug as string]} />
         {/* 도구 선택 */}
@@ -106,6 +126,11 @@ export default function AddPlan() {
         <View style={{ height: 250 }} />
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
+      <SearchWorkoutTagSheet
+        workoutList={workoutData[slug as string]}
+        ref={workoutTagRef}
+        onClose={onWorkoutTagSheetClose}
+      />
     </KeyBoardAvoid>
   )
 }
