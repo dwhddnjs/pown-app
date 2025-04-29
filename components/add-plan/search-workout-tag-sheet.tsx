@@ -5,27 +5,46 @@ import {
   TouchableOpacity,
   View,
 } from "react-native"
-import React, { forwardRef, useCallback, useMemo, useState } from "react"
+import React, {
+  forwardRef,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { FontAwesome } from "@expo/vector-icons"
-import { sortWorkoutPlanList } from "@/lib/function"
+import { searchByInitial, sortWorkoutPlanList } from "@/lib/function"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
 interface SearchWorkoutTagSheetProps {
   onClose: () => void
   workoutList: string[]
+  isOpen: boolean
 }
 
 export const SearchWorkoutTagSheet = forwardRef<
   BottomSheet,
   SearchWorkoutTagSheetProps
->(({ onClose, workoutList }, ref) => {
+>(({ onClose, workoutList, isOpen }, ref) => {
+  console.log("workoutList: ", workoutList)
   const themeColor = useCurrneThemeColor()
   const { workout, setPlanValue } = usePlanStore()
-  const [input, setInput] = useState("")
+  const [inputValue, setInputValue] = useState("")
+  const inputRef = useRef<TextInput | null>(null)
 
   const snapPoints = useMemo(() => ["80%"], [])
+  const filterWorkoutTag = workoutList?.filter((tag) => {
+    const searchLower = inputValue.toLowerCase().trim()
+    const nameLower = tag.toLowerCase().trim()
+
+    if (inputValue.length === 1 && /[ㄱ-ㅎ]/.test(inputValue)) {
+      return searchByInitial(tag, inputValue)
+    }
+    return nameLower.includes(searchLower)
+  })
 
   const renderBackdrop = useCallback(
     (props: any) => (
@@ -45,6 +64,12 @@ export const SearchWorkoutTagSheet = forwardRef<
     setPlanValue("workout", item)
   }
 
+  useEffect(() => {
+    if (inputRef?.current && isOpen) {
+      inputRef?.current.focus()
+    }
+  }, [isOpen, inputRef.current])
+
   return (
     <BottomSheet
       ref={ref}
@@ -52,6 +77,7 @@ export const SearchWorkoutTagSheet = forwardRef<
       snapPoints={snapPoints}
       enablePanDownToClose={true}
       backdropComponent={renderBackdrop}
+      onClose={onClose}
       backgroundStyle={{
         backgroundColor: themeColor.itemColor,
       }}
@@ -76,15 +102,18 @@ export const SearchWorkoutTagSheet = forwardRef<
               },
             ]}
           >
-            <FontAwesome name="search" size={20} color={themeColor.text} />
+            <FontAwesome name="search" size={16} color={themeColor.text} />
           </View>
           <TextInput
+            ref={inputRef}
             placeholder="찾으시는 운동계획이 있으신가요?"
             style={{ color: themeColor.text }}
+            onChangeText={(text) => setInputValue(text)}
+            value={inputValue}
           />
         </View>
         <View style={styles.container}>
-          {workoutList?.map((item) => (
+          {filterWorkoutTag?.map((item) => (
             <TouchableOpacity
               key={item}
               style={[
@@ -109,6 +138,11 @@ export const SearchWorkoutTagSheet = forwardRef<
               </Text>
             </TouchableOpacity>
           ))}
+          {filterWorkoutTag?.length === 0 && (
+            <Text style={{ color: themeColor.subText, fontFamily: "sb-m" }}>
+              음.. 찾으시는 운동이 없네요?
+            </Text>
+          )}
         </View>
       </View>
     </BottomSheet>

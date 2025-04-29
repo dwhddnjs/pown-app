@@ -3,7 +3,13 @@ import React, { useCallback, useRef, useState } from "react"
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
+import {
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  InteractionManager,
+} from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
@@ -44,26 +50,27 @@ export interface InputRefObject {
 export default function AddPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const workoutTagRef = useRef<BottomSheetModal>(null)
-  const onWorkoutTagSheetClose = () => workoutTagRef.current?.close()
-  const onWorkoutTagSheetOpen = () => workoutTagRef.current?.expand()
-  const onSheetClose = () => bottomSheetModalRef.current?.close()
-  const onSheetOpen = () => bottomSheetModalRef.current?.expand()
   const { onReset } = usePlanStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
-
+  const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
   const scrollRef = useRef<ScrollView>(null)
   const themeColor = useCurrneThemeColor()
 
-  useFocusEffect(
-    useCallback(() => {
-      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-        onReset()
-      })
+  const onWorkoutTagSheetClose = () => {
+    if (isWorkoutTagModalOpen) {
+      Keyboard.dismiss()
+      setIsWorkoutTagModalOpen(false)
+      workoutTagRef.current?.close()
+    }
+  }
 
-      return unsubscribe
-    }, [navigation])
-  )
+  const onWorkoutTagSheetOpen = () => {
+    setIsWorkoutTagModalOpen(true)
+    workoutTagRef.current?.expand()
+  }
+  const onSheetClose = () => bottomSheetModalRef.current?.close()
+  const onSheetOpen = () => bottomSheetModalRef.current?.expand()
 
   const onInputFocus = (node: InputRefObject) => {
     if (node) {
@@ -82,6 +89,16 @@ export default function AddPlan() {
     }
   }
 
+  useFocusEffect(
+    useCallback(() => {
+      const unsubscribe = navigation.addListener("beforeRemove", (e) => {
+        onReset()
+      })
+
+      return unsubscribe
+    }, [navigation])
+  )
+
   return (
     <KeyBoardAvoid
       style={[styles.container, { backgroundColor: themeColor.background }]}
@@ -93,14 +110,7 @@ export default function AddPlan() {
           flex: 1,
         }}
       >
-        <View
-          style={{
-            flexDirection: "row",
-            paddingHorizontal: 20,
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.header}>
           <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
           <TouchableOpacity
             onPress={onWorkoutTagSheetOpen}
@@ -130,6 +140,7 @@ export default function AddPlan() {
         workoutList={workoutData[slug as string]}
         ref={workoutTagRef}
         onClose={onWorkoutTagSheetClose}
+        isOpen={isWorkoutTagModalOpen}
       />
     </KeyBoardAvoid>
   )
@@ -141,6 +152,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
 
     paddingTop: 12,
+  },
+  header: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 
   title: {

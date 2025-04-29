@@ -1,39 +1,39 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState } from "react"
 // component
 import {
   Pressable,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-} from "react-native";
-import { Text, View } from "../Themed";
-import { IconTitle } from "../IconTitle";
+} from "react-native"
+import { Text, View } from "../Themed"
+import { IconTitle } from "../IconTitle"
 // icon
-import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
+import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 // hook
-import { usePlanStore } from "@/hooks/use-plan-store";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import { usePlanStore } from "@/hooks/use-plan-store"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export const TopWeight = () => {
-  const { weight, setPlanValue, weightType } = usePlanStore();
-  const inputRef = useRef<TextInput>(null);
-  const themeColor = useCurrneThemeColor();
+  const { weight, setPlanValue, weightType } = usePlanStore()
+  const inputRef = useRef<TextInput>(null)
+  const themeColor = useCurrneThemeColor()
 
   const onSetType = (type: "kg" | "lb") => {
     if (weight) {
       if (weightType === "kg") {
-        const lb = Math.round(parseInt(weight) * 2.20462).toString();
-        setPlanValue("weight", lb);
-        setPlanValue("weightType", type);
+        const lb = Math.round(parseInt(weight) * 2.20462).toString()
+        setPlanValue("weight", lb)
+        setPlanValue("weightType", type)
       } else {
-        const kg = Math.round(parseInt(weight) / 2.20462).toString();
-        setPlanValue("weight", kg);
-        setPlanValue("weightType", type);
+        const kg = Math.round(parseInt(weight) / 2.20462).toString()
+        setPlanValue("weight", kg)
+        setPlanValue("weightType", type)
       }
     } else {
-      setPlanValue("weightType", type);
+      setPlanValue("weightType", type)
     }
-  };
+  }
 
   return (
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
@@ -95,8 +95,8 @@ export const TopWeight = () => {
         </View>
       </View>
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -108,11 +108,12 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     paddingRight: 8,
     borderRadius: 10,
-    // marginHorizontal: 24,
+    width: 94,
+    justifyContent: "flex-end",
   },
   input: {
     textAlign: "right",
-    minWidth: 52,
+    // minWidth: 52,
     fontSize: 16,
     fontFamily: "sb-l",
   },
@@ -132,4 +133,4 @@ const styles = StyleSheet.create({
     alignSelf: "flex-end",
     padding: 4,
   },
-});
+})

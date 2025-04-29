@@ -1,8 +1,14 @@
 import { SetCounterSheet } from "@/components/SetCounterSheet"
 import { Text, View } from "@/components/Themed"
 import { BottomSheetModal } from "@gorhom/bottom-sheet"
-import React, { useCallback, useEffect, useRef } from "react"
-import { Keyboard, ScrollView, StyleSheet, useColorScheme } from "react-native"
+import React, { useCallback, useEffect, useRef, useState } from "react"
+import {
+  Keyboard,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+} from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
@@ -21,6 +27,9 @@ import {
 } from "expo-router"
 import { workoutData } from "@/constants/constants"
 import { CameraImage } from "@/components/add-plan/camera-image"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet"
+import { FontAwesome } from "@expo/vector-icons"
 
 interface InputRefObject {
   measure: (
@@ -37,18 +46,34 @@ interface InputRefObject {
 
 export default function EditPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
-  const onSheetClose = () => bottomSheetModalRef.current?.close()
-  const onSheetOpen = () => bottomSheetModalRef.current?.expand()
+  const workoutTagRef = useRef<BottomSheetModal>(null)
   const { workoutPlanList, setWorkoutPlan, setEditPlan } =
     userWorkoutPlanStore()
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
-  const colorScheme = useColorScheme()
   const workoutList = workoutData[slug[0]]
+
   const getWorkoutPlan = workoutPlanList.filter(
     (item) => item.id === parseInt(slug[1])
   )[0]
+  const themeColor = useCurrneThemeColor()
+  const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
+
+  const onWorkoutTagSheetClose = () => {
+    if (isWorkoutTagModalOpen) {
+      Keyboard.dismiss()
+      setIsWorkoutTagModalOpen(false)
+      workoutTagRef.current?.close()
+    }
+  }
+
+  const onWorkoutTagSheetOpen = () => {
+    setIsWorkoutTagModalOpen(true)
+    workoutTagRef.current?.expand()
+  }
+  const onSheetClose = () => bottomSheetModalRef.current?.close()
+  const onSheetOpen = () => bottomSheetModalRef.current?.expand()
 
   useFocusEffect(
     useCallback(() => {
@@ -87,10 +112,7 @@ export default function EditPlan() {
 
   return (
     <KeyBoardAvoid
-      style={[
-        styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].background },
-      ]}
+      style={[styles.container, { backgroundColor: themeColor.background }]}
     >
       <ScrollView
         ref={scrollRef}
@@ -98,7 +120,15 @@ export default function EditPlan() {
           flex: 1,
         }}
       >
-        <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+        <View style={styles.header}>
+          <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+          <TouchableOpacity
+            onPress={onWorkoutTagSheetOpen}
+            style={{ padding: 8 }}
+          >
+            <FontAwesome name="search" size={20} color={themeColor.text} />
+          </TouchableOpacity>
+        </View>
         {/* 운동 태그 */}
         <WorkoutTags workoutList={workoutList} />
 
@@ -121,6 +151,12 @@ export default function EditPlan() {
         <View style={{ height: 250 }} />
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
+      <SearchWorkoutTagSheet
+        workoutList={workoutList}
+        ref={workoutTagRef}
+        onClose={onWorkoutTagSheetClose}
+        isOpen={isWorkoutTagModalOpen}
+      />
     </KeyBoardAvoid>
   )
 }
@@ -136,5 +172,11 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     textAlign: "center",
+  },
+  header: {
+    flexDirection: "row",
+    paddingHorizontal: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
 })
