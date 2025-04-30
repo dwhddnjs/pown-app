@@ -131,19 +131,14 @@ export default function EditPlan() {
         </View>
         {/* 운동 태그 */}
         <WorkoutTags workoutList={workoutList} />
-
         {/* 도구 선택 */}
         <EquipmentBox />
-
         {/* 목표중량 */}
         <TopWeight />
-
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
-
         {/* 컨디션 */}
         <ConditionList />
-
         {/* 퀵노트 전체 노트 */}
         <PlanNote />
         {/* 사진   */}

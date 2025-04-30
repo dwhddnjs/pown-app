@@ -8,7 +8,6 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  InteractionManager,
 } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
@@ -33,6 +32,8 @@ import { Button } from "@/components/Button"
 import { CameraImage } from "@/components/add-plan/camera-image"
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet"
 import { FontAwesome } from "@expo/vector-icons"
+import { Dialog } from "@/components/Dialog"
+import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialog"
 
 export interface InputRefObject {
   measure: (
@@ -142,6 +143,7 @@ export default function AddPlan() {
         onClose={onWorkoutTagSheetClose}
         isOpen={isWorkoutTagModalOpen}
       />
+      <AddWorkoutTagDialog />
     </KeyBoardAvoid>
   )
 }
