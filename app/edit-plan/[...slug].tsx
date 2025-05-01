@@ -7,29 +7,26 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
 } from "react-native"
 import { WorkoutTags } from "@/components/add-plan/workout-tags"
 import { SetCounter } from "@/components/add-plan/set-counter"
 import { TopWeight } from "@/components/add-plan/top-weight"
 import { ConditionList } from "@/components/add-plan/condition-list"
 import { PlanNote } from "@/components/add-plan/plan-note"
-import Colors from "@/constants/Colors"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store"
 import {
   useFocusEffect,
   useLocalSearchParams,
   useNavigation,
-  useRouter,
 } from "expo-router"
-import { workoutData } from "@/constants/constants"
 import { CameraImage } from "@/components/add-plan/camera-image"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet"
-import { FontAwesome } from "@expo/vector-icons"
+import { useUserStore } from "@/hooks/use-user-store"
+import { TitleSearchHeader } from "@/components/add-plan/title-search-header"
 
 interface InputRefObject {
   measure: (
@@ -47,12 +44,13 @@ interface InputRefObject {
 export default function EditPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null)
   const workoutTagRef = useRef<BottomSheetModal>(null)
+  const { workoutList } = useUserStore()
   const { workoutPlanList, setWorkoutPlan, setEditPlan } =
     userWorkoutPlanStore()
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
   const { slug } = useLocalSearchParams()
   const navigation = useNavigation()
-  const workoutList = workoutData[slug[0]]
+  const workoutListData = workoutList[slug[0] as WorkoutTypes]
 
   const getWorkoutPlan = workoutPlanList.filter(
     (item) => item.id === parseInt(slug[1])
@@ -120,17 +118,9 @@ export default function EditPlan() {
           flex: 1,
         }}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
-          <TouchableOpacity
-            onPress={onWorkoutTagSheetOpen}
-            style={{ padding: 8 }}
-          >
-            <FontAwesome name="search" size={20} color={themeColor.text} />
-          </TouchableOpacity>
-        </View>
+        <TitleSearchHeader onPress={onWorkoutTagSheetOpen} />
         {/* 운동 태그 */}
-        <WorkoutTags workoutList={workoutList} />
+        <WorkoutTags workoutList={workoutListData} />
         {/* 도구 선택 */}
         <EquipmentBox />
         {/* 목표중량 */}
@@ -147,7 +137,7 @@ export default function EditPlan() {
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
       <SearchWorkoutTagSheet
-        workoutList={workoutList}
+        workoutList={workoutListData}
         ref={workoutTagRef}
         onClose={onWorkoutTagSheetClose}
         isOpen={isWorkoutTagModalOpen}
@@ -160,18 +150,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-
     paddingTop: 12,
-  },
-
-  title: {
-    fontSize: 24,
-    textAlign: "center",
-  },
-  header: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-    alignItems: "center",
   },
 })

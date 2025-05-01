@@ -16,7 +16,7 @@ import { ConditionList } from "@/components/add-plan/condition-list"
 import { PlanNote } from "@/components/add-plan/plan-note"
 import { EquipmentBox } from "@/components/add-plan/equipment-box"
 // zustand
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store"
 // expo
 import {
   useFocusEffect,
@@ -24,7 +24,6 @@ import {
   useNavigation,
 } from "expo-router"
 // lib
-import { workoutData } from "@/constants/constants"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
@@ -34,6 +33,9 @@ import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-
 import { FontAwesome } from "@expo/vector-icons"
 import { Dialog } from "@/components/Dialog"
 import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialog"
+import { useUserStore } from "@/hooks/use-user-store"
+import { RemoveWorkoutTagDialog } from "@/components/add-plan/remove-workout-tag-dialog"
+import { TitleSearchHeader } from "@/components/add-plan/title-search-header"
 
 export interface InputRefObject {
   measure: (
@@ -53,6 +55,7 @@ export default function AddPlan() {
   const workoutTagRef = useRef<BottomSheetModal>(null)
   const { onReset } = usePlanStore()
   const { slug } = useLocalSearchParams()
+  const { workoutList } = useUserStore()
   const navigation = useNavigation()
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
   const scrollRef = useRef<ScrollView>(null)
@@ -95,7 +98,6 @@ export default function AddPlan() {
       const unsubscribe = navigation.addListener("beforeRemove", (e) => {
         onReset()
       })
-
       return unsubscribe
     }, [navigation])
   )
@@ -111,17 +113,9 @@ export default function AddPlan() {
           flex: 1,
         }}
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
-          <TouchableOpacity
-            onPress={onWorkoutTagSheetOpen}
-            style={{ padding: 8 }}
-          >
-            <FontAwesome name="search" size={20} color={themeColor.text} />
-          </TouchableOpacity>
-        </View>
+        <TitleSearchHeader onPress={onWorkoutTagSheetOpen} />
         {/* 운동 태그 */}
-        <WorkoutTags workoutList={workoutData[slug as string]} />
+        <WorkoutTags workoutList={workoutList[slug as WorkoutTypes]} />
         {/* 도구 선택 */}
         <EquipmentBox />
         {/* 목표중량 */}
@@ -138,12 +132,13 @@ export default function AddPlan() {
       </ScrollView>
       <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
       <SearchWorkoutTagSheet
-        workoutList={workoutData[slug as string]}
+        workoutList={workoutList[slug as WorkoutTypes]}
         ref={workoutTagRef}
         onClose={onWorkoutTagSheetClose}
         isOpen={isWorkoutTagModalOpen}
       />
-      <AddWorkoutTagDialog />
+      <AddWorkoutTagDialog workoutType={slug as WorkoutTypes} />
+      <RemoveWorkoutTagDialog workoutType={slug as WorkoutTypes} />
     </KeyBoardAvoid>
   )
 }
@@ -152,18 +147,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-
     paddingTop: 12,
-  },
-  header: {
-    flexDirection: "row",
-    paddingHorizontal: 20,
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-
-  title: {
-    fontSize: 24,
-    textAlign: "center",
   },
 })

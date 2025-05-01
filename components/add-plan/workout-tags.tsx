@@ -13,6 +13,8 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
+import { toast } from "sonner-native"
+import { usePathname } from "expo-router"
 
 interface WorkoutTagsProps {
   workoutList: string[]
@@ -21,7 +23,8 @@ interface WorkoutTagsProps {
 export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
   const { workout, setPlanValue } = usePlanStore()
   const themeColor = useCurrneThemeColor()
-  const { setOpen } = useWorkoutTagDialogStore()
+  const { setOpen, setIsRemoveOpen } = useWorkoutTagDialogStore()
+  const pathname = usePathname().split("/")
 
   const onPressWorkout = (item: string) => {
     if (workout === item) {
@@ -29,6 +32,13 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
       return
     }
     setPlanValue("workout", item)
+  }
+  const onOpenRemoveDialog = () => {
+    if (!workout) {
+      toast.error("삭제하실 운동을 선택해주세요.")
+      return
+    }
+    setIsRemoveOpen(true)
   }
 
   return (
@@ -59,19 +69,42 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
             </Text>
           </TouchableOpacity>
         ))}
-        <TouchableOpacity
+      </View>
+      {pathname[1] === "add-plan" && (
+        <View
           style={[
-            styles.plusButton,
+            styles.buttonContainer,
             {
-              backgroundColor: themeColor.itemColor,
               borderColor: themeColor.subText,
             },
           ]}
-          onPress={() => setOpen(true)}
         >
-          <FontAwesome name="plus" size={14} color={themeColor.tint} />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={[
+              styles.plusButton,
+              {
+                backgroundColor: themeColor.tint,
+                borderColor: themeColor.subText,
+              },
+            ]}
+            onPress={() => setOpen(true)}
+          >
+            <FontAwesome name="plus" size={14} color={themeColor.text} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[
+              styles.plusButton,
+              {
+                backgroundColor: themeColor.itemColor,
+                borderColor: themeColor.subText,
+              },
+            ]}
+            onPress={() => onOpenRemoveDialog()}
+          >
+            <FontAwesome name="minus" size={14} color={themeColor.text} />
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   )
 }
@@ -90,7 +123,6 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderWidth: 2,
-
     borderRadius: 50,
   },
   title: {
@@ -98,12 +130,24 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   plusButton: {
-    width: 40,
+    width: 44,
     height: 28,
     borderWidth: 2,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",
     paddingTop: 2,
+  },
+  buttonContainer: {
+    alignItems: "center",
+    gap: 8,
+    flexDirection: "row",
+    justifyContent: "center",
+    borderWidth: 2,
+    alignSelf: "flex-end",
+
+    marginRight: 20,
+    borderRadius: 50,
+    padding: 4,
   },
 })

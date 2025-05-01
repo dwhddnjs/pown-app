@@ -29,7 +29,6 @@ export const SearchWorkoutTagSheet = forwardRef<
   BottomSheet,
   SearchWorkoutTagSheetProps
 >(({ onClose, workoutList, isOpen }, ref) => {
-  console.log("workoutList: ", workoutList)
   const themeColor = useCurrneThemeColor()
   const { workout, setPlanValue } = usePlanStore()
   const [inputValue, setInputValue] = useState("")

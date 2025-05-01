@@ -6,11 +6,32 @@ import { TextInput } from "react-native-gesture-handler"
 import { Button } from "../Button"
 import { StyleSheet } from "react-native"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
+import { useUserStore } from "@/hooks/use-user-store"
+import { WorkoutTypes } from "@/hooks/use-plan-store"
+import { toast } from "sonner-native"
 
-export const AddWorkoutTagDialog = () => {
+interface AddWorkoutTagDialogProp {
+  workoutType: WorkoutTypes
+}
+
+export const AddWorkoutTagDialog = ({
+  workoutType,
+}: AddWorkoutTagDialogProp) => {
   const themeColor = useCurrneThemeColor()
   const [inputValue, setInputValue] = useState("")
+  const { workoutList, setAddWorkoutTag, setRemoveWorkoutTag } = useUserStore()
   const { isOpen, setOpen } = useWorkoutTagDialogStore()
+
+  const onAddWorkoutTag = () => {
+    if (workoutList[workoutType].includes(inputValue)) {
+      toast.error("이미 존재하는 운동인데요?")
+      return
+    }
+    setAddWorkoutTag(workoutType, inputValue)
+    setOpen(false)
+    setInputValue("")
+    toast.success("운동이 추가되었습니다.")
+  }
 
   return (
     <Dialog isOpen={isOpen} onClose={() => setOpen(false)}>
@@ -44,7 +65,9 @@ export const AddWorkoutTagDialog = () => {
           onChangeText={(text) => setInputValue(text)}
         />
       </View>
-      <Button type="solid">추가하기</Button>
+      <Button type="solid" onPress={onAddWorkoutTag}>
+        추가하기
+      </Button>
     </Dialog>
   )
 }

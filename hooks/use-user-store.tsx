@@ -1,3 +1,4 @@
+import { workoutData } from "@/constants/constants"
 import { storage } from "@/lib/storage"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
@@ -15,17 +16,27 @@ export type UserInfoTypes = {
 
 export type UserTypes = {
   userInfo: UserInfoTypes[]
+  workoutList: Record<"back" | "chest" | "shoulder" | "leg" | "arm", string[]>
   theme: "light" | "dark" | "system"
   camera: boolean
   mediaLibrary: boolean
   setUser: (type: string, value: string | boolean) => void
   setUserData: (value: UserInfoTypes) => void
   onReset: () => void
+  setAddWorkoutTag: (
+    type: "back" | "chest" | "shoulder" | "leg" | "arm",
+    tag: string
+  ) => void
+  setRemoveWorkoutTag: (
+    type: "back" | "chest" | "shoulder" | "leg" | "arm",
+    tag: string
+  ) => void
 }
 
 export const useUserStore = create<UserTypes>()(
   persist(
     (set) => ({
+      workoutList: workoutData,
       camera: false,
       mediaLibrary: false,
       userInfo: [],
@@ -46,6 +57,23 @@ export const useUserStore = create<UserTypes>()(
           camera: false,
           mediaLibrary: false,
         }),
+
+      setAddWorkoutTag: (type, tag) =>
+        set((prev) => ({
+          ...prev,
+          workoutList: {
+            ...prev.workoutList,
+            [type]: [...prev.workoutList[type], tag],
+          },
+        })),
+      setRemoveWorkoutTag: (type, tag) =>
+        set((prev) => ({
+          ...prev,
+          workoutList: {
+            ...prev.workoutList,
+            [type]: prev.workoutList[type].filter((item) => item !== tag),
+          },
+        })),
     }),
     {
       name: "user",

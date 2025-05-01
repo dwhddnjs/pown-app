@@ -21,9 +21,10 @@ export const equipmentData: string[] = [
   "맨몸",
 ]
 
-export const workoutData: {
-  [key: string]: string[]
-} = {
+export const workoutData: Record<
+  "back" | "chest" | "shoulder" | "leg" | "arm",
+  string[]
+> = {
   back: [
     "데드리프트",
     "로우",
