@@ -2,12 +2,29 @@
 
 ### Pown은 쉽고 빠르고 간단하게 운동 계획을 짤 수 있는 앱입니다
 
-Pown은 Progressive Overload Workout plaN 의 약자로
-운동계획을 작성하고 기록하면서 중량을 점진적으로 늘리자는 뜻을 가지고 있습니다
-일반적으로 운동하는 분들은 미리 운동계획을 짜고 그 루틴에 맞게 운동을 하지만
-항상 헬스장을 사람이 붐비고 원하는 기구는 못 쓰고 모든 계획에는 변수가 있다 보니
-만족스럽지 못한 운동 경험이 있을 거 라고 생각합니다
-그래서 좀 더 유연하게 운동을 하면서 계획하고 기록할 수 있는 앱 출시 했습니다
+Pown - 유연한 운동 계획, 점진적인 성장
+
+Pown은 쉽고 빠르고 간단하게 운동 계획을 세울 수 있는 앱입니다.
+운동을 꾸준히 하다 보면 기록의 중요성을 깨닫게 됩니다.
+매번 같은 무게로 반복하는 것이 아니라, 점진적으로 무게를 늘려가며
+몸에 적절한 자극을 주는 것이 근력 향상의 핵심이기 때문이죠.
+
+Pown이라는 이름은 Progressive Overload Workout plaN의 약자로,
+운동을 기록하면서 체계적으로 중량을 증가시키고 성장해 나가자는 의미를 담고 있습니다.
+
+운동 계획은 철저하게, 실행은 유연하게
+
+많은 사람들이 운동 전에 미리 루틴을 정해두고 그에 맞춰 운동합니다.
+하지만 헬스장은 항상 사람이 많고, 원하는 기구를 사용할 수 없는 경우가 많죠.
+이런 변수들 때문에 세운 계획을 지키지 못하면,
+운동이 만족스럽지 못하게 느껴지고 때로는 동기부여가 떨어지기도 합니다.
+
+Pown은 이런 문제를 해결하기 위해 만들어졌습니다.
+미리 운동 계획을 세우되, 상황에 맞게 유연하게 조정하고 기록할 수 있는 기능을 제공합니다.
+어떤 환경에서도 내가 원하는 방식으로 운동하고, 점진적인 성장을 이어갈 수 있도록 돕는 것
+그것이 바로 Pown의 목표입니다.
+
+이제, 더 효율적이고 체계적인 운동 기록으로 목표를 달성해 보세요.
 
 1. 플러스 버튼을 클릭해 운동할 부위를 선택합니다
 2. 추가 화면에서 운동, 중량 필수로 작성하고 나머지 세트 및 회수 상태 그리고 글 작성은 선택으로 작성 하실 수 있습니다
@@ -25,10 +42,10 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 ### 키워드
 
 운동, 피트니스, 3대운동, 중량, 스트렝스, 근력, 운동계획, 점진적과부화, workout, planner, strength, 간단
-
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 42 33 1](https://github.com/user-attachments/assets/c953a2cc-b898-4d62-b8a5-e7a908075995)
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 40 26](https://github.com/user-attachments/assets/4d86b96a-064a-480d-abd6-89286730047f)
-![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/4358c990-6d4d-43d4-9c33-d03997e34e82)
+![6 7main](https://github.com/user-attachments/assets/d0eb749e-6563-4bea-b2ac-d623186da1d7)
+![6 7add](https://github.com/user-attachments/assets/db02ef9f-5e7b-4c8a-92dd-a54dab91207e)
+![6 7chart](https://github.com/user-attachments/assets/4bf6d986-ddad-4075-bf13-f7b737a64d9b)
+![6 7cal](https://github.com/user-attachments/assets/6093dd7c-25d1-461f-9589-01a17723e237)
 
 TODO
 데이터 백업 했을때 이미지 잘 나오는지 테스트
