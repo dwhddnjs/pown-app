@@ -43,10 +43,11 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 
 운동, 피트니스, 3대운동, 중량, 스트렝스, 근력, 운동계획, 점진적과부화, workout, planner, strength, 간단
 
-<img src="https://github.com/user-attachments/assets/58e8b541-04db-4fc1-bab2-87ce47006b39" width="400" />
-<img src="https://github.com/user-attachments/assets/91a810e0-e2d3-4142-8e26-4c8894ecc6ac" width="400" />
 <img src="https://github.com/user-attachments/assets/47b7abf3-0c93-4d0f-ad62-1ffa4d747b71" width="400" />
 <img src="https://github.com/user-attachments/assets/7f2b8af0-3d75-49f0-a5ca-1bc5e9b2f90c" width="400" />
+<img src="https://github.com/user-attachments/assets/58e8b541-04db-4fc1-bab2-87ce47006b39" width="400" />
+<img src="https://github.com/user-attachments/assets/91a810e0-e2d3-4142-8e26-4c8894ecc6ac" width="400" />
+
 
 
 
