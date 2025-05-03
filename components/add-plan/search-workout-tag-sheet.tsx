@@ -1,4 +1,5 @@
 import {
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -111,7 +112,7 @@ export const SearchWorkoutTagSheet = forwardRef<
             value={inputValue}
           />
         </View>
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
           {filterWorkoutTag?.map((item) => (
             <TouchableOpacity
               key={item}
@@ -142,7 +143,7 @@ export const SearchWorkoutTagSheet = forwardRef<
               음.. 찾으시는 운동이 없네요?
             </Text>
           )}
-        </View>
+        </ScrollView>
       </View>
     </BottomSheet>
   )
