@@ -42,10 +42,9 @@ https://sites.google.com/view/pown-privacy/%ED%99%88
 ### 키워드
 
 운동, 피트니스, 3대운동, 중량, 스트렝스, 근력, 운동계획, 점진적과부화, workout, planner, strength, 간단
-![6 7main](https://github.com/user-attachments/assets/d0eb749e-6563-4bea-b2ac-d623186da1d7)
-![6 7add](https://github.com/user-attachments/assets/db02ef9f-5e7b-4c8a-92dd-a54dab91207e)
-![6 7chart](https://github.com/user-attachments/assets/4bf6d986-ddad-4075-bf13-f7b737a64d9b)
-![6 7cal](https://github.com/user-attachments/assets/6093dd7c-25d1-461f-9589-01a17723e237)
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 42 33 1](https://github.com/user-attachments/assets/c953a2cc-b898-4d62-b8a5-e7a908075995)
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 40 26](https://github.com/user-attachments/assets/4d86b96a-064a-480d-abd6-89286730047f)
+![Simulator Screenshot - iPhone 15 Pro - 2024-11-08 at 03 58 31](https://github.com/user-attachments/assets/4358c990-6d4d-43d4-9c33-d03997e34e82)
 
 TODO
 데이터 백업 했을때 이미지 잘 나오는지 테스트
