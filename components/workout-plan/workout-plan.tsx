@@ -1,6 +1,12 @@
-import React, { useState } from "react"
+import React, { useCallback, useState } from "react"
 // component
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import {
+  Pressable,
+  StyleSheet,
+  TouchableOpacity,
+  useColorScheme,
+  Image,
+} from "react-native"
 import { Text, View } from "../Themed"
 import { NoteText } from "./note-text"
 import { SetListItem } from "./set-list-item"
@@ -18,7 +24,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // expo
 import { useUserStore } from "@/hooks/use-user-store"
 import { useImageUriStore } from "@/hooks/use-image-uri-store"
-import { Image } from "expo-image"
+// import { Image } from "expo-image"
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes
@@ -138,7 +144,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
             갤러리 접근권한이 필요합니다.
           </Text>
         )}
-        {mediaLibrary && item.imageUri && (
+        {mediaLibrary && item.imageUri?.length > 0 && (
           <View
             style={[
               styles.imageList,
@@ -147,16 +153,16 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               },
             ]}
           >
-            {item.imageUri.map((item) => {
+            {item.imageUri.map((imageItem) => {
               return (
-                <TouchableOpacity
-                  key={item.id}
+                <Pressable
+                  key={imageItem.id}
                   style={{ flex: 4, backgroundColor: themeColor.itemColor }}
-                  onPress={() => setImageUri(item.imageUri as string)}
+                  onPress={() => setImageUri(imageItem.imageUri as string)}
                 >
                   <Image
-                    key={item.id}
-                    source={{ uri: item.imageUri }}
+                    key={imageItem.id}
+                    source={{ uri: imageItem.imageUri }}
                     style={[
                       styles.image,
                       {
@@ -164,7 +170,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
                       },
                     ]}
                   />
-                </TouchableOpacity>
+                </Pressable>
               )
             })}
           </View>
