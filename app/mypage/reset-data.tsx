@@ -141,7 +141,7 @@ export default function ResetData() {
           height: 50,
         }}
         onPress={() => {
-          onSetMockout(mockupData as WorkoutPlanTypes[])
+          // onSetMockout(mockupData as WorkoutPlanTypes[])
           toast.success("목업데이터 생성 되었습니다")
           back()
         }}

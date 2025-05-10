@@ -154,11 +154,17 @@ function RootLayoutNav() {
           },
           headerShadowVisible: false,
 
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.subText} />
-            </TouchableOpacity>
-          ),
+          headerLeft: () => {
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.goBack()
+                }}
+              >
+                <XIcon name="x" size={30} color={themeColor.subText} />
+              </TouchableOpacity>
+            )
+          },
         })}
       />
       <Stack.Screen
@@ -629,6 +635,24 @@ function RootLayoutNav() {
               onPress={() => navigation.goBack()}
             >
               <ArrowIcon name="down" size={30} color={themeColor.subText} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="mypage/settings"
+        options={({ navigation }) => ({
+          title: "설정",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
+              onPress={() => navigation.goBack()}
+            >
+              <ArrowIcon name="left" size={30} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}

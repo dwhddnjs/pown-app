@@ -13,8 +13,12 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { transformWorkoutData } from "@/lib/function"
 // icons
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+import Ionicons from "@expo/vector-icons/Ionicons"
+
 // expo
-import { usePathname } from "expo-router"
+import { useNavigation, usePathname, useRouter } from "expo-router"
+import { MaterialIcons } from "@expo/vector-icons"
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store"
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([])
@@ -23,6 +27,8 @@ const CustomDrawerContent = (props: any) => {
   const { workoutPlanList } = userWorkoutPlanStore()
   const themeColor = useCurrneThemeColor()
   const sortData = transformWorkoutData(workoutPlanList)
+  const navigation = useNavigation()
+  const { push } = useRouter()
 
   const [activeSections2, setActiveSections2] = useState<number[]>([])
   const [multipleSelect2, setMultipleSelect2] = useState(false)
@@ -99,16 +105,36 @@ const CustomDrawerContent = (props: any) => {
       }}
     >
       <View style={{ paddingTop: 72, paddingBottom: 12, gap: 4 }}>
-        <Text style={{ fontSize: 18 }}>나의 운동 기록</Text>
-        <Text
+        <View
           style={{
-            color: themeColor.subText,
-            fontFamily: "sb-l",
-            fontSize: 12,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          {`폴더 ${yearCount + monthCount}개,  파일 ${dayCount}개`}
-        </Text>
+          <View style={{ gap: 4 }}>
+            <Text style={{ fontSize: 18 }}>나의 운동 기록</Text>
+            <Text
+              style={{
+                color: themeColor.subText,
+                fontFamily: "sb-l",
+                fontSize: 12,
+              }}
+            >
+              {`폴더 ${yearCount + monthCount}개,  파일 ${dayCount}개`}
+            </Text>
+          </View>
+          <TouchableOpacity
+            style={{ paddingVertical: 8, paddingLeft: 12 }}
+            onPress={() => push("/mypage/settings")}
+          >
+            <Ionicons
+              name="settings-sharp"
+              size={24}
+              color={themeColor.subText}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
       <DrawerContentScrollView
         {...props}
@@ -231,6 +257,20 @@ const CustomDrawerContent = (props: any) => {
           renderAsFlatList={false}
         />
       </DrawerContentScrollView>
+      <TouchableOpacity
+        onPress={() => {
+          push("/(modals)/calculate")
+        }}
+        style={[
+          styles.calculateButton,
+          {
+            backgroundColor: themeColor.background,
+            borderColor: themeColor.subText,
+          },
+        ]}
+      >
+        <MaterialIcons name="calculate" size={40} color={themeColor.tint} />
+      </TouchableOpacity>
     </View>
   )
 }
@@ -311,5 +351,18 @@ const styles = StyleSheet.create({
   multipleToggle__title: {
     fontSize: 16,
     marginRight: 8,
+  },
+  calculateButton: {
+    width: 64,
+    height: 64,
+    opacity: 0.8,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderRadius: 50,
+    position: "absolute",
+    bottom: 64,
+    right: 20,
+    zIndex: 1000,
   },
 })

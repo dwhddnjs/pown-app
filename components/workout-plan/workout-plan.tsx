@@ -150,6 +150,7 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               styles.imageList,
               {
                 backgroundColor: themeColor.itemColor,
+                marginTop: 12,
               },
             ]}
           >

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react"
 // component
 import { Text, View } from "@/components/Themed"
 import {
@@ -9,11 +9,13 @@ import {
 } from "react-native"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store"
 
 export default function calculate() {
   const themeColor = useCurrneThemeColor()
   const [selected, setSelected] = useState("kg")
   const [inputNumber, setInputNumber] = useState("")
+  const { open, setOpen } = useIsModalOpenStore()
 
   const generatePercentageValues = (input: string) => {
     const value = !input ? "0" : input
@@ -60,6 +62,13 @@ export default function calculate() {
       setInputNumber(String(kg))
     }
   }
+
+  useEffect(() => {
+    setOpen(true)
+    return () => {
+      setOpen(false)
+    }
+  }, [open])
 
   return (
     <View style={{ flex: 1 }}>

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 // component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { Text, View } from "@/components/Themed"
@@ -30,21 +30,19 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6"
 import MaterialIcons from "@expo/vector-icons/MaterialIcons"
-import { useNavigationState } from "@react-navigation/native"
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store"
 
 export default function TabOneScreen() {
   const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore()
-
   const { date: selectedDate } = useSelectDateStore()
-
   const sortWorkList = groupByDate(workoutPlanList)
   const headerHeight = useHeaderHeight()
   const themeColor = useCurrneThemeColor()
   const navigation = useNavigation()
+  const { open } = useIsModalOpenStore()
+
   const router = useRouter()
-
   const itemRef = useRef(new Map())
-
   const scrollRef = useRef<ScrollView | null>(null)
   const scrollY = useRef(0)
 
@@ -58,7 +56,6 @@ export default function TabOneScreen() {
         () => {},
         (x: number, y: number, width: number, height: number) => {
           if (scrollY.current === 0) {
-            const splitData = date.split(".")
             navigation.setOptions({
               title: `🔥오늘도 화이팅!`,
             })
@@ -102,6 +99,14 @@ export default function TabOneScreen() {
   useEffect(() => {
     setTimeout(scrollToSelectedDate, 200)
   }, [selectedDate, scrollToSelectedDate])
+
+  useEffect(() => {
+    if (open) {
+      scrollRef.current?.scrollTo({
+        y: 0,
+      })
+    }
+  }, [open])
 
   if (workoutPlanList.length === 0) {
     return <EmptyList />
@@ -198,20 +203,6 @@ export default function TabOneScreen() {
           </View>
         </View>
       </ScrollView>
-      <TouchableOpacity
-        onPress={() => {
-          router.push("/(modals)/calculate")
-        }}
-        style={[
-          styles.calculateButton,
-          {
-            backgroundColor: themeColor.background,
-            borderColor: themeColor.subText,
-          },
-        ]}
-      >
-        <MaterialIcons name="calculate" size={40} color={themeColor.tint} />
-      </TouchableOpacity>
     </View>
   )
 }
