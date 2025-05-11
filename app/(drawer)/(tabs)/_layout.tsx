@@ -112,12 +112,13 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="mypage"
+          name="shorts"
           options={{
-            title: "마이페이지",
+            title: "내 숏츠",
             tabBarIcon: ({ color }) => (
-              <UserIcon name="user" size={24} color={color} />
+              <Entypo name="video" size={24} color={color} />
             ),
+            // headerShown: false,
           }}
         />
         <Tabs.Screen name="index" redirect />

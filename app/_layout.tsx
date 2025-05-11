@@ -657,6 +657,29 @@ function RootLayoutNav() {
           ),
         })}
       />
+      <Stack.Screen
+        name="shorts/video"
+        options={({ navigation }) => ({
+          headerTitle: "비디오 촬영",
+          headerShown: false,
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          animation: "slide_from_bottom",
+          headerLeft: () => (
+            <TouchableOpacity
+              style={{
+                paddingLeft: 4,
+                paddingRight: 12,
+                paddingVertical: 4,
+              }}
+              onPress={() => navigation.goBack()}
+            >
+              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+            </TouchableOpacity>
+          ),
+        })}
+      />
     </Stack>
   )
 }

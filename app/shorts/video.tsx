@@ -12,18 +12,41 @@ import { FontAwesome6 } from "@expo/vector-icons"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
-const Camera = () => {
+const Video = () => {
   const ref = useRef<CameraView>(null)
   const [uri, setUri] = useState<string | null>(null)
-
+  console.log("uri: ", uri)
   const [facing, setFacing] = useState<CameraType>("back")
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
   const { imageUri, setImageUri } = usePlanStore()
+  const [isRecording, setIsRecording] = useState(false)
 
-  const takePicture = async () => {
-    const photo = await ref.current?.takePictureAsync()
-    setUri(photo?.uri as string)
+  const onStartRecording = async () => {
+    if (!ref.current) return
+    try {
+      setIsRecording(true)
+      const data = await ref.current.recordAsync()
+      setUri(data?.uri as string)
+    } catch (error) {
+      console.log(error)
+    } finally {
+      setIsRecording(false)
+    }
+  }
+
+  const onStopRecording = () => {
+    if (!ref.current) return
+    ref.current.stopRecording()
+  }
+
+  const takeVideo = async () => {
+    try {
+      const data = await ref.current?.recordAsync()
+      console.log("data: ", data)
+    } catch (error) {
+      console.log(error)
+    }
   }
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"))
@@ -93,6 +116,7 @@ const Camera = () => {
         style={styles.camera}
         ref={ref}
         facing={facing}
+        mode="video"
         mute={false}
         responsiveOrientationWhenOrientationLocked
       >
@@ -101,7 +125,7 @@ const Camera = () => {
             <Text style={styles.cancelText}>취소</Text>
           </Pressable>
 
-          <Pressable onPress={takePicture}>
+          <Pressable onPress={isRecording ? onStopRecording : onStartRecording}>
             {({ pressed }) => (
               <View
                 style={[
@@ -132,7 +156,7 @@ const Camera = () => {
   )
 }
 
-export default Camera
+export default Video
 
 const styles = StyleSheet.create({
   container: {
