@@ -6,21 +6,45 @@ import { Text, View } from "@/components/Themed"
 import { CameraMode, CameraType, CameraView } from "expo-camera"
 import { Image } from "expo-image"
 import { useRouter } from "expo-router"
+import { useEvent } from "expo"
+import { useVideoPlayer, VideoView } from "expo-video"
 // icon
 import { FontAwesome6 } from "@expo/vector-icons"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { useHeaderHeight } from "@react-navigation/elements"
+import { SafeAreaView } from "react-native-safe-area-context"
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated"
 
 const Video = () => {
   const ref = useRef<CameraView>(null)
   const [uri, setUri] = useState<string | null>(null)
-  console.log("uri: ", uri)
   const [facing, setFacing] = useState<CameraType>("back")
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
   const { imageUri, setImageUri } = usePlanStore()
   const [isRecording, setIsRecording] = useState(false)
+  const player = useVideoPlayer(uri, (player) => {
+    player.loop = true
+    player.play()
+  })
+  const { isPlaying } = useEvent(player, "playingChange", {
+    isPlaying: player.playing,
+  })
+  const isSquare = useSharedValue(false)
+
+  const animatedShutterStyle = useAnimatedStyle(() => {
+    return {
+      width: withTiming(isSquare.value ? 32 : 64, { duration: 300 }),
+      height: withTiming(isSquare.value ? 32 : 64, { duration: 300 }),
+      borderRadius: withTiming(isSquare.value ? 6 : 50, { duration: 300 }),
+    }
+  })
 
   const onStartRecording = async () => {
     if (!ref.current) return
@@ -40,14 +64,6 @@ const Video = () => {
     ref.current.stopRecording()
   }
 
-  const takeVideo = async () => {
-    try {
-      const data = await ref.current?.recordAsync()
-      console.log("data: ", data)
-    } catch (error) {
-      console.log(error)
-    }
-  }
   const toggleFacing = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"))
   }
@@ -63,27 +79,27 @@ const Video = () => {
     router.back()
   }
 
-  const renderPicture = () => {
+  const renderVideo = () => {
     return (
-      <View
-        style={{ flex: 1, justifyContent: "space-between", paddingTop: 150 }}
-      >
-        <Image
-          source={{ uri } as any}
-          contentFit="contain"
-          style={{ width: "100%", aspectRatio: 1 }}
+      <SafeAreaView style={{ flex: 1 }}>
+        <VideoView
+          style={styles.video}
+          player={player}
+          allowsFullscreen
+          allowsPictureInPicture
         />
+
         <View
           style={{
-            backgroundColor: themeColor.itemColor,
-            height: 100,
+            backgroundColor: "transparents",
+            height: 60,
             flexDirection: "row",
             justifyContent: "space-between",
-            paddingHorizontal: 20,
+            paddingHorizontal: 24,
             // paddingTop: 24,
           }}
         >
-          <Pressable style={{ paddingTop: 24 }}>
+          <Pressable style={{ paddingTop: 18 }}>
             <Text
               style={{
                 fontSize: 16,
@@ -94,7 +110,7 @@ const Video = () => {
             </Text>
           </Pressable>
           <Pressable
-            style={{ paddingTop: 24 }}
+            style={{ paddingTop: 18 }}
             onPress={() => selectImageUri()}
           >
             <Text
@@ -106,7 +122,7 @@ const Video = () => {
             </Text>
           </Pressable>
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 
@@ -125,7 +141,12 @@ const Video = () => {
             <Text style={styles.cancelText}>취소</Text>
           </Pressable>
 
-          <Pressable onPress={isRecording ? onStopRecording : onStartRecording}>
+          <Pressable
+            onPress={() => {
+              isSquare.value = !isSquare.value
+              isRecording ? onStopRecording() : onStartRecording()
+            }}
+          >
             {({ pressed }) => (
               <View
                 style={[
@@ -135,7 +156,13 @@ const Video = () => {
                   },
                 ]}
               >
-                <View style={[styles.shutterBtnInner]} />
+                <Animated.View
+                  style={[
+                    // styles.shutterBtnInner,
+                    animatedShutterStyle,
+                    { backgroundColor: themeColor.fail },
+                  ]}
+                />
               </View>
             )}
           </Pressable>
@@ -151,7 +178,7 @@ const Video = () => {
     <View
       style={[styles.container, { backgroundColor: themeColor.background }]}
     >
-      {uri ? renderPicture() : renderCamera()}
+      {uri ? renderVideo() : renderCamera()}
     </View>
   )
 }
@@ -161,13 +188,17 @@ export default Video
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    // paddingTop: 24,
   },
   camera: {
     flex: 1,
-
     width: "100%",
+  },
+
+  video: {
+    flex: 1,
+    // width: 350,
+    // height: 275,
   },
   shutterContainer: {
     position: "absolute",
@@ -182,7 +213,7 @@ const styles = StyleSheet.create({
   },
   shutterBtn: {
     backgroundColor: "transparent",
-    borderWidth: 6,
+    borderWidth: 4,
     borderColor: "white",
     width: 80,
     height: 80,
@@ -190,11 +221,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  shutterBtnInner: {
-    width: 70,
-    height: 70,
-    borderRadius: 50,
-  },
+  // shutterBtnInner: {
+  //   width: 64,
+  //   height: 64,
+  //   borderRadius: 50,
+  // },
   cancelText: {
     fontSize: 16,
     color: "white",
