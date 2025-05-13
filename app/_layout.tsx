@@ -680,6 +680,35 @@ function RootLayoutNav() {
           ),
         })}
       />
+      <Stack.Screen
+        name="shorts/[...slug]"
+        options={({ navigation }) => ({
+          // headerTitle: "",
+          // headerStyle: {
+          //   borderBottomWidth: 0,
+          //   elevation: 0,
+          //   shadowOpacity: 0,
+          //   backgroundColor: themeColor.background,
+          // },
+
+          // headerShadowVisible: false,
+          headerShown: false,
+          headerLeft: () => {
+            return (
+              <TouchableOpacity
+                style={{
+                  paddingRight: 16,
+                }}
+                onPress={() => {
+                  navigation.goBack()
+                }}
+              >
+                <ArrowIcon name="left" size={28} color={themeColor.subText} />
+              </TouchableOpacity>
+            )
+          },
+        })}
+      />
     </Stack>
   )
 }

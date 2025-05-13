@@ -4,70 +4,57 @@ import {
   AppState,
   Dimensions,
   FlatList,
-  Image,
-  ScrollView,
   StyleSheet,
   TouchableOpacity,
-  useColorScheme,
+  Image,
 } from "react-native"
 import { Text, View } from "@/components/Themed"
-import { IconTitle } from "@/components/IconTitle"
-import { UserDataCard } from "@/components/mypage/user-data-card"
 // expo
 import { useRouter } from "expo-router"
-// icon
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
-import AntDesign from "@expo/vector-icons/AntDesign"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { mediaJSON } from "@/constants/constants"
-import { SafeAreaView } from "react-native-safe-area-context"
+import { useShortsStore } from "@/hooks/use-shorts-store"
+// icons
+import Entypo from "@expo/vector-icons/Entypo"
 
 export default function TabTwoScreen() {
   const { onReset, ...result } = useUserStore()
   const themeColor = useCurrneThemeColor()
   const screenWidth = Dimensions.get("window").width
-
+  const { videos } = useShortsStore()
   const { push } = useRouter()
 
-  const mockData = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]
-
   return (
-    <View style={{ flex: 1, borderWidth: 1 }}>
+    <View style={{ flex: 1 }}>
       <FlatList
-        data={mockData}
+        data={videos}
         numColumns={3}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={{
               flex: 1,
               flexDirection: "column",
-              borderWidth: 1,
-              borderColor: "white",
               alignSelf: "flex-start",
               maxWidth: screenWidth / 3,
             }}
+            onPress={() => push(`/shorts/${item.video}`)}
           >
-            <Text>{item.id}</Text>
+            <Image source={{ uri: item.thumbnail }} style={styles.image} />
           </TouchableOpacity>
         )}
       />
       <TouchableOpacity
-        style={{
-          width: 64,
-          height: 64,
-          borderWidth: 2,
-          position: "absolute",
-          borderColor: "white",
-          bottom: 24,
-          right: 24,
-          borderRadius: 50,
-        }}
+        style={[
+          styles.addVideo,
+          {
+            borderColor: themeColor.subText,
+          },
+        ]}
         onPress={() => push("/shorts/video")}
       >
-        <Text>Video</Text>
+        <Entypo name="video-camera" size={32} color={themeColor.tint} />
       </TouchableOpacity>
     </View>
   )
@@ -75,11 +62,27 @@ export default function TabTwoScreen() {
 
 const styles = StyleSheet.create({
   box: {
-    // backgroundColor: "#eee",
     borderWidth: 1,
     borderColor: "white",
     justifyContent: "center",
     alignItems: "center",
-    // borderRadius: 8,
+  },
+  image: {
+    width: "100%",
+    aspectRatio: 9 / 16,
+    resizeMode: "cover",
+  },
+  addVideo: {
+    width: 64,
+    height: 64,
+    borderWidth: 2,
+    position: "absolute",
+
+    bottom: 20,
+    right: 20,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingLeft: 4,
   },
 })

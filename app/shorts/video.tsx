@@ -12,14 +12,15 @@ import { useVideoPlayer, VideoView } from "expo-video"
 import { FontAwesome6 } from "@expo/vector-icons"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { useHeaderHeight } from "@react-navigation/elements"
 import { SafeAreaView } from "react-native-safe-area-context"
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated"
+import { useShortsStore } from "@/hooks/use-shorts-store"
+import * as VideoThumbnails from "expo-video-thumbnails"
+import { toast } from "sonner-native"
 
 const Video = () => {
   const ref = useRef<CameraView>(null)
@@ -27,7 +28,7 @@ const Video = () => {
   const [facing, setFacing] = useState<CameraType>("back")
   const themeColor = useCurrneThemeColor()
   const router = useRouter()
-  const { imageUri, setImageUri } = usePlanStore()
+  const { setAddVideo, videos } = useShortsStore()
   const [isRecording, setIsRecording] = useState(false)
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true
@@ -68,15 +69,24 @@ const Video = () => {
     setFacing((prev) => (prev === "back" ? "front" : "back"))
   }
 
-  const selectImageUri = () => {
-    if (uri) {
-      setImageUri({
-        id: imageUri.length > 0 ? imageUri[imageUri.length - 1].id + 1 : 1,
-        imageUri: uri,
-      })
-      setUri("")
+  const selectImageUri = async () => {
+    try {
+      if (uri) {
+        const thumbnail = await VideoThumbnails.getThumbnailAsync(uri, {
+          time: 15000,
+        })
+        setAddVideo({
+          id: videos.length > 0 ? videos[videos.length - 1].id + 1 : 1,
+          video: uri,
+          thumbnail: thumbnail.uri,
+        })
+        setUri("")
+      }
+      router.back()
+      toast.success("숏츠가 추가 되었습니다")
+    } catch (error) {
+      console.log(error)
     }
-    router.back()
   }
 
   const renderVideo = () => {
