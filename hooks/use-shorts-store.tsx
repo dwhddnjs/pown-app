@@ -2,7 +2,7 @@ import { storage } from "@/lib/storage"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
-type ShortsVideoTypes = {
+export type ShortsVideoTypes = {
   id: number
   thumbnail: string
   video: string

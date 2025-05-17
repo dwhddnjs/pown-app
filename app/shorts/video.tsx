@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
 // component
-import { Pressable, StyleSheet } from "react-native"
+import { Dimensions, Pressable, StyleSheet } from "react-native"
 import { Text, View } from "@/components/Themed"
 //expo
 import { CameraMode, CameraType, CameraView } from "expo-camera"
@@ -21,6 +21,8 @@ import Animated, {
 import { useShortsStore } from "@/hooks/use-shorts-store"
 import * as VideoThumbnails from "expo-video-thumbnails"
 import { toast } from "sonner-native"
+
+const { width, height } = Dimensions.get("window")
 
 const Video = () => {
   const ref = useRef<CameraView>(null)
@@ -98,7 +100,6 @@ const Video = () => {
           allowsFullscreen
           allowsPictureInPicture
         />
-
         <View
           style={{
             backgroundColor: "transparents",
@@ -139,9 +140,12 @@ const Video = () => {
   const renderCamera = () => {
     return (
       <CameraView
-        style={styles.camera}
         ref={ref}
         facing={facing}
+        style={{
+          flex: 1,
+          aspectRatio: 9 / 16, // 강제로 세로 화면 비율 맞춤
+        }}
         mode="video"
         mute={false}
         responsiveOrientationWhenOrientationLocked

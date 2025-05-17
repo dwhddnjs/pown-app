@@ -1,40 +1,55 @@
+import { ShortsPlayer } from "@/components/shorts/shorts-player"
 import { Text, View } from "@/components/Themed"
 import { useShortsStore } from "@/hooks/use-shorts-store"
 import { useEvent } from "expo"
-import { useLocalSearchParams, useNavigation } from "expo-router"
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React from "react"
-import { StyleSheet } from "react-native"
+import React, { useMemo } from "react"
+import { StyleSheet, TouchableOpacity } from "react-native"
 import PagerView from "react-native-pager-view"
+import { SafeAreaView } from "react-native-safe-area-context"
+import ArrowIcon from "@expo/vector-icons/AntDesign"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>()
   const { videos } = useShortsStore()
-  const uri = slug.join("/")
+  const themeColor = useCurrneThemeColor()
+  const { back } = useRouter()
+  // const uri = slug.join("/")
+
+  const initailPage = useMemo(() => {
+    const index = videos.findIndex((v) => v.id === parseInt(slug[0]))
+    return index >= 0 ? index : 0
+  }, [slug[0]])
 
   return (
-    <View style={{ flex: 1 }}>
-      <PagerView style={{ flex: 1 }} initialPage={0} orientation={"vertical"}>
-        {videos.map((item) => {
-          const player = useVideoPlayer(item.video, (player) => {
-            player.loop = true
-            player.play()
-          })
-          const { isPlaying } = useEvent(player, "playingChange", {
-            isPlaying: player.playing,
-          })
-          return (
-            <VideoView
-              key={item.id}
-              style={styles.video}
-              player={player}
-              allowsFullscreen
-              allowsPictureInPicture
-            />
-          )
-        })}
+    <SafeAreaView style={{ flex: 1, position: "relative" }}>
+      {/* <View>
+        <TouchableOpacity
+          style={{
+            paddingRight: 16,
+          }}
+          onPress={() => {
+            back()
+          }}
+        >
+          <ArrowIcon name="left" size={28} color={themeColor.text} />
+        </TouchableOpacity>
+      </View> */}
+      <PagerView
+        style={{
+          flex: 1,
+          position: "relative",
+        }}
+        initialPage={initailPage}
+        orientation={"vertical"}
+      >
+        {videos.map((item) => (
+          <ShortsPlayer video={item} key={item.id} />
+        ))}
       </PagerView>
-    </View>
+    </SafeAreaView>
   )
 }
 

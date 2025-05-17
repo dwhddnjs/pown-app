@@ -683,7 +683,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="shorts/[...slug]"
         options={({ navigation }) => ({
-          // headerTitle: "",
+          headerTitle: "",
           // headerStyle: {
           //   borderBottomWidth: 0,
           //   elevation: 0,

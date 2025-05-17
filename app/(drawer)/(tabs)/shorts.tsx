@@ -39,7 +39,7 @@ export default function TabTwoScreen() {
               alignSelf: "flex-start",
               maxWidth: screenWidth / 3,
             }}
-            onPress={() => push(`/shorts/${item.video}`)}
+            onPress={() => push(`/shorts/${item.id}`)}
           >
             <Image source={{ uri: item.thumbnail }} style={styles.image} />
           </TouchableOpacity>
