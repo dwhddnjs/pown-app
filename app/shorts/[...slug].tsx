@@ -4,19 +4,25 @@ import { useShortsStore } from "@/hooks/use-shorts-store"
 import { useEvent } from "expo"
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React, { useMemo } from "react"
+import React, { useMemo, useState } from "react"
 import { StyleSheet, TouchableOpacity } from "react-native"
 import PagerView from "react-native-pager-view"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import Feather from "@expo/vector-icons/Feather"
+import { format } from "date-fns"
+import { Dialog } from "@/components/Dialog"
+import { Button } from "@/components/Button"
+import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog"
 
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>()
-  const { videos } = useShortsStore()
+  const { videos, setRemoveVideo } = useShortsStore()
   const themeColor = useCurrneThemeColor()
   const { back } = useRouter()
-  // const uri = slug.join("/")
+  const [position, setPosition] = useState(0)
+  const [isOpen, setIsOpen] = useState(false)
 
   const initailPage = useMemo(() => {
     const index = videos.findIndex((v) => v.id === parseInt(slug[0]))
@@ -25,30 +31,35 @@ export default function ShortsView() {
 
   return (
     <SafeAreaView style={{ flex: 1, position: "relative" }}>
-      {/* <View>
-        <TouchableOpacity
-          style={{
-            paddingRight: 16,
-          }}
-          onPress={() => {
-            back()
-          }}
-        >
-          <ArrowIcon name="left" size={28} color={themeColor.text} />
-        </TouchableOpacity>
-      </View> */}
       <PagerView
-        style={{
-          flex: 1,
-          position: "relative",
-        }}
+        style={{ flex: 1, position: "relative" }}
         initialPage={initailPage}
         orientation={"vertical"}
+        onPageSelected={(e) => setPosition(e.nativeEvent.position)}
       >
         {videos.map((item) => (
           <ShortsPlayer video={item} key={item.id} />
         ))}
       </PagerView>
+      <View style={styles.backButtonContainer}>
+        <TouchableOpacity style={{ paddingRight: 16 }} onPress={() => back()}>
+          <ArrowIcon name="left" size={24} color={themeColor.text} />
+        </TouchableOpacity>
+        <Text style={{ fontSize: 16 }}>
+          {format(videos[position].createdAt, "yyyy년 MM월 dd일")}
+        </Text>
+        <TouchableOpacity
+          style={{ paddingRight: 16 }}
+          onPress={() => setIsOpen(true)}
+        >
+          <Feather name="trash" size={24} color={themeColor.text} />
+        </TouchableOpacity>
+      </View>
+      <RemoveShortsDialog
+        open={isOpen}
+        setIsOpen={() => setIsOpen(false)}
+        position={position}
+      />
     </SafeAreaView>
   )
 }
@@ -56,11 +67,17 @@ export default function ShortsView() {
 const styles = StyleSheet.create({
   video: {
     flex: 1,
-    // width: 350,
-    // height: 275,
   },
   page: {
     justifyContent: "center",
+    alignItems: "center",
+  },
+  backButtonContainer: {
+    paddingVertical: 20,
+    paddingHorizontal: 24,
+    backgroundColor: "black",
+    justifyContent: "space-between",
+    flexDirection: "row",
     alignItems: "center",
   },
 })

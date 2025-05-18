@@ -15,6 +15,7 @@ import { useRouter } from "expo-router"
 import { useUserStore } from "@/hooks/use-user-store"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { useHeaderHeight } from "@react-navigation/elements"
 import { useShortsStore } from "@/hooks/use-shorts-store"
 // icons
 import Entypo from "@expo/vector-icons/Entypo"
@@ -25,12 +26,14 @@ export default function TabTwoScreen() {
   const screenWidth = Dimensions.get("window").width
   const { videos } = useShortsStore()
   const { push } = useRouter()
+  const headerHeight = useHeaderHeight()
 
   return (
     <View style={{ flex: 1 }}>
       <FlatList
         data={videos}
         numColumns={3}
+        style={{ paddingTop: headerHeight }}
         renderItem={({ item }) => (
           <TouchableOpacity
             style={{

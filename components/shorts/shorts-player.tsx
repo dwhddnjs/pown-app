@@ -1,7 +1,7 @@
-import { ShortsVideoTypes } from "@/hooks/use-shorts-store"
+import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store"
 import { useEvent } from "expo"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React from "react"
+import React, { useEffect } from "react"
 import { StyleSheet, Dimensions } from "react-native"
 
 interface ShortsPlayerProps {
@@ -17,6 +17,7 @@ export const ShortsPlayer = ({ video }: ShortsPlayerProps) => {
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   })
+
   return (
     <VideoView
       key={video.id}

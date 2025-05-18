@@ -14,7 +14,6 @@ import { useRouter } from "expo-router"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useWorkoutHeaderTitleStore } from "@/hooks/use-is-modal-open-store"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrneThemeColor()

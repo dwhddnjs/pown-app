@@ -81,6 +81,7 @@ const Video = () => {
           id: videos.length > 0 ? videos[videos.length - 1].id + 1 : 1,
           video: uri,
           thumbnail: thumbnail.uri,
+          createdAt: new Date(),
         })
         setUri("")
       }
@@ -144,7 +145,6 @@ const Video = () => {
         facing={facing}
         style={{
           flex: 1,
-          aspectRatio: 9 / 16, // 강제로 세로 화면 비율 맞춤
         }}
         mode="video"
         mute={false}

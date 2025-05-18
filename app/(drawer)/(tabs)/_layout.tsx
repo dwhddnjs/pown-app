@@ -17,6 +17,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { CalendarHeader } from "@/components/calendar"
 import { useImageUriStore } from "@/hooks/use-image-uri-store"
 import ImageModal from "@/components/workout-plan/image-modal"
+import ShortsTabHeader from "@/components/shorts/shorts-tab-header"
 
 export default function TabLayout() {
   const themColor = useCurrneThemeColor()
@@ -118,7 +119,10 @@ export default function TabLayout() {
             tabBarIcon: ({ color }) => (
               <Entypo name="video" size={24} color={color} />
             ),
-            // headerShown: false,
+            header: ({ navigation, route, options }) => {
+              return <ShortsTabHeader />
+            },
+            headerTransparent: true,
           }}
         />
         <Tabs.Screen name="index" redirect />

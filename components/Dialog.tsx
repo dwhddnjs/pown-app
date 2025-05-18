@@ -14,9 +14,15 @@ interface DialogProps {
   children: React.ReactNode
   isOpen: boolean
   onClose: () => void
+  modalHeight?: number
 }
 
-export const Dialog = ({ children, isOpen, onClose }: DialogProps) => {
+export const Dialog = ({
+  children,
+  isOpen,
+  onClose,
+  modalHeight,
+}: DialogProps) => {
   const themeColor = useCurrneThemeColor()
   const translateY = useSharedValue(50)
   const opacity = useSharedValue(0)
@@ -48,11 +54,19 @@ export const Dialog = ({ children, isOpen, onClose }: DialogProps) => {
   }
 
   return (
-    <Pressable style={styles.overlay} onPress={onPress}>
+    <Pressable
+      style={[
+        styles.overlay,
+        modalHeight ? { paddingTop: modalHeight } : { paddingTop: 180 },
+      ]}
+      onPress={onPress}
+    >
       <Animated.View
         style={[
           styles.content,
+
           { backgroundColor: themeColor.itemColor },
+
           animatedStyle,
         ]}
       >
@@ -80,7 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-start",
     alignItems: "center",
-    paddingTop: 180,
+    // paddingTop: 180,
     flex: 1,
     zIndex: 999,
   },
