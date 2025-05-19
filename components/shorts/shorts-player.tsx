@@ -1,22 +1,31 @@
 import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store"
 import { useEvent } from "expo"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React, { useEffect } from "react"
+import React, { useEffect, useRef } from "react"
 import { StyleSheet, Dimensions } from "react-native"
 
 interface ShortsPlayerProps {
   video: ShortsVideoTypes
+  isActive?: boolean
 }
 
-export const ShortsPlayer = ({ video }: ShortsPlayerProps) => {
+export const ShortsPlayer = ({ video, isActive }: ShortsPlayerProps) => {
   const player = useVideoPlayer(video.video, (player) => {
     player.loop = true
-    player.play()
+    // player.play()
   })
 
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   })
+
+  // useEffect(() => {
+  //   if (isActive) {
+  //     player.play()
+  //   } else {
+  //     player.pause()
+  //   }
+  // }, [isActive])
 
   return (
     <VideoView
@@ -24,7 +33,7 @@ export const ShortsPlayer = ({ video }: ShortsPlayerProps) => {
       style={[styles.video]}
       player={player}
       allowsFullscreen
-      // allowsPictureInPicture
+      allowsPictureInPicture
     />
   )
 }

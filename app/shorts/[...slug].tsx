@@ -4,8 +4,15 @@ import { useShortsStore } from "@/hooks/use-shorts-store"
 import { useEvent } from "expo"
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React, { useMemo, useState } from "react"
-import { StyleSheet, TouchableOpacity } from "react-native"
+import React, { useEffect, useMemo, useState } from "react"
+import {
+  Dimensions,
+  FlatList,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  TouchableOpacity,
+} from "react-native"
 import PagerView from "react-native-pager-view"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
@@ -15,31 +22,44 @@ import { format } from "date-fns"
 import { Dialog } from "@/components/Dialog"
 import { Button } from "@/components/Button"
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog"
+const { height: SCREEN_HEIGHT } = Dimensions.get("window")
 
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>()
+
   const { videos, setRemoveVideo } = useShortsStore()
   const themeColor = useCurrneThemeColor()
   const { back } = useRouter()
-  const [position, setPosition] = useState(0)
-  const [isOpen, setIsOpen] = useState(false)
-
-  const initailPage = useMemo(() => {
+  const initailPage = () => {
     const index = videos.findIndex((v) => v.id === parseInt(slug[0]))
     return index >= 0 ? index : 0
-  }, [slug[0]])
+  }
+  const [position, setPosition] = useState(initailPage())
+  console.log("position: ", position)
+  const [isOpen, setIsOpen] = useState(false)
 
   return (
     <SafeAreaView style={{ flex: 1, position: "relative" }}>
       <PagerView
         style={{ flex: 1, position: "relative" }}
-        initialPage={initailPage}
+        // initialPage={initailPage()}
         orientation={"vertical"}
-        onPageSelected={(e) => setPosition(e.nativeEvent.position)}
+        onPageScroll={(e) => console.log(e.nativeEvent.position)}
+        // onPageSelected={(e) => console.log(e.nativeEvent.position)}
+        // onPageScrollStateChanged={(e) =>
+
+        // }
+        // offscreenPageLimit={0}
       >
-        {videos.map((item) => (
-          <ShortsPlayer video={item} key={item.id} />
-        ))}
+        {videos.map((item, index) => {
+          return (
+            <ShortsPlayer
+              video={item}
+              key={item.id}
+              isActive={index === position}
+            />
+          )
+        })}
       </PagerView>
       <View style={styles.backButtonContainer}>
         <TouchableOpacity style={{ paddingRight: 16 }} onPress={() => back()}>
