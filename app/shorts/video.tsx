@@ -24,7 +24,7 @@ import { toast } from "sonner-native"
 
 const { width, height } = Dimensions.get("window")
 
-const Video = () => {
+export default function Video() {
   const ref = useRef<CameraView>(null)
   const [uri, setUri] = useState<string | null>(null)
   const [facing, setFacing] = useState<CameraType>("back")
@@ -196,8 +196,6 @@ const Video = () => {
     </View>
   )
 }
-
-export default Video
 
 const styles = StyleSheet.create({
   container: {
