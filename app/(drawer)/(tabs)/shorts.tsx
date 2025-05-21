@@ -19,6 +19,7 @@ import { useHeaderHeight } from "@react-navigation/elements"
 import { useShortsStore } from "@/hooks/use-shorts-store"
 // icons
 import Entypo from "@expo/vector-icons/Entypo"
+import { EmptyVideos } from "@/components/shorts/empty-videos"
 
 export default function TabTwoScreen() {
   const { onReset, ...result } = useUserStore()
@@ -30,24 +31,28 @@ export default function TabTwoScreen() {
 
   return (
     <View style={{ flex: 1 }}>
-      <FlatList
-        data={videos}
-        numColumns={3}
-        style={{ paddingTop: headerHeight }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{
-              flex: 1,
-              flexDirection: "column",
-              alignSelf: "flex-start",
-              maxWidth: screenWidth / 3,
-            }}
-            onPress={() => push(`/shorts/${item.id}`)}
-          >
-            <Image source={{ uri: item.thumbnail }} style={styles.image} />
-          </TouchableOpacity>
-        )}
-      />
+      {videos.length === 0 ? (
+        <EmptyVideos />
+      ) : (
+        <FlatList
+          data={videos}
+          numColumns={3}
+          style={{ paddingTop: headerHeight }}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={{
+                flex: 1,
+                flexDirection: "column",
+                alignSelf: "flex-start",
+                maxWidth: screenWidth / 3,
+              }}
+              onPress={() => push(`/shorts/${item.id}`)}
+            >
+              <Image source={{ uri: item.thumbnail }} style={styles.image} />
+            </TouchableOpacity>
+          )}
+        />
+      )}
       <TouchableOpacity
         style={[
           styles.addVideo,

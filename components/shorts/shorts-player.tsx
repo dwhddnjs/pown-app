@@ -9,9 +9,14 @@ const { height: SCREEN_HEIGHT } = Dimensions.get("window")
 interface ShortsPlayerProps {
   video: ShortsVideoTypes
   isActive?: boolean
+  height?: number
 }
 
-export const ShortsPlayer = ({ video, isActive }: ShortsPlayerProps) => {
+export const ShortsPlayer = ({
+  video,
+  isActive,
+  height,
+}: ShortsPlayerProps) => {
   const player = useVideoPlayer(video.video, (player) => {
     player.loop = true
     player.play()
@@ -32,7 +37,12 @@ export const ShortsPlayer = ({ video, isActive }: ShortsPlayerProps) => {
   return (
     <VideoView
       key={video.id}
-      style={[styles.video]}
+      style={[
+        {
+          height: height,
+          width: "100%",
+        },
+      ]}
       player={player}
       allowsFullscreen
       allowsPictureInPicture
@@ -41,19 +51,6 @@ export const ShortsPlayer = ({ video, isActive }: ShortsPlayerProps) => {
 }
 
 const styles = StyleSheet.create({
-  video: {
-    flex: 1,
-    // width: 350,
-    // height: 275,
-    borderWidth: 1,
-    // position: "absolute",
-    // top: 0,
-    // left: 0,
-    // right: 0,
-    // bottom: 0,
-    // width: "100%",
-    // height: "100%",
-  },
   page: {
     justifyContent: "center",
     alignItems: "center",
