@@ -14,7 +14,6 @@ import { transformWorkoutData } from "@/lib/function"
 // icons
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import Ionicons from "@expo/vector-icons/Ionicons"
-
 // expo
 import { useNavigation, usePathname, useRouter } from "expo-router"
 import { MaterialIcons } from "@expo/vector-icons"
@@ -136,127 +135,143 @@ const CustomDrawerContent = (props: any) => {
           </TouchableOpacity>
         </View>
       </View>
-      <DrawerContentScrollView
-        {...props}
-        style={{
-          backgroundColor: themeColor.background,
-        }}
-        contentContainerStyle={{
-          paddingTop: 12,
-        }}
-      >
-        <Accordion
-          activeSections={activeSections}
-          sections={sortData}
-          touchableComponent={TouchableOpacity}
-          expandMultiple={multipleSelect}
-          renderHeader={(section, _, isActive) => (
-            <View
-              style={[
-                styles.header,
-                isActive ? styles.active : styles.inactive,
-                { backgroundColor: themeColor.background },
-              ]}
-            >
-              <FontAwesome
-                name={isActive ? "folder-open" : "folder"}
-                size={20}
-                color={themeColor.subText}
-              />
-              <Text style={[styles.headerText, { color: themeColor.subText }]}>
-                {section.title}
-              </Text>
-            </View>
-          )}
-          renderContent={(section, _, isActive) => {
-            return (
+      {workoutPlanList.length === 0 ? (
+        <View style={styles.emptyFolder}>
+          <MaterialIcons
+            name="folder-off"
+            size={20}
+            color={themeColor.subText}
+          />
+          <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
+            운동 폴더가 없습니다.
+          </Text>
+        </View>
+      ) : (
+        <DrawerContentScrollView
+          {...props}
+          style={{
+            backgroundColor: themeColor.background,
+          }}
+          contentContainerStyle={{
+            paddingTop: 12,
+          }}
+        >
+          <Accordion
+            activeSections={activeSections}
+            sections={sortData}
+            touchableComponent={TouchableOpacity}
+            expandMultiple={multipleSelect}
+            renderHeader={(section, _, isActive) => (
               <View
                 style={[
-                  styles.content,
+                  styles.header,
                   isActive ? styles.active : styles.inactive,
                   { backgroundColor: themeColor.background },
                 ]}
               >
-                <Accordion
-                  activeSections={activeSections2}
-                  sections={section.content}
-                  touchableComponent={TouchableOpacity}
-                  expandMultiple={multipleSelect2}
-                  renderHeader={(section2, _, isActive2) => (
-                    <View
-                      style={[
-                        styles.header,
-                        isActive2 ? styles.active : styles.inactive,
-                        {
-                          backgroundColor: themeColor.background,
-                        },
-                      ]}
-                    >
-                      <FontAwesome
-                        name={isActive2 ? "folder-open" : "folder"}
-                        size={20}
-                        color={themeColor.subText}
-                      />
-                      <Text
+                <FontAwesome
+                  name={isActive ? "folder-open" : "folder"}
+                  size={20}
+                  color={themeColor.subText}
+                />
+                <Text
+                  style={[styles.headerText, { color: themeColor.subText }]}
+                >
+                  {section.title}
+                </Text>
+              </View>
+            )}
+            renderContent={(section, _, isActive) => {
+              return (
+                <View
+                  style={[
+                    styles.content,
+                    isActive ? styles.active : styles.inactive,
+                    { backgroundColor: themeColor.background },
+                  ]}
+                >
+                  <Accordion
+                    activeSections={activeSections2}
+                    sections={section.content}
+                    touchableComponent={TouchableOpacity}
+                    expandMultiple={multipleSelect2}
+                    renderHeader={(section2, _, isActive2) => (
+                      <View
                         style={[
-                          styles.headerText,
-                          { color: themeColor.subText },
+                          styles.header,
+                          isActive2 ? styles.active : styles.inactive,
+                          {
+                            backgroundColor: themeColor.background,
+                          },
                         ]}
                       >
-                        {section2.title}
-                      </Text>
-                    </View>
-                  )}
-                  renderContent={(section2, _, isActive2) => (
-                    <View
-                      style={[
-                        styles.content,
-                        isActive2 ? styles.active : styles.inactive,
-                        {
-                          backgroundColor: themeColor.background,
-                        },
-                      ]}
-                    >
-                      {section2.content.map((item, index) => (
-                        <TouchableOpacity
-                          key={item}
+                        <FontAwesome
+                          name={isActive2 ? "folder-open" : "folder"}
+                          size={20}
+                          color={themeColor.subText}
+                        />
+                        <Text
                           style={[
-                            styles.header,
-                            {
-                              backgroundColor: themeColor.background,
-                            },
+                            styles.headerText,
+                            { color: themeColor.subText },
                           ]}
-                          onPress={() => handleItemSelect(item)}
                         >
-                          <FontAwesome
-                            name="file-text"
-                            size={18}
-                            color={themeColor.subText}
-                          />
-                          <Text
+                          {section2.title}
+                        </Text>
+                      </View>
+                    )}
+                    renderContent={(section2, _, isActive2) => (
+                      <View
+                        style={[
+                          styles.content,
+                          isActive2 ? styles.active : styles.inactive,
+                          {
+                            backgroundColor: themeColor.background,
+                          },
+                        ]}
+                      >
+                        {section2.content.map((item, index) => (
+                          <TouchableOpacity
+                            key={item}
                             style={[
-                              styles.headerText,
-                              { color: themeColor.subText },
+                              styles.header,
+                              {
+                                backgroundColor: themeColor.background,
+                              },
                             ]}
+                            onPress={() => handleItemSelect(item)}
                           >
-                            {item}
-                          </Text>
-                        </TouchableOpacity>
-                      ))}
-                    </View>
-                  )}
-                  onChange={handleSetActiveSections2}
-                  renderAsFlatList={false}
-                  duration={400}
-                />
-              </View>
-            )
-          }}
-          duration={400}
-          onChange={handleSetActiveSections}
-          renderAsFlatList={false}
-        />
-      </DrawerContentScrollView>
+                            <FontAwesome
+                              name="file-text"
+                              size={18}
+                              color={themeColor.subText}
+                            />
+                            <Text
+                              style={[
+                                styles.headerText,
+                                { color: themeColor.subText },
+                              ]}
+                            >
+                              {item}
+                            </Text>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    )}
+                    onChange={handleSetActiveSections2}
+                    renderAsFlatList={false}
+                    duration={400}
+                  />
+                </View>
+              )
+            }}
+            duration={400}
+            onChange={handleSetActiveSections}
+            renderAsFlatList={false}
+          />
+        </DrawerContentScrollView>
+      )}
+
       <TouchableOpacity
         onPress={() => {
           push("/(modals)/calculate")
@@ -299,6 +314,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: "300",
     marginBottom: 20,
+  },
+  emptyFolder: {
+    flexDirection: "row",
+    gap: 8,
+    alignItems: "flex-end",
+    marginTop: 12,
   },
   header: {
     backgroundColor: "#1a1a1a",

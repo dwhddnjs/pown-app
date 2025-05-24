@@ -95,12 +95,7 @@ export default function Video() {
   const renderVideo = () => {
     return (
       <SafeAreaView style={{ flex: 1 }}>
-        <VideoView
-          style={styles.video}
-          player={player}
-          allowsFullscreen
-          allowsPictureInPicture
-        />
+        <VideoView style={styles.video} player={player} allowsFullscreen />
         <View
           style={{
             backgroundColor: "transparents",

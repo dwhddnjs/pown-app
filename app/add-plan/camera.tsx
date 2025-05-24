@@ -57,7 +57,6 @@ const Camera = () => {
             flexDirection: "row",
             justifyContent: "space-between",
             paddingHorizontal: 20,
-            // paddingTop: 24,
           }}
         >
           <Pressable style={{ paddingTop: 24 }}>

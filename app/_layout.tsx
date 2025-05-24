@@ -91,12 +91,17 @@ export default function RootLayout() {
           await Camera.requestCameraPermissionsAsync()
         const { status: mediaStatus } =
           await MediaLibrary.requestPermissionsAsync()
+        const { status: micStatus } =
+          await Camera.requestMicrophonePermissionsAsync()
 
         if (cameraStatus === "granted") {
           setUser("camera", true)
         }
         if (mediaStatus === "granted") {
           setUser("mediaLibrary", true)
+        }
+        if (micStatus === "granted") {
+          setUser("microphone", true)
         }
       } catch (error) {
         console.log("error: ", error)

@@ -20,6 +20,7 @@ export type UserTypes = {
   theme: "light" | "dark" | "system"
   camera: boolean
   mediaLibrary: boolean
+  microphone: boolean
   setUser: (type: string, value: string | boolean) => void
   setUserData: (value: UserInfoTypes) => void
   onReset: () => void
@@ -39,6 +40,7 @@ export const useUserStore = create<UserTypes>()(
       workoutList: workoutData,
       camera: false,
       mediaLibrary: false,
+      microphone: false,
       userInfo: [],
       theme: "system",
       setUserData: (value) =>

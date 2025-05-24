@@ -45,7 +45,6 @@ export const ShortsPlayer = ({
       ]}
       player={player}
       allowsFullscreen
-      allowsPictureInPicture
     />
   )
 }
