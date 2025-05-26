@@ -21,8 +21,7 @@ import Animated, {
 import { useShortsStore } from "@/hooks/use-shorts-store"
 import * as VideoThumbnails from "expo-video-thumbnails"
 import { toast } from "sonner-native"
-
-const { width, height } = Dimensions.get("window")
+import * as MediaLibrary from "expo-media-library"
 
 export default function Video() {
   const ref = useRef<CameraView>(null)
@@ -83,6 +82,7 @@ export default function Video() {
           thumbnail: thumbnail.uri,
           createdAt: new Date(),
         })
+        await MediaLibrary.createAssetAsync(uri as string)
         setUri("")
       }
       router.back()
@@ -125,7 +125,7 @@ export default function Video() {
                 fontSize: 16,
               }}
             >
-              사진 사용
+              비디오 사용
             </Text>
           </Pressable>
         </View>
