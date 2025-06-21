@@ -57,6 +57,7 @@ export default function EditPlan() {
   )[0]
   const themeColor = useCurrneThemeColor()
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
+  const [currentScrollY, setCurrentScrollY] = useState(0)
 
   const onWorkoutTagSheetClose = () => {
     if (isWorkoutTagModalOpen) {
@@ -108,12 +109,17 @@ export default function EditPlan() {
     }
   }
 
+  const onFocusScroll = (positionY: number) => {
+    scrollRef.current?.scrollTo({ y: positionY, animated: true })
+  }
+
   return (
     <KeyBoardAvoid
       style={[styles.container, { backgroundColor: themeColor.background }]}
     >
       <ScrollView
         ref={scrollRef}
+        onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}
         style={{
           flex: 1,
         }}
@@ -124,13 +130,19 @@ export default function EditPlan() {
         {/* 도구 선택 */}
         <EquipmentBox />
         {/* 목표중량 */}
-        <TopWeight />
+        <TopWeight
+          onFocusScroll={onFocusScroll}
+          currentScrollY={currentScrollY}
+        />
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
         {/* 컨디션 */}
         <ConditionList />
         {/* 퀵노트 전체 노트 */}
-        <PlanNote />
+        <PlanNote
+          onFocusScroll={onFocusScroll}
+          currentScrollY={currentScrollY}
+        />
         {/* 사진   */}
         <CameraImage />
         <View style={{ height: 250 }} />

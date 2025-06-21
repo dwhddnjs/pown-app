@@ -11,9 +11,15 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
-export const PlanNote = () => {
+interface PlanNoteProps {
+  onFocusScroll: (positionY: number) => void
+  currentScrollY: number
+}
+
+export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
   const { title, content, setPlanValue } = usePlanStore()
   const themeColor = useCurrneThemeColor()
+  const inputRef = useRef<TextInput>(null)
 
   return (
     <View style={styles.main}>
@@ -38,6 +44,13 @@ export const PlanNote = () => {
         </View>
       ) : (
         <TextInput
+          ref={inputRef}
+          onFocus={() => {
+            inputRef.current?.measure((x, y, w, h, px, py) => {
+              const targetPosition = (currentScrollY + py) / 2
+              onFocusScroll(targetPosition)
+            })
+          }}
           style={[
             styles.input,
             {

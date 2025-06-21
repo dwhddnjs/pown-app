@@ -14,7 +14,15 @@ import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 
-export const TopWeight = () => {
+interface TopWeightProps {
+  onFocusScroll: (node: any) => void
+  currentScrollY: number
+}
+
+export const TopWeight = ({
+  onFocusScroll,
+  currentScrollY,
+}: TopWeightProps) => {
   const { weight, setPlanValue, weightType } = usePlanStore()
   const inputRef = useRef<TextInput>(null)
   const themeColor = useCurrneThemeColor()
@@ -50,11 +58,19 @@ export const TopWeight = () => {
         }}
       >
         <Pressable
-          onPress={() => inputRef.current?.focus()}
+          onPress={() => {
+            inputRef.current?.focus()
+          }}
           style={[styles.container, { borderColor: themeColor.subText }]}
         >
           <TextInput
             ref={inputRef}
+            onFocus={() => {
+              inputRef.current?.measure((x, y, w, h, px, py) => {
+                const targetPosition = (currentScrollY + py) / 2
+                onFocusScroll(targetPosition)
+              })
+            }}
             style={[styles.input, { color: themeColor.tint }]}
             maxLength={3}
             keyboardType="numeric"
