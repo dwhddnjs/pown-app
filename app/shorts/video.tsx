@@ -97,14 +97,15 @@ export default function Video() {
       <SafeAreaView style={{ flex: 1 }}>
         <VideoView style={styles.video} player={player} allowsFullscreen />
         <View
-          style={{
-            backgroundColor: "transparents",
-            height: 60,
-            flexDirection: "row",
-            justifyContent: "space-between",
-            paddingHorizontal: 24,
-            // paddingTop: 24,
-          }}
+          style={[
+            {
+              height: 60,
+              flexDirection: "row",
+              justifyContent: "space-between",
+              paddingHorizontal: 24,
+              backgroundColor: themeColor.hard,
+            },
+          ]}
         >
           <Pressable style={{ paddingTop: 18 }}>
             <Text
@@ -184,9 +185,7 @@ export default function Video() {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: themeColor.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderVideo() : renderCamera()}
     </View>
   )

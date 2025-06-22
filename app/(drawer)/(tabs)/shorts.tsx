@@ -30,7 +30,7 @@ export default function TabTwoScreen() {
   const headerHeight = useHeaderHeight()
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={{ flex: 1, backgroundColor: themeColor.hard }}>
       {videos.length === 0 ? (
         <EmptyVideos />
       ) : (

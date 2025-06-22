@@ -19,12 +19,13 @@ export const ShortsPlayer = ({
 }: ShortsPlayerProps) => {
   const player = useVideoPlayer(video.video, (player) => {
     player.loop = true
-    player.play()
   })
 
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   })
+
+  console.log("video: ", video)
 
   useEffect(() => {
     if (isActive) {
@@ -41,8 +42,10 @@ export const ShortsPlayer = ({
         {
           height: height,
           width: "100%",
+          aspectRatio: 9 / 16,
         },
       ]}
+      contentFit="fill"
       player={player}
       allowsFullscreen
     />

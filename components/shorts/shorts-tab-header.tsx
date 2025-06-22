@@ -18,7 +18,7 @@ const ShortsTabHeader = ({ title }: { title?: string }) => {
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          {/* <Text style={{ fontSize: 16 }}>내 운동 숏츠</Text> */}
+          <Text style={{ fontSize: 16 }}>내 운동 숏츠</Text>
         </View>
       </SafeAreaView>
     </BlurView>
@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     // height: 50,
     width: "100%",
+    paddingVertical: 8,
     paddingLeft: 8,
     paddingRight: 25,
     flexDirection: "row",

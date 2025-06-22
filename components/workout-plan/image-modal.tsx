@@ -13,8 +13,8 @@ const ImageModal = () => {
       <View style={styles.imageContainer}>
         <Image
           source={{ uri }}
-          contentFit="contain"
-          style={{ flex: 1, aspectRatio: 1 }}
+          contentFit="fill"
+          style={{ flex: 1, aspectRatio: 9 / 16, borderRadius: 12 }}
         />
       </View>
     </Pressable>

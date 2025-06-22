@@ -18,6 +18,7 @@ import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog"
 
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>()
+
   const { videos, setRemoveVideo } = useShortsStore()
   const themeColor = useCurrneThemeColor()
   const { back } = useRouter()
@@ -25,6 +26,7 @@ export default function ShortsView() {
     const index = videos.findIndex((v) => v.id === parseInt(slug[0]))
     return index >= 0 ? index : 0
   }, [])
+
   const [position, setPosition] = useState(initailPage)
   const [isOpen, setIsOpen] = useState(false)
   const ref = useRef<ScrollView>(null)
@@ -42,12 +44,13 @@ export default function ShortsView() {
   }, [height])
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: themeColor.hard }}>
       <ScrollView
         ref={ref}
         pagingEnabled
         horizontal={false}
         showsVerticalScrollIndicator={false}
+        style={{ backgroundColor: "black" }}
         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
         onScroll={(e) => {
           const offsetY = e.nativeEvent.contentOffset.y
@@ -68,7 +71,12 @@ export default function ShortsView() {
           )
         })}
       </ScrollView>
-      <View style={styles.backButtonContainer}>
+      <View
+        style={[
+          styles.backButtonContainer,
+          { backgroundColor: themeColor.hard },
+        ]}
+      >
         <TouchableOpacity style={{ paddingRight: 16 }} onPress={() => back()}>
           <ArrowIcon name="left" size={24} color={themeColor.text} />
         </TouchableOpacity>
@@ -101,9 +109,7 @@ const styles = StyleSheet.create({
   },
   backButtonContainer: {
     paddingVertical: 20,
-
     paddingHorizontal: 24,
-    backgroundColor: "black",
     justifyContent: "space-between",
     flexDirection: "row",
     alignItems: "center",

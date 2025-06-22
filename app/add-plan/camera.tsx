@@ -11,6 +11,7 @@ import { FontAwesome6 } from "@expo/vector-icons"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { SafeAreaView } from "react-native-safe-area-context"
 
 const Camera = () => {
   const ref = useRef<CameraView>(null)
@@ -42,13 +43,15 @@ const Camera = () => {
 
   const renderPicture = () => {
     return (
-      <View
-        style={{ flex: 1, justifyContent: "space-between", paddingTop: 150 }}
+      <SafeAreaView
+        style={{
+          flex: 1,
+        }}
       >
         <Image
           source={{ uri } as any}
-          contentFit="contain"
-          style={{ width: "100%", aspectRatio: 1 }}
+          contentFit="fill"
+          style={{ width: "100%", aspectRatio: 9 / 16 }}
         />
         <View
           style={{
@@ -82,7 +85,7 @@ const Camera = () => {
             </Text>
           </Pressable>
         </View>
-      </View>
+      </SafeAreaView>
     )
   }
 
@@ -123,9 +126,7 @@ const Camera = () => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: themeColor.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderPicture() : renderCamera()}
     </View>
   )
@@ -157,7 +158,7 @@ const styles = StyleSheet.create({
   },
   shutterBtn: {
     backgroundColor: "transparent",
-    borderWidth: 6,
+    borderWidth: 4,
     borderColor: "white",
     width: 80,
     height: 80,
@@ -166,9 +167,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   shutterBtnInner: {
-    width: 70,
-    height: 70,
+    width: 60,
+    height: 60,
     borderRadius: 50,
+    backgroundColor: "white",
   },
   cancelText: {
     fontSize: 16,

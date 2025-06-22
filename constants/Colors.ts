@@ -15,6 +15,7 @@ export default {
     success: "#3A76E2",
     fail: "#F13C33",
     empty: "#EFEEF3",
+    hard: "#ffffff",
   },
   dark: {
     text: "#fff",
@@ -29,6 +30,7 @@ export default {
     success: "#3A76E2",
     fail: "#F13C33",
     empty: "#1e1e1e",
+    hard: "#000000",
   },
 }
 
