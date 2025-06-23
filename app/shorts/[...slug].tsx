@@ -64,7 +64,7 @@ export default function ShortsView() {
           return (
             <ShortsPlayer
               video={item}
-              key={index}
+              key={item.id}
               height={height}
               isActive={index === position}
             />

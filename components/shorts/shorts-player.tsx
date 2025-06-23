@@ -4,8 +4,6 @@ import { useVideoPlayer, VideoView } from "expo-video"
 import React, { useEffect, useRef } from "react"
 import { StyleSheet, Dimensions } from "react-native"
 
-const { height: SCREEN_HEIGHT } = Dimensions.get("window")
-
 interface ShortsPlayerProps {
   video: ShortsVideoTypes
   isActive?: boolean
@@ -24,8 +22,6 @@ export const ShortsPlayer = ({
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
   })
-
-  console.log("video: ", video)
 
   useEffect(() => {
     if (isActive) {
