@@ -67,7 +67,7 @@ export const TopWeight = ({
             ref={inputRef}
             onFocus={() => {
               inputRef.current?.measure((x, y, w, h, px, py) => {
-                const targetPosition = (currentScrollY + py) / 2
+                const targetPosition = (currentScrollY + py) / 3
                 onFocusScroll(targetPosition)
               })
             }}

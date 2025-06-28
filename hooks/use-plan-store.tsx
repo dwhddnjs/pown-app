@@ -1,44 +1,46 @@
-import { create } from "zustand";
+import { create } from "zustand"
 
-export type WorkoutTypes = "chest" | "back" | "shoulder" | "leg" | "arm";
+export type WorkoutTypes = "chest" | "back" | "shoulder" | "leg" | "arm"
 
 type ImageUriType = {
-  id: number;
-  imageUri?: string;
-};
+  id: number
+  imageUri?: string
+}
 
 export type ConditionTypes = {
-  id: number;
-  condition: string;
-};
+  id: number
+  condition: string
+}
 
 export type SetWithCountType = {
-  id: number;
-  set: string;
-  count: string;
-  progress: "진행중" | "완료";
-};
+  id: number
+  set: string
+  count: string
+  progress: "진행중" | "완료"
+}
 
 export type PlanStoreType = {
-  workout: string;
-  type: string;
-  equipment: string;
-  weightType: "kg" | "lb";
-  weight: string;
-  condition: string[];
-  title: string;
-  content: string;
-  setWithCount: SetWithCountType[];
-  imageUri: ImageUriType[];
+  workout: string
+  type: string
+  date: Date
+  equipment: string
+  weightType: "kg" | "lb"
+  weight: string
+  condition: string[]
+  title: string
+  content: string
+  setWithCount: SetWithCountType[]
+  imageUri: ImageUriType[]
 
-  setImageUri: (uri: ImageUriType) => void;
-  setRemoveImageUri: (id: number) => void;
-  setPlanValue: (type: string, value: string | string[]) => void;
-  setCondition: (value: string) => void;
-  setFilterCondition: (value: string) => void;
-  onReset: () => void;
-  setSetWithCount: (value: SetWithCountType) => void;
-  setFilterSetWithCount: (id: number) => void;
+  setImageUri: (uri: ImageUriType) => void
+  setRemoveImageUri: (id: number) => void
+  setPlanValue: (type: string, value: string | string[]) => void
+  setCondition: (value: string) => void
+  setFilterCondition: (value: string) => void
+  onReset: () => void
+  setSetWithCount: (value: SetWithCountType) => void
+  setFilterSetWithCount: (id: number) => void
+  setDate: (date: Date) => void
   setPrevPlanValue: (
     value: Partial<
       Pick<
@@ -52,12 +54,14 @@ export type PlanStoreType = {
         | "content"
         | "setWithCount"
         | "imageUri"
+        | "date"
       >
     >
-  ) => void;
-};
+  ) => void
+}
 
 export const usePlanStore = create<PlanStoreType>((set) => ({
+  date: new Date(),
   workout: "",
   type: "",
   weight: "",
@@ -68,6 +72,11 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
   content: "",
   imageUri: [],
   weightType: "kg",
+
+  setDate: (date) =>
+    set({
+      date,
+    }),
 
   setImageUri: (uri) =>
     set((prev) => ({
@@ -82,24 +91,24 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
   setSetWithCount: (value) => {
     set((prev) => ({
       setWithCount: [...prev.setWithCount, value],
-    }));
+    }))
   },
 
   setFilterSetWithCount: (id) => {
     set((prev) => ({
       setWithCount: prev.setWithCount.filter((item) => item.id !== id),
-    }));
+    }))
   },
 
   setCondition: (value) => {
     set((prev) => ({
       condition: [...prev.condition, value],
-    }));
+    }))
   },
   setFilterCondition: (value) => {
     set((prev) => ({
       condition: prev.condition.filter((item) => item !== value),
-    }));
+    }))
   },
   setPlanValue: (type, value) =>
     set({
@@ -116,10 +125,11 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       title: "",
       content: "",
       imageUri: [],
+      date: new Date(),
       weightType: "kg",
     }),
 
-  setPrevPlanValue: (value: any) =>
+  setPrevPlanValue: (value) =>
     set({
       workout: value.workout,
       type: value.type,
@@ -130,5 +140,6 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       title: value.title,
       content: value.content,
       imageUri: value.imageUri,
+      date: value.date,
     }),
-}));
+}))

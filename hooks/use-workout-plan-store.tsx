@@ -2,6 +2,7 @@ import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 import { PlanStoreType } from "./use-plan-store"
 import { storage } from "@/lib/storage"
+import { parse } from "date-fns"
 
 export type WorkoutPlanTypes = Pick<
   PlanStoreType,
@@ -32,7 +33,11 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
       workoutPlanList: [],
       setWorkoutPlan: (value) =>
         set((prev) => ({
-          workoutPlanList: [value, ...prev.workoutPlanList],
+          workoutPlanList: [value, ...prev.workoutPlanList].sort(
+            (a, b) =>
+              parse(b.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime() -
+              parse(a.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime()
+          ),
         })),
       onResetPlanList: () =>
         set({

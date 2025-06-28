@@ -34,8 +34,6 @@ import { useUserStore } from "@/hooks/use-user-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { useCameraPermissions } from "expo-camera"
 
 export { ErrorBoundary } from "expo-router"
 
@@ -331,8 +329,8 @@ function RootLayoutNav() {
                     content: result.content,
                     title: result.title,
                     setWithCount: result.setWithCount,
-                    createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-                    updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+                    createdAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
+                    updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
                     imageUri: imageUri ? imageUri : [],
                   })
                   onReset()
