@@ -26,11 +26,12 @@ export default function TabTwoScreen() {
   const themeColor = useCurrneThemeColor()
   const screenWidth = Dimensions.get("window").width
   const { videos } = useShortsStore()
+
   const { push } = useRouter()
   const headerHeight = useHeaderHeight()
 
   return (
-    <View style={{ flex: 1, backgroundColor: themeColor.hard }}>
+    <View style={{ flex: 1, backgroundColor: themeColor.background }}>
       {videos.length === 0 ? (
         <EmptyVideos />
       ) : (

@@ -13,6 +13,7 @@ type ShortsStoreTypes = {
   videos: ShortsVideoTypes[]
   setAddVideo: (video: ShortsVideoTypes) => void
   setRemoveVideo: (videoId: number) => void
+  onResetVideo: () => void
 }
 
 export const useShortsStore = create<ShortsStoreTypes>()(
@@ -29,6 +30,10 @@ export const useShortsStore = create<ShortsStoreTypes>()(
           ...prev,
           videos: [...prev.videos].filter((item) => item.id !== videoId),
         })),
+      onResetVideo: () =>
+        set({
+          videos: [],
+        }),
     }),
     {
       name: "shorts",

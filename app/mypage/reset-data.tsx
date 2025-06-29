@@ -20,12 +20,14 @@ import { useRouter } from "expo-router"
 import * as DocumentPicker from "expo-document-picker"
 import { shareAsync, isAvailableAsync } from "expo-sharing"
 import * as FileSystem from "expo-file-system"
+import { useShortsStore } from "@/hooks/use-shorts-store"
 
 export default function ResetData() {
   const { onResetPlanList, onSetMockout, workoutPlanList } =
     userWorkoutPlanStore()
 
   const { userInfo, onReset, setUser } = useUserStore()
+  const { onResetVideo } = useShortsStore()
   const { back } = useRouter()
   const themeColor = useCurrneThemeColor()
 
@@ -79,6 +81,7 @@ export default function ResetData() {
   const onSubmit = () => {
     onResetPlanList()
     onReset()
+    onResetVideo()
     toast.success("모든 데이터가 초기화 되었습니다")
     back()
   }
