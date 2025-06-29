@@ -8,12 +8,18 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { getEquipmentCount } from "@/lib/function"
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
 import { useChartStore } from "@/hooks/use-chart-store"
+import InfoIcon from "@expo/vector-icons/FontAwesome6"
 
 const EquipmentChart = () => {
   const themeColor = useCurrneThemeColor()
   const { date } = useChartStore()
   const { monthlyPlanData } = useMonthlyPlanData(date)
   const equipmentCount = getEquipmentCount(monthlyPlanData)
+
+  const isEmptyCount =
+    (Object.values(equipmentCount) as number[]).reduce(
+      (acc: number, cur: number) => acc + cur
+    ) === 0
 
   const barData1 = [
     {
@@ -57,44 +63,59 @@ const EquipmentChart = () => {
           backgroundColor: themeColor.tabIconDefault,
         }}
       />
-      <View
-        style={{
-          overflow: "hidden",
-          backgroundColor: themeColor.itemColor,
-          paddingVertical: 4,
-        }}
-      >
-        <BarChart
-          barWidth={24}
-          noOfSections={5}
-          barBorderRadius={4}
-          frontColor={themeColor.subText}
-          disableScroll
-          data={barData1}
-          shiftY={10}
-          sideWidth={15}
-          yAxisThickness={1}
-          xAxisThickness={1}
-          yAxisColor={themeColor.subText}
-          xAxisColor={themeColor.subText}
-          rulesColor={themeColor.subText}
-          barInnerComponent={(item) => (
-            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
-              {item?.value}
-            </Text>
-          )}
-          xAxisLabelTextStyle={{
-            color: themeColor.text,
-            fontWeight: "bold",
-            fontFamily: "sb-l",
+      {isEmptyCount ? (
+        <View style={[styles(themeColor).emptyContainer]}>
+          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+          <Text
+            style={{
+              color: themeColor.subText,
+            }}
+          >
+            기록된 운동장비 데이터가 없습니다.
+          </Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            overflow: "hidden",
+            backgroundColor: themeColor.itemColor,
+            paddingVertical: 4,
           }}
-          yAxisTextStyle={{
-            color: themeColor.text,
-            fontWeight: "bold",
-            fontFamily: "sb-l",
-          }}
-        />
-      </View>
+        >
+          <BarChart
+            barWidth={24}
+            noOfSections={5}
+            barBorderRadius={4}
+            frontColor={themeColor.subText}
+            disableScroll
+            data={barData1}
+            shiftY={10}
+            sideWidth={15}
+            yAxisThickness={1}
+            xAxisThickness={1}
+            yAxisColor={themeColor.subText}
+            xAxisColor={themeColor.subText}
+            rulesColor={themeColor.subText}
+            barInnerComponent={(item) => (
+              <Text
+                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
+              >
+                {item?.value}
+              </Text>
+            )}
+            xAxisLabelTextStyle={{
+              color: themeColor.text,
+              fontWeight: "bold",
+              fontFamily: "sb-l",
+            }}
+            yAxisTextStyle={{
+              color: themeColor.text,
+              fontWeight: "bold",
+              fontFamily: "sb-l",
+            }}
+          />
+        </View>
+      )}
     </View>
   )
 }
@@ -143,5 +164,12 @@ const styles = (color: any) =>
       top: -2,
       left: -2,
       zIndex: 1,
+    },
+    emptyContainer: {
+      flexDirection: "row",
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      gap: 6,
+      backgroundColor: color.itemColor,
     },
   })

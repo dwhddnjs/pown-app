@@ -8,6 +8,7 @@ import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { useUserStore } from "@/hooks/use-user-store"
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
 import { useChartStore } from "@/hooks/use-chart-store"
+import InfoIcon from "@expo/vector-icons/FontAwesome6"
 
 const SbdChart = () => {
   const { userInfo } = useUserStore()
@@ -49,53 +50,69 @@ const SbdChart = () => {
       frontColor: themeColor?.tint,
     },
   ]
+
   return (
     <View style={[styles(themeColor).container]}>
       <Text style={{ fontSize: 18 }}>3대중량의 변화</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
-      <View
-        style={{
-          overflow: "hidden",
-          backgroundColor: themeColor.itemColor,
-          paddingVertical: 4,
-        }}
-      >
-        <BarChart
-          data={data as any}
-          barWidth={28}
-          disableScroll
-          barBorderRadius={4}
-          yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
-          stepValue={50}
-          maxValue={300}
-          yAxisLabelTexts={["0", "50", "100", "150", "200", "250"]}
-          labelWidth={65}
-          yAxisThickness={1}
-          xAxisThickness={1}
-          yAxisColor={themeColor.subText}
-          xAxisColor={themeColor.subText}
-          rulesColor={themeColor.subText}
-          barInnerComponent={(item) => (
-            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
-              {item?.value}
-            </Text>
-          )}
-          xAxisLabelTextStyle={{
-            color: themeColor.text,
-            textAlign: "center",
-            fontFamily: "sb-l",
+      {!firstWeight ? (
+        <View style={[styles(themeColor).emptyContainer]}>
+          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+          <Text
+            style={{
+              color: themeColor.subText,
+            }}
+          >
+            기록된 3대중량 데이터가 없습니다.
+          </Text>
+        </View>
+      ) : (
+        <View
+          style={{
+            overflow: "hidden",
+            backgroundColor: themeColor.itemColor,
+            paddingVertical: 4,
           }}
-          showLine
-          lineConfig={{
-            color: themeColor.success,
-            thickness: 3,
-            curved: true,
-            hideDataPoints: true,
-            shiftY: 60,
-            initialSpacing: 2,
-          }}
-        />
-      </View>
+        >
+          <BarChart
+            data={data as any}
+            barWidth={28}
+            disableScroll
+            barBorderRadius={4}
+            yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
+            stepValue={50}
+            maxValue={300}
+            yAxisLabelTexts={["0", "50", "100", "150", "200", "250"]}
+            labelWidth={65}
+            yAxisThickness={1}
+            xAxisThickness={1}
+            yAxisColor={themeColor.subText}
+            xAxisColor={themeColor.subText}
+            rulesColor={themeColor.subText}
+            barInnerComponent={(item) => (
+              <Text
+                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
+              >
+                {item?.value}
+              </Text>
+            )}
+            xAxisLabelTextStyle={{
+              color: themeColor.text,
+              textAlign: "center",
+              fontFamily: "sb-l",
+            }}
+            showLine
+            lineConfig={{
+              color: themeColor.success,
+              thickness: 3,
+              curved: true,
+              hideDataPoints: true,
+              shiftY: 60,
+              initialSpacing: 2,
+            }}
+          />
+        </View>
+      )}
     </View>
   )
 }
@@ -124,6 +141,13 @@ const styles = (color: any) =>
       flexDirection: "row",
       gap: 8,
       paddingVertical: 4,
+    },
+    emptyContainer: {
+      flexDirection: "row",
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      gap: 6,
+      backgroundColor: color.itemColor,
     },
   })
 

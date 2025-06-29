@@ -8,6 +8,7 @@ import Arm from "@/assets/images/svg/arm_icon.svg"
 import Chest from "@/assets/images/svg/chest_icon.svg"
 import Leg from "@/assets/images/svg/leg_icon.svg"
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
+import InfoIcon from "@expo/vector-icons/FontAwesome6"
 // hook
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
 import { sortWorkoutPlanList } from "@/lib/function"
@@ -20,32 +21,55 @@ const WorkoutCount = () => {
   const { monthlyPlanData } = useMonthlyPlanData(date)
   const listCount = sortWorkoutPlanList(monthlyPlanData)
 
+  const isEmptyCount =
+    listCount.arm +
+      listCount.back +
+      listCount.chest +
+      listCount.leg +
+      listCount.shoulder ===
+    0
+
   return (
     <View style={[styles(themeColor).container]}>
       <Text style={{ fontSize: 18 }}>기록한 운동 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
-      <View style={[styles(themeColor).iconListContainer]}>
-        <View style={[styles(themeColor).iconItem]}>
-          <Back />
-          <Text style={{ color: themeColor.tint }}>{listCount.back}회</Text>
+      {isEmptyCount ? (
+        <View style={[styles(themeColor).emptyContainer]}>
+          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+          <Text
+            style={{
+              color: themeColor.subText,
+            }}
+          >
+            기록된 운동 데이터가 없습니다.
+          </Text>
         </View>
-        <View style={[styles(themeColor).iconItem]}>
-          <Chest />
-          <Text style={{ color: themeColor.tint }}>{listCount.chest}회</Text>
+      ) : (
+        <View style={[styles(themeColor).iconListContainer]}>
+          <View style={[styles(themeColor).iconItem]}>
+            <Back />
+            <Text style={{ color: themeColor.tint }}>{listCount.back}회</Text>
+          </View>
+          <View style={[styles(themeColor).iconItem]}>
+            <Chest />
+            <Text style={{ color: themeColor.tint }}>{listCount.chest}회</Text>
+          </View>
+          <View style={[styles(themeColor).iconItem]}>
+            <Shoulder />
+            <Text style={{ color: themeColor.tint }}>
+              {listCount.shoulder}회
+            </Text>
+          </View>
+          <View style={[styles(themeColor).iconItem]}>
+            <Leg />
+            <Text style={{ color: themeColor.tint }}>{listCount.leg}회</Text>
+          </View>
+          <View style={[styles(themeColor).iconItem]}>
+            <Arm />
+            <Text style={{ color: themeColor.tint }}>{listCount.arm}회</Text>
+          </View>
         </View>
-        <View style={[styles(themeColor).iconItem]}>
-          <Shoulder />
-          <Text style={{ color: themeColor.tint }}>{listCount.shoulder}회</Text>
-        </View>
-        <View style={[styles(themeColor).iconItem]}>
-          <Leg />
-          <Text style={{ color: themeColor.tint }}>{listCount.leg}회</Text>
-        </View>
-        <View style={[styles(themeColor).iconItem]}>
-          <Arm />
-          <Text style={{ color: themeColor.tint }}>{listCount.arm}회</Text>
-        </View>
-      </View>
+      )}
     </View>
   )
 }
@@ -75,5 +99,12 @@ const styles = (color: any) =>
       flexDirection: "row",
       gap: 8,
       paddingVertical: 4,
+    },
+    emptyContainer: {
+      flexDirection: "row",
+      paddingVertical: 12,
+      paddingHorizontal: 4,
+      gap: 6,
+      backgroundColor: color.itemColor,
     },
   })
