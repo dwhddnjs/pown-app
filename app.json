@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "1.3.1",
-    "runtimeVersion": "1.3.1",
+    "version": "1.4.0",
+    "runtimeVersion": "1.4.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
