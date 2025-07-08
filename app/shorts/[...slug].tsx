@@ -3,12 +3,7 @@ import { Text, View } from "@/components/Themed"
 import { useShortsStore } from "@/hooks/use-shorts-store"
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
 import React, { useEffect, useMemo, useRef, useState } from "react"
-import {
-  Dimensions,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native"
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
 import useCurrneThemeColor from "@/hooks/use-current-theme-color"
