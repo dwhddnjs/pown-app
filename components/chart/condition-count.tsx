@@ -27,7 +27,7 @@ const ConditionCount = () => {
 
   return (
     <View style={styles(themeColor).container}>
-      <Text style={{ fontSize: 18 }}>컨비션 별 횟수</Text>
+      <Text style={{ fontSize: 18 }}>컨디션 별 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <View style={[styles(themeColor).emptyContainer]}>
