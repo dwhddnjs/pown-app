@@ -1,99 +1,122 @@
-import React, { useEffect, useRef, useState } from "react"
+import React, { useEffect, useRef, useState } from "react";
 // component
-import { Text, View } from "@/components/Themed"
+import { Text, View } from "@/components/Themed";
 import {
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
-} from "react-native"
+} from "react-native";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
 export default function calculate() {
-  const themeColor = useCurrneThemeColor()
-  const [selected, setSelected] = useState("kg")
-  const [inputNumber, setInputNumber] = useState("")
-  const { open, setOpen } = useIsModalOpenStore()
+  const themeColor = useCurrneThemeColor();
+  const [selected, setSelected] = useState("kg");
+  const [inputNumber, setInputNumber] = useState("");
+  const { open, setOpen } = useIsModalOpenStore();
+
+  const translateX = useSharedValue(0);
+  const [tabContainerWidth, setTabContainerWidth] = useState(0);
+  const tabItemWidth = (tabContainerWidth - 12) / 2;
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const generatePercentageValues = (input: string) => {
-    const value = !input ? "0" : input
-    const num = parseFloat(value)
+    const value = !input ? "0" : input;
+    const num = parseFloat(value);
 
     return Array.from({ length: 22 }, (_, i) => {
-      const percent = 110 - i * 5
+      const percent = 110 - i * 5;
       const percentText = () => {
         if (percent === 110) {
-          return `💪🏻 + 10%`
+          return `💪🏻 + 10%`;
         }
         if (percent === 105) {
-          return `💪🏻 + 5%`
+          return `💪🏻 + 5%`;
         }
         if (percent === 100) {
-          return `💪🏻`
+          return `💪🏻`;
         }
-        return `${percent}%`
-      }
+        return `${percent}%`;
+      };
 
       return {
         title: percentText(),
         value: `${Math.round((num * percent) / 100).toString()}${
           selected === "kg" ? "kg" : "lb"
         }`,
-      }
-    })
-  }
+      };
+    });
+  };
 
   const onSelectedTab = (type: "lb" | "kg") => {
+    translateX.value = withTiming(type === "kg" ? 0 : tabItemWidth, {
+      duration: 250,
+    });
+
     if (!inputNumber) {
-      setInputNumber("0")
-      setSelected(type)
-      return
+      setInputNumber("0");
+      setSelected(type);
+      return;
     }
-    const num = parseFloat(inputNumber)
+    const num = parseFloat(inputNumber);
     if (type === "lb") {
-      const pound = Math.round(num * 2.20462).toString()
-      setSelected("lb")
-      setInputNumber(String(pound))
+      const pound = Math.round(num * 2.20462).toString();
+      setSelected("lb");
+      setInputNumber(String(pound));
     } else {
-      const kg = Math.round(num / 2.20462).toString()
-      setSelected("kg")
-      setInputNumber(String(kg))
+      const kg = Math.round(num / 2.20462).toString();
+      setSelected("kg");
+      setInputNumber(String(kg));
     }
-  }
+  };
 
   useEffect(() => {
-    setOpen(true)
+    setOpen(true);
     return () => {
-      setOpen(false)
-    }
-  }, [open])
+      setOpen(false);
+    };
+  }, [open]);
 
   return (
-    <View style={{ flex: 1 }}>
-      <View style={styles(themeColor).tabContainer}>
+    <View style={{ flex: 1, paddingTop: 24 }}>
+      <View
+        style={styles(themeColor).tabContainer}
+        onLayout={(e) => setTabContainerWidth(e.nativeEvent.layout.width)}
+      >
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            {
+              position: "absolute",
+              left: 6,
+              top: 6,
+              width: tabItemWidth,
+              height: 36,
+              borderRadius: 6,
+              backgroundColor: themeColor.tint,
+            },
+            indicatorStyle,
+          ]}
+        />
         <TouchableOpacity
           onPress={() => onSelectedTab("kg")}
-          style={[
-            styles(themeColor).tabItem,
-            {
-              backgroundColor:
-                selected === "kg" ? themeColor.tint : themeColor.background,
-            },
-          ]}
+          style={styles(themeColor).tabItem}
         >
           <Text style={{ textAlign: "center" }}>킬로그램/kg</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onSelectedTab("lb")}
-          style={[
-            styles(themeColor).tabItem,
-            {
-              backgroundColor:
-                selected === "lb" ? themeColor.tint : themeColor.background,
-            },
-          ]}
+          style={styles(themeColor).tabItem}
         >
           <Text style={{ textAlign: "center" }}>파운드/lb</Text>
         </TouchableOpacity>
@@ -116,10 +139,20 @@ export default function calculate() {
         scrollEventThrottle={16}
         contentContainerStyle={{
           paddingHorizontal: 20,
+          flexGrow: 1,
         }}
       >
-        {generatePercentageValues(inputNumber)?.map((item) => (
-          <View style={styles(themeColor).listItem} key={item.title}>
+        {generatePercentageValues(inputNumber)?.map((item, index) => (
+          <View
+            style={[
+              styles(themeColor).listItem,
+              index === 0 && {
+                borderTopWidth: 1,
+                borderTopColor: themeColor.itemColor,
+              },
+            ]}
+            key={item.title}
+          >
             <Text style={{ fontSize: 16, color: themeColor.text }}>
               {item.title}
             </Text>
@@ -128,10 +161,10 @@ export default function calculate() {
             </Text>
           </View>
         ))}
+        <View style={{ height: 320 }} />
       </ScrollView>
-      <View style={{ height: 100 }} />
     </View>
-  )
+  );
 }
 
 const styles = (color: any) =>
@@ -143,6 +176,7 @@ const styles = (color: any) =>
       borderRadius: 12,
       flexDirection: "row",
       marginHorizontal: 20,
+      marginBottom: 20,
     },
     tabItem: {
       flex: 1,
@@ -154,10 +188,11 @@ const styles = (color: any) =>
       flexDirection: "row",
       alignItems: "center",
       gap: 2,
-      paddingVertical: 24,
+      paddingVertical: 20,
       paddingHorizontal: 20,
-      borderBottomWidth: 1,
-      borderColor: color.itemColor,
+      // borderBottomWidth: 1,
+      // // borderColor: color.itemColor,
+      // // borderWidth: 1,
     },
     input: {
       fontSize: 36,
@@ -173,4 +208,4 @@ const styles = (color: any) =>
       borderColor: color.itemColor,
       paddingVertical: 20,
     },
-  })
+  });

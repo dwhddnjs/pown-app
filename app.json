@@ -18,7 +18,8 @@
         "aps-environment": "development"
       },
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIDesignRequiresCompatibility": true
       }
     },
     "android": {

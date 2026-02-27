@@ -1,100 +1,100 @@
-import { useState } from "react"
+import { useState } from "react";
 // component
-import { Text, View } from "@/components/Themed"
-import { DrawerContentScrollView } from "@react-navigation/drawer"
-import { Drawer } from "expo-router/drawer"
-import Accordion from "react-native-collapsible/Accordion"
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import { Text, View } from "@/components/Themed";
+import { DrawerContentScrollView } from "@react-navigation/drawer";
+import { Drawer } from "expo-router/drawer";
+import Accordion from "react-native-collapsible/Accordion";
+import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 // hook
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import { useSelectDateStore } from "@/hooks/use-select-date-store"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useSelectDateStore } from "@/hooks/use-select-date-store";
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { transformWorkoutData } from "@/lib/function"
+import { transformWorkoutData } from "@/lib/function";
 // icons
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-import Ionicons from "@expo/vector-icons/Ionicons"
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
 // expo
-import { useNavigation, usePathname, useRouter } from "expo-router"
-import { MaterialIcons } from "@expo/vector-icons"
-import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store"
+import { useNavigation, usePathname, useRouter } from "expo-router";
+import { MaterialIcons } from "@expo/vector-icons";
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
 const CustomDrawerContent = (props: any) => {
-  const [activeSections, setActiveSections] = useState<number[]>([])
-  const [collapsed, setCollapsed] = useState(true)
-  const [multipleSelect, setMultipleSelect] = useState(false)
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const themeColor = useCurrneThemeColor()
-  const sortData = transformWorkoutData(workoutPlanList)
-  const navigation = useNavigation()
-  const { push } = useRouter()
+  const [activeSections, setActiveSections] = useState<number[]>([]);
+  const [collapsed, setCollapsed] = useState(true);
+  const [multipleSelect, setMultipleSelect] = useState(false);
+  const { workoutPlanList } = userWorkoutPlanStore();
+  const themeColor = useCurrneThemeColor();
+  const sortData = transformWorkoutData(workoutPlanList);
+  const navigation = useNavigation();
+  const { push } = useRouter();
 
-  const [activeSections2, setActiveSections2] = useState<number[]>([])
-  const [multipleSelect2, setMultipleSelect2] = useState(false)
-  const [selectedTitle, setSelectedTitle] = useState<string[]>([])
-  const { date, onSetDate } = useSelectDateStore()
-  const yearCount = sortData.length
+  const [activeSections2, setActiveSections2] = useState<number[]>([]);
+  const [multipleSelect2, setMultipleSelect2] = useState(false);
+  const [selectedTitle, setSelectedTitle] = useState<string[]>([]);
+  const { date, onSetDate } = useSelectDateStore();
+  const yearCount = sortData.length;
   const monthCount = sortData.reduce((acc: number, item) => {
-    return acc + item.content.length
-  }, 0)
+    return acc + item.content.length;
+  }, 0);
   const dayCount = sortData
     .map((item) => item.content)
     .flat()
-    .reduce((acc, item) => acc + item.content.length, 0)
+    .reduce((acc, item) => acc + item.content.length, 0);
 
   // 특정 레벨의 title을 업데이트하는 함수
   const updateTitleAtLevel = (level: number, newTitle: string) => {
     setSelectedTitle((prev) => {
-      const newTitles = [...prev]
+      const newTitles = [...prev];
       // 해당 레벨의 title 업데이트
-      newTitles[level] = newTitle
+      newTitles[level] = newTitle;
       // 해당 레벨 이후의 title들은 제거
-      return newTitles.slice(0, level + 1)
-    })
-  }
+      return newTitles.slice(0, level + 1);
+    });
+  };
 
   const handleSetActiveSections = (sections: number[]) => {
-    setActiveSections(sections)
+    setActiveSections(sections);
     if (sections.length > 0) {
       // section 배열의 첫 번째 인덱스를 사용하여 sortData에서 해당하는 섹션 데이터를 가져옴
-      const section = sortData[sections[0]]
-      updateTitleAtLevel(0, section.title)
+      const section = sortData[sections[0]];
+      updateTitleAtLevel(0, section.title);
     } else {
       // 섹션이 닫힐 때 모든 선택된 title 제거
-      setSelectedTitle([])
+      setSelectedTitle([]);
     }
-  }
+  };
 
   const handleSetActiveSections2 = (sections: number[]) => {
-    setActiveSections2(sections)
+    setActiveSections2(sections);
     if (activeSections.length > 0 && sections.length > 0) {
       // 첫 번째 레벨의 선택된 섹션 데이터
-      const firstLevelSection = sortData[activeSections[0]]
+      const firstLevelSection = sortData[activeSections[0]];
       // 두 번째 레벨의 선택된 섹션 데이터
-      const secondLevelSection = firstLevelSection.content[sections[0]]
-      updateTitleAtLevel(1, secondLevelSection.title)
+      const secondLevelSection = firstLevelSection.content[sections[0]];
+      updateTitleAtLevel(1, secondLevelSection.title);
     } else if (sections.length === 0) {
       // 두 번째 레벨의 섹션이 닫힐 때 해당 레벨 이후의 title 제거
-      setSelectedTitle((prev) => prev.slice(0, 1))
+      setSelectedTitle((prev) => prev.slice(0, 1));
     }
-  }
+  };
 
   const handleItemSelect = (item: string) => {
-    const selectedDate = [...selectedTitle, item]
+    const selectedDate = [...selectedTitle, item];
 
-    if (selectedDate.length === 0) return
+    if (selectedDate.length === 0) return;
 
     const result = `${selectedDate[0].slice(0, -1)}.${selectedDate[1].slice(
       0,
-      -1
-    )}.${selectedDate[2].slice(0, -1)}`
+      -1,
+    )}.${selectedDate[2].slice(0, -1)}`;
 
-    onSetDate(result)
-    setSelectedTitle([])
-    setActiveSections([])
-    setActiveSections2([])
-    props.navigation.closeDrawer()
-  }
+    onSetDate(result);
+    setSelectedTitle([]);
+    setActiveSections([]);
+    setActiveSections2([]);
+    props.navigation.closeDrawer();
+  };
 
   return (
     <View
@@ -263,7 +263,7 @@ const CustomDrawerContent = (props: any) => {
                     duration={400}
                   />
                 </View>
-              )
+              );
             }}
             duration={400}
             onChange={handleSetActiveSections}
@@ -271,27 +271,12 @@ const CustomDrawerContent = (props: any) => {
           />
         </DrawerContentScrollView>
       )}
-
-      <TouchableOpacity
-        onPress={() => {
-          push("/(modals)/calculate")
-        }}
-        style={[
-          styles.calculateButton,
-          {
-            backgroundColor: themeColor.background,
-            borderColor: themeColor.subText,
-          },
-        ]}
-      >
-        <MaterialIcons name="calculate" size={40} color={themeColor.tint} />
-      </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 export default function Layout() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   return (
     <Drawer
@@ -301,7 +286,7 @@ export default function Layout() {
         swipeEnabled: pathname === "/workout",
       }}
     />
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -386,4 +371,4 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 1000,
   },
-})
+});

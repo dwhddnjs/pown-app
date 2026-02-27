@@ -140,6 +140,6 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       title: value.title,
       content: value.content,
       imageUri: value.imageUri,
-      date: value.date,
+      date: value.date ?? new Date(),
     }),
 }))

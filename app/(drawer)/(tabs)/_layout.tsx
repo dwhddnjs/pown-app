@@ -1,27 +1,31 @@
-import React from "react"
+import React from "react";
 // compoents
-import { Pressable, StyleSheet, TouchableOpacity } from "react-native"
-import { View } from "@/components/Themed"
-import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header"
-import { ChartHeader } from "@/components/chart"
+import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { View } from "@/components/Themed";
+import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
+import { ChartHeader } from "@/components/chart";
 // expo
-import { router, Tabs } from "expo-router"
-import { Image } from "expo-image"
+import { router, Tabs } from "expo-router";
+import { Image } from "expo-image";
+import { BlurView } from "expo-blur";
 // icon
-import UserIcon from "@expo/vector-icons/FontAwesome"
-import AntDesign from "@expo/vector-icons/AntDesign"
-import { SymbolView } from "expo-symbols"
-import Entypo from "@expo/vector-icons/Entypo"
+import UserIcon from "@expo/vector-icons/FontAwesome";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { SymbolView } from "expo-symbols";
+import Entypo from "@expo/vector-icons/Entypo";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { CalendarHeader } from "@/components/calendar"
-import { useImageUriStore } from "@/hooks/use-image-uri-store"
-import ImageModal from "@/components/workout-plan/image-modal"
-import ShortsTabHeader from "@/components/shorts/shorts-tab-header"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import { CalendarHeader } from "@/components/calendar";
+import { useImageUriStore } from "@/hooks/use-image-uri-store";
+import ImageModal from "@/components/workout-plan/image-modal";
+import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
+import Colors from "@/constants/Colors";
 
 export default function TabLayout() {
-  const themColor = useCurrneThemeColor()
-  const { uri, onResetImageUri } = useImageUriStore()
+  const themColor = useCurrneThemeColor();
+  const { uri, onResetImageUri } = useImageUriStore();
 
   const tabOption = {
     headerStyle: {
@@ -32,10 +36,18 @@ export default function TabLayout() {
       color: themColor.text,
     },
     tabBarStyle: {
-      backgroundColor: themColor.tabBar,
+      backgroundColor: "transparent",
       borderTopWidth: 0,
       paddingHorizontal: 12,
+      position: "absolute" as const,
     },
+    tabBarBackground: () => (
+      <BlurView
+        intensity={80}
+        tint="systemChromeMaterial"
+        style={StyleSheet.absoluteFill}
+      />
+    ),
     tabBarActiveTintColor: themColor.tabIconSelected,
     tabBarItemStyle: {
       paddingBottom: 3,
@@ -45,7 +57,7 @@ export default function TabLayout() {
       fontFamily: "sb-m",
       fontSize: 8,
     },
-  }
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -76,7 +88,7 @@ export default function TabLayout() {
               <AntDesign name="piechart" size={24} color={color} />
             ),
             header: ({ navigation, route, options }) => {
-              return <ChartHeader />
+              return <ChartHeader />;
             },
             headerTransparent: true,
           }}
@@ -86,16 +98,28 @@ export default function TabLayout() {
           name="add"
           options={{
             tabBarIcon: ({ color }) => (
-              <View style={styles.addButton}>
-                <AntDesign name="pluscircle" size={48} color={themColor.tint} />
+              <View
+                style={[
+                  styles.addButton,
+                  {
+                    backgroundColor: themColor.tint,
+                    marginBottom: 8,
+                  },
+                ]}
+              >
+                <FontAwesome6
+                  name="plus"
+                  size={30}
+                  color={themColor.background}
+                />
               </View>
             ),
             tabBarLabel: () => null,
           }}
           listeners={({ navigation }) => ({
             tabPress: (e) => {
-              e.preventDefault()
-              router.push("/(modals)/select-type")
+              e.preventDefault();
+              router.push("/(modals)/select-type");
             },
           })}
         />
@@ -107,7 +131,7 @@ export default function TabLayout() {
               <Entypo name="calendar" size={24} color={color} />
             ),
             header: ({ navigation, route, options }) => {
-              return <CalendarHeader />
+              return <CalendarHeader />;
             },
             headerTransparent: true,
           }}
@@ -120,7 +144,7 @@ export default function TabLayout() {
               <Entypo name="video" size={24} color={color} />
             ),
             header: ({ navigation, route, options }) => {
-              return <ShortsTabHeader />
+              return <ShortsTabHeader />;
             },
             headerTransparent: true,
           }}
@@ -129,7 +153,7 @@ export default function TabLayout() {
       </Tabs>
       {uri && <ImageModal />}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -139,5 +163,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "transparent",
+    borderRadius: 50,
   },
-})
+});
