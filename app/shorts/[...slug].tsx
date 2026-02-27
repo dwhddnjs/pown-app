@@ -73,7 +73,7 @@ export default function ShortsView() {
         ]}
       >
         <TouchableOpacity style={{ paddingRight: 16 }} onPress={() => back()}>
-          <ArrowIcon name="left" size={24} color={themeColor.text} />
+          <ArrowIcon name="left" size={28} color={themeColor.text} />
         </TouchableOpacity>
         <Text style={{ fontSize: 16 }}>
           {format(videos[position]?.createdAt, "yyyy년 MM월 dd일")}

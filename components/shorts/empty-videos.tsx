@@ -1,7 +1,7 @@
-import { Image, StyleSheet } from "react-native"
-import React from "react"
-import Colors from "@/constants/Colors"
-import { Text, View } from "../Themed"
+import { Image, StyleSheet } from "react-native";
+import React from "react";
+import Colors from "@/constants/Colors";
+import { Text, View } from "../Themed";
 
 export const EmptyVideos = () => {
   return (
@@ -25,10 +25,10 @@ export const EmptyVideos = () => {
           lineHeight: 24,
         }}
       >
-        숏츠가 없습니다. {"\n"}추가해주세요!
+        운동 숏츠가 없습니다. {"\n"}추가해주세요!
       </Text>
     </View>
-  )
-}
+  );
+};
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({});

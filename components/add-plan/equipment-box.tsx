@@ -4,27 +4,27 @@ import {
   Touchable,
   TouchableOpacity,
   useColorScheme,
-} from "react-native"
-import React from "react"
-import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import { Text, View } from "../Themed"
-import { IconTitle } from "../IconTitle"
-import Colors from "@/constants/Colors"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { equipmentData } from "@/constants/constants"
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+} from "react-native";
+import React from "react";
+import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Text, View } from "../Themed";
+import { IconTitle } from "../IconTitle";
+import Colors from "@/constants/Colors";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { equipmentData } from "@/constants/constants";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export const EquipmentBox = () => {
-  const { equipment, setPlanValue } = usePlanStore()
-  const colorScheme = useColorScheme()
+  const { equipment, setPlanValue } = usePlanStore();
+  const colorScheme = useColorScheme();
 
   const onPressEquipment = (item: string) => {
     if (item === "맨몸") {
-      setPlanValue("equipment", item)
-      setPlanValue("weight", "0")
+      setPlanValue("equipment", item);
+      setPlanValue("weight", "0");
     }
-    setPlanValue("equipment", item)
-  }
+    setPlanValue("equipment", item);
+  };
 
   return (
     <View style={styles.container}>
@@ -70,8 +70,8 @@ export const EquipmentBox = () => {
         ))}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -100,4 +100,4 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     paddingVertical: 4,
   },
-})
+});

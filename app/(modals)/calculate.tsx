@@ -23,8 +23,7 @@ export default function calculate() {
   const { open, setOpen } = useIsModalOpenStore();
 
   const translateX = useSharedValue(0);
-  const [tabContainerWidth, setTabContainerWidth] = useState(0);
-  const tabItemWidth = (tabContainerWidth - 12) / 2;
+  const [tabItemWidth, setTabItemWidth] = useState(0);
 
   const indicatorStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -89,10 +88,7 @@ export default function calculate() {
 
   return (
     <View style={{ flex: 1, paddingTop: 24 }}>
-      <View
-        style={styles(themeColor).tabContainer}
-        onLayout={(e) => setTabContainerWidth(e.nativeEvent.layout.width)}
-      >
+      <View style={styles(themeColor).tabContainer}>
         <Animated.View
           pointerEvents="none"
           style={[
@@ -111,6 +107,7 @@ export default function calculate() {
         <TouchableOpacity
           onPress={() => onSelectedTab("kg")}
           style={styles(themeColor).tabItem}
+          onLayout={(e) => setTabItemWidth(e.nativeEvent.layout.width)}
         >
           <Text style={{ textAlign: "center" }}>킬로그램/kg</Text>
         </TouchableOpacity>

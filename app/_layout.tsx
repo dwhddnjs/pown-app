@@ -272,7 +272,7 @@ function RootLayoutNav() {
                   navigation.goBack();
                 }}
               >
-                <ArrowIcon name="left" size={24} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.subText} />
               </TouchableOpacity>
             );
           },
@@ -514,7 +514,7 @@ function RootLayoutNav() {
           },
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={24} color={themeColor.subText} />
+              <ArrowIcon name="left" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -529,7 +529,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -541,7 +541,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -553,7 +553,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -567,7 +567,7 @@ function RootLayoutNav() {
             gestureEnabled: false,
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <ArrowIcon name="left" size={24} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.subText} />
               </TouchableOpacity>
             ),
           };
@@ -584,7 +584,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -595,7 +595,7 @@ function RootLayoutNav() {
           title: "설정",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={30} color={themeColor.subText} />
+              <ArrowIcon name="left" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
@@ -611,7 +611,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={30} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.subText} />
             </TouchableOpacity>
           ),
         })}
