@@ -1,42 +1,42 @@
-import { ShortsPlayer } from "@/components/shorts/shorts-player"
-import { Text, View } from "@/components/Themed"
-import { useShortsStore } from "@/hooks/use-shorts-store"
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router"
-import React, { useEffect, useMemo, useRef, useState } from "react"
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
-import { SafeAreaView } from "react-native-safe-area-context"
-import ArrowIcon from "@expo/vector-icons/AntDesign"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import Feather from "@expo/vector-icons/Feather"
-import { format } from "date-fns"
-import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog"
+import { ShortsPlayer } from "@/components/shorts/shorts-player";
+import { Text, View } from "@/components/Themed";
+import { useShortsStore } from "@/hooks/use-shorts-store";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import ArrowIcon from "@expo/vector-icons/AntDesign";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import Feather from "@expo/vector-icons/Feather";
+import { format } from "date-fns";
+import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
 
 export default function ShortsView() {
-  const { slug } = useLocalSearchParams<any>()
+  const { slug } = useLocalSearchParams<any>();
 
-  const { videos, setRemoveVideo } = useShortsStore()
-  const themeColor = useCurrentThemeColor()
-  const { back } = useRouter()
+  const { videos, setRemoveVideo } = useShortsStore();
+  const themeColor = useCurrentThemeColor();
+  const { back } = useRouter();
   const initailPage = useMemo(() => {
-    const index = videos.findIndex((v) => v.id === parseInt(slug[0]))
-    return index >= 0 ? index : 0
-  }, [])
+    const index = videos.findIndex((v) => v.id === parseInt(slug?.[0]));
+    return index >= 0 ? index : 0;
+  }, []);
 
-  const [position, setPosition] = useState(initailPage)
-  const [isOpen, setIsOpen] = useState(false)
-  const ref = useRef<ScrollView>(null)
+  const [position, setPosition] = useState(initailPage);
+  const [isOpen, setIsOpen] = useState(false);
+  const ref = useRef<ScrollView>(null);
 
-  const [height, setHeight] = useState(0)
+  const [height, setHeight] = useState(0);
 
   useEffect(() => {
     if (!ref.current || height === 0) {
-      return
+      return;
     }
     ref.current.scrollTo({
       y: position * height,
       animated: false,
-    })
-  }, [height])
+    });
+  }, [height]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: themeColor.hard }}>
@@ -48,10 +48,10 @@ export default function ShortsView() {
         style={{ backgroundColor: "black" }}
         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
         onScroll={(e) => {
-          const offsetY = e.nativeEvent.contentOffset.y
-          const index = Math.round(offsetY / height)
+          const offsetY = e.nativeEvent.contentOffset.y;
+          const index = Math.round(offsetY / height);
           if (index !== position) {
-            setPosition(index)
+            setPosition(index);
           }
         }}
       >
@@ -63,7 +63,7 @@ export default function ShortsView() {
               height={height}
               isActive={index === position}
             />
-          )
+          );
         })}
       </ScrollView>
       <View
@@ -76,7 +76,9 @@ export default function ShortsView() {
           <ArrowIcon name="left" size={28} color={themeColor.text} />
         </TouchableOpacity>
         <Text style={{ fontSize: 16 }}>
-          {format(videos[position]?.createdAt, "yyyy년 MM월 dd일")}
+          {videos[position]?.createdAt
+            ? format(new Date(videos[position].createdAt), "yyyy년 MM월 dd일")
+            : ""}
         </Text>
         <TouchableOpacity
           style={{ paddingRight: 16 }}
@@ -91,7 +93,7 @@ export default function ShortsView() {
         position={position}
       />
     </SafeAreaView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -109,4 +111,4 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-})
+});

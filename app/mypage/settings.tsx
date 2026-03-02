@@ -1,29 +1,23 @@
-import { useEffect, useRef } from "react"
 // component
-import {
-  AppState,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
-import { Text, View } from "@/components/Themed"
-import { IconTitle } from "@/components/IconTitle"
-import { UserDataCard } from "@/components/mypage/user-data-card"
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View } from "@/components/Themed";
+import { IconTitle } from "@/components/IconTitle";
+import { UserDataCard } from "@/components/mypage/user-data-card";
 // expo
-import { useRouter } from "expo-router"
+import { useRouter } from "expo-router";
 // icon
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
-import AntDesign from "@expo/vector-icons/AntDesign"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AntDesign from "@expo/vector-icons/AntDesign";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store"
+import { useUserStore } from "@/hooks/use-user-store";
 // hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 export default function settings() {
-  const { onReset, ...result } = useUserStore()
-  const themeColor = useCurrentThemeColor()
+  const { onReset, ...result } = useUserStore();
+  const themeColor = useCurrentThemeColor();
 
-  const { push } = useRouter()
+  const { push } = useRouter();
 
   return (
     <View style={styles.container}>
@@ -78,7 +72,7 @@ export default function settings() {
         </TouchableOpacity>
       </View>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -101,4 +95,4 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 10,
   },
-})
+});

@@ -1,24 +1,24 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 // component
-import { ScrollView, StyleSheet } from "react-native"
-import { Button } from "@/components/Button"
-import { Text, View } from "@/components/Themed"
-import { toast } from "sonner-native"
-import { TitleInput } from "@/components/mypage/title-input"
+import { ScrollView, StyleSheet } from "react-native";
+import { Button } from "@/components/Button";
+import { Text, View } from "@/components/Themed";
+import { toast } from "sonner-native";
+import { TitleInput } from "@/components/mypage/title-input";
 // expo
-import Checkbox from "expo-checkbox"
-import { router, useRouter } from "expo-router"
+import Checkbox from "expo-checkbox";
+import { useRouter } from "expo-router";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store"
+import { useUserStore } from "@/hooks/use-user-store";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 //lib
-import { format } from "date-fns"
+import { format } from "date-fns";
 
 export default function UserInfo() {
-  const { setUserData, userInfo } = useUserStore()
+  const { setUserData, userInfo } = useUserStore();
 
-  const lastestUserInfo = userInfo[userInfo.length - 1]
+  const lastestUserInfo = userInfo[userInfo.length - 1];
 
   const [value, setValue] = useState({
     height: lastestUserInfo?.height ?? "",
@@ -27,38 +27,38 @@ export default function UserInfo() {
     sq: lastestUserInfo?.sq ?? "",
     bp: lastestUserInfo?.bp ?? "",
     dl: lastestUserInfo?.dl ?? "",
-  })
+  });
 
   const [isChecked, setChecked] = useState({
     male: lastestUserInfo?.gender === "male" ? true : false,
     female: lastestUserInfo?.gender === "female" ? true : false,
-  })
-  const themeColor = useCurrentThemeColor()
+  });
+  const themeColor = useCurrentThemeColor();
 
-  const { back } = useRouter()
+  const { back } = useRouter();
 
   const onSetValue = (type: string, newValue: string) => {
     setValue({
       ...value,
       [type]: newValue,
-    })
-  }
+    });
+  };
 
   const onSetCheckBox = (type: "male" | "female") => {
     if (type === "male") {
       setChecked({
         male: true,
         female: false,
-      })
+      });
     }
 
     if (type === "female") {
       setChecked({
         male: false,
         female: true,
-      })
+      });
     }
-  }
+  };
 
   const onSubmitValue = () => {
     if (
@@ -69,16 +69,16 @@ export default function UserInfo() {
       !value.bp ||
       !value.dl
     ) {
-      return toast.error("정보를 모두 기입해주세요!")
+      return toast.error("정보를 모두 기입해주세요!");
     }
     setUserData({
       ...value,
       gender: isChecked.male ? "male" : isChecked.female ? "female" : null,
       createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-    })
-    toast.success("내정보가 추가 되었습니다!")
-    back()
-  }
+    });
+    toast.success("내정보가 추가 되었습니다!");
+    back();
+  };
 
   return (
     <View style={{ flex: 1, paddingBottom: 48 }}>
@@ -164,7 +164,7 @@ export default function UserInfo() {
                 style={styles.checkbox}
                 value={isChecked.male}
                 onValueChange={() => onSetCheckBox("male")}
-                color={isChecked ? themeColor.tint : undefined}
+                color={isChecked.male ? themeColor.tint : undefined}
               />
               <Text
                 style={{
@@ -180,7 +180,7 @@ export default function UserInfo() {
                 style={styles.checkbox}
                 value={isChecked.female}
                 onValueChange={() => onSetCheckBox("female")}
-                color={isChecked ? themeColor.tint : undefined}
+                color={isChecked.female ? themeColor.tint : undefined}
               />
               <Text
                 style={{
@@ -198,7 +198,7 @@ export default function UserInfo() {
         저장
       </Button>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -255,4 +255,4 @@ const styles = StyleSheet.create({
     paddingTop: 32,
     gap: 85,
   },
-})
+});

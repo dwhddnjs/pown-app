@@ -1,12 +1,10 @@
 import { useRef, useState } from "react";
 // component
-import { Dimensions, Pressable, StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/Themed";
 //expo
-import { CameraMode, CameraType, CameraView } from "expo-camera";
-import { Image } from "expo-image";
+import { CameraType, CameraView } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useEvent } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -35,9 +33,6 @@ export default function Video() {
     player.loop = true;
     player.play();
   });
-  const { isPlaying } = useEvent(player, "playingChange", {
-    isPlaying: player.playing,
-  });
   const isSquare = useSharedValue(false);
 
   const animatedShutterStyle = useAnimatedStyle(() => {
@@ -55,7 +50,7 @@ export default function Video() {
       const data = await ref.current.recordAsync();
       setUri(data?.uri as string);
     } catch (error) {
-      console.log(error);
+      toast.error("녹화 중 오류가 발생했습니다.");
     } finally {
       setIsRecording(false);
     }
@@ -80,7 +75,7 @@ export default function Video() {
           id: videos.length > 0 ? videos[videos.length - 1].id + 1 : 1,
           video: uri,
           thumbnail: thumbnail.uri,
-          createdAt: new Date(),
+          createdAt: new Date().toISOString(),
         });
         await MediaLibrary.createAssetAsync(uri as string);
         setUri("");
@@ -88,7 +83,7 @@ export default function Video() {
       router.back();
       toast.success("숏츠가 추가 되었습니다");
     } catch (error) {
-      console.log(error);
+      toast.error("숏츠 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -107,12 +102,11 @@ export default function Video() {
             },
           ]}
         >
-          <Pressable style={{ paddingTop: 18 }}>
+          <Pressable style={{ paddingTop: 18 }} onPress={() => setUri(null)}>
             <Text
               style={{
                 fontSize: 16,
               }}
-              onPress={() => setUri(null)}
             >
               다시 찍기
             </Text>

@@ -1,12 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 // component
-import {
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-  Image,
-} from "react-native";
+import { Pressable, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { Text, View } from "../Themed";
 import Animated, {
   useSharedValue,
@@ -217,8 +211,13 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               bgColor={themeColor.empty}
               textColor={themeColor.subText}
             />
-            {item.setWithCount.map((setCount) => (
-              <SetListItem key={setCount.id} planId={item.id} item={setCount} />
+            {item.setWithCount.map((setCount, index) => (
+              <SetListItem
+                key={setCount.id}
+                planId={item.id}
+                item={setCount}
+                setIndex={index + 1}
+              />
             ))}
           </View>
         )}

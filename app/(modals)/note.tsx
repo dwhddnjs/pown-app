@@ -1,15 +1,15 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet, TextInput, useColorScheme } from "react-native"
-import { View } from "@/components/Themed"
+import { StyleSheet, TextInput } from "react-native";
+import { View } from "@/components/Themed";
 // zustand
-import { useNoteStore } from "@/hooks/use-note-store"
+import { useNoteStore } from "@/hooks/use-note-store";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 export default function note() {
-  const { title, content, setValue } = useNoteStore()
-  const themeColor = useCurrentThemeColor()
+  const { title, content, setValue } = useNoteStore();
+  const themeColor = useCurrentThemeColor();
   return (
     <View style={styles.container}>
       <TextInput
@@ -38,7 +38,7 @@ export default function note() {
         onChangeText={(value) => setValue("content", value)}
       />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -64,4 +64,4 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     textAlignVertical: "top",
   },
-})
+});

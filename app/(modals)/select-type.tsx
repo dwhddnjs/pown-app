@@ -1,26 +1,24 @@
-import { View, Text } from "@/components/Themed"
-import { StatusBar } from "expo-status-bar"
-import { Platform, StyleSheet, TouchableOpacity } from "react-native"
-import Arm from "@/assets/images/svg/arm_icon.svg"
-import Back from "@/assets/images/svg/back_icon.svg"
-import Chest from "@/assets/images/svg/chest_icon.svg"
-import Leg from "@/assets/images/svg/leg_icon.svg"
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
-import { IconTitleButton } from "@/components/IconTitleButton"
-import { useNavigation, useRouter } from "expo-router"
-import { format } from "date-fns"
-import Entypo from "@expo/vector-icons/Entypo"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useLayoutEffect, useState } from "react"
-import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet"
-import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store"
-import { useIsFocused } from "@react-navigation/native"
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { View, Text } from "@/components/Themed";
+import { StatusBar } from "expo-status-bar";
+import { Platform, StyleSheet, TouchableOpacity } from "react-native";
+import Arm from "@/assets/images/svg/arm_icon.svg";
+import Back from "@/assets/images/svg/back_icon.svg";
+import Chest from "@/assets/images/svg/chest_icon.svg";
+import Leg from "@/assets/images/svg/leg_icon.svg";
+import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
+import { IconTitleButton } from "@/components/IconTitleButton";
+import { useRouter } from "expo-router";
+import { format } from "date-fns";
+import Entypo from "@expo/vector-icons/Entypo";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
+import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
+import { usePlanStore } from "@/hooks/use-plan-store";
 
 export default function ModalScreen() {
-  const themeColor = useCurrentThemeColor()
-  const { open, setOpen } = useIsDialogOpenStore()
-  const { date } = usePlanStore()
+  const themeColor = useCurrentThemeColor();
+  const { open, setOpen } = useIsDialogOpenStore();
+  const { date } = usePlanStore();
 
   const iconButtonData = [
     {
@@ -53,8 +51,8 @@ export default function ModalScreen() {
       icon: Arm,
       type: "arm",
     },
-  ]
-  const router = useRouter()
+  ];
+  const router = useRouter();
 
   return (
     <View style={styles.container}>
@@ -64,7 +62,7 @@ export default function ModalScreen() {
           style={styles.dateButton}
           onPress={() => setOpen(true)}
         >
-          <Text style={(styles.date, { color: themeColor.tint })}>
+          <Text style={[styles.date, { color: themeColor.tint }]}>
             {`📆 ${format(date, "yyyy년 M월 d일 h시 m분")}`}
           </Text>
           <Entypo name="select-arrows" size={18} color={themeColor.tint} />
@@ -78,8 +76,10 @@ export default function ModalScreen() {
             Icon={item.icon}
             title={item.title}
             onClick={() => {
-              router.back()
-              router.push(`/add-plan/${item.type}`)
+              router.dismiss();
+              setTimeout(() => {
+                router.push(`/add-plan/${item.type}`);
+              }, 100);
             }}
           />
         ))}
@@ -87,7 +87,7 @@ export default function ModalScreen() {
       <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
       <SelectTypeDateSheet />
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -121,4 +121,4 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
     gap: 4,
   },
-})
+});

@@ -18,13 +18,17 @@ export const groupByDate = (arr: WorkoutPlanTypes[]) => {
   }, {})
 }
 export const formatTime = (value: string) => {
+  if (!value) return ""
   const splitValue = value.split(" ")
+  if (!splitValue[1]) return ""
   const splitValueAgain = splitValue[1].split(":")
   return `${splitValueAgain[0]}:${splitValueAgain[1]}`
 }
 
 export const formatDate = (value: string) => {
+  if (!value) return ""
   const splitValue = value.split(".")
+  if (!splitValue[0] || !splitValue[1] || !splitValue[2]) return value
   return `${splitValue[0]}년 ${splitValue[1]}월 ${splitValue[2]}일`
 }
 
@@ -314,6 +318,7 @@ export const getMonthlyBodyData = (
 }
 
 export const getInitialConsonant = (str: string) => {
+  if (!str) return ""
   const firstChar = str.charCodeAt(0)
   if (firstChar < 0xac00 || firstChar > 0xd7a3) return str[0]
   const firstConsonant = Math.floor((firstChar - 0xac00) / 28 / 21)

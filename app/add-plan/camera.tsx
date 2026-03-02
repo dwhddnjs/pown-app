@@ -1,45 +1,45 @@
-import { useRef, useState } from "react"
+import { useRef, useState } from "react";
 // component
-import { Pressable, StyleSheet } from "react-native"
-import { Text, View } from "@/components/Themed"
+import { Pressable, StyleSheet } from "react-native";
+import { Text, View } from "@/components/Themed";
 //expo
-import { CameraMode, CameraType, CameraView } from "expo-camera"
-import { Image } from "expo-image"
-import { useRouter } from "expo-router"
+import { CameraType, CameraView } from "expo-camera";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 // icon
-import { FontAwesome6 } from "@expo/vector-icons"
+import { FontAwesome6 } from "@expo/vector-icons";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { SafeAreaView } from "react-native-safe-area-context"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const Camera = () => {
-  const ref = useRef<CameraView>(null)
-  const [uri, setUri] = useState<string | null>(null)
+  const ref = useRef<CameraView>(null);
+  const [uri, setUri] = useState<string | null>(null);
 
-  const [facing, setFacing] = useState<CameraType>("back")
-  const themeColor = useCurrentThemeColor()
-  const router = useRouter()
-  const { imageUri, setImageUri } = usePlanStore()
+  const [facing, setFacing] = useState<CameraType>("back");
+  const themeColor = useCurrentThemeColor();
+  const router = useRouter();
+  const { imageUri, setImageUri } = usePlanStore();
 
   const takePicture = async () => {
-    const photo = await ref.current?.takePictureAsync()
-    setUri(photo?.uri as string)
-  }
+    const photo = await ref.current?.takePictureAsync();
+    setUri(photo?.uri as string);
+  };
   const toggleFacing = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"))
-  }
+    setFacing((prev) => (prev === "back" ? "front" : "back"));
+  };
 
   const selectImageUri = () => {
     if (uri) {
       setImageUri({
         id: imageUri.length > 0 ? imageUri[imageUri.length - 1].id + 1 : 1,
         imageUri: uri,
-      })
-      setUri("")
+      });
+      setUri("");
     }
-    router.back()
-  }
+    router.back();
+  };
 
   const renderPicture = () => {
     return (
@@ -62,12 +62,11 @@ const Camera = () => {
             paddingHorizontal: 20,
           }}
         >
-          <Pressable style={{ paddingTop: 24 }}>
+          <Pressable style={{ paddingTop: 24 }} onPress={() => setUri(null)}>
             <Text
               style={{
                 fontSize: 16,
               }}
-              onPress={() => setUri(null)}
             >
               다시 찍기
             </Text>
@@ -86,8 +85,8 @@ const Camera = () => {
           </Pressable>
         </View>
       </SafeAreaView>
-    )
-  }
+    );
+  };
 
   const renderCamera = () => {
     return (
@@ -122,17 +121,17 @@ const Camera = () => {
           </Pressable>
         </View>
       </CameraView>
-    )
-  }
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderPicture() : renderCamera()}
     </View>
-  )
-}
+  );
+};
 
-export default Camera
+export default Camera;
 
 const styles = StyleSheet.create({
   container: {
@@ -177,4 +176,4 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "sb-m",
   },
-})
+});

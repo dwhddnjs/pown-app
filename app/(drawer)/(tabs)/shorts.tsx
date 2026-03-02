@@ -1,7 +1,6 @@
 import { useEffect, useRef } from "react";
 // component
 import {
-  AppState,
   Dimensions,
   FlatList,
   StyleSheet,

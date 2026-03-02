@@ -45,4 +45,4 @@ export default function chart() {
   );
 }
 
-const styles = (color: any) => StyleSheet.create({});
+const styles = StyleSheet.create({});

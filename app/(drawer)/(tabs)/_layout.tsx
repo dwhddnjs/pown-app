@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from "react";
 // compoents
-import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet } from "react-native";
 import { View } from "@/components/Themed";
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
 import { ChartHeader } from "@/components/chart";
 // expo
-import { router, Tabs } from "expo-router";
-import { Image } from "expo-image";
+import { Tabs } from "expo-router";
 import { BlurView } from "expo-blur";
 // icon
-import UserIcon from "@expo/vector-icons/FontAwesome";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { SymbolView } from "expo-symbols";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -19,9 +17,7 @@ import { CalendarHeader } from "@/components/calendar";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import ImageModal from "@/components/workout-plan/image-modal";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
-import Colors from "@/constants/Colors";
+import { FontAwesome6 } from "@expo/vector-icons";
 import FabOverlay from "@/components/fab-menu/fab-overlay";
 import Animated, {
   useSharedValue,
@@ -33,7 +29,7 @@ import Animated, {
 
 export default function TabLayout() {
   const themColor = useCurrentThemeColor();
-  const { uri, onResetImageUri } = useImageUriStore();
+  const { uri } = useImageUriStore();
   const [fabOpen, setFabOpen] = useState(false);
   const fabProgress = useSharedValue(0);
 

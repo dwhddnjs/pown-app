@@ -3,7 +3,7 @@ import { create } from "zustand"
 type NoteStoreType = {
   title: string
   content: string
-  setValue: (type: string, value: string) => void
+  setValue: (type: "title" | "content", value: string) => void
   onReset: () => void
 }
 

@@ -1,29 +1,21 @@
-import {
-  StyleSheet,
-  TextInput,
-  Touchable,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Text, View } from "../Themed";
 import { IconTitle } from "../IconTitle";
-import Colors from "@/constants/Colors";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { equipmentData } from "@/constants/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore();
-  const colorScheme = useColorScheme();
+  const themeColor = useCurrentThemeColor();
 
   const onPressEquipment = (item: string) => {
+    setPlanValue("equipment", item);
     if (item === "맨몸") {
-      setPlanValue("equipment", item);
       setPlanValue("weight", "0");
     }
-    setPlanValue("equipment", item);
   };
 
   return (
@@ -32,16 +24,11 @@ export const EquipmentBox = () => {
         <MaterialCommunityIcons
           name="dumbbell"
           size={20}
-          color={Colors[colorScheme ?? "light"].tint}
+          color={themeColor.tint}
         />
         <Text style={{ fontSize: 16 }}>기구 종류</Text>
       </IconTitle>
-      <View
-        style={[
-          styles.box,
-          { borderColor: Colors[colorScheme ?? "light"].tint },
-        ]}
-      >
+      <View style={[styles.box, { borderColor: themeColor.tint }]}>
         {equipmentData.map((item) => (
           <TouchableOpacity
             key={item}
@@ -50,7 +37,7 @@ export const EquipmentBox = () => {
               equipment === item && {
                 paddingHorizontal: 12,
                 paddingVertical: 8,
-                backgroundColor: Colors[colorScheme ?? "light"].tint,
+                backgroundColor: themeColor.tint,
                 borderRadius: 8,
               },
             ]}
@@ -58,9 +45,9 @@ export const EquipmentBox = () => {
           >
             <Text
               style={[
-                { color: Colors[colorScheme ?? "light"].tint },
+                { color: themeColor.tint },
                 equipment === item && {
-                  color: Colors[colorScheme ?? "light"].text,
+                  color: themeColor.text,
                 },
               ]}
             >

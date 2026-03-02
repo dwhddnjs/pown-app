@@ -66,9 +66,9 @@ export const SearchWorkoutTagSheet = forwardRef<
 
   useEffect(() => {
     if (inputRef?.current && isOpen) {
-      inputRef?.current.focus()
+      inputRef.current.focus()
     }
-  }, [isOpen, inputRef.current])
+  }, [isOpen])
 
   return (
     <BottomSheet

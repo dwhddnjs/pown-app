@@ -8,8 +8,9 @@ import Arm from "@/assets/images/svg/arm_icon.svg";
 import Chest from "@/assets/images/svg/chest_icon.svg";
 import Leg from "@/assets/images/svg/leg_icon.svg";
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 // hook
+import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { sortWorkoutPlanList } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
@@ -34,16 +35,10 @@ const WorkoutCount = () => {
       <Text style={{ fontSize: 18, marginLeft: 6 }}>기록한 운동 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text
-            style={{
-              color: themeColor.subText,
-            }}
-          >
-            기록된 운동 데이터가 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="기록된 운동 데이터가 없습니다."
+          themeColor={themeColor}
+        />
       ) : (
         <View
           style={[
@@ -81,7 +76,7 @@ const WorkoutCount = () => {
 
 export default WorkoutCount;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

@@ -1,34 +1,34 @@
-import { useLayoutEffect, useState } from "react"
+import { useLayoutEffect, useState } from "react";
 // component
-import { ScrollView, StyleSheet, useColorScheme } from "react-native"
-import { Text, View } from "@/components/Themed"
-import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
-import { FlashList } from "@shopify/flash-list"
+import { ScrollView, StyleSheet } from "react-native";
+import { Text, View } from "@/components/Themed";
+import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { FlashList } from "@shopify/flash-list";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 // lib
-import { formatDate, groupByDate, setColor } from "@/lib/function"
+import { formatDate, groupByDate, setColor } from "@/lib/function";
 // expo
-import { useNavigation } from "expo-router"
+import { useNavigation } from "expo-router";
 
 export default function Search() {
-  const { workoutPlanList } = userWorkoutPlanStore()
-  const navigation = useNavigation()
-  const [inputValue, setInputValue] = useState("")
-  const { onReset, setPrevPlanValue, ...result } = usePlanStore()
-  const themeColor = useCurrentThemeColor()
+  const { workoutPlanList } = useWorkoutPlanStore();
+  const navigation = useNavigation();
+  const [inputValue, setInputValue] = useState("");
+  const { onReset, setPrevPlanValue, ...result } = usePlanStore();
+  const themeColor = useCurrentThemeColor();
 
   const filterWorkoutList = (value: string) => {
     const result = workoutPlanList.filter((workout) => {
-      let convertValue = value
+      let convertValue = value;
 
-      if (value == "등") convertValue = "back"
-      if (value == "어깨") convertValue = "shoulder"
-      if (value == "하체") convertValue = "leg"
-      if (value == "팔") convertValue = "arm"
-      if (value == "가슴") convertValue = "chest"
+      if (value == "등") convertValue = "back";
+      if (value == "어깨") convertValue = "shoulder";
+      if (value == "하체") convertValue = "leg";
+      if (value == "팔") convertValue = "arm";
+      if (value == "가슴") convertValue = "chest";
 
       return (
         workout.equipment.includes(convertValue) ||
@@ -37,26 +37,26 @@ export default function Search() {
         workout.content.includes(convertValue) ||
         workout.title.includes(convertValue) ||
         workout.weight.includes(convertValue)
-      )
-    })
-    return groupByDate(result)
-  }
+      );
+    });
+    return groupByDate(result);
+  };
   useLayoutEffect(() => {
     navigation.setOptions({
       headerSearchBarOptions: {
-        visable: true,
-        placeHolder: "Search",
+        visible: true,
+        placeholder: "Search",
         autoFocus: true,
         tintColor: themeColor.tint,
         cancelButtonText: "취소",
 
         onChangeText: (e: any) => {
-          setInputValue(e.nativeEvent.text)
+          setInputValue(e.nativeEvent.text);
         },
         hideWhenScrolling: false,
       },
-    })
-  }, [navigation])
+    });
+  }, [navigation]);
 
   return (
     <ScrollView
@@ -111,7 +111,7 @@ export default function Search() {
                   ))}
                 </View>
               </View>
-            )
+            );
           }}
         />
       )}
@@ -136,7 +136,7 @@ export default function Search() {
         </Text>
       </View>
     </ScrollView>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -184,4 +184,4 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     marginTop: 4,
   },
-})
+});

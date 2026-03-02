@@ -91,7 +91,7 @@ export default function AddMultiPlan() {
     } else {
       usePlanStore.getState().setPlanValue("type", selectedType);
     }
-  }, []);
+  }, [editingPlan]);
 
   const onSelectType = (type: WorkoutTypes) => {
     setSelectedType(type);
@@ -212,7 +212,7 @@ export default function AddMultiPlan() {
           onFocusScroll={onFocusScroll}
           currentScrollY={currentScrollY}
         />
-        <SetCounter onOpen={onSheetOpen} onFocus={onInputFocus} />
+        <SetCounter onOpen={onSheetOpen} />
         <ConditionList />
         <PlanNote
           onFocusScroll={onFocusScroll}

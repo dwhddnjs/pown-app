@@ -34,7 +34,7 @@ export type PlanStoreType = {
 
   setImageUri: (uri: ImageUriType) => void
   setRemoveImageUri: (id: number) => void
-  setPlanValue: (type: string, value: string | string[]) => void
+  setPlanValue: (type: keyof Pick<PlanStoreType, "workout" | "type" | "equipment" | "weight" | "title" | "content" | "weightType">, value: string | string[]) => void
   setCondition: (value: string) => void
   setFilterCondition: (value: string) => void
   onReset: () => void
@@ -130,16 +130,16 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
     }),
 
   setPrevPlanValue: (value) =>
-    set({
-      workout: value.workout,
-      type: value.type,
-      setWithCount: value.setWithCount,
-      weight: value.weight,
-      condition: value.condition,
-      equipment: value.equipment,
-      title: value.title,
-      content: value.content,
-      imageUri: value.imageUri,
-      date: value.date ?? new Date(),
-    }),
+    set((prev) => ({
+      workout: value.workout ?? prev.workout,
+      type: value.type ?? prev.type,
+      setWithCount: value.setWithCount ?? prev.setWithCount,
+      weight: value.weight ?? prev.weight,
+      condition: value.condition ?? prev.condition,
+      equipment: value.equipment ?? prev.equipment,
+      title: value.title ?? prev.title,
+      content: value.content ?? prev.content,
+      imageUri: value.imageUri ?? prev.imageUri,
+      date: value.date ?? prev.date,
+    })),
 }))

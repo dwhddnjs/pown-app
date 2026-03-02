@@ -1,11 +1,12 @@
 import React from "react";
 import { StyleSheet } from "react-native";
 import { Text, View } from "../Themed";
+import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { sortWorkoutPlanList } from "@/lib/function";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 
 const typeLabel: Record<string, string> = {
   chest: "가슴",
@@ -58,12 +59,10 @@ const WorkoutSummary = () => {
         <View
           style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
         />
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text style={{ color: themeColor.subText }}>
-            이번 달 운동 기록이 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="이번 달 운동 기록이 없습니다."
+          themeColor={themeColor}
+        />
       </View>
     );
   }
@@ -123,7 +122,7 @@ const WorkoutSummary = () => {
 
 export default WorkoutSummary;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

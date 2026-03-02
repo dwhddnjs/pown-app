@@ -1,20 +1,19 @@
-import Colors from "@/constants/Colors"
-import { Text, View } from "../Themed"
-import Ionicons from "@expo/vector-icons/Ionicons"
-import PlusIcon from "@expo/vector-icons/AntDesign"
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store"
-import { NumberBallIcon } from "../number-ball-icon"
+import { Text, View } from "../Themed";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store";
+import { NumberBallIcon } from "../number-ball-icon";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface SetCounterItemProps {
-  item: SetWithCountType
-  index: number
+  item: SetWithCountType;
+  index: number;
 }
 
 export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
   const { setFilterSetWithCount, setSetWithCount, setWithCount } =
-    usePlanStore()
-  const colorScheme = useColorScheme()
+    usePlanStore();
+  const themeColor = useCurrentThemeColor();
 
   return (
     <View style={styles.container}>
@@ -22,8 +21,8 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
         style={[
           styles.item,
           {
-            backgroundColor: Colors[colorScheme ?? "light"].background,
-            borderColor: Colors[colorScheme ?? "light"].subText,
+            backgroundColor: themeColor.background,
+            borderColor: themeColor.subText,
           },
         ]}
       >
@@ -31,64 +30,41 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
           style={[
             styles.setTypeCount,
             {
-              backgroundColor: Colors[colorScheme ?? "light"].background,
+              backgroundColor: themeColor.background,
             },
           ]}
         >
           <NumberBallIcon>{index + 1}</NumberBallIcon>
-          <Text
-            style={[
-              styles.type,
-              { color: Colors[colorScheme ?? "light"].tint },
-            ]}
-          >
+          <Text style={[styles.type, { color: themeColor.tint }]}>
             {item.set}
           </Text>
           <Text
-            style={[
-              styles.typeText,
-              { color: Colors[colorScheme ?? "light"].tint },
-            ]}
+            style={[styles.typeText, { color: themeColor.tint }]}
           >{`${item.count} 회`}</Text>
         </View>
         <View
           style={[
             styles.iconWrapper,
-            { backgroundColor: Colors[colorScheme ?? "light"].background },
+            { backgroundColor: themeColor.background },
           ]}
         >
           <TouchableOpacity
             onPress={() => setFilterSetWithCount(item.id)}
             style={{ paddingLeft: 12 }}
           >
-            <Ionicons
-              name="trash"
-              size={22}
-              color={Colors[colorScheme ?? "light"].text}
-            />
+            <Ionicons name="trash" size={22} color={themeColor.text} />
           </TouchableOpacity>
           <TouchableOpacity
             style={{ paddingLeft: 12, paddingRight: 4 }}
-            onPress={() =>
-              setSetWithCount({ ...item, id: setWithCount.length + 1 })
-            }
+            onPress={() => setSetWithCount({ ...item, id: Date.now() })}
           >
-            <Ionicons
-              name="copy"
-              size={20}
-              color={Colors[colorScheme ?? "light"].tint}
-            />
-            {/* <PlusIcon
-              name="pluscircle"
-              size={24}
-              color={Colors[colorScheme ?? "light"].tint}
-            /> */}
+            <Ionicons name="copy" size={20} color={themeColor.tint} />
           </TouchableOpacity>
         </View>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -128,4 +104,4 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-})
+});

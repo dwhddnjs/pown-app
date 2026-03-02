@@ -1,7 +1,7 @@
 const tintColorLight = "#2f95dc";
 const tintColorDark = "#fff";
 
-export default {
+const Colors = {
   light: {
     text: "#27272a",
     subText: "#aaaaaa",
@@ -32,7 +32,9 @@ export default {
     empty: "#1e1e1e",
     hard: "#000000",
   },
-};
+} as const;
 
-// Colors[colorScheme ?? "light"].background
-//const colorScheme = useColorScheme()
+export type ThemeColorType =
+  | (typeof Colors)["light"]
+  | (typeof Colors)["dark"]
+export default Colors

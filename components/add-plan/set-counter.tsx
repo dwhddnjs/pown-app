@@ -1,52 +1,33 @@
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import { Text, View } from "../Themed"
-import { Octicons } from "@expo/vector-icons"
-import Colors from "@/constants/Colors"
-import { Button } from "../Button"
-import { IconTitle } from "../IconTitle"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { SetCounterItem } from "./set-counter-item"
-import { useRef, useState } from "react"
-import { InputRefObject } from "@/app/add-plan/[slug]"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
+import { Octicons } from "@expo/vector-icons";
+import { Button } from "../Button";
+import { IconTitle } from "../IconTitle";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { SetCounterItem } from "./set-counter-item";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface SetCounterProps {
-  onOpen: () => void
-  onFocus: (value: InputRefObject) => void
+  onOpen: () => void;
 }
 
-export const SetCounter = ({ onOpen, onFocus }: SetCounterProps) => {
-  const { setWithCount } = usePlanStore()
-  const colorScheme = useColorScheme()
-  const [layout, setLayout] = useState(0)
+export const SetCounter = ({ onOpen }: SetCounterProps) => {
+  const { setWithCount } = usePlanStore();
+  const themeColor = useCurrentThemeColor();
 
   return (
-    <View
-      style={styles.container}
-      onLayout={(e) => setLayout(e.nativeEvent.layout.y)}
-    >
+    <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
-          <Octicons
-            name="number"
-            size={20}
-            color={Colors[colorScheme ?? "light"].tint}
-          />
+          <Octicons name="number" size={20} color={themeColor.tint} />
           <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
         </IconTitle>
-        <Text
-          style={[
-            styles.subText,
-            { color: Colors[colorScheme ?? "light"].tint },
-          ]}
-        >
-          (선택)
-        </Text>
+        <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
       </View>
       <Button
         type="bordered"
-        onPress={(e) => {
-          onOpen()
-          onFocus(e.target)
+        onPress={() => {
+          onOpen();
         }}
       >
         선택하기
@@ -59,8 +40,8 @@ export const SetCounter = ({ onOpen, onFocus }: SetCounterProps) => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -78,4 +59,4 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     alignItems: "flex-end",
   },
-})
+});

@@ -4,12 +4,13 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../Themed";
 import { LineChart } from "react-native-gifted-charts";
 // hook
+import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useChartStore } from "@/hooks/use-chart-store";
 // lib
 import { getMonthlyBodyData } from "@/lib/function";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 
 const BodyChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -51,16 +52,10 @@ const BodyChart = () => {
         }}
       />
       {isEmptyData ? (
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text
-            style={{
-              color: themeColor.subText,
-            }}
-          >
-            기록된 몸무게 데이터가 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="기록된 몸무게 데이터가 없습니다."
+          themeColor={themeColor}
+        />
       ) : (
         <View
           style={{
@@ -105,7 +100,10 @@ const BodyChart = () => {
               pointerLabelWidth: 100,
               activatePointersOnLongPress: true,
               // autoAdjustPointerLabelPosition: true,
-              pointerLabelComponent: (items: any, index: number) => {
+              pointerLabelComponent: (
+                items: { id: number; value: number; date: string }[],
+                index: number,
+              ) => {
                 return (
                   <View
                     style={{
@@ -139,7 +137,7 @@ const BodyChart = () => {
 
 export default BodyChart;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

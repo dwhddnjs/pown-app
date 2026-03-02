@@ -5,6 +5,7 @@ import { Text, View } from "../Themed";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // data
+import { ThemeColorType } from "@/constants/Colors";
 import { conditionData } from "@/constants/constants";
 // lib
 import { getIcon } from "../add-plan/condition-icon";
@@ -12,7 +13,7 @@ import { convertConditionType, getConditionCount } from "@/lib/function";
 // hook
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 
 const ConditionCount = () => {
   const themeColor = useCurrentThemeColor();
@@ -30,16 +31,10 @@ const ConditionCount = () => {
       <Text style={{ fontSize: 18, marginLeft: 6 }}>컨디션 별 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text
-            style={{
-              color: themeColor.subText,
-            }}
-          >
-            기록된 컨디션 데이터가 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="기록된 컨디션 데이터가 없습니다."
+          themeColor={themeColor}
+        />
       ) : (
         <View style={[styles(themeColor).iconListContainer]}>
           {conditionData.map((item) => (
@@ -64,7 +59,7 @@ const ConditionCount = () => {
 
 export default ConditionCount;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

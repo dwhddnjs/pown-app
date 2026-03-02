@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 // component
 import {
   StyleSheet,
@@ -6,30 +6,30 @@ import {
   TouchableOpacity,
   useColorScheme,
   View,
-} from "react-native"
-import { toast } from "sonner-native"
+} from "react-native";
+import { toast } from "sonner-native";
 // zustand
 import {
-  userWorkoutPlanStore,
+  useWorkoutPlanStore,
   WorkoutPlanTypes,
-} from "@/hooks/use-workout-plan-store"
-import { useMultiPlanStore } from "@/hooks/use-multi-plan-store"
+} from "@/hooks/use-workout-plan-store";
+import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // lib
-import { formatTime } from "@/lib/function"
+import { formatTime } from "@/lib/function";
 // expo
-import { Ionicons } from "@expo/vector-icons"
-import { useActionSheet } from "@expo/react-native-action-sheet"
-import { usePathname, useRouter } from "expo-router"
+import { Ionicons } from "@expo/vector-icons";
+import { useActionSheet } from "@expo/react-native-action-sheet";
+import { usePathname, useRouter } from "expo-router";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface WeightDateProps {
-  id: number
-  workout: string
-  weight: string
-  date: string
-  equipment: string
-  type: string
+  id: number;
+  workout: string;
+  weight: string;
+  date: string;
+  equipment: string;
+  type: string;
 }
 
 export const WeightDate = ({
@@ -40,18 +40,18 @@ export const WeightDate = ({
   type,
   equipment,
 }: WeightDateProps) => {
-  const themeColor = useCurrentThemeColor()
-  const { showActionSheetWithOptions } = useActionSheet()
-  const { push } = useRouter()
-  const { setRemovePlan } = userWorkoutPlanStore()
-  const { removeTempPlan, setEditingPlan, tempPlans } = useMultiPlanStore()
-  const pathname = usePathname()
-  const isMultiPlan = pathname.includes("multi-plan")
+  const themeColor = useCurrentThemeColor();
+  const { showActionSheetWithOptions } = useActionSheet();
+  const { push } = useRouter();
+  const { setRemovePlan } = useWorkoutPlanStore();
+  const { removeTempPlan, setEditingPlan, tempPlans } = useMultiPlanStore();
+  const pathname = usePathname();
+  const isMultiPlan = pathname.includes("multi-plan");
 
   const onPress = () => {
-    const options = ["삭제", "수정", "취소"]
-    const destructiveButtonIndex = 0
-    const cancelButtonIndex = 2
+    const options = ["삭제", "수정", "취소"];
+    const destructiveButtonIndex = 0;
+    const cancelButtonIndex = 2;
 
     showActionSheetWithOptions(
       {
@@ -63,32 +63,32 @@ export const WeightDate = ({
         switch (selectedIndex) {
           case 1:
             if (isMultiPlan) {
-              const plan = tempPlans.find((p) => p.id === id)
+              const plan = tempPlans.find((p) => p.id === id);
               if (plan) {
-                setEditingPlan(plan)
-                push("/workout/add-multi-plan")
+                setEditingPlan(plan);
+                push("/workout/add-multi-plan");
               }
             } else {
-              push(`/edit-plan/${type}/${id}`)
+              push(`/edit-plan/${type}/${id}`);
             }
-            break
+            break;
 
           case destructiveButtonIndex:
             if (isMultiPlan) {
-              removeTempPlan(id)
-              toast.success("운동계획이 삭제 되었습니다!")
+              removeTempPlan(id);
+              toast.success("운동계획이 삭제 되었습니다!");
             } else {
-              setRemovePlan(id)
-              toast.success("운동계획이 삭제 되었습니다!")
+              setRemovePlan(id);
+              toast.success("운동계획이 삭제 되었습니다!");
             }
-            break
+            break;
 
           case cancelButtonIndex:
-            break
+            break;
         }
-      }
-    )
-  }
+      },
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
@@ -113,8 +113,8 @@ export const WeightDate = ({
         {`목표 • ${weight}kg`}{" "}
       </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -145,4 +145,4 @@ const styles = StyleSheet.create({
   date: {
     fontFamily: "sb-l",
   },
-})
+});

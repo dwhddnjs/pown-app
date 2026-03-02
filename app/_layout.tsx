@@ -5,12 +5,7 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import {
-  Alert,
-  Appearance,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native";
+import { Appearance, TouchableOpacity, useColorScheme } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { toast, Toaster } from "sonner-native";
 //expo
@@ -31,11 +26,10 @@ import { format } from "date-fns";
 import { useNoteStore } from "@/hooks/use-note-store";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { FontAwesome5 } from "@expo/vector-icons";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -98,7 +92,7 @@ export default function RootLayout() {
           setUser("microphone", true);
         }
       } catch (error) {
-        console.log("error: ", error);
+        toast.error("권한 요청 중 오류가 발생했습니다.");
       }
     })();
   }, []);
@@ -226,7 +220,7 @@ function RootLayoutNav() {
           ),
           headerRight: () => {
             const { tempPlans, resetMultiPlan } = useMultiPlanStore();
-            const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore();
+            const { workoutPlanList, setWorkoutPlan } = useWorkoutPlanStore();
 
             const onSaveAll = () => {
               if (tempPlans.length === 0) {
@@ -326,7 +320,7 @@ function RootLayoutNav() {
             );
           },
           headerRight: () => {
-            const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore();
+            const { workoutPlanList, setWorkoutPlan } = useWorkoutPlanStore();
             const { onReset, ...result } = usePlanStore();
             const { onReset: onResetNote } = useNoteStore();
             const { slug } = useGlobalSearchParams();
@@ -384,7 +378,7 @@ function RootLayoutNav() {
                 }
                 return toast.error("운동과 목표 중량은 필수에요..");
               } catch (error) {
-                console.log("error: ", error);
+                toast.error("운동 계획 저장 중 오류가 발생했습니다.");
               }
             };
 
@@ -426,7 +420,7 @@ function RootLayoutNav() {
           },
           headerRight: () => {
             const { workoutPlanList, setWorkoutPlan, setEditPlan } =
-              userWorkoutPlanStore();
+              useWorkoutPlanStore();
             const { back } = useRouter();
             const { onReset, setPrevPlanValue, ...result } = usePlanStore();
 
@@ -495,7 +489,7 @@ function RootLayoutNav() {
                       id: index + 1,
                     })),
                     createdAt: getWorkoutPlan.createdAt,
-                    updatedAt: getWorkoutPlan.updatedAt,
+                    updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
                     imageUri: newImagesList ? newImagesList : [],
                   });
                   onReset();
@@ -505,7 +499,7 @@ function RootLayoutNav() {
                 }
                 return toast.error("운동과 목표 중량은 필수에요..");
               } catch (error) {
-                console.log("error: ", error);
+                toast.error("운동 계획 수정 중 오류가 발생했습니다.");
               }
             };
 
@@ -633,7 +627,7 @@ function RootLayoutNav() {
                 onResetNote();
                 return toast.success("루틴에 운동이 추가되었습니다!");
               } catch (error) {
-                console.log("error: ", error);
+                toast.error("운동 계획 저장 중 오류가 발생했습니다.");
               }
             };
 

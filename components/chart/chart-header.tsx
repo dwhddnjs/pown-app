@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 // component
 import {
   SafeAreaView,
@@ -6,25 +6,25 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native"
+} from "react-native";
 // expo
-import { BlurView } from "expo-blur"
+import { BlurView } from "expo-blur";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useChartStore } from "@/hooks/use-chart-store"
-import { convertChartDate } from "@/lib/function"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useChartStore } from "@/hooks/use-chart-store";
+import { convertChartDate } from "@/lib/function";
 // icon
-import AntDesign from "@expo/vector-icons/AntDesign"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 
 const ChartHeader = () => {
-  const themeColor = useCurrentThemeColor()
-  const { date, setDate } = useChartStore()
-  const { workoutPlanList } = userWorkoutPlanStore()
+  const themeColor = useCurrentThemeColor();
+  const { date, setDate } = useChartStore();
+  const { workoutPlanList } = useWorkoutPlanStore();
 
-  const onClickDate = (type: string) => {
-    setDate(type, workoutPlanList)
-  }
+  const onClickDate = (type: "prev" | "next") => {
+    setDate(type, workoutPlanList);
+  };
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
@@ -42,7 +42,7 @@ const ChartHeader = () => {
           <TouchableOpacity
             style={[styles.button, { paddingRight: 12 }]}
             onPress={() => {
-              onClickDate("next")
+              onClickDate("next");
             }}
           >
             <AntDesign name="rightcircleo" size={28} color={themeColor.tint} />
@@ -50,10 +50,10 @@ const ChartHeader = () => {
         </View>
       </SafeAreaView>
     </BlurView>
-  )
-}
+  );
+};
 
-export default ChartHeader
+export default ChartHeader;
 
 const styles = StyleSheet.create({
   blur: {
@@ -76,4 +76,4 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: "sb-m",
   },
-})
+});

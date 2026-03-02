@@ -4,9 +4,9 @@ import { Text, View } from "@/components/Themed";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Drawer } from "expo-router/drawer";
 import Accordion from "react-native-collapsible/Accordion";
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 // hook
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
@@ -17,13 +17,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 // expo
 import { useNavigation, usePathname, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
 const CustomDrawerContent = (props: any) => {
   const [activeSections, setActiveSections] = useState<number[]>([]);
   const [collapsed, setCollapsed] = useState(true);
   const [multipleSelect, setMultipleSelect] = useState(false);
-  const { workoutPlanList } = userWorkoutPlanStore();
+  const { workoutPlanList } = useWorkoutPlanStore();
   const themeColor = useCurrentThemeColor();
   const sortData = transformWorkoutData(workoutPlanList);
   const navigation = useNavigation();

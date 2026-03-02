@@ -1,14 +1,15 @@
-import React from "react";
+import React, { useMemo } from "react";
 // component
 import { StyleSheet } from "react-native";
 import { Text, View } from "../Themed";
-import { BarChart, ruleTypes, yAxisSides } from "react-native-gifted-charts";
+import { BarChart } from "react-native-gifted-charts";
 // hook
+import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { getEquipmentCount } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 
 const EquipmentChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -21,38 +22,41 @@ const EquipmentChart = () => {
       (acc: number, cur: number) => acc + cur,
     ) === 0;
 
-  const barData1 = [
-    {
-      value: equipmentCount.babel,
-      label: "바벨",
-      frontColor: themeColor.tint,
-    },
-    {
-      value: equipmentCount.dumbel,
-      label: "덤벨",
-      frontColor: themeColor.tint,
-    },
-    {
-      value: equipmentCount.machine,
-      label: "머신",
-      frontColor: themeColor.tint,
-    },
-    {
-      value: equipmentCount.smith,
-      label: "스미스",
-      frontColor: themeColor.tint,
-    },
-    {
-      value: equipmentCount.cable,
-      label: "케이블",
-      frontColor: themeColor.tint,
-    },
-    {
-      value: equipmentCount.body,
-      label: "맨몸",
-      frontColor: themeColor.tint,
-    },
-  ];
+  const barData1 = useMemo(
+    () => [
+      {
+        value: equipmentCount.babel,
+        label: "바벨",
+        frontColor: themeColor.tint,
+      },
+      {
+        value: equipmentCount.dumbel,
+        label: "덤벨",
+        frontColor: themeColor.tint,
+      },
+      {
+        value: equipmentCount.machine,
+        label: "머신",
+        frontColor: themeColor.tint,
+      },
+      {
+        value: equipmentCount.smith,
+        label: "스미스",
+        frontColor: themeColor.tint,
+      },
+      {
+        value: equipmentCount.cable,
+        label: "케이블",
+        frontColor: themeColor.tint,
+      },
+      {
+        value: equipmentCount.body,
+        label: "맨몸",
+        frontColor: themeColor.tint,
+      },
+    ],
+    [equipmentCount, themeColor.tint],
+  );
 
   return (
     <View style={styles(themeColor).container}>
@@ -64,16 +68,10 @@ const EquipmentChart = () => {
         }}
       />
       {isEmptyCount ? (
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text
-            style={{
-              color: themeColor.subText,
-            }}
-          >
-            기록된 운동장비 데이터가 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="기록된 운동장비 데이터가 없습니다."
+          themeColor={themeColor}
+        />
       ) : (
         <View
           style={{
@@ -122,7 +120,7 @@ const EquipmentChart = () => {
 
 export default EquipmentChart;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

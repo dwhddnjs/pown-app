@@ -1,11 +1,11 @@
-import React from "react";
+import React, { useMemo } from "react";
 // component
 import { StyleSheet } from "react-native";
 import { Text, View } from "../Themed";
 import { PieChart } from "react-native-gifted-charts";
 // hook
+import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 // lib
 import {
   convertChartValuesToPercentage,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/function";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
-import InfoIcon from "@expo/vector-icons/FontAwesome6";
+import { ChartEmptyState } from "./chart-empty-state";
 
 const WorkoutPieChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -29,13 +29,21 @@ const WorkoutPieChart = () => {
       listCount.shoulder ===
     0;
 
-  const chartValue = monthlyPlanData && [
-    { value: listCount.back, color: "#F13C33", title: "등" },
-    { value: listCount.chest, color: "#FFC134", title: "가슴" },
-    { value: listCount.shoulder, color: "#3CC42E", title: "어깨" },
-    { value: listCount.leg, color: "#3A76E2", title: "하체" },
-    { value: listCount.arm, color: "#9A48C1", title: "팔" },
-  ];
+  const chartValue = useMemo(
+    () => [
+      { value: listCount.back, color: "#F13C33", title: "등" },
+      { value: listCount.chest, color: "#FFC134", title: "가슴" },
+      { value: listCount.shoulder, color: "#3CC42E", title: "어깨" },
+      { value: listCount.leg, color: "#3A76E2", title: "하체" },
+      { value: listCount.arm, color: "#9A48C1", title: "팔" },
+    ],
+    [listCount],
+  );
+
+  const percentageData = useMemo(
+    () => convertChartValuesToPercentage(chartValue),
+    [chartValue],
+  );
 
   return (
     <View style={[styles(themeColor).container]}>
@@ -44,22 +52,16 @@ const WorkoutPieChart = () => {
       </Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
-        <View style={[styles(themeColor).emptyContainer]}>
-          <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
-          <Text
-            style={{
-              color: themeColor.subText,
-            }}
-          >
-            기록된 운동부위 데이터가 없습니다.
-          </Text>
-        </View>
+        <ChartEmptyState
+          message="기록된 운동부위 데이터가 없습니다."
+          themeColor={themeColor}
+        />
       ) : (
         <View
           style={[styles(themeColor).itemContainer, { marginHorizontal: 6 }]}
         >
           <PieChart
-            data={convertChartValuesToPercentage(chartValue)}
+            data={percentageData}
             donut
             shadow
             showText
@@ -70,7 +72,14 @@ const WorkoutPieChart = () => {
             backgroundColor={themeColor.itemColor}
           />
           <View style={{ backgroundColor: themeColor.itemColor }}>
-            {convertChartValuesToPercentage(chartValue).map((item: any) => (
+            {(
+              percentageData as {
+                value: number;
+                color: string;
+                title: string;
+                text: string;
+              }[]
+            ).map((item) => (
               <View
                 style={{
                   flexDirection: "row",
@@ -93,7 +102,7 @@ const WorkoutPieChart = () => {
 
 export default WorkoutPieChart;
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       backgroundColor: color.itemColor,

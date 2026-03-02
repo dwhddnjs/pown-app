@@ -14,7 +14,7 @@ import {
 import { EmptyList } from "@/components/workout-plan/empty-list";
 import { RefView } from "@/components/RefView";
 // zustand
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 // lib
 import { formatDate, groupByDate } from "@/lib/function";
@@ -36,7 +36,7 @@ import {
 } from "@expo/vector-icons";
 
 export default function TabOneScreen() {
-  const { workoutPlanList, onResetPlanList } = userWorkoutPlanStore();
+  const { workoutPlanList, onResetPlanList } = useWorkoutPlanStore();
   const { date: selectedDate } = useSelectDateStore();
   const sortWorkList = groupByDate(workoutPlanList);
   const headerHeight = useHeaderHeight();

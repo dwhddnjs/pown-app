@@ -1,90 +1,85 @@
 // component
-import {
-  Pressable,
-  StyleSheet,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
-import { Text, View } from "@/components/Themed"
-import { mockupData } from "@/constants/constants"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { toast } from "sonner-native"
+import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View } from "@/components/Themed";
+import { mockupData } from "@/constants/constants";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { toast } from "sonner-native";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store"
+import { useUserStore } from "@/hooks/use-user-store";
 import {
-  userWorkoutPlanStore,
+  useWorkoutPlanStore,
   WorkoutPlanTypes,
-} from "@/hooks/use-workout-plan-store"
+} from "@/hooks/use-workout-plan-store";
 // expo
-import { useRouter } from "expo-router"
-import * as DocumentPicker from "expo-document-picker"
-import { shareAsync, isAvailableAsync } from "expo-sharing"
-import * as FileSystem from "expo-file-system"
-import { useShortsStore } from "@/hooks/use-shorts-store"
+import { useRouter } from "expo-router";
+import * as DocumentPicker from "expo-document-picker";
+import { shareAsync, isAvailableAsync } from "expo-sharing";
+import * as FileSystem from "expo-file-system";
+import { useShortsStore } from "@/hooks/use-shorts-store";
 
 export default function ResetData() {
   const { onResetPlanList, onSetMockout, workoutPlanList } =
-    userWorkoutPlanStore()
+    useWorkoutPlanStore();
 
-  const { userInfo, onReset, setUser } = useUserStore()
-  const { onResetVideo } = useShortsStore()
-  const { back } = useRouter()
-  const themeColor = useCurrentThemeColor()
+  const { userInfo, onReset, setUser } = useUserStore();
+  const { onResetVideo } = useShortsStore();
+  const { back } = useRouter();
+  const themeColor = useCurrentThemeColor();
 
   const jsonFile = {
     user: userInfo,
     workoutPlan: workoutPlanList,
-  }
-  const jsonData = JSON.stringify(jsonFile, null, 2)
-  const fileUri = FileSystem.documentDirectory + "pown.json"
+  };
+  const jsonData = JSON.stringify(jsonFile, null, 2);
+  const fileUri = FileSystem.documentDirectory + "pown.json";
 
   const saveJsonFile = async () => {
     try {
       await FileSystem.writeAsStringAsync(fileUri, jsonData, {
         encoding: FileSystem.EncodingType.UTF8,
-      })
+      });
       if (await isAvailableAsync()) {
         const res = await shareAsync(fileUri, {
           mimeType: "application/json",
-        })
+        });
       } else {
-        console.log("공유 안됨")
+        console.log("공유 안됨");
       }
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const pickJsonFile = async () => {
     try {
       const result = await DocumentPicker.getDocumentAsync({
         type: "application/json",
-      })
+      });
 
       if (result?.assets) {
         const jsonData = await FileSystem.readAsStringAsync(
           result?.assets[0]?.uri,
           {
             encoding: FileSystem.EncodingType.UTF8,
-          }
-        )
-        const { user, workoutPlan } = JSON.parse(jsonData)
-        setUser("userInfo", user)
-        onSetMockout(workoutPlan)
-        toast.success("운동계획 파일을 불러왔습니다!")
+          },
+        );
+        const { user, workoutPlan } = JSON.parse(jsonData);
+        setUser("userInfo", user);
+        onSetMockout(workoutPlan);
+        toast.success("운동계획 파일을 불러왔습니다!");
       }
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
-  }
+  };
 
   const onSubmit = () => {
-    onResetPlanList()
-    onReset()
-    onResetVideo()
-    toast.success("모든 데이터가 초기화 되었습니다")
-    back()
-  }
+    onResetPlanList();
+    onReset();
+    onResetVideo();
+    toast.success("모든 데이터가 초기화 되었습니다");
+    back();
+  };
 
   return (
     <View style={styles.container}>
@@ -145,12 +140,12 @@ export default function ResetData() {
         }}
         onPress={() => {
           // onSetMockout(mockupData as WorkoutPlanTypes[])
-          toast.success("목업데이터 생성 되었습니다")
-          back()
+          toast.success("목업데이터 생성 되었습니다");
+          back();
         }}
       ></Pressable>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -179,4 +174,4 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
   },
-})
+});

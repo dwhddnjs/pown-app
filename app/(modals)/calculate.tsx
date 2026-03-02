@@ -2,16 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 // component
 import { Text, View } from "@/components/Themed";
 import {
+  Animated,
   ScrollView,
   StyleSheet,
   TextInput,
   TouchableOpacity,
 } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from "react-native-reanimated";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
@@ -22,12 +18,9 @@ export default function calculate() {
   const [inputNumber, setInputNumber] = useState("");
   const { open, setOpen } = useIsModalOpenStore();
 
-  const translateX = useSharedValue(0);
+  const inputRef = useRef<TextInput>(null);
+  const translateX = useRef(new Animated.Value(0)).current;
   const [tabItemWidth, setTabItemWidth] = useState(0);
-
-  const indicatorStyle = useAnimatedStyle(() => ({
-    transform: [{ translateX: translateX.value }],
-  }));
 
   const generatePercentageValues = (input: string) => {
     const value = !input ? "0" : input;
@@ -58,25 +51,28 @@ export default function calculate() {
   };
 
   const onSelectedTab = (type: "lb" | "kg") => {
-    translateX.value = withTiming(type === "kg" ? 0 : tabItemWidth, {
-      duration: 250,
-    });
+    if (selected === type) return;
 
-    if (!inputNumber) {
-      setInputNumber("0");
-      setSelected(type);
-      return;
-    }
+    inputRef.current?.blur();
+
+    Animated.timing(translateX, {
+      toValue: type === "kg" ? 0 : tabItemWidth,
+      duration: 250,
+      useNativeDriver: true,
+    }).start();
+
     const num = parseFloat(inputNumber);
-    if (type === "lb") {
-      const pound = Math.round(num * 2.20462).toString();
-      setSelected("lb");
-      setInputNumber(String(pound));
-    } else {
-      const kg = Math.round(num / 2.20462).toString();
-      setSelected("kg");
-      setInputNumber(String(kg));
-    }
+    const converted =
+      !inputNumber || isNaN(num)
+        ? "0"
+        : type === "lb"
+          ? Math.round(num * 2.20462).toString()
+          : Math.round(num / 2.20462).toString();
+
+    setTimeout(() => {
+      setSelected(type);
+      setInputNumber(converted);
+    }, 50);
   };
 
   useEffect(() => {
@@ -84,7 +80,7 @@ export default function calculate() {
     return () => {
       setOpen(false);
     };
-  }, [open]);
+  }, []);
 
   return (
     <View style={{ flex: 1, paddingTop: 24 }}>
@@ -100,8 +96,8 @@ export default function calculate() {
               height: 36,
               borderRadius: 6,
               backgroundColor: themeColor.tint,
+              transform: [{ translateX }],
             },
-            indicatorStyle,
           ]}
         />
         <TouchableOpacity
@@ -120,6 +116,7 @@ export default function calculate() {
       </View>
       <View style={styles(themeColor).inputContainer}>
         <TextInput
+          ref={inputRef}
           keyboardType="numeric"
           placeholder="0"
           textAlign="right"

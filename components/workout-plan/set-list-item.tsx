@@ -1,72 +1,60 @@
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import React from "react"
-import { Text, View } from "../Themed"
-import Colors from "@/constants/Colors"
-import { NumberBallIcon } from "../number-ball-icon"
-import { SetWithCountType } from "@/hooks/use-plan-store"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
-import CheckCircle from "@expo/vector-icons/AntDesign"
+import { StyleSheet, TouchableOpacity } from "react-native";
+import React from "react";
+import { Text, View } from "../Themed";
+import { NumberBallIcon } from "../number-ball-icon";
+import { SetWithCountType } from "@/hooks/use-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import CheckCircle from "@expo/vector-icons/AntDesign";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface SetListItemProps {
-  item: SetWithCountType
-  planId: number
+  item: SetWithCountType;
+  planId: number;
+  setIndex: number;
 }
 
-export const SetListItem = ({ item, planId }: SetListItemProps) => {
-  const { setCompleteProgress } = userWorkoutPlanStore()
-  const colorScheme = useColorScheme()
+export const SetListItem = ({ item, planId, setIndex }: SetListItemProps) => {
+  const { setCompleteProgress } = useWorkoutPlanStore();
+  const themeColor = useCurrentThemeColor();
 
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <View
         style={[
           styles.ballContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          { backgroundColor: themeColor.itemColor },
         ]}
       >
-        <NumberBallIcon>{item.id}</NumberBallIcon>
+        <NumberBallIcon>{setIndex}</NumberBallIcon>
       </View>
       <View
         style={[
           styles.setCounter,
           {
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
-            borderBottomColor: Colors[colorScheme ?? "light"].subText,
+            backgroundColor: themeColor.itemColor,
+            borderBottomColor: themeColor.subText,
           },
         ]}
       >
         <View
           style={[
             styles.setCounterContainer,
-            { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+            { backgroundColor: themeColor.itemColor },
           ]}
         >
-          <Text
-            style={[
-              styles.setType,
-              { color: Colors[colorScheme ?? "light"].tint },
-            ]}
-          >
+          <Text style={[styles.setType, { color: themeColor.tint }]}>
             {item.set}
           </Text>
           <Text
-            style={[
-              styles.count,
-              { color: Colors[colorScheme ?? "light"].text },
-            ]}
+            style={[styles.count, { color: themeColor.text }]}
           >{`${item.count} 회`}</Text>
         </View>
         <Text
           style={[
             styles.progressText,
-            { color: Colors[colorScheme ?? "light"].subText },
+            { color: themeColor.subText },
             item.progress === "완료" && {
-              color: Colors[colorScheme ?? "light"].tint,
+              color: themeColor.tint,
             },
           ]}
         >
@@ -76,20 +64,20 @@ export const SetListItem = ({ item, planId }: SetListItemProps) => {
       <View
         style={[
           styles.buttonContainer,
-          { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+          { backgroundColor: themeColor.itemColor },
         ]}
       >
         {item.progress === "완료" ? (
           <View
             style={[
               styles.completedIcon,
-              { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
+              { backgroundColor: themeColor.itemColor },
             ]}
           >
             <CheckCircle
               name="checkcircleo"
               size={24}
-              color={Colors[colorScheme ?? "light"].tint}
+              color={themeColor.tint}
             />
           </View>
         ) : (
@@ -97,19 +85,19 @@ export const SetListItem = ({ item, planId }: SetListItemProps) => {
             style={[
               styles.button,
               {
-                backgroundColor: Colors[colorScheme ?? "light"].subText,
+                backgroundColor: themeColor.subText,
                 borderRadius: 8,
               },
             ]}
             onPress={() => setCompleteProgress(planId, item.id)}
           >
-            <Text style={styles.butttonText}>완료</Text>
+            <Text style={styles.buttonText}>완료</Text>
           </TouchableOpacity>
         )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -153,7 +141,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
 
-  butttonText: {
+  buttonText: {
     fontSize: 12,
   },
   completedIcon: {
@@ -161,4 +149,4 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: 10,
   },
-})
+});

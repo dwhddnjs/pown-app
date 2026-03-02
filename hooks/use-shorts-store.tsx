@@ -6,7 +6,7 @@ export type ShortsVideoTypes = {
   id: number
   thumbnail: string
   video: string
-  createdAt: Date
+  createdAt: string
 }
 
 type ShortsStoreTypes = {

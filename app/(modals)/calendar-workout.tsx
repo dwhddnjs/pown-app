@@ -1,19 +1,27 @@
 // component
-import { View, Text } from "@/components/Themed"
-import { Platform, StyleSheet, useColorScheme, FlatList } from "react-native"
-import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
+import { View, Text } from "@/components/Themed";
+import { StyleSheet, FlatList } from "react-native";
+import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 // expo
-import { useLocalSearchParams, useRouter } from "expo-router"
+import { useLocalSearchParams } from "expo-router";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { formatDate, groupByDate } from "@/lib/function"
+import { formatDate, groupByDate } from "@/lib/function";
+import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
+import { ThemeColorType } from "@/constants/Colors";
 
 export default function calendarWorkout() {
-  const themeColor = useCurrentThemeColor()
-  const { data } = useLocalSearchParams()
-  const workoutPlanData = JSON.parse(data as string)
-  const sortWorkList = groupByDate(workoutPlanData)
+  const themeColor = useCurrentThemeColor();
+  const { data } = useLocalSearchParams();
+
+  let workoutPlanData: WorkoutPlanTypes[] = [];
+  try {
+    workoutPlanData = data ? JSON.parse(data as string) : [];
+  } catch {
+    workoutPlanData = [];
+  }
+  const sortWorkList = groupByDate(workoutPlanData);
 
   return (
     <View style={styles(themeColor).container}>
@@ -59,14 +67,14 @@ export default function calendarWorkout() {
                 ))}
               </View>
             </View>
-          )
+          );
         }}
       />
     </View>
-  )
+  );
 }
 
-const styles = (color: any) =>
+const styles = (color: ThemeColorType) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -114,4 +122,4 @@ const styles = (color: any) =>
       borderRadius: 50,
       marginTop: 4,
     },
-  })
+  });

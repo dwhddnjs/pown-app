@@ -1,9 +1,10 @@
-import { Image, StyleSheet } from "react-native"
+import { Image } from "react-native"
 import React from "react"
-import Colors from "@/constants/Colors"
 import { Text, View } from "../Themed"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export const EmptyList = () => {
+  const themeColor = useCurrentThemeColor()
   return (
     <View
       style={{
@@ -19,7 +20,7 @@ export const EmptyList = () => {
       />
       <Text
         style={{
-          color: Colors.dark.subText,
+          color: themeColor.subText,
           fontSize: 18,
           textAlign: "center",
           lineHeight: 24,
@@ -30,5 +31,3 @@ export const EmptyList = () => {
     </View>
   )
 }
-
-const styles = StyleSheet.create({})
