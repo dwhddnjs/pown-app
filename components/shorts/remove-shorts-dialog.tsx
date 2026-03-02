@@ -1,7 +1,7 @@
 import { StyleSheet } from "react-native"
 import React from "react"
 import { Dialog } from "../Dialog"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Button } from "../Button"
 import { useRouter } from "expo-router"
 import { useShortsStore } from "@/hooks/use-shorts-store"
@@ -19,7 +19,7 @@ export const RemoveShortsDialog = ({
   setIsOpen,
   position,
 }: RemoveShortsDialogProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { back } = useRouter()
   const { videos, setRemoveVideo } = useShortsStore()
 

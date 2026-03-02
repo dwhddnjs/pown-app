@@ -4,7 +4,7 @@ import { Text, View } from "@/components/Themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import GoodIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import TiredIcon from "@expo/vector-icons/MaterialCommunityIcons"
@@ -60,7 +60,7 @@ export const getIcon = (value: string, size: number, color: string) => {
 
 export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
   const { condition, setCondition, setFilterCondition } = usePlanStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const onPressCondition = () => {
     if (condition.includes(item.condition)) {

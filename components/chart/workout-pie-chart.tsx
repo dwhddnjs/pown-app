@@ -1,25 +1,25 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
-import { PieChart } from "react-native-gifted-charts"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
+import { PieChart } from "react-native-gifted-charts";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 // lib
 import {
   convertChartValuesToPercentage,
   sortWorkoutPlanList,
-} from "@/lib/function"
-import { useChartStore } from "@/hooks/use-chart-store"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+} from "@/lib/function";
+import { useChartStore } from "@/hooks/use-chart-store";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 
 const WorkoutPieChart = () => {
-  const themeColor = useCurrneThemeColor()
-  const { date } = useChartStore()
-  const { monthlyPlanData } = useMonthlyPlanData(date)
-  const listCount = sortWorkoutPlanList(monthlyPlanData)
+  const themeColor = useCurrentThemeColor();
+  const { date } = useChartStore();
+  const { monthlyPlanData } = useMonthlyPlanData(date);
+  const listCount = sortWorkoutPlanList(monthlyPlanData);
 
   const isEmptyCount =
     listCount.arm +
@@ -27,7 +27,7 @@ const WorkoutPieChart = () => {
       listCount.chest +
       listCount.leg +
       listCount.shoulder ===
-    0
+    0;
 
   const chartValue = monthlyPlanData && [
     { value: listCount.back, color: "#F13C33", title: "등" },
@@ -35,11 +35,13 @@ const WorkoutPieChart = () => {
     { value: listCount.shoulder, color: "#3CC42E", title: "어깨" },
     { value: listCount.leg, color: "#3A76E2", title: "하체" },
     { value: listCount.arm, color: "#9A48C1", title: "팔" },
-  ]
+  ];
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18 }}>주로 어느 부위 운동을 했지?</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>
+        주로 어느 부위 운동을 했지?
+      </Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <View style={[styles(themeColor).emptyContainer]}>
@@ -53,7 +55,9 @@ const WorkoutPieChart = () => {
           </Text>
         </View>
       ) : (
-        <View style={styles(themeColor).itemContainer}>
+        <View
+          style={[styles(themeColor).itemContainer, { marginHorizontal: 6 }]}
+        >
           <PieChart
             data={convertChartValuesToPercentage(chartValue)}
             donut
@@ -84,10 +88,10 @@ const WorkoutPieChart = () => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default WorkoutPieChart
+export default WorkoutPieChart;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -111,4 +115,4 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });

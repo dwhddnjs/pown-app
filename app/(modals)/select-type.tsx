@@ -10,7 +10,7 @@ import { IconTitleButton } from "@/components/IconTitleButton"
 import { useNavigation, useRouter } from "expo-router"
 import { format } from "date-fns"
 import Entypo from "@expo/vector-icons/Entypo"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useLayoutEffect, useState } from "react"
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet"
 import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store"
@@ -18,7 +18,7 @@ import { useIsFocused } from "@react-navigation/native"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
 export default function ModalScreen() {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { open, setOpen } = useIsDialogOpenStore()
   const { date } = usePlanStore()
 

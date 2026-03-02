@@ -19,7 +19,7 @@ import {
 import { Text, View } from "@/components/Themed";
 // lib
 import { useHeaderHeight } from "@react-navigation/elements";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // icon
 import Arm from "@/assets/images/svg/arm_icon.svg";
 import Back from "@/assets/images/svg/back_icon.svg";
@@ -37,7 +37,7 @@ import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 
 export default function calendar() {
   const headerHeight = useHeaderHeight();
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const { date } = useCalendarStore();
   const { monthlyPlanData } = useMonthlyPlanData(format(date, "yyyyMM"));
   const workoutCount = removeSameItem(monthlyPlanData).length;

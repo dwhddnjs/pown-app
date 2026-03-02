@@ -34,7 +34,7 @@ import { useUserStore } from "@/hooks/use-user-store";
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // hooks
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { FontAwesome5 } from "@expo/vector-icons";
 
 export { ErrorBoundary } from "expo-router";
@@ -64,12 +64,6 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  // useEffect(() => {
-  //   ;(async () => {
-  //     await AsyncStorage.clear()
-  //   })()
-  // }, [])
-
   useEffect(() => {
     if (theme === "system") {
       Appearance.setColorScheme(null);
@@ -82,7 +76,7 @@ export default function RootLayout() {
     if (theme == "light") {
       Appearance.setColorScheme("light");
     }
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     (async () => {
@@ -132,7 +126,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   return (
     <Stack
       screenOptions={{

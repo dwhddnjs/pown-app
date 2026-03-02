@@ -3,7 +3,7 @@ import { Text, View } from "../Themed";
 import { Dialog } from "../Dialog";
 import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { Button } from "../Button";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useState } from "react";
@@ -17,7 +17,7 @@ interface SelectTypeDateSheetProps {
 export const SelectTypeDateSheet = () => {
   const { open, setOpen } = useIsDialogOpenStore();
   const { setDate } = usePlanStore();
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const [selectedDate, setSelectedDate] = useState(new Date().valueOf());
 
   const onSubmitDate = () => {

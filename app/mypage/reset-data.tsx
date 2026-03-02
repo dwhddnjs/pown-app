@@ -7,7 +7,7 @@ import {
 } from "react-native"
 import { Text, View } from "@/components/Themed"
 import { mockupData } from "@/constants/constants"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { toast } from "sonner-native"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
@@ -29,7 +29,7 @@ export default function ResetData() {
   const { userInfo, onReset, setUser } = useUserStore()
   const { onResetVideo } = useShortsStore()
   const { back } = useRouter()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const jsonFile = {
     user: userInfo,

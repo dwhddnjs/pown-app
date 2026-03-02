@@ -1,33 +1,33 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // data
-import { conditionData } from "@/constants/constants"
+import { conditionData } from "@/constants/constants";
 // lib
-import { getIcon } from "../add-plan/condition-icon"
-import { convertConditionType, getConditionCount } from "@/lib/function"
+import { getIcon } from "../add-plan/condition-icon";
+import { convertConditionType, getConditionCount } from "@/lib/function";
 // hook
-import { useChartStore } from "@/hooks/use-chart-store"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import { useChartStore } from "@/hooks/use-chart-store";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 
 const ConditionCount = () => {
-  const themeColor = useCurrneThemeColor()
-  const { date } = useChartStore()
-  const { monthlyPlanData } = useMonthlyPlanData(date)
-  const getCount = getConditionCount(monthlyPlanData)
+  const themeColor = useCurrentThemeColor();
+  const { date } = useChartStore();
+  const { monthlyPlanData } = useMonthlyPlanData(date);
+  const getCount = getConditionCount(monthlyPlanData);
 
   const isEmptyCount =
     (Object.values(getCount) as number[]).reduce(
-      (acc: number, cur: number) => acc + cur
-    ) === 0
+      (acc: number, cur: number) => acc + cur,
+    ) === 0;
 
   return (
     <View style={styles(themeColor).container}>
-      <Text style={{ fontSize: 18 }}>컨디션 별 횟수</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>컨디션 별 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <View style={[styles(themeColor).emptyContainer]}>
@@ -46,7 +46,10 @@ const ConditionCount = () => {
             <View style={styles(themeColor).iconItem} key={item.id}>
               <View style={styles(themeColor).numberCount}>
                 <Text style={{ fontSize: 10 }}>
-                  {getCount[`${convertConditionType(item.condition)}`]}
+                  {(() => {
+                    const key = convertConditionType(item.condition);
+                    return key ? (getCount[key] ?? 0) : 0;
+                  })()}
                 </Text>
               </View>
               {getIcon(item.condition, 44, themeColor.tint)}
@@ -56,10 +59,10 @@ const ConditionCount = () => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default ConditionCount
+export default ConditionCount;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -110,4 +113,4 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });

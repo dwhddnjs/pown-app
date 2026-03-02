@@ -3,7 +3,7 @@ import { StyleSheet } from "react-native"
 import { Text, View } from "../Themed"
 import { Dialog } from "../Dialog"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Button } from "../Button"
 import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store"
 import { useUserStore } from "@/hooks/use-user-store"
@@ -19,7 +19,7 @@ export const RemoveWorkoutTagDialog = ({
   const { isRemoveOpen, setIsRemoveOpen } = useWorkoutTagDialogStore()
   const { workout, setPlanValue } = usePlanStore()
   const { setRemoveWorkoutTag } = useUserStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const onRemoveWorkoutTag = () => {
     setRemoveWorkoutTag(workoutType, workout)

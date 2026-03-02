@@ -1,5 +1,11 @@
+import { UserInfoTypes } from "@/hooks/use-user-store"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import { addDays, format, lastDayOfMonth, parse, parseISO } from "date-fns"
+import { parse } from "date-fns"
+
+type WorkoutTypeCount = Record<
+  "chest" | "back" | "arm" | "leg" | "shoulder",
+  number
+>
 
 export const groupByDate = (arr: WorkoutPlanTypes[]) => {
   return arr.reduce<Record<string, WorkoutPlanTypes[]>>((acc, cur) => {
@@ -42,7 +48,7 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
-    const date = new Date(item.createdAt.replace(".", "-").replace(".", "-"))
+    const date = new Date(item.createdAt.replaceAll(".", "-"))
     const year = `${date.getFullYear()}년`
     const month = `${String(date.getMonth() + 1).padStart(2, "0")}월` // 월을 2자리로 변환
     const day = `${String(date.getDate()).padStart(2, "0")}일` // 일을 2자리로 변환
@@ -70,12 +76,23 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
     }))
 }
 
-export const sortWorkoutPlanList = (list: WorkoutPlanTypes[]) => {
-  const result = { chest: 0, back: 0, arm: 0, leg: 0, shoulder: 0 }
-  return list.reduce((acc: any, item) => {
-    acc[item.type] = (acc[item.type] || 0) + 1
+export const sortWorkoutPlanList = (
+  list: WorkoutPlanTypes[]
+): WorkoutTypeCount => {
+  const result: WorkoutTypeCount = {
+    chest: 0,
+    back: 0,
+    arm: 0,
+    leg: 0,
+    shoulder: 0,
+  }
+  return list.reduce<WorkoutTypeCount>((acc, item) => {
+    const key = item.type as keyof WorkoutTypeCount
+    if (key in acc) {
+      acc[key] = (acc[key] || 0) + 1
+    }
     return acc
-  }, result)
+  }, { ...result })
 }
 
 export const convertChartValuesToPercentage = (
@@ -92,55 +109,60 @@ export const convertChartValuesToPercentage = (
   }))
 }
 
-export const getConditionCount = (workoutPlanList: WorkoutPlanTypes[]) => {
-  const result = {
-    good: 0,
-    tired: 0,
-    angry: 0,
-    sick: 0,
-    sad: 0,
-    lol: 0,
-    cool: 0,
-    neutral: 0,
-    anoy: 0,
-  }
-  const getConditionList = workoutPlanList
-    .map((item: WorkoutPlanTypes) => item.condition)
-    .flat()
-
-  return getConditionList.reduce((acc: any, item: string) => {
-    if (item === "좋음") {
-      acc["good"] = (acc["good"] || 0) + 1
-    }
-    if (item === "피곤함") {
-      acc["tired"] = (acc["tired"] || 0) + 1
-    }
-    if (item === "화남") {
-      acc["angry"] = (acc["angry"] || 0) + 1
-    }
-    if (item === "아픔") {
-      acc["sick"] = (acc["sick"] || 0) + 1
-    }
-    if (item === "슬픔") {
-      acc["sad"] = (acc["sad"] || 0) + 1
-    }
-    if (item === "신남") {
-      acc["lol"] = (acc["lol"] || 0) + 1
-    }
-    if (item === "상쾌함") {
-      acc["cool"] = (acc["cool"] || 0) + 1
-    }
-    if (item === "양호함") {
-      acc["neutral"] = (acc["neutral"] || 0) + 1
-    }
-    if (item === "짜증남") {
-      acc["anoy"] = (acc["anoy"] || 0) + 1
-    }
-    return acc
-  }, result)
+type ConditionCountResult = {
+  good: number
+  tired: number
+  angry: number
+  sick: number
+  sad: number
+  lol: number
+  cool: number
+  neutral: number
+  anoy: number
 }
 
-export const convertConditionType = (type: string) => {
+const CONDITION_MAP: Record<string, keyof ConditionCountResult> = {
+  좋음: "good",
+  피곤함: "tired",
+  화남: "angry",
+  아픔: "sick",
+  슬픔: "sad",
+  신남: "lol",
+  상쾌함: "cool",
+  양호함: "neutral",
+  짜증남: "anoy",
+}
+
+export const getConditionCount = (
+  workoutPlanList: WorkoutPlanTypes[]
+): ConditionCountResult => {
+  const countMap = new Map<keyof ConditionCountResult, number>([
+    ["good", 0],
+    ["tired", 0],
+    ["angry", 0],
+    ["sick", 0],
+    ["sad", 0],
+    ["lol", 0],
+    ["cool", 0],
+    ["neutral", 0],
+    ["anoy", 0],
+  ])
+
+  const conditionList = workoutPlanList.flatMap((item) => item.condition)
+
+  for (const item of conditionList) {
+    const key = CONDITION_MAP[item]
+    if (key) {
+      countMap.set(key, (countMap.get(key) ?? 0) + 1)
+    }
+  }
+
+  return Object.fromEntries(countMap) as ConditionCountResult
+}
+
+export const convertConditionType = (
+  type: string
+): keyof ConditionCountResult | undefined => {
   switch (type) {
     case "좋음":
       return "good"
@@ -160,41 +182,49 @@ export const convertConditionType = (type: string) => {
       return "neutral"
     case "짜증남":
       return "anoy"
+    default:
+      return undefined
   }
 }
 
-export const getEquipmentCount = (data: WorkoutPlanTypes[]) => {
-  const result = {
-    babel: 0,
-    dumbel: 0,
-    machine: 0,
-    smith: 0,
-    cable: 0,
-    body: 0,
-  }
-  const equipmentList = data.map((item: WorkoutPlanTypes) => item.equipment)
+type EquipmentCountResult = {
+  babel: number
+  dumbel: number
+  machine: number
+  smith: number
+  cable: number
+  body: number
+}
 
-  return equipmentList.reduce((acc: any, item: string) => {
-    if (item === "바벨") {
-      acc["babel"] = (acc["babel"] || 0) + 1
+const EQUIPMENT_MAP: Record<string, keyof EquipmentCountResult> = {
+  바벨: "babel",
+  덤벨: "dumbel",
+  머신: "machine",
+  스미스: "smith",
+  케이블: "cable",
+  맨몸: "body",
+}
+
+export const getEquipmentCount = (
+  data: WorkoutPlanTypes[]
+): EquipmentCountResult => {
+  const countMap = new Map<keyof EquipmentCountResult, number>([
+    ["babel", 0],
+    ["dumbel", 0],
+    ["machine", 0],
+    ["smith", 0],
+    ["cable", 0],
+    ["body", 0],
+  ])
+
+  for (const item of data) {
+    const key = EQUIPMENT_MAP[item.equipment]
+    if (key) {
+      countMap.set(key, (countMap.get(key) ?? 0) + 1)
     }
-    if (item === "덤벨") {
-      acc["dumbel"] = (acc["dumbel"] || 0) + 1
-    }
-    if (item === "머신") {
-      acc["machine"] = (acc["machine"] || 0) + 1
-    }
-    if (item === "스미스") {
-      acc["smith"] = (acc["smith"] || 0) + 1
-    }
-    if (item === "케이블") {
-      acc["cable"] = (acc["cable"] || 0) + 1
-    }
-    if (item === "맨몸") {
-      acc["body"] = (acc["body"] || 0) + 1
-    }
-    return acc
-  }, result)
+  }
+
+  return Object.fromEntries(countMap) as EquipmentCountResult
 }
 
 export const convertChartDate = (date: string) => {
@@ -206,28 +236,19 @@ export const convertChartDate = (date: string) => {
   return `${year}년 ${month}월`
 }
 
-type RawData = {
-  age: string
-  bp: string
-  createdAt: string
-  dl: string
-  gender: string
-  height: string
-  sq: string
-  weight: string
-}
+type BodyDataItem = { id: number; value: number; date: string }
 
-type ProcessedData = { id: number; value: number; date: string }
-
-export const removeSameItem = (arr: any) => {
-  return arr.reduce((acc: any, item: any) => {
+export const removeSameItem = <T extends { createdAt: string }>(
+  arr: T[]
+): T[] => {
+  return arr.reduce<T[]>((acc, item) => {
     const dateKey = item.createdAt.split(" ")[0] // YYYY.MM.DD만 추출
     const parsedDate = parse(
       item.createdAt,
       "yyyy.MM.dd HH:mm:ss",
       new Date()
     ).valueOf()
-    const existingIndex = acc.findIndex((el: any) =>
+    const existingIndex = acc.findIndex((el) =>
       el.createdAt.startsWith(dateKey)
     )
     if (existingIndex === -1) {
@@ -247,11 +268,13 @@ export const removeSameItem = (arr: any) => {
   }, [])
 }
 
-export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
+export const getMonthlyBodyData = (
+  rawData: Pick<UserInfoTypes, "createdAt" | "weight">[],
+  yearMonth: string
+): BodyDataItem[] => {
   const year = yearMonth.slice(0, 4)
   const month = yearMonth.slice(4, 6)
 
-  // 해당 월 데이터 필터링
   const filterPlanListData = rawData.filter((item) => {
     return (
       item.createdAt.slice(0, 4) === year &&
@@ -259,34 +282,30 @@ export const getMonthlyBodyData = (rawData: any[], yearMonth: string) => {
     )
   })
 
-  // 중복 제거 (함수 정의 필요)
   const removeSameDateItem = removeSameItem(filterPlanListData)
 
-  // 필요한 데이터만 추출하여 변환
-  const processedData = removeSameDateItem.map((item: any) => {
-    const year = item.createdAt.slice(0, 4)
-    const month = item.createdAt.slice(5, 7)
-    const day = item.createdAt.slice(8, 10)
+  const processedData = removeSameDateItem.map((item) => {
+    const y = item.createdAt.slice(0, 4)
+    const m = item.createdAt.slice(5, 7)
+    const d = item.createdAt.slice(8, 10)
     return {
-      value: item.weight,
-      date: `${year}년 ${month}월 ${day}일`,
+      value: item.weight ?? "0",
+      date: `${y}년 ${m}월 ${d}일`,
     }
   })
-  const daysInMonth = new Date(parseInt(year), parseInt(month), 0).getDate()
+  const daysInMonth = new Date(parseInt(year, 10), parseInt(month, 10), 0).getDate()
 
-  const result = []
+  const result: BodyDataItem[] = []
   for (let day = 1; day <= daysInMonth; day++) {
     result.push({
       id: day,
       value: 0,
-      date: `${year}년 ${month}월 ${day}일`,
+      date: `${year}년 ${month}월 ${String(day).padStart(2, "0")}일`,
     })
   }
 
   return result.map((item) => {
-    const findItem = processedData.find(
-      (el: (typeof processedData)[0]) => el.date === item.date
-    )
+    const findItem = processedData.find((el) => el.date === item.date)
     return {
       ...item,
       value: findItem ? parseInt(findItem.value, 10) : item.value,
@@ -327,24 +346,3 @@ export const searchByInitial = (name: string, search: string) => {
   const initial = getInitialConsonant(name)
   return initial === search
 }
-
-// const mockup = [
-//   { date: "2025년 03월 01일", value: "70" },
-//   { date: "2025년 03월 02일", value: "70" },
-//   { date: "2025년 03월 03일", value: "70" },
-//   { date: "2025년 03월 04일", value: "70" },
-//   { date: "2025년 03월 05일", value: "70" },
-//   { date: "2025년 03월 06일", value: "70" },
-//   { date: "2025년 03월 07일", value: "70" },
-//   { date: "2025년 03월 08일", value: "70" },
-//   { date: "2025년 03월 09일", value: "70" },
-//   { date: "2025년 03월 10일", value: "70" },
-//   { date: "2025년 03월 11일", value: "70" },
-//   { date: "2025년 03월 12일", value: "70" },
-//   { date: "2025년 03월 13일", value: "70" },
-//   { date: "2025년 03월 14일", value: "70" },
-//   { date: "2025년 03월 15일", value: "80" },
-//   { date: "2025년 03월 16일", value: "80" },
-//   { date: "2025년 03월 17일", value: "80" },
-//   { date: "2025년 03월 18일", value: "90" },
-// ]

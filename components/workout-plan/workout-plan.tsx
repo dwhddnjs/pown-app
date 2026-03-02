@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react";
 // component
 import {
   Pressable,
@@ -6,59 +6,133 @@ import {
   TouchableOpacity,
   useColorScheme,
   Image,
-} from "react-native"
-import { Text, View } from "../Themed"
-import { NoteText } from "./note-text"
-import { SetListItem } from "./set-list-item"
+} from "react-native";
+import { Text, View } from "../Themed";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  Easing,
+} from "react-native-reanimated";
+import { NoteText } from "./note-text";
+import { SetListItem } from "./set-list-item";
 // icon
-import { ConditionIcon } from "../add-plan/condition-icon"
-import { WeightDate } from "./weight-date"
-import Back from "@/assets/images/svg/back_icon.svg"
-import Arm from "@/assets/images/svg/arm_icon.svg"
-import Chest from "@/assets/images/svg/chest_icon.svg"
-import Leg from "@/assets/images/svg/leg_icon.svg"
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
+import { ConditionIcon } from "../add-plan/condition-icon";
+import { WeightDate } from "./weight-date";
+import Back from "@/assets/images/svg/back_icon.svg";
+import Arm from "@/assets/images/svg/arm_icon.svg";
+import Chest from "@/assets/images/svg/chest_icon.svg";
+import Leg from "@/assets/images/svg/leg_icon.svg";
+import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 // zustand
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // expo
-import { useUserStore } from "@/hooks/use-user-store"
-import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import { useUserStore } from "@/hooks/use-user-store";
+import { useImageUriStore } from "@/hooks/use-image-uri-store";
 // import { Image } from "expo-image"
 
+interface ProgressBarProps {
+  completed: number;
+  total: number;
+  tintColor: string;
+  bgColor: string;
+  textColor: string;
+}
+
+const ProgressBar = ({
+  completed,
+  total,
+  tintColor,
+  bgColor,
+  textColor,
+}: ProgressBarProps) => {
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const progress = useSharedValue(pct);
+
+  useEffect(() => {
+    progress.value = withTiming(pct, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [pct]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    width: `${progress.value}%`,
+    height: "100%",
+    borderRadius: 3,
+    backgroundColor: tintColor,
+  }));
+
+  return (
+    <View style={{ gap: 4, backgroundColor: "transparent" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          backgroundColor: "transparent",
+        }}
+      >
+        <Text style={{ fontSize: 11, fontFamily: "sb-l", color: textColor }}>
+          {completed}/{total} 세트 완료
+        </Text>
+        <Text
+          style={{
+            fontSize: 11,
+            fontFamily: "sb-m",
+            color: pct === 100 ? tintColor : textColor,
+          }}
+        >
+          {pct}%
+        </Text>
+      </View>
+      <View
+        style={{
+          height: 6,
+          borderRadius: 3,
+          backgroundColor: bgColor,
+          overflow: "hidden",
+        }}
+      >
+        <Animated.View style={animatedStyle} />
+      </View>
+    </View>
+  );
+};
+
 interface WorkoutPlanProps {
-  item: WorkoutPlanTypes
-  index: number
-  totalLength: number
+  item: WorkoutPlanTypes;
+  index: number;
+  totalLength: number;
 }
 
 export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
-  const themeColor = useCurrneThemeColor()
-  const { mediaLibrary } = useUserStore()
-  const { setImageUri } = useImageUriStore()
+  const themeColor = useCurrentThemeColor();
+  const { mediaLibrary } = useUserStore();
+  const { setImageUri } = useImageUriStore();
 
   const getWorkoutIcon = (type: string) => {
-    let result
+    let result;
     switch (type) {
       case "chest":
-        result = <Chest />
-        break
+        result = <Chest />;
+        break;
       case "back":
-        result = <Back />
-        break
+        result = <Back />;
+        break;
       case "leg":
-        result = <Leg />
-        break
+        result = <Leg />;
+        break;
       case "arm":
-        result = <Arm />
-        break
+        result = <Arm />;
+        break;
       default:
-        result = <Shoulder />
-        break
+        result = <Shoulder />;
+        break;
     }
 
-    return result
-  }
+    return result;
+  };
 
   return (
     <View
@@ -126,14 +200,23 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
         {/* 노트 */}
         {item.content && <NoteText title={item.title} content={item.content} />}
 
-        {/* 세트와 횟수 */}
+        {/* 세트와 횟수 + 완료율 */}
         {item.setWithCount.length > 0 && (
           <View
             style={{
               backgroundColor: themeColor.itemColor,
-              gap: 8,
+              gap: 14,
             }}
           >
+            <ProgressBar
+              completed={
+                item.setWithCount.filter((s) => s.progress === "완료").length
+              }
+              total={item.setWithCount.length}
+              tintColor={themeColor.tint}
+              bgColor={themeColor.empty}
+              textColor={themeColor.subText}
+            />
             {item.setWithCount.map((setCount) => (
               <SetListItem key={setCount.id} planId={item.id} item={setCount} />
             ))}
@@ -172,14 +255,14 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
                     ]}
                   />
                 </Pressable>
-              )
+              );
             })}
           </View>
         )}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -217,4 +300,4 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     borderWidth: 1,
   },
-})
+});

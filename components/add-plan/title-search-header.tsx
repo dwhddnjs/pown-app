@@ -2,7 +2,7 @@ import React from "react"
 //components
 import { StyleSheet, TouchableOpacity } from "react-native"
 // color
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import { FontAwesome } from "@expo/vector-icons"
 import { Text, View } from "../Themed"
@@ -12,7 +12,7 @@ interface TitleSearchHeaderProps {
 }
 
 export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   return (
     <View style={styles.header}>

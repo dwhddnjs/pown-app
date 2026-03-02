@@ -6,7 +6,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react"
 import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import ArrowIcon from "@expo/vector-icons/AntDesign"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import Feather from "@expo/vector-icons/Feather"
 import { format } from "date-fns"
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog"
@@ -15,7 +15,7 @@ export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>()
 
   const { videos, setRemoveVideo } = useShortsStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { back } = useRouter()
   const initailPage = useMemo(() => {
     const index = videos.findIndex((v) => v.id === parseInt(slug[0]))

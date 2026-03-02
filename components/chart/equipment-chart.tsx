@@ -1,25 +1,25 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
-import { BarChart, ruleTypes, yAxisSides } from "react-native-gifted-charts"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
+import { BarChart, ruleTypes, yAxisSides } from "react-native-gifted-charts";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { getEquipmentCount } from "@/lib/function"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import { useChartStore } from "@/hooks/use-chart-store"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { getEquipmentCount } from "@/lib/function";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import { useChartStore } from "@/hooks/use-chart-store";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 
 const EquipmentChart = () => {
-  const themeColor = useCurrneThemeColor()
-  const { date } = useChartStore()
-  const { monthlyPlanData } = useMonthlyPlanData(date)
-  const equipmentCount = getEquipmentCount(monthlyPlanData)
+  const themeColor = useCurrentThemeColor();
+  const { date } = useChartStore();
+  const { monthlyPlanData } = useMonthlyPlanData(date);
+  const equipmentCount = getEquipmentCount(monthlyPlanData);
 
   const isEmptyCount =
     (Object.values(equipmentCount) as number[]).reduce(
-      (acc: number, cur: number) => acc + cur
-    ) === 0
+      (acc: number, cur: number) => acc + cur,
+    ) === 0;
 
   const barData1 = [
     {
@@ -52,11 +52,11 @@ const EquipmentChart = () => {
       label: "맨몸",
       frontColor: themeColor.tint,
     },
-  ]
+  ];
 
   return (
     <View style={styles(themeColor).container}>
-      <Text style={{ fontSize: 18 }}>주로 뭐로 운동했지?</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>주로 뭐로 운동했지?</Text>
       <View
         style={{
           height: 1,
@@ -117,10 +117,10 @@ const EquipmentChart = () => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default EquipmentChart
+export default EquipmentChart;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -172,4 +172,4 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });

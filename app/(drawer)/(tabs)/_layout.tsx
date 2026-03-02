@@ -14,7 +14,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { SymbolView } from "expo-symbols";
 import Entypo from "@expo/vector-icons/Entypo";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { CalendarHeader } from "@/components/calendar";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import ImageModal from "@/components/workout-plan/image-modal";
@@ -32,7 +32,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function TabLayout() {
-  const themColor = useCurrneThemeColor();
+  const themColor = useCurrentThemeColor();
   const { uri, onResetImageUri } = useImageUriStore();
   const [fabOpen, setFabOpen] = useState(false);
   const fabProgress = useSharedValue(0);

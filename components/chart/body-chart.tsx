@@ -1,39 +1,46 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
-import { LineChart } from "react-native-gifted-charts"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
+import { LineChart } from "react-native-gifted-charts";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useUserStore } from "@/hooks/use-user-store"
-import { useChartStore } from "@/hooks/use-chart-store"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useUserStore } from "@/hooks/use-user-store";
+import { useChartStore } from "@/hooks/use-chart-store";
 // lib
-import { getMonthlyBodyData } from "@/lib/function"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import { getMonthlyBodyData } from "@/lib/function";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 
 const BodyChart = () => {
-  const themeColor = useCurrneThemeColor()
-  const { userInfo } = useUserStore()
-  const { date } = useChartStore()
+  const themeColor = useCurrentThemeColor();
+  const { userInfo } = useUserStore();
+  const { date } = useChartStore();
   const monthUserInfo = userInfo.filter((item) => {
-    const getYear = item.createdAt.slice(0, 4)
-    const getMonth = item.createdAt.slice(5, 7)
-    const selectedYear = date.slice(0, 4)
-    const selectedMonth = date.slice(4, 7)
-    return getYear === selectedYear && getMonth === selectedMonth
-  })
+    const getYear = item.createdAt.slice(0, 4);
+    const getMonth = item.createdAt.slice(5, 7);
+    const selectedYear = date.slice(0, 4);
+    const selectedMonth = date.slice(4, 7);
+    return getYear === selectedYear && getMonth === selectedMonth;
+  });
 
-  const ptData2 = getMonthlyBodyData(monthUserInfo, date)
+  const ptData2 = getMonthlyBodyData(monthUserInfo, date);
   // console.log("ptData2: ", ptData2)
 
   const isEmptyData =
     ptData2
       .map((item: (typeof ptData2)[0]) => item.value)
-      .reduce((acc: number, cur: number) => acc + cur, 0) === 0
+      .reduce((acc: number, cur: number) => acc + cur, 0) === 0;
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18, paddingHorizontal: 12, paddingTop: 20 }}>
+      <Text
+        style={{
+          fontSize: 18,
+          paddingHorizontal: 12,
+          paddingTop: 20,
+          marginLeft: 6,
+        }}
+      >
         몸무게의 변화
       </Text>
       <View
@@ -120,17 +127,17 @@ const BodyChart = () => {
                       {items[0].value + "kg"}
                     </Text>
                   </View>
-                )
+                );
               },
             }}
           />
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default BodyChart
+export default BodyChart;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -147,4 +154,4 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });

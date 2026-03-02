@@ -5,11 +5,11 @@ import { View } from "@/components/Themed"
 // zustand
 import { useNoteStore } from "@/hooks/use-note-store"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export default function note() {
   const { title, content, setValue } = useNoteStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   return (
     <View style={styles.container}>
       <TextInput

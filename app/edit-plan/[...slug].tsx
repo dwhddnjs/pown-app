@@ -23,7 +23,7 @@ import {
   useNavigation,
 } from "expo-router"
 import { CameraImage } from "@/components/add-plan/camera-image"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet"
 import { useUserStore } from "@/hooks/use-user-store"
 import { TitleSearchHeader } from "@/components/add-plan/title-search-header"
@@ -55,7 +55,7 @@ export default function EditPlan() {
   const getWorkoutPlan = workoutPlanList.find(
     (item) => item.id === Number(slug[1])
   )
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
   const [currentScrollY, setCurrentScrollY] = useState(0)
 

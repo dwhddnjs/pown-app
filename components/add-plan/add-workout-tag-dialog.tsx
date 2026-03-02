@@ -1,7 +1,7 @@
 import React, { useState } from "react"
 import { Dialog } from "../Dialog"
 import { Text, View } from "../Themed"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { TextInput } from "react-native-gesture-handler"
 import { Button } from "../Button"
 import { StyleSheet } from "react-native"
@@ -17,7 +17,7 @@ interface AddWorkoutTagDialogProp {
 export const AddWorkoutTagDialog = ({
   workoutType,
 }: AddWorkoutTagDialogProp) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const [inputValue, setInputValue] = useState("")
   const { workoutList, setAddWorkoutTag, setRemoveWorkoutTag } = useUserStore()
   const { isOpen, setOpen } = useWorkoutTagDialogStore()

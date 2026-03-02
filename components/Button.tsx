@@ -6,7 +6,7 @@ import {
 } from "react-native"
 import { Text } from "./Themed"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 interface ButtonProps extends TouchableOpacityProps {
   children: React.ReactNode
@@ -17,7 +17,7 @@ interface ButtonProps extends TouchableOpacityProps {
 }
 
 export const Button = ({ type, children, style, ...props }: ButtonProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   return (
     <TouchableOpacity

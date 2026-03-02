@@ -8,7 +8,7 @@ import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native";
 // hook
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
 import { transformWorkoutData } from "@/lib/function";
 // icons
@@ -24,7 +24,7 @@ const CustomDrawerContent = (props: any) => {
   const [collapsed, setCollapsed] = useState(true);
   const [multipleSelect, setMultipleSelect] = useState(false);
   const { workoutPlanList } = userWorkoutPlanStore();
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const sortData = transformWorkoutData(workoutPlanList);
   const navigation = useNavigation();
   const { push } = useRouter();

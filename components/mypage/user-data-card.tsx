@@ -5,12 +5,12 @@ import { Text, View } from "../Themed"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export const UserDataCard = () => {
   const { userInfo } = useUserStore()
   const currentUserInfo = userInfo[userInfo.length - 1]
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const weightMax = [
     { id: 1, title: "스쿼트", weight: currentUserInfo?.sq ?? 0 },
     { id: 2, title: "벤치프레스", weight: currentUserInfo?.bp ?? 0 },

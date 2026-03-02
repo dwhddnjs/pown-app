@@ -21,7 +21,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { useActionSheet } from "@expo/react-native-action-sheet"
 import { usePathname, useRouter } from "expo-router"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 interface WeightDateProps {
   id: number
@@ -40,7 +40,7 @@ export const WeightDate = ({
   type,
   equipment,
 }: WeightDateProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { showActionSheetWithOptions } = useActionSheet()
   const { push } = useRouter()
   const { setRemovePlan } = userWorkoutPlanStore()

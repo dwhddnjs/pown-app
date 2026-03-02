@@ -1,23 +1,23 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
-import { BarChart, ruleTypes } from "react-native-gifted-charts"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
+import { BarChart, ruleTypes } from "react-native-gifted-charts";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { useUserStore } from "@/hooks/use-user-store"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import { useChartStore } from "@/hooks/use-chart-store"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useUserStore } from "@/hooks/use-user-store";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import { useChartStore } from "@/hooks/use-chart-store";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 
 const SbdChart = () => {
-  const { userInfo } = useUserStore()
-  const { date } = useChartStore()
-  const { monthlyUserInfoData } = useMonthlyPlanData(date)
-  const firstWeight = userInfo[0]
-  const lastestWeight = monthlyUserInfoData[monthlyUserInfoData.length - 1]
+  const { userInfo } = useUserStore();
+  const { date } = useChartStore();
+  const { monthlyUserInfoData } = useMonthlyPlanData(date);
+  const firstWeight = userInfo[0];
+  const lastestWeight = monthlyUserInfoData[monthlyUserInfoData.length - 1];
 
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor();
   const data = [
     {
       value: firstWeight?.sq,
@@ -49,11 +49,11 @@ const SbdChart = () => {
       value: lastestWeight?.dl,
       frontColor: themeColor?.tint,
     },
-  ]
+  ];
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18 }}>3대중량의 변화</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>3대중량의 변화</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {!firstWeight ? (
         <View style={[styles(themeColor).emptyContainer]}>
@@ -114,10 +114,10 @@ const SbdChart = () => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default SbdChart
+export default SbdChart;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -149,7 +149,7 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });
 
 // <Button
 //         type="solid"

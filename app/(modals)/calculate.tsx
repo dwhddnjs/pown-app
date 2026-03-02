@@ -13,11 +13,11 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
 export default function calculate() {
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const [selected, setSelected] = useState("kg");
   const [inputNumber, setInputNumber] = useState("");
   const { open, setOpen } = useIsModalOpenStore();

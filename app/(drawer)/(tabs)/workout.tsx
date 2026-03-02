@@ -24,7 +24,7 @@ import { useNavigation, useRouter } from "expo-router";
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
 // hooks
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -40,7 +40,7 @@ export default function TabOneScreen() {
   const { date: selectedDate } = useSelectDateStore();
   const sortWorkList = groupByDate(workoutPlanList);
   const headerHeight = useHeaderHeight();
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const navigation = useNavigation();
   const { open } = useIsModalOpenStore();
 

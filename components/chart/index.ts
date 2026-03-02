@@ -5,6 +5,7 @@ import EquipmentChart from "./equipment-chart"
 import SbdChart from "./sbd-chart"
 import BodyChart from "./body-chart"
 import ChartHeader from "./chart-header"
+import WorkoutSummary from "./workout-summary"
 
 export { WorkoutCount }
 export { WorkoutPieChart }
@@ -13,3 +14,4 @@ export { EquipmentChart }
 export { SbdChart }
 export { BodyChart }
 export { ChartHeader }
+export { WorkoutSummary }

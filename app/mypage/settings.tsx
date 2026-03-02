@@ -17,11 +17,11 @@ import AntDesign from "@expo/vector-icons/AntDesign"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
 // hooks
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export default function settings() {
   const { onReset, ...result } = useUserStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const { push } = useRouter()
 

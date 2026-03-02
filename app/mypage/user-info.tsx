@@ -11,7 +11,7 @@ import { router, useRouter } from "expo-router"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 //lib
 import { format } from "date-fns"
 
@@ -33,7 +33,7 @@ export default function UserInfo() {
     male: lastestUserInfo?.gender === "male" ? true : false,
     female: lastestUserInfo?.gender === "female" ? true : false,
   })
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const { back } = useRouter()
 

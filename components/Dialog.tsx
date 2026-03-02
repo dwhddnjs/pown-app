@@ -7,7 +7,7 @@ import Animated, {
   withTiming,
   runOnJS,
 } from "react-native-reanimated"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import AntDesign from "@expo/vector-icons/AntDesign"
 
 interface DialogProps {
@@ -23,7 +23,7 @@ export const Dialog = ({
   onClose,
   modalHeight,
 }: DialogProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const translateY = useSharedValue(50)
   const opacity = useSharedValue(0)
 

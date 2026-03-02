@@ -1,7 +1,7 @@
-import React from "react"
+import React from "react";
 // component
-import { ScrollView, StyleSheet } from "react-native"
-import { View } from "@/components/Themed"
+import { ScrollView, StyleSheet } from "react-native";
+import { View } from "@/components/Themed";
 import {
   BodyChart,
   ConditionCount,
@@ -9,15 +9,16 @@ import {
   SbdChart,
   WorkoutCount,
   WorkoutPieChart,
-} from "@/components/chart"
+  WorkoutSummary,
+} from "@/components/chart";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { useHeaderHeight } from "@react-navigation/elements"
+import { useHeaderHeight } from "@react-navigation/elements";
 
 export default function chart() {
-  const themeColor = useCurrneThemeColor()
-  const headerHeight = useHeaderHeight()
+  const themeColor = useCurrentThemeColor();
+  const headerHeight = useHeaderHeight();
 
   return (
     <View style={{ flex: 1 }}>
@@ -28,10 +29,11 @@ export default function chart() {
           gap: 24,
           paddingTop: headerHeight,
           paddingHorizontal: 20,
-          paddingBottom: 24,
+          paddingBottom: 180,
           backgroundColor: themeColor.background,
         }}
       >
+        <WorkoutSummary />
         <WorkoutCount />
         <WorkoutPieChart />
         <ConditionCount />
@@ -40,7 +42,7 @@ export default function chart() {
         <BodyChart />
       </ScrollView>
     </View>
-  )
+  );
 }
 
-const styles = (color: any) => StyleSheet.create({})
+const styles = (color: any) => StyleSheet.create({});

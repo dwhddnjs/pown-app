@@ -5,7 +5,7 @@ import { Text, View } from "@/components/Themed"
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 import { FlashList } from "@shopify/flash-list"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 // lib
@@ -18,7 +18,7 @@ export default function Search() {
   const navigation = useNavigation()
   const [inputValue, setInputValue] = useState("")
   const { onReset, setPrevPlanValue, ...result } = usePlanStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const filterWorkoutList = (value: string) => {
     const result = workoutPlanList.filter((workout) => {

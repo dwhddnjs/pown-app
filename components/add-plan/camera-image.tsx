@@ -7,7 +7,7 @@ import { IconTitle } from "../IconTitle"
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
@@ -17,7 +17,7 @@ import { useUserStore } from "@/hooks/use-user-store"
 interface CameraImageProps {}
 
 export const CameraImage = ({}: CameraImageProps) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const router = useRouter()
   const { camera } = useUserStore()
   const { imageUri, setRemoveImageUri } = usePlanStore()

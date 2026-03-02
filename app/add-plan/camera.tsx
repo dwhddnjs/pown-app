@@ -9,7 +9,7 @@ import { useRouter } from "expo-router"
 // icon
 import { FontAwesome6 } from "@expo/vector-icons"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { SafeAreaView } from "react-native-safe-area-context"
 
@@ -18,7 +18,7 @@ const Camera = () => {
   const [uri, setUri] = useState<string | null>(null)
 
   const [facing, setFacing] = useState<CameraType>("back")
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const router = useRouter()
   const { imageUri, setImageUri } = usePlanStore()
 

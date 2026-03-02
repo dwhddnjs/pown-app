@@ -10,7 +10,7 @@ import {
 // expo
 import { BlurView } from "expo-blur"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useChartStore } from "@/hooks/use-chart-store"
 import { convertChartDate } from "@/lib/function"
 // icon
@@ -18,7 +18,7 @@ import AntDesign from "@expo/vector-icons/AntDesign"
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store"
 
 const ChartHeader = () => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { date, setDate } = useChartStore()
   const { workoutPlanList } = userWorkoutPlanStore()
 

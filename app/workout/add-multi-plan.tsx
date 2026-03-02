@@ -18,7 +18,7 @@ import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
 import { useFocusEffect, useNavigation } from "expo-router";
 import { format } from "date-fns";
 import Entypo from "@expo/vector-icons/Entypo";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid";
 import { CameraImage } from "@/components/add-plan/camera-image";
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet";
@@ -65,7 +65,7 @@ export default function AddMultiPlan() {
   const navigation = useNavigation();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const [currentScrollY, setCurrentScrollY] = useState(0);
   const { open, setOpen } = useIsDialogOpenStore();
 

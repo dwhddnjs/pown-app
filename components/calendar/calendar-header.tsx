@@ -10,7 +10,7 @@ import {
 // expo
 import { BlurView } from "expo-blur"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useChartStore } from "@/hooks/use-chart-store"
 import { convertChartDate } from "@/lib/function"
 // icon
@@ -19,7 +19,7 @@ import { useCalendarStore } from "@/hooks/use-calendar-store"
 import { format } from "date-fns"
 
 const CalenderHeader = () => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { date, nextMonth, prevMonth } = useCalendarStore()
 
   const title = format(date, "yyyy년 MM월")

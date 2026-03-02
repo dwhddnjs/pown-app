@@ -13,10 +13,10 @@ import { BlurView } from "expo-blur"
 import { useRouter } from "expo-router"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { push } = useRouter()
 
   return (

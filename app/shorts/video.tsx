@@ -11,7 +11,7 @@ import { useVideoPlayer, VideoView } from "expo-video";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
@@ -27,7 +27,7 @@ export default function Video() {
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>("back");
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const router = useRouter();
   const { setAddVideo, videos } = useShortsStore();
   const [isRecording, setIsRecording] = useState(false);

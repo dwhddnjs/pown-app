@@ -5,12 +5,12 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan"
 // expo
 import { useLocalSearchParams, useRouter } from "expo-router"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // lib
 import { formatDate, groupByDate } from "@/lib/function"
 
 export default function calendarWorkout() {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { data } = useLocalSearchParams()
   const workoutPlanData = JSON.parse(data as string)
   const sortWorkList = groupByDate(workoutPlanData)

@@ -7,7 +7,7 @@ import { IconTitle } from "../IconTitle";
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
 // hook
 import { usePlanStore } from "@/hooks/use-plan-store";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // animation
 import Animated, {
   useSharedValue,
@@ -26,7 +26,7 @@ export const TopWeight = ({
 }: TopWeightProps) => {
   const { weight, setPlanValue, weightType } = usePlanStore();
   const inputRef = useRef<TextInput>(null);
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
 
   const BUTTON_WIDTH = 42;
   const PADDING = 4;

@@ -14,7 +14,7 @@ import { useRouter } from "expo-router";
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
 // hooks
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useShortsStore } from "@/hooks/use-shorts-store";
@@ -24,7 +24,7 @@ import { EmptyVideos } from "@/components/shorts/empty-videos";
 
 export default function TabTwoScreen() {
   const { onReset, ...result } = useUserStore();
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const screenWidth = Dimensions.get("window").width;
   const { videos } = useShortsStore();
 

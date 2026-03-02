@@ -25,7 +25,7 @@ import {
 } from "expo-router"
 // lib
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { KeyBoardAvoid } from "@/components/KeyBoardAvoid"
 import { Button } from "@/components/Button"
 import { CameraImage } from "@/components/add-plan/camera-image"
@@ -59,7 +59,7 @@ export default function AddPlan() {
   const navigation = useNavigation()
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
   const scrollRef = useRef<ScrollView>(null)
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const [currentScrollY, setCurrentScrollY] = useState(0)
 
   const onWorkoutTagSheetClose = () => {

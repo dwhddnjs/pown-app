@@ -9,7 +9,7 @@ import {
 import { Text, View } from "../Themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
@@ -22,7 +22,7 @@ interface WorkoutTagsProps {
 
 export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
   const { workout, setPlanValue } = usePlanStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { setOpen, setIsRemoveOpen } = useWorkoutTagDialogStore()
   const pathname = usePathname().split("/")
 

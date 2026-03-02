@@ -8,7 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { useRouter } from "expo-router";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -16,7 +16,7 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { FontAwesome6 } from "@expo/vector-icons";
 
 export default function MultiPlanScreen() {
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const router = useRouter();
   const { tempPlans, setMultiPlanMode, removeTempPlan, resetMultiPlan } =
     useMultiPlanStore();

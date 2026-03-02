@@ -1,25 +1,25 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
+import { StyleSheet } from "react-native";
+import { Text, View } from "../Themed";
 // icon
-import Back from "@/assets/images/svg/back_icon.svg"
-import Arm from "@/assets/images/svg/arm_icon.svg"
-import Chest from "@/assets/images/svg/chest_icon.svg"
-import Leg from "@/assets/images/svg/leg_icon.svg"
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
-import InfoIcon from "@expo/vector-icons/FontAwesome6"
+import Back from "@/assets/images/svg/back_icon.svg";
+import Arm from "@/assets/images/svg/arm_icon.svg";
+import Chest from "@/assets/images/svg/chest_icon.svg";
+import Leg from "@/assets/images/svg/leg_icon.svg";
+import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
+import InfoIcon from "@expo/vector-icons/FontAwesome6";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { sortWorkoutPlanList } from "@/lib/function"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import { useChartStore } from "@/hooks/use-chart-store"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { sortWorkoutPlanList } from "@/lib/function";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import { useChartStore } from "@/hooks/use-chart-store";
 
 const WorkoutCount = () => {
-  const themeColor = useCurrneThemeColor()
-  const { date } = useChartStore()
-  const { monthlyPlanData } = useMonthlyPlanData(date)
-  const listCount = sortWorkoutPlanList(monthlyPlanData)
+  const themeColor = useCurrentThemeColor();
+  const { date } = useChartStore();
+  const { monthlyPlanData } = useMonthlyPlanData(date);
+  const listCount = sortWorkoutPlanList(monthlyPlanData);
 
   const isEmptyCount =
     listCount.arm +
@@ -27,11 +27,11 @@ const WorkoutCount = () => {
       listCount.chest +
       listCount.leg +
       listCount.shoulder ===
-    0
+    0;
 
   return (
     <View style={[styles(themeColor).container]}>
-      <Text style={{ fontSize: 18 }}>기록한 운동 횟수</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>기록한 운동 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <View style={[styles(themeColor).emptyContainer]}>
@@ -45,7 +45,12 @@ const WorkoutCount = () => {
           </Text>
         </View>
       ) : (
-        <View style={[styles(themeColor).iconListContainer]}>
+        <View
+          style={[
+            styles(themeColor).iconListContainer,
+            { marginHorizontal: 6 },
+          ]}
+        >
           <View style={[styles(themeColor).iconItem]}>
             <Back />
             <Text style={{ color: themeColor.tint }}>{listCount.back}회</Text>
@@ -71,10 +76,10 @@ const WorkoutCount = () => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
-export default WorkoutCount
+export default WorkoutCount;
 
 const styles = (color: any) =>
   StyleSheet.create({
@@ -84,7 +89,7 @@ const styles = (color: any) =>
       paddingVertical: 20,
       borderRadius: 12,
       gap: 12,
-      marginTop: 24,
+      // marginTop: 24,
     },
     iconItem: {
       backgroundColor: color.itemColor,
@@ -107,4 +112,4 @@ const styles = (color: any) =>
       gap: 6,
       backgroundColor: color.itemColor,
     },
-  })
+  });

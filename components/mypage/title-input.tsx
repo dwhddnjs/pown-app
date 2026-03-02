@@ -1,6 +1,6 @@
 import { StyleSheet, TextInput } from "react-native"
 import React from "react"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Text, View } from "../Themed"
 
 interface TitleInputProp {
@@ -18,7 +18,7 @@ export const TitleInput = ({
   type,
   onChangeValue,
 }: TitleInputProp) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   return (
     <View style={styles.itemContainer}>

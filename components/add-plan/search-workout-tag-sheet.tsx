@@ -15,7 +15,7 @@ import React, {
   useState,
 } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { FontAwesome } from "@expo/vector-icons"
 import { searchByInitial, sortWorkoutPlanList } from "@/lib/function"
 import { usePlanStore } from "@/hooks/use-plan-store"
@@ -30,7 +30,7 @@ export const SearchWorkoutTagSheet = forwardRef<
   BottomSheet,
   SearchWorkoutTagSheetProps
 >(({ onClose, workoutList, isOpen }, ref) => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const { workout, setPlanValue } = usePlanStore()
   const [inputValue, setInputValue] = useState("")
   const inputRef = useRef<TextInput | null>(null)

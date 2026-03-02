@@ -11,7 +11,7 @@ import Animated, {
   interpolate,
   Easing,
 } from "react-native-reanimated";
-import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface FabOverlayProps {
   isOpen: boolean;
@@ -21,7 +21,7 @@ interface FabOverlayProps {
 const ANIMATION_DURATION = 250;
 
 export default function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
-  const themeColor = useCurrneThemeColor();
+  const themeColor = useCurrentThemeColor();
   const progress = useSharedValue(0);
 
   useEffect(() => {

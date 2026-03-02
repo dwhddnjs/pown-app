@@ -9,7 +9,7 @@ import { Link } from "expo-router"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 interface PlanNoteProps {
   onFocusScroll: (positionY: number) => void
@@ -18,7 +18,7 @@ interface PlanNoteProps {
 
 export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
   const { title, content, setPlanValue } = usePlanStore()
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   const inputRef = useRef<TextInput>(null)
 
   return (

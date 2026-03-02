@@ -11,10 +11,10 @@ import { conditionData } from "@/constants/constants"
 // icon
 import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export const ConditionList = () => {
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>

@@ -9,13 +9,13 @@ import { useUserStore } from "@/hooks/use-user-store"
 // expo
 import { useRouter } from "expo-router"
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 export default function ThemeMode() {
   const { setUser, theme } = useUserStore()
   const { back } = useRouter()
 
-  const themeColor = useCurrneThemeColor()
+  const themeColor = useCurrentThemeColor()
 
   const onSubmitTheme = (theme: "light" | "dark" | "system") => {
     let result: "light" | "dark" | "system" | null = theme
