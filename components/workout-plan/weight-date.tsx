@@ -13,6 +13,7 @@ import {
   userWorkoutPlanStore,
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store"
+import { useMultiPlanStore } from "@/hooks/use-multi-plan-store"
 // lib
 import { formatTime } from "@/lib/function"
 // expo
@@ -43,7 +44,9 @@ export const WeightDate = ({
   const { showActionSheetWithOptions } = useActionSheet()
   const { push } = useRouter()
   const { setRemovePlan } = userWorkoutPlanStore()
+  const { removeTempPlan, setEditingPlan, tempPlans } = useMultiPlanStore()
   const pathname = usePathname()
+  const isMultiPlan = pathname.includes("multi-plan")
 
   const onPress = () => {
     const options = ["삭제", "수정", "취소"]
@@ -59,17 +62,29 @@ export const WeightDate = ({
       (selectedIndex: number | undefined) => {
         switch (selectedIndex) {
           case 1:
-            push(`/edit-plan/${type}/${id}`)
+            if (isMultiPlan) {
+              const plan = tempPlans.find((p) => p.id === id)
+              if (plan) {
+                setEditingPlan(plan)
+                push("/workout/add-multi-plan")
+              }
+            } else {
+              push(`/edit-plan/${type}/${id}`)
+            }
             break
 
           case destructiveButtonIndex:
-            // Delete
-            setRemovePlan(id)
-            toast.success("운동계획이 삭제 되었습니다!")
+            if (isMultiPlan) {
+              removeTempPlan(id)
+              toast.success("운동계획이 삭제 되었습니다!")
+            } else {
+              setRemovePlan(id)
+              toast.success("운동계획이 삭제 되었습니다!")
+            }
             break
 
           case cancelButtonIndex:
-            console.log("취소")
+            break
         }
       }
     )

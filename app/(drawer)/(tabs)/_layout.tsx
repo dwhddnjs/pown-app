@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 // compoents
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { View } from "@/components/Themed";
@@ -22,10 +22,33 @@ import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
 import Colors from "@/constants/Colors";
+import FabOverlay from "@/components/fab-menu/fab-overlay";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  interpolate,
+  Easing,
+} from "react-native-reanimated";
 
 export default function TabLayout() {
   const themColor = useCurrneThemeColor();
   const { uri, onResetImageUri } = useImageUriStore();
+  const [fabOpen, setFabOpen] = useState(false);
+  const fabProgress = useSharedValue(0);
+
+  useEffect(() => {
+    fabProgress.value = withTiming(fabOpen ? 1 : 0, {
+      duration: 250,
+      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+    });
+  }, [fabOpen]);
+
+  const fabIconStyle = useAnimatedStyle(() => ({
+    transform: [
+      { rotate: `${interpolate(fabProgress.value, [0, 1], [0, 45])}deg` },
+    ],
+  }));
 
   const tabOption = {
     headerStyle: {
@@ -40,6 +63,7 @@ export default function TabLayout() {
       borderTopWidth: 0,
       paddingHorizontal: 12,
       position: "absolute" as const,
+      zIndex: 200,
     },
     tabBarBackground: () => (
       <BlurView
@@ -107,11 +131,13 @@ export default function TabLayout() {
                   },
                 ]}
               >
-                <FontAwesome6
-                  name="plus"
-                  size={30}
-                  color={themColor.background}
-                />
+                <Animated.View style={fabIconStyle}>
+                  <FontAwesome6
+                    name="plus"
+                    size={30}
+                    color={themColor.background}
+                  />
+                </Animated.View>
               </View>
             ),
             tabBarLabel: () => null,
@@ -119,7 +145,7 @@ export default function TabLayout() {
           listeners={({ navigation }) => ({
             tabPress: (e) => {
               e.preventDefault();
-              router.push("/(modals)/select-type");
+              setFabOpen((prev) => !prev);
             },
           })}
         />
@@ -152,6 +178,7 @@ export default function TabLayout() {
         <Tabs.Screen name="index" redirect />
       </Tabs>
       {uri && <ImageModal />}
+      <FabOverlay isOpen={fabOpen} onClose={() => setFabOpen(false)} />
     </View>
   );
 }

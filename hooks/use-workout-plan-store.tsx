@@ -47,6 +47,7 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
         set((prev) => {
           const newWorkoutList = [...prev.workoutPlanList]
           const findIndex = newWorkoutList.findIndex((item) => item.id === id)
+          if (findIndex === -1) return prev
           const selectItem = newWorkoutList[findIndex].setWithCount.map(
             (item) => {
               if (item.id === itemId) {
@@ -99,6 +100,20 @@ export const userWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
     {
       name: "workout-plan",
       storage: createJSONStorage(() => storage),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return
+        const seen = new Set<number>()
+        const deduped: WorkoutPlanTypes[] = []
+        for (const plan of state.workoutPlanList) {
+          if (!seen.has(plan.id)) {
+            seen.add(plan.id)
+            deduped.push(plan)
+          }
+        }
+        if (deduped.length !== state.workoutPlanList.length) {
+          userWorkoutPlanStore.setState({ workoutPlanList: deduped })
+        }
+      },
     }
   )
 )

@@ -52,9 +52,9 @@ export default function EditPlan() {
   const navigation = useNavigation()
   const workoutListData = workoutList[slug[0] as WorkoutTypes]
 
-  const getWorkoutPlan = workoutPlanList.filter(
-    (item) => item.id === parseInt(slug[1])
-  )[0]
+  const getWorkoutPlan = workoutPlanList.find(
+    (item) => item.id === Number(slug[1])
+  )
   const themeColor = useCurrneThemeColor()
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false)
   const [currentScrollY, setCurrentScrollY] = useState(0)
@@ -85,7 +85,7 @@ export default function EditPlan() {
   )
 
   useEffect(() => {
-    if (slug[0]) {
+    if (slug[0] && getWorkoutPlan) {
       setPrevPlanValue(getWorkoutPlan)
     }
   }, [slug[0]])

@@ -70,7 +70,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
           </TouchableOpacity>
         ))}
       </View>
-      {pathname[1] === "add-plan" && (
+      {(pathname[1] === "add-plan" || pathname.includes("add-multi-plan")) && (
         <View
           style={[
             styles.buttonContainer,

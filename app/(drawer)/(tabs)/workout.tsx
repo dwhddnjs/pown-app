@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { Text, View } from "@/components/Themed";
 import {
-  FlatList,
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
@@ -14,7 +13,6 @@ import {
 } from "react-native";
 import { EmptyList } from "@/components/workout-plan/empty-list";
 import { RefView } from "@/components/RefView";
-import { FlashList } from "@shopify/flash-list";
 // zustand
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
@@ -134,65 +132,55 @@ export default function TabOneScreen() {
           position: "relative",
         }}
       >
-        <FlatList
-          data={Object.entries(sortWorkList)}
-          // estimatedItemSize={300}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.list} key={index}>
-                <RefView
-                  ref={(ref) => {
-                    itemRef.current.set(item[0], ref);
-                    if (ref && index === 0) {
-                      measureView(ref, item[0]);
-                    }
-                  }}
-                >
-                  <View
-                    style={[
-                      styles.planContainer,
-                      {
-                        backgroundColor: themeColor.tint,
-                      },
-                    ]}
-                  >
-                    <Text
-                      style={[
-                        styles.dateText,
-                        { color: themeColor.background },
-                      ]}
-                    >{`🗓️  ${formatDate(item[0])}`}</Text>
+        {Object.entries(sortWorkList).map(([date, plans], index) => (
+          <View style={styles.list} key={date}>
+            <RefView
+              ref={(ref) => {
+                itemRef.current.set(date, ref);
+                if (ref && index === 0) {
+                  measureView(ref, date);
+                }
+              }}
+            >
+              <View
+                style={[
+                  styles.planContainer,
+                  {
+                    backgroundColor: themeColor.tint,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.dateText, { color: themeColor.background }]}
+                >{`🗓️  ${formatDate(date)}`}</Text>
 
-                    <View
-                      style={[
-                        styles.dot,
-                        {
-                          backgroundColor: themeColor.background,
-                        },
-                      ]}
-                    />
-                  </View>
-                </RefView>
                 <View
                   style={[
-                    styles.workoutList,
-                    { backgroundColor: themeColor.itemColor },
+                    styles.dot,
+                    {
+                      backgroundColor: themeColor.background,
+                    },
                   ]}
-                >
-                  {item[1].map((data, index) => (
-                    <WorkoutPlan
-                      key={data.id}
-                      item={data}
-                      index={index}
-                      totalLength={item[1].length}
-                    />
-                  ))}
-                </View>
+                />
               </View>
-            );
-          }}
-        />
+            </RefView>
+            <View
+              style={[
+                styles.workoutList,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              {plans.map((data, idx) => (
+                <WorkoutPlan
+                  key={data.id}
+                  item={data}
+                  index={idx}
+                  totalLength={plans.length}
+                />
+              ))}
+            </View>
+          </View>
+        ))}
         <View
           style={{
             height: 200,

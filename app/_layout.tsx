@@ -32,6 +32,7 @@ import { useNoteStore } from "@/hooks/use-note-store";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
 import { userWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // hooks
 import useCurrneThemeColor from "@/hooks/use-current-theme-color";
 import { FontAwesome5 } from "@expo/vector-icons";
@@ -165,7 +166,7 @@ function RootLayoutNav() {
                   navigation.goBack();
                 }}
               >
-                <XIcon name="x" size={30} color={themeColor.subText} />
+                <XIcon name="x" size={30} color={themeColor.text} />
               </TouchableOpacity>
             );
           },
@@ -186,7 +187,7 @@ function RootLayoutNav() {
 
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.subText} />
+              <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -206,9 +207,63 @@ function RootLayoutNav() {
 
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.subText} />
+              <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
+        })}
+      />
+      <Stack.Screen
+        name="workout/multi-plan"
+        options={({ navigation }) => ({
+          headerTitle: "루틴 추가",
+          headerStyle: {
+            borderBottomWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+            backgroundColor: themeColor.background,
+          },
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <XIcon name="x" size={30} color={themeColor.text} />
+            </TouchableOpacity>
+          ),
+          headerRight: () => {
+            const { tempPlans, resetMultiPlan } = useMultiPlanStore();
+            const { workoutPlanList, setWorkoutPlan } = userWorkoutPlanStore();
+
+            const onSaveAll = () => {
+              if (tempPlans.length === 0) {
+                return toast.error("추가된 운동이 없어요..");
+              }
+              const baseId = Date.now();
+              tempPlans.forEach((plan, idx) => {
+                setWorkoutPlan({
+                  ...plan,
+                  id: baseId + idx,
+                });
+              });
+              resetMultiPlan();
+              navigation.goBack();
+              toast.success(
+                `${tempPlans.length}개 운동 계획이 추가되었습니다!!`,
+              );
+            };
+
+            if (tempPlans.length === 0) return null;
+
+            return (
+              <TouchableOpacity onPress={onSaveAll}>
+                <Checkcircle
+                  name="checkcircle"
+                  size={30}
+                  color={themeColor.tint}
+                />
+              </TouchableOpacity>
+            );
+          },
         })}
       />
       <Stack.Screen
@@ -226,7 +281,7 @@ function RootLayoutNav() {
 
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.subText} />
+              <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
           headerRight: () => {
@@ -272,7 +327,7 @@ function RootLayoutNav() {
                   navigation.goBack();
                 }}
               >
-                <ArrowIcon name="left" size={28} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.text} />
               </TouchableOpacity>
             );
           },
@@ -310,7 +365,7 @@ function RootLayoutNav() {
                   ));
                 if (result.weight && result.workout && route.params) {
                   setWorkoutPlan({
-                    id: workoutPlanList.length + 1,
+                    id: Date.now(),
                     workout: result.workout,
                     type: slug as string,
                     equipment: result.equipment,
@@ -371,7 +426,7 @@ function RootLayoutNav() {
                   navigation.goBack();
                 }}
               >
-                <ArrowIcon name="left" size={28} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.text} />
               </TouchableOpacity>
             );
           },
@@ -383,9 +438,9 @@ function RootLayoutNav() {
 
             const { onReset: onResetNote } = useNoteStore();
             const { slug } = useGlobalSearchParams();
-            const getWorkoutPlan = workoutPlanList.filter(
-              (item) => slug && item.id === parseInt(slug[1]),
-            )[0];
+            const getWorkoutPlan = workoutPlanList.find(
+              (item) => slug && item.id === Number(slug[1]),
+            );
             const { mediaLibrary } = useUserStore();
 
             const onSubmitWorkoutPlan = async () => {
@@ -422,13 +477,13 @@ function RootLayoutNav() {
                   ));
 
                 const newImagesList = [
-                  ...alreadySavedImages,
-                  ...(imageUri as any),
+                  ...(alreadySavedImages || []),
+                  ...(imageUri || []),
                 ];
 
-                if (result.weight && result.workout) {
+                if (result.weight && result.workout && getWorkoutPlan) {
                   setEditPlan({
-                    id: parseInt(slug[1]),
+                    id: Number(slug[1]),
                     workout: result.workout,
                     type: slug[0],
                     equipment: result.equipment,
@@ -477,6 +532,130 @@ function RootLayoutNav() {
         })}
       />
       <Stack.Screen
+        name="workout/add-multi-plan"
+        options={({ navigation }) => ({
+          presentation: "modal",
+          headerTitle: "",
+          headerStyle: {
+            borderBottomWidth: 0,
+            elevation: 0,
+            shadowOpacity: 0,
+            backgroundColor: themeColor.background,
+          },
+          headerShadowVisible: false,
+          headerLeft: () => {
+            const { onReset } = usePlanStore();
+            const { clearEditingPlan } = useMultiPlanStore();
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  onReset();
+                  clearEditingPlan();
+                  navigation.goBack();
+                }}
+              >
+                <ArrowIcon name="left" size={28} color={themeColor.text} />
+              </TouchableOpacity>
+            );
+          },
+          headerRight: () => {
+            const { onReset, ...result } = usePlanStore();
+            const { onReset: onResetNote } = useNoteStore();
+            const { mediaLibrary } = useUserStore();
+            const {
+              editingPlan,
+              addTempPlan,
+              updateTempPlan,
+              tempPlans,
+              clearEditingPlan,
+            } = useMultiPlanStore();
+
+            const onSubmitMultiPlan = async () => {
+              try {
+                const imageUri =
+                  mediaLibrary &&
+                  result.imageUri.length > 0 &&
+                  (await Promise.all(
+                    result.imageUri.map(async (item) => {
+                      if (item.imageUri?.includes("/DCIM/")) {
+                        return item;
+                      }
+                      const asset = await MediaLibrary.createAssetAsync(
+                        item.imageUri as string,
+                      );
+                      const photoLib = await MediaLibrary.getAssetsAsync({
+                        mediaType: "photo",
+                      });
+                      const findAsset = photoLib.assets.find(
+                        (a) => a.uri === asset.uri,
+                      );
+                      const assetInfo =
+                        findAsset &&
+                        (await MediaLibrary.getAssetInfoAsync(findAsset.id));
+                      return {
+                        id: item.id,
+                        imageUri: assetInfo?.localUri,
+                      };
+                    }),
+                  ));
+
+                if (!result.weight || !result.workout) {
+                  return toast.error("운동과 목표 중량은 필수에요..");
+                }
+
+                const planObj = {
+                  id: editingPlan ? editingPlan.id : Date.now(),
+                  workout: result.workout,
+                  type: result.type || editingPlan?.type || "back",
+                  equipment: result.equipment,
+                  weight:
+                    result.weightType === "lb"
+                      ? Math.round(parseInt(result.weight) / 2.20462).toString()
+                      : result.weight,
+                  condition: result.condition,
+                  content: result.content,
+                  title: result.title,
+                  setWithCount: result.setWithCount,
+                  createdAt: editingPlan
+                    ? editingPlan.createdAt
+                    : format(result.date, "yyyy.MM.dd HH:mm:ss"),
+                  updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
+                  imageUri: imageUri ? imageUri : [],
+                };
+
+                if (editingPlan) {
+                  updateTempPlan(planObj);
+                  onReset();
+                  clearEditingPlan();
+                  navigation.goBack();
+                  onResetNote();
+                  return toast.success("운동 계획이 수정되었습니다!");
+                }
+
+                addTempPlan(planObj);
+                onReset();
+                clearEditingPlan();
+                navigation.goBack();
+                onResetNote();
+                return toast.success("루틴에 운동이 추가되었습니다!");
+              } catch (error) {
+                console.log("error: ", error);
+              }
+            };
+
+            return (
+              <TouchableOpacity onPress={onSubmitMultiPlan}>
+                <Checkcircle
+                  name="checkcircle"
+                  size={30}
+                  color={themeColor.tint}
+                />
+              </TouchableOpacity>
+            );
+          },
+        })}
+      />
+      <Stack.Screen
         name="auth/sign-in"
         options={({ navigation }) => ({
           headerTitle: "",
@@ -494,7 +673,7 @@ function RootLayoutNav() {
                 navigation.goBack();
               }}
             >
-              <XIcon name="x" size={30} color={themeColor.subText} />
+              <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -514,7 +693,7 @@ function RootLayoutNav() {
           },
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.subText} />
+              <ArrowIcon name="left" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -529,7 +708,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -541,7 +720,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -553,7 +732,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -567,7 +746,7 @@ function RootLayoutNav() {
             gestureEnabled: false,
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
-                <ArrowIcon name="left" size={28} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.text} />
               </TouchableOpacity>
             ),
           };
@@ -584,7 +763,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -595,7 +774,7 @@ function RootLayoutNav() {
           title: "설정",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.subText} />
+              <ArrowIcon name="left" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -611,7 +790,7 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.subText} />
+              <ArrowIcon name="down" size={28} color={themeColor.text} />
             </TouchableOpacity>
           ),
         })}
@@ -636,7 +815,7 @@ function RootLayoutNav() {
                   navigation.goBack();
                 }}
               >
-                <ArrowIcon name="left" size={28} color={themeColor.subText} />
+                <ArrowIcon name="left" size={28} color={themeColor.text} />
               </TouchableOpacity>
             );
           },

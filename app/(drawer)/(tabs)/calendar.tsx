@@ -1,10 +1,10 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
   ScrollView,
-} from "react-native"
+} from "react-native";
 import {
   format,
   startOfMonth,
@@ -15,40 +15,40 @@ import {
   parse,
   isBefore,
   startOfDay,
-} from "date-fns"
-import { Text, View } from "@/components/Themed"
+} from "date-fns";
+import { Text, View } from "@/components/Themed";
 // lib
-import { useHeaderHeight } from "@react-navigation/elements"
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+import { useHeaderHeight } from "@react-navigation/elements";
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
 // icon
-import Arm from "@/assets/images/svg/arm_icon.svg"
-import Back from "@/assets/images/svg/back_icon.svg"
-import Chest from "@/assets/images/svg/chest_icon.svg"
-import Leg from "@/assets/images/svg/leg_icon.svg"
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg"
-import Ionicons from "@expo/vector-icons/Ionicons"
+import Arm from "@/assets/images/svg/arm_icon.svg";
+import Back from "@/assets/images/svg/back_icon.svg";
+import Chest from "@/assets/images/svg/chest_icon.svg";
+import Leg from "@/assets/images/svg/leg_icon.svg";
+import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
+import Ionicons from "@expo/vector-icons/Ionicons";
 // zustand
-import { useCalendarStore } from "@/hooks/use-calendar-store"
-import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data"
-import { WorkoutTypes } from "@/hooks/use-plan-store"
-import { removeSameItem } from "@/lib/function"
-import { useRouter } from "expo-router"
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
+import { useCalendarStore } from "@/hooks/use-calendar-store";
+import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
+import { WorkoutTypes } from "@/hooks/use-plan-store";
+import { removeSameItem } from "@/lib/function";
+import { useRouter } from "expo-router";
+import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 
 export default function calendar() {
-  const headerHeight = useHeaderHeight()
-  const themeColor = useCurrneThemeColor()
-  const { date } = useCalendarStore()
-  const { monthlyPlanData } = useMonthlyPlanData(format(date, "yyyyMM"))
-  const workoutCount = removeSameItem(monthlyPlanData).length
-  const todayDate = format(new Date(), "yyyyMMdd")
+  const headerHeight = useHeaderHeight();
+  const themeColor = useCurrneThemeColor();
+  const { date } = useCalendarStore();
+  const { monthlyPlanData } = useMonthlyPlanData(format(date, "yyyyMM"));
+  const workoutCount = removeSameItem(monthlyPlanData).length;
+  const todayDate = format(new Date(), "yyyyMMdd");
 
-  const firstDayOfMonth = startOfMonth(date)
-  const lastDayOfMonth = endOfMonth(date)
-  const firstDay = startOfWeek(firstDayOfMonth)
-  const lastDay = endOfWeek(lastDayOfMonth)
-  const days = eachDayOfInterval({ start: firstDay, end: lastDay })
-  const router = useRouter()
+  const firstDayOfMonth = startOfMonth(date);
+  const lastDayOfMonth = endOfMonth(date);
+  const firstDay = startOfWeek(firstDayOfMonth);
+  const lastDay = endOfWeek(lastDayOfMonth);
+  const days = eachDayOfInterval({ start: firstDay, end: lastDay });
+  const router = useRouter();
 
   const getDayIcon = (isBefore: boolean, findItem: any) => {
     const icons = {
@@ -57,48 +57,48 @@ export default function calendar() {
       shoulder: Shoulder,
       leg: Leg,
       arm: Arm,
-    }
-    const WorkoutIcon = findItem && icons[findItem.type as WorkoutTypes]
+    };
+    const WorkoutIcon = findItem && icons[findItem.type as WorkoutTypes];
 
     if (isBefore) {
       if (findItem) {
-        return <WorkoutIcon width={40} height={40} />
+        return <WorkoutIcon width={40} height={40} />;
       }
       return (
         <View style={[styles(themeColor).emptyIcon]}>
           <Ionicons name="close" size={24} color={themeColor.itemColor} />
         </View>
-      )
+      );
     } else if (findItem) {
-      return <WorkoutIcon width={40} height={40} />
+      return <WorkoutIcon width={40} height={40} />;
     }
-    return <View style={styles(themeColor).emptyIcon} />
-  }
+    return <View style={styles(themeColor).emptyIcon} />;
+  };
 
   const onOpenWorkoutModal = (findItem?: WorkoutPlanTypes) => {
     if (!findItem) {
-      return
+      return;
     }
-    const findSplitDate = findItem.createdAt.split(".")
-    const findYear = findSplitDate[0]
-    const findMonth = findSplitDate[1]
-    const findDay = findSplitDate[2].slice(0, 2)
+    const findSplitDate = findItem.createdAt.split(".");
+    const findYear = findSplitDate[0];
+    const findMonth = findSplitDate[1];
+    const findDay = findSplitDate[2].slice(0, 2);
     const filterWorkoutPlanList = monthlyPlanData.filter((item) => {
-      const itemSplitDate = item.createdAt.split(".")
-      const itemYear = itemSplitDate[0]
-      const itemMonth = itemSplitDate[1]
-      const itemDay = itemSplitDate[2].slice(0, 2)
+      const itemSplitDate = item.createdAt.split(".");
+      const itemYear = itemSplitDate[0];
+      const itemMonth = itemSplitDate[1];
+      const itemDay = itemSplitDate[2].slice(0, 2);
 
       return (
         findYear === itemYear && findMonth === itemMonth && findDay === itemDay
-      )
-    })
+      );
+    });
 
     router.push({
       pathname: "/(modals)/calendar-workout",
       params: { data: JSON.stringify(filterWorkoutPlanList) },
-    } as any)
-  }
+    } as any);
+  };
 
   return (
     <View style={{ flex: 1, paddingTop: 24 }}>
@@ -144,18 +144,18 @@ export default function calendar() {
             keyExtractor={(item) => item.toString()}
             nestedScrollEnabled={true}
             renderItem={({ item }) => {
-              const isCurrentMonth = item.getMonth() === date.getMonth()
+              const isCurrentMonth = item.getMonth() === date.getMonth();
               const findItem = monthlyPlanData.findLast((el) => {
-                const split = el.createdAt.split(".")
-                const date = format(item, "yyyyMMdd")
-                const itemDate = `${split[0]}${split[1]}${split[2].slice(0, 2)}`
-                return date === itemDate
-              })
-              const isToday = todayDate === format(item, "yyyyMMdd")
+                const split = el.createdAt.split(".");
+                const date = format(item, "yyyyMMdd");
+                const itemDate = `${split[0]}${split[1]}${split[2].slice(0, 2)}`;
+                return date === itemDate;
+              });
+              const isToday = todayDate === format(item, "yyyyMMdd");
               const beforeToday = isBefore(
                 startOfDay(item),
-                startOfDay(new Date())
-              )
+                startOfDay(new Date()),
+              );
 
               return (
                 <TouchableOpacity
@@ -189,13 +189,13 @@ export default function calendar() {
                     {format(item, "d")}
                   </Text>
                 </TouchableOpacity>
-              )
+              );
             }}
           />
         </View>
       </ScrollView>
     </View>
-  )
+  );
 }
 
 const styles = (color: any) =>
@@ -229,4 +229,4 @@ const styles = (color: any) =>
       alignItems: "flex-end",
       gap: 12,
     },
-  })
+  });
