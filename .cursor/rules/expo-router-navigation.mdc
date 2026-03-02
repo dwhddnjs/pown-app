@@ -1,0 +1,42 @@
+---
+description: Expo Router 네비게이션 패턴
+globs: app/**/*.tsx
+alwaysApply: false
+---
+
+# Expo Router Navigation
+
+## 파일 기반 라우팅
+
+- 파일 경로 = URL 경로: `app/workout/multi-plan.tsx` → `/workout/multi-plan`
+- 그룹 세그먼트 `(drawer)`, `(tabs)`, `(modals)`는 URL에 포함되지 않음
+- 동적 라우트: `[slug].tsx`, catch-all: `[...slug].tsx`
+
+## 경로 비교 시 주의
+
+`usePathname()`은 그룹 세그먼트를 제외한 실제 경로를 반환합니다.
+
+```tsx
+// ❌ BAD - 파일 이동 시 깨짐
+const isMultiPlan = pathname === "/multi-plan"
+
+// ✅ GOOD - 유연한 매칭
+const isMultiPlan = pathname.includes("multi-plan")
+```
+
+## 스크린 헤더 설정
+
+`app/_layout.tsx`의 `Stack.Screen`에서 `options` 콜백으로 설정:
+- `headerLeft` / `headerRight`는 컴포넌트로 렌더되므로 훅 사용 가능
+- `navigation.goBack()` 전에 스토어 reset 호출 필요 시 순서 주의
+
+## 네비게이션 패턴
+
+```tsx
+import { useRouter } from "expo-router"
+const { push, back } = useRouter()
+
+push("/workout/multi-plan")     // 스크린 이동
+push(`/edit-plan/${type}/${id}`) // 동적 라우트
+back()                           // 뒤로가기
+```

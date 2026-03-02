@@ -1,0 +1,58 @@
+---
+description: React Native 컴포넌트 작성 패턴
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# Component Patterns
+
+## 구조
+
+- 함수형 컴포넌트만 사용 (arrow function export)
+- 스타일은 파일 하단 `StyleSheet.create()`
+- 테마 색상은 인라인 배열 스타일로 주입
+
+```tsx
+export const MyComponent = ({ title }: MyComponentProps) => {
+  const themeColor = useCurrneThemeColor()
+
+  return (
+    <View style={[styles.container, { backgroundColor: themeColor.background }]}>
+      <Text style={[styles.title, { color: themeColor.text }]}>{title}</Text>
+    </View>
+  )
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+  title: { fontSize: 16, fontFamily: "sb-m" },
+})
+```
+
+## 테마
+
+- `useCurrneThemeColor()` 훅으로 현재 테마 색상 접근
+- `@/components/Themed`의 `Text`, `View`는 자동 테마 적용 래퍼
+
+## import 순서
+
+```tsx
+import React from "react"
+// component
+import { StyleSheet, TouchableOpacity } from "react-native"
+import { Text, View } from "@/components/Themed"
+// zustand
+import { usePlanStore } from "@/hooks/use-plan-store"
+// hooks
+import useCurrneThemeColor from "@/hooks/use-current-theme-color"
+// lib
+import { formatTime } from "@/lib/function"
+// expo
+import { useRouter } from "expo-router"
+// icon
+import AntDesign from "@expo/vector-icons/AntDesign"
+```
+
+## 경로 별칭
+
+- `@/*` → 프로젝트 루트 (예: `@/components/`, `@/hooks/`)

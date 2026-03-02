@@ -1,0 +1,38 @@
+---
+description: 프로젝트 개요 및 기술 스택
+alwaysApply: true
+---
+
+# Project Overview
+
+- **프레임워크**: Expo (v53) + React Native (0.79)
+- **라우팅**: Expo Router v5 (파일 기반, `typedRoutes: true`)
+- **상태 관리**: Zustand v5 + persist (AsyncStorage)
+- **언어**: TypeScript (strict mode)
+- **항상 한국어로 응답**
+
+## 디렉토리 구조
+
+```
+app/              # Expo Router 라우트
+  (drawer)/       # Drawer 네비게이션 그룹
+    (tabs)/       # 탭 네비게이션 그룹
+  (modals)/       # 모달 라우트 (presentation: "modal")
+  workout/        # 루틴 관련 스크린
+  add-plan/       # 운동 계획 추가
+  edit-plan/      # 운동 계획 수정
+components/       # 재사용 UI 컴포넌트 (폴더별 그룹)
+hooks/            # Zustand 스토어 + 커스텀 훅
+lib/              # 유틸리티 (storage, function)
+constants/        # Colors, constants
+assets/           # 폰트(SB_B, SB_L, SB_M), SVG, 이미지
+```
+
+## 주요 라이브러리
+
+- `@gorhom/bottom-sheet` - 바텀시트
+- `sonner-native` - 토스트 (`toast.success()`, `toast.error()`)
+- `@expo/react-native-action-sheet` - 액션시트
+- `date-fns` - 날짜 포맷
+- `react-native-reanimated` - 애니메이션
+- `react-native-gifted-charts` - 차트

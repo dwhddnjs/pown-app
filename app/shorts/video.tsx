@@ -1,96 +1,96 @@
-import { useRef, useState } from "react"
+import { useRef, useState } from "react";
 // component
-import { Dimensions, Pressable, StyleSheet } from "react-native"
-import { Text, View } from "@/components/Themed"
+import { Dimensions, Pressable, StyleSheet } from "react-native";
+import { Text, View } from "@/components/Themed";
 //expo
-import { CameraMode, CameraType, CameraView } from "expo-camera"
-import { Image } from "expo-image"
-import { useRouter } from "expo-router"
-import { useEvent } from "expo"
-import { useVideoPlayer, VideoView } from "expo-video"
+import { CameraMode, CameraType, CameraView } from "expo-camera";
+import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { useEvent } from "expo";
+import { useVideoPlayer, VideoView } from "expo-video";
 // icon
-import { FontAwesome6 } from "@expo/vector-icons"
+import { FontAwesome6 } from "@expo/vector-icons";
 // hook
-import useCurrneThemeColor from "@/hooks/use-current-theme-color"
-import { SafeAreaView } from "react-native-safe-area-context"
+import useCurrneThemeColor from "@/hooks/use-current-theme-color";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withTiming,
-} from "react-native-reanimated"
-import { useShortsStore } from "@/hooks/use-shorts-store"
-import * as VideoThumbnails from "expo-video-thumbnails"
-import { toast } from "sonner-native"
-import * as MediaLibrary from "expo-media-library"
+} from "react-native-reanimated";
+import { useShortsStore } from "@/hooks/use-shorts-store";
+import * as VideoThumbnails from "expo-video-thumbnails";
+import { toast } from "sonner-native";
+import * as MediaLibrary from "expo-media-library";
 
 export default function Video() {
-  const ref = useRef<CameraView>(null)
-  const [uri, setUri] = useState<string | null>(null)
-  const [facing, setFacing] = useState<CameraType>("back")
-  const themeColor = useCurrneThemeColor()
-  const router = useRouter()
-  const { setAddVideo, videos } = useShortsStore()
-  const [isRecording, setIsRecording] = useState(false)
+  const ref = useRef<CameraView>(null);
+  const [uri, setUri] = useState<string | null>(null);
+  const [facing, setFacing] = useState<CameraType>("back");
+  const themeColor = useCurrneThemeColor();
+  const router = useRouter();
+  const { setAddVideo, videos } = useShortsStore();
+  const [isRecording, setIsRecording] = useState(false);
   const player = useVideoPlayer(uri, (player) => {
-    player.loop = true
-    player.play()
-  })
+    player.loop = true;
+    player.play();
+  });
   const { isPlaying } = useEvent(player, "playingChange", {
     isPlaying: player.playing,
-  })
-  const isSquare = useSharedValue(false)
+  });
+  const isSquare = useSharedValue(false);
 
   const animatedShutterStyle = useAnimatedStyle(() => {
     return {
       width: withTiming(isSquare.value ? 32 : 64, { duration: 300 }),
       height: withTiming(isSquare.value ? 32 : 64, { duration: 300 }),
       borderRadius: withTiming(isSquare.value ? 6 : 50, { duration: 300 }),
-    }
-  })
+    };
+  });
 
   const onStartRecording = async () => {
-    if (!ref.current) return
+    if (!ref.current) return;
     try {
-      setIsRecording(true)
-      const data = await ref.current.recordAsync()
-      setUri(data?.uri as string)
+      setIsRecording(true);
+      const data = await ref.current.recordAsync();
+      setUri(data?.uri as string);
     } catch (error) {
-      console.log(error)
+      console.log(error);
     } finally {
-      setIsRecording(false)
+      setIsRecording(false);
     }
-  }
+  };
 
   const onStopRecording = () => {
-    if (!ref.current) return
-    ref.current.stopRecording()
-  }
+    if (!ref.current) return;
+    ref.current.stopRecording();
+  };
 
   const toggleFacing = () => {
-    setFacing((prev) => (prev === "back" ? "front" : "back"))
-  }
+    setFacing((prev) => (prev === "back" ? "front" : "back"));
+  };
 
   const selectImageUri = async () => {
     try {
       if (uri) {
         const thumbnail = await VideoThumbnails.getThumbnailAsync(uri, {
           time: 15000,
-        })
+        });
         setAddVideo({
           id: videos.length > 0 ? videos[videos.length - 1].id + 1 : 1,
           video: uri,
           thumbnail: thumbnail.uri,
           createdAt: new Date(),
-        })
-        await MediaLibrary.createAssetAsync(uri as string)
-        setUri("")
+        });
+        await MediaLibrary.createAssetAsync(uri as string);
+        setUri("");
       }
-      router.back()
-      toast.success("숏츠가 추가 되었습니다")
+      router.back();
+      toast.success("숏츠가 추가 되었습니다");
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }
+  };
 
   const renderVideo = () => {
     return (
@@ -131,8 +131,8 @@ export default function Video() {
           </Pressable>
         </View>
       </SafeAreaView>
-    )
-  }
+    );
+  };
 
   const renderCamera = () => {
     return (
@@ -153,8 +153,8 @@ export default function Video() {
 
           <Pressable
             onPress={() => {
-              isSquare.value = !isSquare.value
-              isRecording ? onStopRecording() : onStartRecording()
+              isSquare.value = !isSquare.value;
+              isRecording ? onStopRecording() : onStartRecording();
             }}
           >
             {({ pressed }) => (
@@ -181,14 +181,14 @@ export default function Video() {
           </Pressable>
         </View>
       </CameraView>
-    )
-  }
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderVideo() : renderCamera()}
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -237,4 +237,4 @@ const styles = StyleSheet.create({
     color: "white",
     fontFamily: "sb-m",
   },
-})
+});

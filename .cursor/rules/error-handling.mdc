@@ -1,0 +1,52 @@
+---
+description: 에러 처리 및 방어 코딩 패턴
+globs: "**/*.{ts,tsx}"
+alwaysApply: false
+---
+
+# Error Handling
+
+## console.log 사용 금지
+
+디버깅용 `console.log`를 프로덕션 코드에 남기지 않기.
+
+```tsx
+// ❌ BAD
+} catch (error) {
+  console.log("error: ", error)
+}
+
+// ✅ GOOD - 조용히 실패하거나 사용자에게 토스트
+} catch {
+}
+
+// ✅ GOOD - 사용자 알림이 필요한 경우
+} catch {
+  toast.error("문제가 발생했습니다")
+}
+```
+
+## 배열 spread 안전성
+
+`mediaLibrary && (await Promise.all(...))` 같은 패턴은 `false`를 반환할 수 있음.
+
+```tsx
+// ❌ BAD - false일 때 TypeError
+...(imageUri as any)
+
+// ✅ GOOD
+...(imageUri || [])
+```
+
+## 옵셔널 데이터 접근
+
+```tsx
+// ❌ BAD - findIndex가 -1이면 크래시
+const idx = list.findIndex((item) => item.id === id)
+list[idx].property
+
+// ✅ GOOD
+const idx = list.findIndex((item) => item.id === id)
+if (idx === -1) return prev
+list[idx].property
+```

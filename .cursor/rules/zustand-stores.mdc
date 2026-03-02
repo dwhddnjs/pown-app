@@ -1,0 +1,44 @@
+---
+description: Zustand 스토어 작성 패턴
+globs: hooks/use-*-store.tsx
+alwaysApply: false
+---
+
+# Zustand Store Patterns
+
+## 기본 구조
+
+```tsx
+import { create } from "zustand"
+import { createJSONStorage, persist } from "zustand/middleware"
+import { storage } from "@/lib/storage"
+
+type MyStoreTypes = {
+  items: Item[]
+  setItem: (value: Item) => void
+  onReset: () => void
+}
+
+export const useMyStore = create<MyStoreTypes>()(
+  persist(
+    (set) => ({
+      items: [],
+      setItem: (value) =>
+        set((prev) => ({ items: [value, ...prev.items] })),
+      onReset: () => set({ items: [] }),
+    }),
+    {
+      name: "my-store",
+      storage: createJSONStorage(() => storage),
+    }
+  )
+)
+```
+
+## 규칙
+
+- 영속 데이터는 `persist` 미들웨어 사용, 임시 데이터는 persist 없이 `create`
+- 타입은 스토어 파일 내부에 정의 후 필요시 export
+- ID 생성은 `Date.now()` 사용 (순차 ID 금지 - 삭제 후 충돌 위험)
+- `set()` 내부에서 이전 상태 접근 시 `set((prev) => ...)` 패턴
+- `findIndex` 사용 시 `-1` 반환에 대한 가드 필수

@@ -1,0 +1,20 @@
+---
+description: 파일 및 코드 네이밍 컨벤션
+alwaysApply: true
+---
+
+# Naming Conventions
+
+## 파일 및 폴더
+
+- **kebab-case**: `workout-tags.tsx`, `use-plan-store.tsx`, `fab-menu/`
+
+## 코드
+
+- **컴포넌트**: PascalCase (`WorkoutPlan`, `FabOverlay`)
+- **훅 파일**: `use-*-store.tsx` (스토어), `use-*.tsx` (일반)
+- **스토어 export**: `use*Store` (예: `useMultiPlanStore`, `usePlanStore`)
+- **타입/인터페이스**: PascalCase + `Types` 또는 `Props` 접미사
+  - 스토어 타입: `WorkoutPlanTypes`, `PlanStoreType`
+  - 컴포넌트 Props: `interface WeightDateProps`
+- **커스텀 폰트**: `fontFamily: "sb-b"` (Bold), `"sb-m"` (Medium), `"sb-l"` (Light)
