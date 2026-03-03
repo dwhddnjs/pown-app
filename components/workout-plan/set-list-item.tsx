@@ -11,9 +11,10 @@ interface SetListItemProps {
   item: SetWithCountType;
   planId: number;
   setIndex: number;
+  hideProgress?: boolean;
 }
 
-export const SetListItem = ({ item, planId, setIndex }: SetListItemProps) => {
+export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListItemProps) => {
   const { setCompleteProgress } = useWorkoutPlanStore();
   const themeColor = useCurrentThemeColor();
 
@@ -49,52 +50,56 @@ export const SetListItem = ({ item, planId, setIndex }: SetListItemProps) => {
             style={[styles.count, { color: themeColor.text }]}
           >{`${item.count} 회`}</Text>
         </View>
-        <Text
-          style={[
-            styles.progressText,
-            { color: themeColor.subText },
-            item.progress === "완료" && {
-              color: themeColor.tint,
-            },
-          ]}
-        >
-          {item.progress}
-        </Text>
-      </View>
-      <View
-        style={[
-          styles.buttonContainer,
-          { backgroundColor: themeColor.itemColor },
-        ]}
-      >
-        {item.progress === "완료" ? (
-          <View
+        {!hideProgress && (
+          <Text
             style={[
-              styles.completedIcon,
-              { backgroundColor: themeColor.itemColor },
-            ]}
-          >
-            <CheckCircle
-              name="checkcircleo"
-              size={24}
-              color={themeColor.tint}
-            />
-          </View>
-        ) : (
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: themeColor.subText,
-                borderRadius: 8,
+              styles.progressText,
+              { color: themeColor.subText },
+              item.progress === "완료" && {
+                color: themeColor.tint,
               },
             ]}
-            onPress={() => setCompleteProgress(planId, item.id)}
           >
-            <Text style={styles.buttonText}>완료</Text>
-          </TouchableOpacity>
+            {item.progress}
+          </Text>
         )}
       </View>
+      {!hideProgress && (
+        <View
+          style={[
+            styles.buttonContainer,
+            { backgroundColor: themeColor.itemColor },
+          ]}
+        >
+          {item.progress === "완료" ? (
+            <View
+              style={[
+                styles.completedIcon,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              <CheckCircle
+                name="checkcircleo"
+                size={24}
+                color={themeColor.tint}
+              />
+            </View>
+          ) : (
+            <TouchableOpacity
+              style={[
+                styles.button,
+                {
+                  backgroundColor: themeColor.subText,
+                  borderRadius: 8,
+                },
+              ]}
+              onPress={() => setCompleteProgress(planId, item.id)}
+            >
+              <Text style={styles.buttonText}>완료</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      )}
     </View>
   );
 };

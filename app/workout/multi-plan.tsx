@@ -69,6 +69,7 @@ export default function MultiPlanScreen() {
                 item={plan}
                 index={index}
                 totalLength={tempPlans.length}
+                hideProgress
               />
             ))}
           </View>

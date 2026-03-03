@@ -12,19 +12,29 @@ import { DrawerToggleButton } from "@react-navigation/drawer"
 import { BlurView } from "expo-blur"
 import { useRouter } from "expo-router"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
+import * as Haptics from "expo-haptics"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useNavigation, DrawerActions } from "@react-navigation/native"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrentThemeColor()
   const { push } = useRouter()
+  const navigation = useNavigation()
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          <TouchableOpacity>
-            <DrawerToggleButton tintColor={themeColor.text} />
+          <TouchableOpacity
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
+              navigation.dispatch(DrawerActions.toggleDrawer())
+            }}
+          >
+            <View pointerEvents="none">
+              <DrawerToggleButton tintColor={themeColor.text} />
+            </View>
           </TouchableOpacity>
           <Text
             style={{

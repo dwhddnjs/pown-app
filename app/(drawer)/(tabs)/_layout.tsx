@@ -15,6 +15,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { CalendarHeader } from "@/components/calendar";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
+import * as Haptics from "expo-haptics";
 import ImageModal from "@/components/workout-plan/image-modal";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -141,6 +142,7 @@ export default function TabLayout() {
           listeners={({ navigation }) => ({
             tabPress: (e) => {
               e.preventDefault();
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               setFabOpen((prev) => !prev);
             },
           })}

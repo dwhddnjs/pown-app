@@ -29,6 +29,7 @@ export default function calendarWorkout() {
       <FlatList
         data={Object.entries(sortWorkList)}
         // estimatedItemSize={50}
+        ListFooterComponent={<View style={{ height: 120 }} />}
         keyExtractor={(item) => item[0]}
         renderItem={({ item, index }) => {
           return (

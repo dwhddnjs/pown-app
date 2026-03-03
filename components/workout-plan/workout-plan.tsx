@@ -98,9 +98,10 @@ interface WorkoutPlanProps {
   item: WorkoutPlanTypes;
   index: number;
   totalLength: number;
+  hideProgress?: boolean;
 }
 
-export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
+export const WorkoutPlan = ({ item, index, totalLength, hideProgress }: WorkoutPlanProps) => {
   const themeColor = useCurrentThemeColor();
   const { mediaLibrary } = useUserStore();
   const { setImageUri } = useImageUriStore();
@@ -202,21 +203,24 @@ export const WorkoutPlan = ({ item, index, totalLength }: WorkoutPlanProps) => {
               gap: 14,
             }}
           >
-            <ProgressBar
-              completed={
-                item.setWithCount.filter((s) => s.progress === "완료").length
-              }
-              total={item.setWithCount.length}
-              tintColor={themeColor.tint}
-              bgColor={themeColor.empty}
-              textColor={themeColor.subText}
-            />
+            {!hideProgress && (
+              <ProgressBar
+                completed={
+                  item.setWithCount.filter((s) => s.progress === "완료").length
+                }
+                total={item.setWithCount.length}
+                tintColor={themeColor.tint}
+                bgColor={themeColor.empty}
+                textColor={themeColor.subText}
+              />
+            )}
             {item.setWithCount.map((setCount, index) => (
               <SetListItem
                 key={setCount.id}
                 planId={item.id}
                 item={setCount}
                 setIndex={index + 1}
+                hideProgress={hideProgress}
               />
             ))}
           </View>

@@ -55,7 +55,7 @@ const WorkoutSummary = () => {
   if (totalWorkouts === 0) {
     return (
       <View style={[styles(themeColor).container]}>
-        <Text style={{ fontSize: 18 }}>월간 요약</Text>
+        <Text style={{ fontSize: 18, marginLeft: 6 }}>월간 요약</Text>
         <View
           style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
         />
