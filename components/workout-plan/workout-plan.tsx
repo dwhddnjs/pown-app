@@ -101,7 +101,12 @@ interface WorkoutPlanProps {
   hideProgress?: boolean;
 }
 
-export const WorkoutPlan = ({ item, index, totalLength, hideProgress }: WorkoutPlanProps) => {
+export const WorkoutPlan = ({
+  item,
+  index,
+  totalLength,
+  hideProgress,
+}: WorkoutPlanProps) => {
   const themeColor = useCurrentThemeColor();
   const { mediaLibrary } = useUserStore();
   const { setImageUri } = useImageUriStore();

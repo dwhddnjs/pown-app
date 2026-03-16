@@ -1,20 +1,21 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native"
-import React, { useEffect } from "react"
+import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import React, { useEffect } from "react";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withSpring,
   withTiming,
   runOnJS,
-} from "react-native-reanimated"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import AntDesign from "@expo/vector-icons/AntDesign"
+} from "react-native-reanimated";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { Text } from "./Themed";
 
 interface DialogProps {
-  children: React.ReactNode
-  isOpen: boolean
-  onClose: () => void
-  modalHeight?: number
+  children: React.ReactNode;
+  isOpen: boolean;
+  onClose: () => void;
+  modalHeight?: number;
 }
 
 export const Dialog = ({
@@ -23,35 +24,35 @@ export const Dialog = ({
   onClose,
   modalHeight,
 }: DialogProps) => {
-  const themeColor = useCurrentThemeColor()
-  const translateY = useSharedValue(50)
-  const opacity = useSharedValue(0)
+  const themeColor = useCurrentThemeColor();
+  const translateY = useSharedValue(50);
+  const opacity = useSharedValue(0);
 
   useEffect(() => {
     if (isOpen) {
-      translateY.value = withSpring(0)
-      opacity.value = withSpring(1)
+      translateY.value = withSpring(0);
+      opacity.value = withSpring(1);
     } else {
-      translateY.value = withTiming(50, { duration: 150 })
+      translateY.value = withTiming(50, { duration: 150 });
       opacity.value = withTiming(0, { duration: 150 }, () => {
-        runOnJS(onClose)()
-      })
+        runOnJS(onClose)();
+      });
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateY: translateY.value }],
     opacity: opacity.value,
-  }))
+  }));
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   const onPress = () => {
-    translateY.value = withTiming(50, { duration: 150 })
+    translateY.value = withTiming(50, { duration: 150 });
     opacity.value = withTiming(0, { duration: 150 }, () => {
-      runOnJS(onClose)()
-    })
-  }
+      runOnJS(onClose)();
+    });
+  };
 
   return (
     <Pressable
@@ -81,8 +82,8 @@ export const Dialog = ({
         {children}
       </Animated.View>
     </Pressable>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   overlay: {
@@ -103,4 +104,4 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingBottom: 20,
   },
-})
+});
