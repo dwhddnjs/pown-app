@@ -14,9 +14,6 @@
       "supportsTablet": true,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
-      "entitlements": {
-        "aps-environment": "development"
-      },
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIDesignRequiresCompatibility": true
@@ -34,30 +31,8 @@
       "output": "single",
       "favicon": "./assets/images/favicon.png"
     },
-    "packagerOpts": {
-      "config": "metro.config.js",
-      "sourceExts": [
-        "expo.ts",
-        "expo.tsx",
-        "expo.js",
-        "expo.jsx",
-        "ts",
-        "tsx",
-        "js",
-        "jsx",
-        "json",
-        "wasm",
-        "svg"
-      ]
-    },
     "plugins": [
       "expo-router",
-      [
-        "expo-font",
-        {
-          "fonts": ["./assets/fonts/SB_M.otf"]
-        }
-      ],
       [
         "expo-splash-screen",
         {

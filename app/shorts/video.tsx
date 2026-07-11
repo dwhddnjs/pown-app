@@ -20,6 +20,7 @@ import { useShortsStore } from "@/hooks/use-shorts-store";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { toast } from "sonner-native";
 import * as MediaLibrary from "expo-media-library";
+import * as FileSystem from "expo-file-system";
 
 export default function Video() {
   const ref = useRef<CameraView>(null);
@@ -27,7 +28,7 @@ export default function Video() {
   const [facing, setFacing] = useState<CameraType>("back");
   const themeColor = useCurrentThemeColor();
   const router = useRouter();
-  const { setAddVideo, videos } = useShortsStore();
+  const { setAddVideo } = useShortsStore();
   const [isRecording, setIsRecording] = useState(false);
   const player = useVideoPlayer(uri, (player) => {
     player.loop = true;
@@ -68,17 +69,22 @@ export default function Video() {
   const selectImageUri = async () => {
     try {
       if (uri) {
+        const id = Date.now();
+        // recordAsync가 주는 캐시 경로는 iOS가 언제든 비울 수 있어 영구 경로로 옮겨 저장한다
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
         const thumbnail = await VideoThumbnails.getThumbnailAsync(uri, {
-          time: 15000,
+          time: 0,
         });
+        const thumbnailUri = `${FileSystem.documentDirectory}shorts-thumbnail-${id}.jpg`;
+        await FileSystem.copyAsync({ from: thumbnail.uri, to: thumbnailUri });
         setAddVideo({
-          id: videos.length > 0 ? videos[videos.length - 1].id + 1 : 1,
-          video: uri,
-          thumbnail: thumbnail.uri,
+          id,
+          video: assetInfo.localUri ?? asset.uri,
+          thumbnail: thumbnailUri,
           createdAt: new Date().toISOString(),
         });
-        await MediaLibrary.createAssetAsync(uri as string);
-        setUri("");
+        setUri(null);
       }
       router.back();
       toast.success("숏츠가 추가 되었습니다");

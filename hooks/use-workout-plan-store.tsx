@@ -27,17 +27,20 @@ type WorkoutPlanStoreTypes = {
   onSetMockout: (value: WorkoutPlanTypes[]) => void;
 };
 
+const sortByCreatedAt = (list: WorkoutPlanTypes[]) =>
+  [...list].sort(
+    (a, b) =>
+      parse(b.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime() -
+      parse(a.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime(),
+  );
+
 export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
   persist(
     (set) => ({
       workoutPlanList: [],
       setWorkoutPlan: (value) =>
         set((prev) => ({
-          workoutPlanList: [value, ...prev.workoutPlanList].sort(
-            (a, b) =>
-              parse(b.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime() -
-              parse(a.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime(),
-          ),
+          workoutPlanList: sortByCreatedAt([value, ...prev.workoutPlanList]),
         })),
       onResetPlanList: () =>
         set({
@@ -53,7 +56,7 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
               if (item.id === itemId) {
                 return {
                   ...item,
-                  progress: "완료",
+                  progress: "완료" as const,
                 };
               }
               return item;
@@ -66,10 +69,10 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           };
 
           const newArr = newWorkoutList.filter((item) => item.id !== id);
-          const result = [...newArr, newObj].sort((a, b) => b.id - a.id);
+          const result = sortByCreatedAt([...newArr, newObj]);
 
           return {
-            workoutPlanList: result as WorkoutPlanTypes[],
+            workoutPlanList: result,
           };
         }),
       setRemovePlan: (id: number) =>
@@ -84,9 +87,7 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           const filteredList = newWorkoutList.filter(
             (item) => item.id !== value.id,
           );
-          const result = [...filteredList, { ...value }].sort(
-            (a, b) => b.id - a.id,
-          );
+          const result = sortByCreatedAt([...filteredList, { ...value }]);
 
           return {
             workoutPlanList: result,

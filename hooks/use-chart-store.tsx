@@ -60,6 +60,6 @@ export const useChartStore = create<ChartStore>((set) => ({
     }),
   onReset: () =>
     set({
-      date: "",
+      date: new Date().toISOString().slice(0, 7).replace("-", ""),
     }),
 }));

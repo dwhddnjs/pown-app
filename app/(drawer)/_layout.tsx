@@ -81,7 +81,7 @@ const CustomDrawerContent = (props: any) => {
   const handleItemSelect = (item: string) => {
     const selectedDate = [...selectedTitle, item];
 
-    if (selectedDate.length === 0) return;
+    if (selectedDate.length < 3) return;
 
     const result = `${selectedDate[0].slice(0, -1)}.${selectedDate[1].slice(
       0,

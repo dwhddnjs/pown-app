@@ -11,7 +11,7 @@ import { formatDate, groupByDate } from "@/lib/function";
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import { ThemeColorType } from "@/constants/Colors";
 
-export default function calendarWorkout() {
+export default function CalendarWorkout() {
   const themeColor = useCurrentThemeColor();
   const { data } = useLocalSearchParams();
 

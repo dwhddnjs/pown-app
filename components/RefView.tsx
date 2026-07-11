@@ -9,3 +9,5 @@ export const RefView = forwardRef<View, ViewProps>((props, ref) => {
     </View>
   )
 })
+
+RefView.displayName = "RefView"

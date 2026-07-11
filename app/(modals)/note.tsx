@@ -1,15 +1,27 @@
-import React from "react";
+import React, { useEffect } from "react";
 // component
 import { StyleSheet, TextInput } from "react-native";
 import { View } from "@/components/Themed";
 // zustand
 import { useNoteStore } from "@/hooks/use-note-store";
+import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
-export default function note() {
-  const { title, content, setValue } = useNoteStore();
+export default function Note() {
+  const { title, content, setValue, onReset } = useNoteStore();
   const themeColor = useCurrentThemeColor();
+
+  // 수정 중이던 계획의 노트를 프리필하고, 모달이 닫히면(저장/취소 모두) 임시 스토어를 비운다
+  useEffect(() => {
+    const plan = usePlanStore.getState();
+    setValue("title", plan.title);
+    setValue("content", plan.content);
+    return () => {
+      onReset();
+    };
+  }, []);
+
   return (
     <View style={styles.container}>
       <TextInput

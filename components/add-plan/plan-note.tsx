@@ -31,7 +31,6 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
         <Link
           href="/(modals)/note"
           style={[styles.link, { color: themeColor.tint }]}
-          onPress={() => setPlanValue("content", "")}
         >
           전체노트 열기
         </Link>

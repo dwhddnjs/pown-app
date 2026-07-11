@@ -172,7 +172,7 @@ export default function AddMultiPlan() {
               onPress={() => setOpen(true)}
             >
               <Text style={{ color: themeColor.tint }}>
-                {`📆 ${format(date, "yyyy년 M월 d일 h시 m분")}`}
+                {`📆 ${format(date, "yyyy년 M월 d일 HH시 mm분")}`}
               </Text>
               <Entypo name="select-arrows" size={18} color={themeColor.tint} />
             </TouchableOpacity>

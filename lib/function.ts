@@ -52,7 +52,7 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
-    const date = new Date(item.createdAt.replaceAll(".", "-"))
+    const date = parse(item.createdAt, "yyyy.MM.dd HH:mm:ss", new Date())
     const year = `${date.getFullYear()}년`
     const month = `${String(date.getMonth() + 1).padStart(2, "0")}월` // 월을 2자리로 변환
     const day = `${String(date.getDate()).padStart(2, "0")}일` // 일을 2자리로 변환
@@ -312,7 +312,7 @@ export const getMonthlyBodyData = (
     const findItem = processedData.find((el) => el.date === item.date)
     return {
       ...item,
-      value: findItem ? parseInt(findItem.value, 10) : item.value,
+      value: findItem ? parseFloat(findItem.value) : item.value,
     }
   })
 }

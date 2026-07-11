@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/rules-of-hooks -- headerRight/headerLeft 콜백은 React Navigation이 컴포넌트로 렌더하므로 훅 사용이 실제로는 유효함. 저장 로직을 훅으로 추출하는 구조 개선(docs 03-refactoring #1) 때 이 예외를 제거할 것. */
 import { useEffect, useState } from "react";
 // component
 import {
@@ -82,15 +83,9 @@ export default function RootLayout() {
         const { status: micStatus } =
           await Camera.requestMicrophonePermissionsAsync();
 
-        if (cameraStatus === "granted") {
-          setUser("camera", true);
-        }
-        if (mediaStatus === "granted") {
-          setUser("mediaLibrary", true);
-        }
-        if (micStatus === "granted") {
-          setUser("microphone", true);
-        }
+        setUser("camera", cameraStatus === "granted");
+        setUser("mediaLibrary", mediaStatus === "granted");
+        setUser("microphone", micStatus === "granted");
       } catch (error) {
         toast.error("권한 요청 중 오류가 발생했습니다.");
       }
@@ -324,12 +319,22 @@ function RootLayoutNav() {
             const { onReset, ...result } = usePlanStore();
             const { onReset: onResetNote } = useNoteStore();
             const { slug } = useGlobalSearchParams();
-            const { mediaLibrary } = useUserStore();
 
             const onSubmitWorkoutPlan = async () => {
               try {
+                let hasMediaPermission = false;
+                if (result.imageUri.length > 0) {
+                  const { status } =
+                    await MediaLibrary.requestPermissionsAsync();
+                  hasMediaPermission = status === "granted";
+                  if (!hasMediaPermission) {
+                    toast.error(
+                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
+                    );
+                  }
+                }
                 const imageUri =
-                  mediaLibrary &&
+                  hasMediaPermission &&
                   (await Promise.all(
                     result.imageUri.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
@@ -359,8 +364,9 @@ function RootLayoutNav() {
                     equipment: result.equipment,
                     weight:
                       result.weightType === "lb"
-                        ? Math.round(
-                            parseInt(result.weight) / 2.20462,
+                        ? (
+                            Math.round((parseFloat(result.weight) / 2.20462) * 10) /
+                            10
                           ).toString()
                         : result.weight,
                     condition: result.condition,
@@ -374,7 +380,7 @@ function RootLayoutNav() {
                   onReset();
                   navigation.goBack();
                   onResetNote();
-                  return toast.success("운동 계획을 추가되었습니다!!");
+                  return toast.success("운동 계획이 추가되었습니다!");
                 }
                 return toast.error("운동과 목표 중량은 필수에요..");
               } catch (error) {
@@ -429,7 +435,6 @@ function RootLayoutNav() {
             const getWorkoutPlan = workoutPlanList.find(
               (item) => slug && item.id === Number(slug[1]),
             );
-            const { mediaLibrary } = useUserStore();
 
             const onSubmitWorkoutPlan = async () => {
               try {
@@ -441,8 +446,19 @@ function RootLayoutNav() {
                   (item) => !item.imageUri?.includes("/DCIM/"),
                 );
 
+                let hasMediaPermission = false;
+                if (newImages.length > 0) {
+                  const { status } =
+                    await MediaLibrary.requestPermissionsAsync();
+                  hasMediaPermission = status === "granted";
+                  if (!hasMediaPermission) {
+                    toast.error(
+                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
+                    );
+                  }
+                }
                 const imageUri =
-                  mediaLibrary &&
+                  hasMediaPermission &&
                   (await Promise.all(
                     newImages.map(async (item) => {
                       const asset = await MediaLibrary.createAssetAsync(
@@ -477,17 +493,15 @@ function RootLayoutNav() {
                     equipment: result.equipment,
                     weight:
                       result.weightType === "lb"
-                        ? Math.round(
-                            parseInt(result.weight) / 2.20462,
+                        ? (
+                            Math.round((parseFloat(result.weight) / 2.20462) * 10) /
+                            10
                           ).toString()
                         : result.weight,
                     condition: result.condition,
                     content: result.content,
                     title: result.title,
-                    setWithCount: result.setWithCount.map((item, index) => ({
-                      ...item,
-                      id: index + 1,
-                    })),
+                    setWithCount: result.setWithCount,
                     createdAt: getWorkoutPlan.createdAt,
                     updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
                     imageUri: newImagesList ? newImagesList : [],
@@ -495,7 +509,7 @@ function RootLayoutNav() {
                   onReset();
                   back();
                   onResetNote();
-                  return toast.success("운동 계획을 수정되었습니다!!");
+                  return toast.success("운동 계획이 수정되었습니다!");
                 }
                 return toast.error("운동과 목표 중량은 필수에요..");
               } catch (error) {
@@ -549,7 +563,6 @@ function RootLayoutNav() {
           headerRight: () => {
             const { onReset, ...result } = usePlanStore();
             const { onReset: onResetNote } = useNoteStore();
-            const { mediaLibrary } = useUserStore();
             const {
               editingPlan,
               addTempPlan,
@@ -560,9 +573,19 @@ function RootLayoutNav() {
 
             const onSubmitMultiPlan = async () => {
               try {
+                let hasMediaPermission = false;
+                if (result.imageUri.length > 0) {
+                  const { status } =
+                    await MediaLibrary.requestPermissionsAsync();
+                  hasMediaPermission = status === "granted";
+                  if (!hasMediaPermission) {
+                    toast.error(
+                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
+                    );
+                  }
+                }
                 const imageUri =
-                  mediaLibrary &&
-                  result.imageUri.length > 0 &&
+                  hasMediaPermission &&
                   (await Promise.all(
                     result.imageUri.map(async (item) => {
                       if (item.imageUri?.includes("/DCIM/")) {
@@ -598,7 +621,10 @@ function RootLayoutNav() {
                   equipment: result.equipment,
                   weight:
                     result.weightType === "lb"
-                      ? Math.round(parseInt(result.weight) / 2.20462).toString()
+                      ? (
+                          Math.round((parseFloat(result.weight) / 2.20462) * 10) /
+                          10
+                        ).toString()
                       : result.weight,
                   condition: result.condition,
                   content: result.content,

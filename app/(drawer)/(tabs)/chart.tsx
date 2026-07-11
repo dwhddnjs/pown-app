@@ -16,7 +16,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
 import { useHeaderHeight } from "@react-navigation/elements";
 
-export default function chart() {
+export default function Chart() {
   const themeColor = useCurrentThemeColor();
   const headerHeight = useHeaderHeight();
 
