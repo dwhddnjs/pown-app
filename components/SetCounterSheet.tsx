@@ -32,7 +32,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     const onSetPlanStore = () => {
       setSetWithCount({
         ...picker,
-        id: setWithCount.length + 1,
+        id: Date.now(),
         progress: "진행중",
       })
     }
@@ -149,6 +149,8 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     )
   }
 )
+
+SetCounterSheet.displayName = "SetCounterSheet"
 
 const styles = StyleSheet.create({
   container: {},

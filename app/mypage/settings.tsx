@@ -13,7 +13,7 @@ import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
-export default function settings() {
+export default function Settings() {
   const { onReset, ...result } = useUserStore();
   const themeColor = useCurrentThemeColor();
 

@@ -33,7 +33,7 @@ const Camera = () => {
   const selectImageUri = () => {
     if (uri) {
       setImageUri({
-        id: imageUri.length > 0 ? imageUri[imageUri.length - 1].id + 1 : 1,
+        id: Date.now(),
         imageUri: uri,
       });
       setUri("");

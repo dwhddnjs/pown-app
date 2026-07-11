@@ -1,21 +1,39 @@
+import { useState } from "react";
 // component
-import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/Themed";
-import { mockupData } from "@/constants/constants";
+import { Dialog } from "@/components/Dialog";
+import { Button } from "@/components/Button";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { toast } from "sonner-native";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store";
+import { UserInfoTypes, useUserStore } from "@/hooks/use-user-store";
 import {
   useWorkoutPlanStore,
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store";
+import { useShortsStore } from "@/hooks/use-shorts-store";
 // expo
 import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { shareAsync, isAvailableAsync } from "expo-sharing";
 import * as FileSystem from "expo-file-system";
-import { useShortsStore } from "@/hooks/use-shorts-store";
+
+const isValidUserInfo = (value: unknown): value is UserInfoTypes[] =>
+  Array.isArray(value) &&
+  value.every((item) => item && typeof item.createdAt === "string");
+
+const isValidWorkoutPlan = (value: unknown): value is WorkoutPlanTypes[] =>
+  Array.isArray(value) &&
+  value.every(
+    (item) =>
+      item &&
+      typeof item.id === "number" &&
+      typeof item.createdAt === "string" &&
+      typeof item.workout === "string" &&
+      Array.isArray(item.condition) &&
+      Array.isArray(item.setWithCount),
+  );
 
 export default function ResetData() {
   const { onResetPlanList, onSetMockout, workoutPlanList } =
@@ -25,6 +43,7 @@ export default function ResetData() {
   const { onResetVideo } = useShortsStore();
   const { back } = useRouter();
   const themeColor = useCurrentThemeColor();
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   const jsonFile = {
     user: userInfo,
@@ -39,14 +58,14 @@ export default function ResetData() {
         encoding: FileSystem.EncodingType.UTF8,
       });
       if (await isAvailableAsync()) {
-        const res = await shareAsync(fileUri, {
+        await shareAsync(fileUri, {
           mimeType: "application/json",
         });
       } else {
-        console.log("공유 안됨");
+        toast.error("이 기기에서는 파일 공유를 사용할 수 없어요.");
       }
     } catch (error) {
-      console.log(error);
+      toast.error("백업 파일 저장 중 오류가 발생했습니다.");
     }
   };
 
@@ -64,16 +83,20 @@ export default function ResetData() {
           },
         );
         const { user, workoutPlan } = JSON.parse(jsonData);
+        if (!isValidUserInfo(user) || !isValidWorkoutPlan(workoutPlan)) {
+          return toast.error("Pown 백업 파일이 아니에요. 파일을 확인해주세요.");
+        }
         setUser("userInfo", user);
         onSetMockout(workoutPlan);
         toast.success("운동계획 파일을 불러왔습니다!");
       }
     } catch (error) {
-      console.error(error);
+      toast.error("복원 중 오류가 발생했습니다. 파일을 확인해주세요.");
     }
   };
 
   const onSubmit = () => {
+    setIsResetDialogOpen(false);
     onResetPlanList();
     onReset();
     onResetVideo();
@@ -126,24 +149,67 @@ export default function ResetData() {
               borderBottomColor: themeColor.background,
             },
           ]}
-          onPress={() => onSubmit()}
+          onPress={() => setIsResetDialogOpen(true)}
         >
           <Text>초기화</Text>
         </TouchableOpacity>
       </View>
-      <Pressable
-        style={{
-          alignSelf: "flex-end",
-          marginTop: 300,
-          width: 50,
-          height: 50,
-        }}
-        onPress={() => {
-          // onSetMockout(mockupData as WorkoutPlanTypes[])
-          toast.success("목업데이터 생성 되었습니다");
-          back();
-        }}
-      ></Pressable>
+      <Dialog
+        isOpen={isResetDialogOpen}
+        onClose={() => setIsResetDialogOpen(false)}
+        modalHeight={300}
+      >
+        <View
+          style={{
+            backgroundColor: themeColor.itemColor,
+            paddingHorizontal: 20,
+            gap: 24,
+          }}
+        >
+          <View style={{ backgroundColor: themeColor.itemColor, gap: 4 }}>
+            <Text style={{ fontSize: 18 }}>정말 모든 데이터를 삭제할까요?</Text>
+            <Text
+              style={{
+                fontSize: 14,
+                color: themeColor.subText,
+                fontFamily: "sb-l",
+              }}
+            >
+              * 운동 기록·내정보·숏츠가 모두 삭제되며 복구할 수 없어요.
+            </Text>
+          </View>
+          <View
+            style={{
+              flexDirection: "row",
+              backgroundColor: themeColor.itemColor,
+              gap: 12,
+            }}
+          >
+            <Button
+              type="solid"
+              style={{
+                flex: 1,
+                marginHorizontal: 0,
+                backgroundColor: themeColor.subText,
+              }}
+              onPress={() => setIsResetDialogOpen(false)}
+            >
+              취소
+            </Button>
+            <Button
+              type="solid"
+              style={{
+                flex: 1,
+                marginHorizontal: 0,
+                backgroundColor: themeColor.fail,
+              }}
+              onPress={onSubmit}
+            >
+              삭제하기
+            </Button>
+          </View>
+        </View>
+      </Dialog>
     </View>
   );
 }

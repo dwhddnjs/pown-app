@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { View, Text } from "@/components/Themed";
 import { router } from "expo-router";
@@ -10,6 +10,7 @@ import Animated, {
   withTiming,
   interpolate,
   Easing,
+  runOnJS,
 } from "react-native-reanimated";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
@@ -23,12 +24,20 @@ const ANIMATION_DURATION = 250;
 export default function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
   const themeColor = useCurrentThemeColor();
   const progress = useSharedValue(0);
+  const [mounted, setMounted] = useState(isOpen);
 
   useEffect(() => {
-    progress.value = withTiming(isOpen ? 1 : 0, {
-      duration: ANIMATION_DURATION,
-      easing: Easing.bezier(0.25, 0.1, 0.25, 1),
-    });
+    if (isOpen) setMounted(true);
+    progress.value = withTiming(
+      isOpen ? 1 : 0,
+      {
+        duration: ANIMATION_DURATION,
+        easing: Easing.bezier(0.25, 0.1, 0.25, 1),
+      },
+      (finished) => {
+        if (finished && !isOpen) runOnJS(setMounted)(false);
+      },
+    );
   }, [isOpen]);
 
   const overlayStyle = useAnimatedStyle(() => ({
@@ -69,11 +78,14 @@ export default function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
     }, ANIMATION_DURATION);
   };
 
-  if (!isOpen && progress.value === 0) return null;
+  if (!mounted) return null;
 
   return (
     <View style={styles.container} pointerEvents="box-none">
-      <Animated.View style={[styles.overlay, overlayStyle]}>
+      <Animated.View
+        style={[styles.overlay, overlayStyle]}
+        pointerEvents={isOpen ? "auto" : "none"}
+      >
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 

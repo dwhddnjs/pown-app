@@ -12,7 +12,7 @@ import {
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
-export default function calculate() {
+export default function Calculate() {
   const themeColor = useCurrentThemeColor();
   const [selected, setSelected] = useState("kg");
   const [inputNumber, setInputNumber] = useState("");

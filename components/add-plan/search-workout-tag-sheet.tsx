@@ -149,6 +149,8 @@ export const SearchWorkoutTagSheet = forwardRef<
   )
 })
 
+SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet"
+
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",

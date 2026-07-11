@@ -81,7 +81,9 @@ export const RemoveShortsDialog = ({
               backgroundColor: themeColor.fail,
             }}
             onPress={() => {
-              setRemoveVideo(videos[position].id)
+              const video = videos[position]
+              if (!video) return
+              setRemoveVideo(video.id)
               toast.success("숏츠가 삭제 되었습니다.")
               back()
             }}

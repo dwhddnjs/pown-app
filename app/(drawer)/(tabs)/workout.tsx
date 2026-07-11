@@ -86,7 +86,7 @@ export default function TabOneScreen() {
             animated: true,
           });
         },
-        (error: Error) => console.log("Scroll error:", error),
+        () => {},
       );
     }
   }, [selectedDate, headerHeight]);

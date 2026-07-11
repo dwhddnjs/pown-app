@@ -44,19 +44,13 @@ export const TopWeight = ({
   }));
 
   const onSetType = (type: "kg" | "lb") => {
-    if (weight) {
-      if (weightType === "kg") {
-        const lb = Math.round(parseInt(weight) * 2.20462).toString();
-        setPlanValue("weight", lb);
-        setPlanValue("weightType", type);
-      } else {
-        const kg = Math.round(parseInt(weight) / 2.20462).toString();
-        setPlanValue("weight", kg);
-        setPlanValue("weightType", type);
-      }
-    } else {
-      setPlanValue("weightType", type);
+    if (type === weightType) return;
+    const parsed = parseFloat(weight);
+    if (weight && !Number.isNaN(parsed)) {
+      const converted = type === "lb" ? parsed * 2.20462 : parsed / 2.20462;
+      setPlanValue("weight", (Math.round(converted * 10) / 10).toString());
     }
+    setPlanValue("weightType", type);
   };
 
   return (
@@ -88,7 +82,7 @@ export const TopWeight = ({
               });
             }}
             style={[styles.input, { color: themeColor.tint }]}
-            maxLength={3}
+            maxLength={5}
             keyboardType="numeric"
             value={weight}
             onChangeText={(value) => setPlanValue("weight", value)}

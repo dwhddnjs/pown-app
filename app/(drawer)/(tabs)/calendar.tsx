@@ -35,7 +35,7 @@ import { removeSameItem } from "@/lib/function";
 import { useRouter } from "expo-router";
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 
-export default function calendar() {
+export default function Calendar() {
   const headerHeight = useHeaderHeight();
   const themeColor = useCurrentThemeColor();
   const { date } = useCalendarStore();
@@ -50,7 +50,7 @@ export default function calendar() {
   const days = eachDayOfInterval({ start: firstDay, end: lastDay });
   const router = useRouter();
 
-  const getDayIcon = (isBefore: boolean, findItem: any) => {
+  const getDayIcon = (isBeforeToday: boolean, findItem?: WorkoutPlanTypes) => {
     const icons = {
       chest: Chest,
       back: Back,
@@ -58,19 +58,19 @@ export default function calendar() {
       leg: Leg,
       arm: Arm,
     };
-    const WorkoutIcon = findItem && icons[findItem.type as WorkoutTypes];
+    const WorkoutIcon = findItem
+      ? icons[findItem.type as WorkoutTypes]
+      : undefined;
 
-    if (isBefore) {
-      if (findItem) {
-        return <WorkoutIcon width={40} height={40} />;
-      }
+    if (WorkoutIcon) {
+      return <WorkoutIcon width={40} height={40} />;
+    }
+    if (isBeforeToday) {
       return (
         <View style={[styles(themeColor).emptyIcon]}>
           <Ionicons name="close" size={24} color={themeColor.itemColor} />
         </View>
       );
-    } else if (findItem) {
-      return <WorkoutIcon width={40} height={40} />;
     }
     return <View style={styles(themeColor).emptyIcon} />;
   };
@@ -121,7 +121,7 @@ export default function calendar() {
             </Text>
           </View>
           <Text style={{ fontFamily: "sb-l", color: themeColor.subText }}>
-            운동한 날짜을 눌러서, 그날의 운동 기록을 확인해보세요.
+            운동한 날짜를 눌러서, 그날의 운동 기록을 확인해보세요.
           </Text>
         </View>
         <View style={styles(themeColor).calendarContainer}>
