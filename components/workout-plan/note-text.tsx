@@ -1,7 +1,7 @@
 import { StyleSheet, useColorScheme } from "react-native"
 import React from "react"
 import Colors from "@/constants/Colors"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 
 interface NoteTextProps {
   title?: string

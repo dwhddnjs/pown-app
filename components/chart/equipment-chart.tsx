@@ -1,17 +1,16 @@
 import React, { useMemo } from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
-import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { getEquipmentCount } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { ChartEmptyState } from "./chart-empty-state";
 
-const EquipmentChart = () => {
+export const EquipmentChart = () => {
   const themeColor = useCurrentThemeColor();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
@@ -59,7 +58,7 @@ const EquipmentChart = () => {
   );
 
   return (
-    <View style={styles(themeColor).container}>
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>주로 뭐로 운동했지?</Text>
       <View
         style={{
@@ -118,56 +117,13 @@ const EquipmentChart = () => {
   );
 };
 
-export default EquipmentChart;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingVertical: 20,
-      paddingHorizontal: 12,
-      borderRadius: 12,
-      gap: 12,
-      overflow: "hidden",
-    },
-    iconListContainer: {
-      backgroundColor: color.itemColor,
-      justifyContent: "center",
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 9,
-      paddingVertical: 4,
-      flexWrap: "wrap",
-    },
-    iconItem: {
-      backgroundColor: color.itemColor,
-      justifyContent: "center",
-      alignItems: "center",
-      minWidth: 54,
-      position: "relative",
-    },
-    iconText: {
-      color: color.tint,
-      fontSize: 10,
-      fontFamily: "sb-l",
-    },
-    numberCount: {
-      width: 18,
-      height: 18,
-      justifyContent: "center",
-      alignItems: "center",
-      borderRadius: 50,
-      backgroundColor: color.subText,
-      position: "absolute",
-      top: -2,
-      left: -2,
-      zIndex: 1,
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 4,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 20,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    gap: 12,
+    overflow: "hidden",
+  },
+});

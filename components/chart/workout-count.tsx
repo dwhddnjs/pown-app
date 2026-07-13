@@ -1,7 +1,7 @@
 import React from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 // icon
 import Back from "@/assets/images/svg/back_icon.svg";
 import Arm from "@/assets/images/svg/arm_icon.svg";
@@ -10,13 +10,12 @@ import Leg from "@/assets/images/svg/leg_icon.svg";
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 import { ChartEmptyState } from "./chart-empty-state";
 // hook
-import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { sortWorkoutPlanList } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 
-const WorkoutCount = () => {
+export const WorkoutCount = () => {
   const themeColor = useCurrentThemeColor();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
@@ -31,7 +30,7 @@ const WorkoutCount = () => {
     0;
 
   return (
-    <View style={[styles(themeColor).container]}>
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>기록한 운동 횟수</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
@@ -42,29 +41,54 @@ const WorkoutCount = () => {
       ) : (
         <View
           style={[
-            styles(themeColor).iconListContainer,
-            { marginHorizontal: 6 },
+            styles.iconListContainer,
+            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
           ]}
         >
-          <View style={[styles(themeColor).iconItem]}>
+          <View
+            style={[
+              styles.iconItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
             <Back />
             <Text style={{ color: themeColor.tint }}>{listCount.back}회</Text>
           </View>
-          <View style={[styles(themeColor).iconItem]}>
+          <View
+            style={[
+              styles.iconItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
             <Chest />
             <Text style={{ color: themeColor.tint }}>{listCount.chest}회</Text>
           </View>
-          <View style={[styles(themeColor).iconItem]}>
+          <View
+            style={[
+              styles.iconItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
             <Shoulder />
             <Text style={{ color: themeColor.tint }}>
               {listCount.shoulder}회
             </Text>
           </View>
-          <View style={[styles(themeColor).iconItem]}>
+          <View
+            style={[
+              styles.iconItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
             <Leg />
             <Text style={{ color: themeColor.tint }}>{listCount.leg}회</Text>
           </View>
-          <View style={[styles(themeColor).iconItem]}>
+          <View
+            style={[
+              styles.iconItem,
+              { backgroundColor: themeColor.itemColor },
+            ]}
+          >
             <Arm />
             <Text style={{ color: themeColor.tint }}>{listCount.arm}회</Text>
           </View>
@@ -74,37 +98,24 @@ const WorkoutCount = () => {
   );
 };
 
-export default WorkoutCount;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingHorizontal: 12,
-      paddingVertical: 20,
-      borderRadius: 12,
-      gap: 12,
-      // marginTop: 24,
-    },
-    iconItem: {
-      backgroundColor: color.itemColor,
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 8,
-    },
-    iconListContainer: {
-      backgroundColor: color.itemColor,
-      justifyContent: "space-between",
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 8,
-      paddingVertical: 4,
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 4,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+    borderRadius: 12,
+    gap: 12,
+  },
+  iconItem: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 8,
+  },
+  iconListContainer: {
+    justifyContent: "space-between",
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 8,
+    paddingVertical: 4,
+  },
+});

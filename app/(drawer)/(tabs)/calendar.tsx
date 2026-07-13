@@ -16,7 +16,7 @@ import {
   isBefore,
   startOfDay,
 } from "date-fns";
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 // lib
 import { useHeaderHeight } from "@react-navigation/elements";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -67,37 +67,25 @@ export default function Calendar() {
     }
     if (isBeforeToday) {
       return (
-        <View style={[styles(themeColor).emptyIcon]}>
+        <View style={[styles.emptyIcon, { backgroundColor: themeColor.empty }]}>
           <Ionicons name="close" size={24} color={themeColor.itemColor} />
         </View>
       );
     }
-    return <View style={styles(themeColor).emptyIcon} />;
+    return (
+      <View style={[styles.emptyIcon, { backgroundColor: themeColor.empty }]} />
+    );
   };
 
   const onOpenWorkoutModal = (findItem?: WorkoutPlanTypes) => {
     if (!findItem) {
       return;
     }
-    const findSplitDate = findItem.createdAt.split(".");
-    const findYear = findSplitDate[0];
-    const findMonth = findSplitDate[1];
-    const findDay = findSplitDate[2].slice(0, 2);
-    const filterWorkoutPlanList = monthlyPlanData.filter((item) => {
-      const itemSplitDate = item.createdAt.split(".");
-      const itemYear = itemSplitDate[0];
-      const itemMonth = itemSplitDate[1];
-      const itemDay = itemSplitDate[2].slice(0, 2);
-
-      return (
-        findYear === itemYear && findMonth === itemMonth && findDay === itemDay
-      );
-    });
-
+    // 기록 배열을 직렬화해 넘기는 대신 날짜만 넘기고 모달이 스토어에서 직접 조회한다
     router.push({
       pathname: "/(modals)/calendar-workout",
-      params: { data: JSON.stringify(filterWorkoutPlanList) },
-    } as any);
+      params: { date: findItem.createdAt.split(" ")[0] },
+    });
   };
 
   return (
@@ -114,7 +102,7 @@ export default function Calendar() {
         nestedScrollEnabled={true}
       >
         <View style={{ gap: 4 }}>
-          <View style={styles(themeColor).titleContainer}>
+          <View style={styles.titleContainer}>
             <Text style={{ fontSize: 24 }}>이번달 헬스장 간 횟수</Text>
             <Text style={{ fontSize: 20, color: themeColor.tint }}>
               {workoutCount}회
@@ -124,7 +112,12 @@ export default function Calendar() {
             운동한 날짜를 눌러서, 그날의 운동 기록을 확인해보세요.
           </Text>
         </View>
-        <View style={styles(themeColor).calendarContainer}>
+        <View
+          style={[
+            styles.calendarContainer,
+            { backgroundColor: themeColor.itemColor },
+          ]}
+        >
           <View
             style={{
               flexDirection: "row",
@@ -160,7 +153,7 @@ export default function Calendar() {
               return (
                 <TouchableOpacity
                   style={[
-                    styles(themeColor).numberIcon,
+                    styles.numberIcon,
                     { opacity: isCurrentMonth ? 1 : 0.4 },
                   ]}
                   onPress={() => onOpenWorkoutModal(findItem)}
@@ -198,35 +191,32 @@ export default function Calendar() {
   );
 }
 
-const styles = (color: any) =>
-  StyleSheet.create({
-    calendarContainer: {
-      paddingVertical: 20,
-      backgroundColor: color.itemColor,
-      gap: 12,
-      borderRadius: 12,
-      paddingHorizontal: 6,
-    },
-    numberIcon: {
-      flex: 1,
-      borderRadius: 50,
-      justifyContent: "center",
-      alignItems: "center",
-      gap: 2,
-      marginBottom: 8,
-    },
-    emptyIcon: {
-      width: 38,
-      height: 38,
-      backgroundColor: color.empty,
-      borderRadius: 50,
-      justifyContent: "center",
-      alignItems: "center",
-    },
-    titleContainer: {
-      flexDirection: "row",
-      justifyContent: "flex-start",
-      alignItems: "flex-end",
-      gap: 12,
-    },
-  });
+const styles = StyleSheet.create({
+  calendarContainer: {
+    paddingVertical: 20,
+    gap: 12,
+    borderRadius: 12,
+    paddingHorizontal: 6,
+  },
+  numberIcon: {
+    flex: 1,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 2,
+    marginBottom: 8,
+  },
+  emptyIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 50,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  titleContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    alignItems: "flex-end",
+    gap: 12,
+  },
+});

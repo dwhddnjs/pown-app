@@ -1,8 +1,8 @@
 // component
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import { Text, View } from "../Themed"
-import { Button } from "../Button"
-import { IconTitle } from "../IconTitle"
+import { Text, View } from "../themed"
+import { Button } from "../button"
+import { IconTitle } from "../icon-title"
 // expo
 import { useRouter } from "expo-router"
 import { Image } from "expo-image"
@@ -12,14 +12,12 @@ import { usePlanStore } from "@/hooks/use-plan-store"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { toast } from "sonner-native"
-import { useUserStore } from "@/hooks/use-user-store"
 
 interface CameraImageProps {}
 
 export const CameraImage = ({}: CameraImageProps) => {
   const themeColor = useCurrentThemeColor()
   const router = useRouter()
-  const { camera } = useUserStore()
   const { imageUri, setRemoveImageUri } = usePlanStore()
 
   const onRemoveImageUri = (id: number) => {
@@ -38,9 +36,7 @@ export const CameraImage = ({}: CameraImageProps) => {
       <Button
         type="bordered"
         onPress={() => {
-          if (!camera) {
-            return toast.error("카메라 허용이 필요합니다")
-          }
+          // 카메라 권한은 카메라 화면이 열릴 때 그 화면에서 직접 요청한다
           if (imageUri.length === 4) {
             return toast.error("최대 4개까지 가능합니다")
           }

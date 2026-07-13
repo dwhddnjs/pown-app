@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { PlanStoreType } from "./use-plan-store";
 import { storage } from "@/lib/storage";
-import { parse } from "date-fns";
+import { sortByCreatedAtDesc } from "@/lib/date";
 
 export type WorkoutPlanTypes = Pick<
   PlanStoreType,
@@ -27,20 +27,13 @@ type WorkoutPlanStoreTypes = {
   onSetMockout: (value: WorkoutPlanTypes[]) => void;
 };
 
-const sortByCreatedAt = (list: WorkoutPlanTypes[]) =>
-  [...list].sort(
-    (a, b) =>
-      parse(b.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime() -
-      parse(a.createdAt, "yyyy.MM.dd HH:mm:ss", new Date()).getTime(),
-  );
-
 export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
   persist(
     (set) => ({
       workoutPlanList: [],
       setWorkoutPlan: (value) =>
         set((prev) => ({
-          workoutPlanList: sortByCreatedAt([value, ...prev.workoutPlanList]),
+          workoutPlanList: sortByCreatedAtDesc([value, ...prev.workoutPlanList]),
         })),
       onResetPlanList: () =>
         set({
@@ -56,7 +49,11 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
               if (item.id === itemId) {
                 return {
                   ...item,
-                  progress: "완료" as const,
+                  // 완료를 실수로 눌러도 다시 탭해 진행중으로 되돌릴 수 있게 토글
+                  progress:
+                    item.progress === "완료"
+                      ? ("진행중" as const)
+                      : ("완료" as const),
                 };
               }
               return item;
@@ -69,7 +66,7 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           };
 
           const newArr = newWorkoutList.filter((item) => item.id !== id);
-          const result = sortByCreatedAt([...newArr, newObj]);
+          const result = sortByCreatedAtDesc([...newArr, newObj]);
 
           return {
             workoutPlanList: result,
@@ -87,7 +84,7 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
           const filteredList = newWorkoutList.filter(
             (item) => item.id !== value.id,
           );
-          const result = sortByCreatedAt([...filteredList, { ...value }]);
+          const result = sortByCreatedAtDesc([...filteredList, { ...value }]);
 
           return {
             workoutPlanList: result,

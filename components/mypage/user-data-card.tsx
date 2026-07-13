@@ -1,7 +1,7 @@
 import React from "react"
 // component
 import { StyleSheet, useColorScheme } from "react-native"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 // zustand
 import { useUserStore } from "@/hooks/use-user-store"
 // hook

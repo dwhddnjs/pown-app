@@ -1,7 +1,7 @@
 import React from "react";
 // component
 import { ScrollView, StyleSheet } from "react-native";
-import { View } from "@/components/Themed";
+import { View } from "@/components/themed";
 import {
   BodyChart,
   ConditionCount,

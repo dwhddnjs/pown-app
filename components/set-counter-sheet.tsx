@@ -1,11 +1,11 @@
-import { StyleSheet, useColorScheme } from "react-native"
+import { StyleSheet } from "react-native"
 import React, { forwardRef, useCallback, useMemo, useState } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import { Picker } from "@react-native-picker/picker"
-import Colors from "@/constants/Colors"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { TouchableOpacity } from "react-native-gesture-handler"
-import { Text, View } from "./Themed"
-import { Button } from "./Button"
+import { Text, View } from "./themed"
+import { Button } from "./button"
 import { countData, setData, setTypeData } from "@/constants/constants"
 import { usePlanStore } from "@/hooks/use-plan-store"
 
@@ -20,7 +20,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
       count: "8 + α",
     })
     const { setSetWithCount, setWithCount } = usePlanStore()
-    const colorScheme = useColorScheme()
+    const themeColor = useCurrentThemeColor()
 
     const onSelectedPicker = (type: string, value: string) => {
       setPicker({
@@ -57,10 +57,10 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
         backgroundStyle={{
-          backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+          backgroundColor: themeColor.itemColor,
         }}
         handleIndicatorStyle={{
-          backgroundColor: Colors[colorScheme ?? "light"].subText,
+          backgroundColor: themeColor.subText,
         }}
       >
         <View
@@ -68,19 +68,19 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
             flex: 1,
             flexDirection: "row",
             paddingTop: 14,
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            backgroundColor: themeColor.itemColor,
           }}
         >
           <View
             style={{
               width: "50%",
-              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+              backgroundColor: themeColor.itemColor,
             }}
           >
             <Text
               style={[
                 styles.title,
-                { color: Colors[colorScheme ?? "light"].text },
+                { color: themeColor.text },
               ]}
             >
               세트 유형
@@ -96,8 +96,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   key={item}
                   label={String(item)}
                   value={item}
-                  color={Colors[colorScheme ?? "light"].text}
-                  fontFamily="sb-b"
+                  color={themeColor.text}
                 />
               ))}
             </Picker>
@@ -106,13 +105,13 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           <View
             style={{
               width: "50%",
-              backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+              backgroundColor: themeColor.itemColor,
             }}
           >
             <Text
               style={[
                 styles.title,
-                { color: Colors[colorScheme ?? "light"].text },
+                { color: themeColor.text },
               ]}
             >
               반복 횟수
@@ -128,8 +127,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   key={item}
                   label={item}
                   value={item}
-                  color={Colors[colorScheme ?? "light"].text}
-                  fontFamily="sb-b"
+                  color={themeColor.text}
                 />
               ))}
             </Picker>
@@ -138,7 +136,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
         <View
           style={{
             paddingBottom: 44,
-            backgroundColor: Colors[colorScheme ?? "light"].itemColor,
+            backgroundColor: themeColor.itemColor,
           }}
         >
           <Button type="solid" onPress={onSetPlanStore}>

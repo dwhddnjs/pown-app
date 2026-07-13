@@ -1,17 +1,16 @@
 import React from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
-import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { ChartEmptyState } from "./chart-empty-state";
 
-const SbdChart = () => {
+export const SbdChart = () => {
   const { userInfo } = useUserStore();
   const { date } = useChartStore();
   const { monthlyUserInfoData } = useMonthlyPlanData(date);
@@ -57,9 +56,26 @@ const SbdChart = () => {
     },
   ];
 
+  const barValues = data.map((item) => item.value ?? 0);
+  // 최대 기록보다 한 눈금 여유를 두고 50kg 단위로 올림 — 축 라벨은 자동 생성에 맡긴다
+  const maxValue = Math.max(
+    100,
+    Math.ceil((Math.max(...barValues, 0) * 1.1) / 50) * 50,
+  );
+
   return (
-    <View style={[styles(themeColor).container]}>
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>3대중량의 변화</Text>
+      <Text
+        style={{
+          fontSize: 12,
+          fontFamily: "sb-l",
+          marginLeft: 6,
+          color: themeColor.subText,
+        }}
+      >
+        회색: 최초 기록  ·  컬러: 선택한 달의 마지막 기록
+      </Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {!firstWeight ? (
         <ChartEmptyState
@@ -80,9 +96,8 @@ const SbdChart = () => {
             disableScroll
             barBorderRadius={4}
             yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
-            stepValue={50}
-            maxValue={300}
-            yAxisLabelTexts={["0", "50", "100", "150", "200", "250"]}
+            maxValue={maxValue}
+            noOfSections={6}
             labelWidth={65}
             yAxisThickness={1}
             xAxisThickness={1}
@@ -117,45 +132,12 @@ const SbdChart = () => {
   );
 };
 
-export default SbdChart;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingVertical: 20,
-      paddingHorizontal: 12,
-      borderRadius: 12,
-      gap: 12,
-    },
-    iconItem: {
-      backgroundColor: color.itemColor,
-      justifyContent: "space-between",
-      alignItems: "center",
-      gap: 8,
-    },
-    iconListContainer: {
-      backgroundColor: color.itemColor,
-      justifyContent: "space-between",
-      alignItems: "center",
-      flexDirection: "row",
-      gap: 8,
-      paddingVertical: 4,
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 4,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
-
-// <Button
-//         type="solid"
-//         onPress={async () => {
-//           AsyncStorage.removeItem("user")
-//         }}
-//       >
-//         asdsdadsa
-//       </Button>
+const styles = StyleSheet.create({
+  container: {
+    paddingVertical: 20,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    gap: 12,
+  },
+});

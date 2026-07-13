@@ -1,7 +1,7 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import { Text, View } from "../Themed";
-import { IconTitle } from "../IconTitle";
+import { Text, View } from "../themed";
+import { IconTitle } from "../icon-title";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { equipmentData } from "@/constants/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";

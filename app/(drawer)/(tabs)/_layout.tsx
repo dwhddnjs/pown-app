@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 // compoents
 import { StyleSheet } from "react-native";
-import { View } from "@/components/Themed";
+import { View } from "@/components/themed";
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
 import { ChartHeader } from "@/components/chart";
 // expo
@@ -16,10 +16,10 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { CalendarHeader } from "@/components/calendar";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import * as Haptics from "expo-haptics";
-import ImageModal from "@/components/workout-plan/image-modal";
+import { ImageModal } from "@/components/workout-plan/image-modal";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import { FontAwesome6 } from "@expo/vector-icons";
-import FabOverlay from "@/components/fab-menu/fab-overlay";
+import { FabOverlay } from "@/components/fab-menu/fab-overlay";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -131,7 +131,7 @@ export default function TabLayout() {
                 <Animated.View style={fabIconStyle}>
                   <FontAwesome6
                     name="plus"
-                    size={30}
+                    size={28}
                     color={themColor.background}
                   />
                 </Animated.View>

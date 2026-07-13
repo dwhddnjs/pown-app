@@ -1,12 +1,7 @@
 import React from "react";
 // component
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // expo
 import { BlurView } from "expo-blur";
 // hook
@@ -15,20 +10,18 @@ import { useChartStore } from "@/hooks/use-chart-store";
 import { convertChartDate } from "@/lib/function";
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 
-const ChartHeader = () => {
+export const ChartHeader = () => {
   const themeColor = useCurrentThemeColor();
   const { date, setDate } = useChartStore();
-  const { workoutPlanList } = useWorkoutPlanStore();
 
   const onClickDate = (type: "prev" | "next") => {
-    setDate(type, workoutPlanList);
+    setDate(type);
   };
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
-      <SafeAreaView>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.container}>
           <TouchableOpacity
             style={[styles.button, { paddingLeft: 12 }]}
@@ -53,7 +46,6 @@ const ChartHeader = () => {
   );
 };
 
-export default ChartHeader;
 
 const styles = StyleSheet.create({
   blur: {

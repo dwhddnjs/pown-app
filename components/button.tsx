@@ -4,7 +4,7 @@ import {
   TouchableOpacity,
   TouchableOpacityProps,
 } from "react-native"
-import { Text } from "./Themed"
+import { Text } from "./themed"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 

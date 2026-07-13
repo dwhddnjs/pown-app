@@ -1,5 +1,5 @@
-import { SetCounterSheet } from "@/components/SetCounterSheet";
-import { Text, View } from "@/components/Themed";
+import { SetCounterSheet } from "@/components/set-counter-sheet";
+import { Text, View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -13,15 +13,21 @@ import { SetCounter } from "@/components/add-plan/set-counter";
 import { TopWeight } from "@/components/add-plan/top-weight";
 import { ConditionList } from "@/components/add-plan/condition-list";
 import { PlanNote } from "@/components/add-plan/plan-note";
-import { KeyBoardAvoid } from "@/components/KeyBoardAvoid";
+import { KeyBoardAvoid } from "@/components/keyboard-avoid";
 import { EquipmentBox } from "@/components/add-plan/equipment-box";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
+import { useNoteStore } from "@/hooks/use-note-store";
 import {
+  Stack,
   useFocusEffect,
   useLocalSearchParams,
   useNavigation,
 } from "expo-router";
+import { format } from "date-fns";
+import { toast } from "sonner-native";
+import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
+import Checkcircle from "@expo/vector-icons/AntDesign";
 import { CameraImage } from "@/components/add-plan/camera-image";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet";
@@ -45,9 +51,9 @@ export default function EditPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const workoutTagRef = useRef<BottomSheetModal>(null);
   const { workoutList } = useUserStore();
-  const { workoutPlanList, setWorkoutPlan, setEditPlan } =
-    useWorkoutPlanStore();
+  const { workoutPlanList, setEditPlan } = useWorkoutPlanStore();
   const { onReset, setPrevPlanValue, ...result } = usePlanStore();
+  const { onReset: onResetNote } = useNoteStore();
   const { slug } = useLocalSearchParams();
   const navigation = useNavigation();
   const workoutListData = workoutList[slug?.[0] as WorkoutTypes];
@@ -113,10 +119,52 @@ export default function EditPlan() {
     scrollRef.current?.scrollTo({ y: positionY, animated: true });
   };
 
+  const onSubmitWorkoutPlan = async () => {
+    try {
+      if (!result.weight || !result.workout || !getWorkoutPlan) {
+        return toast.error("운동과 목표 중량은 필수에요..");
+      }
+      const imageUri = await saveImagesToLibrary(result.imageUri);
+      setEditPlan({
+        id: getWorkoutPlan.id,
+        workout: result.workout,
+        type: slug?.[0] as string,
+        equipment: result.equipment,
+        weight: convertWeightToKg(result.weight, result.weightType),
+        condition: result.condition,
+        content: result.content,
+        title: result.title,
+        setWithCount: result.setWithCount,
+        createdAt: getWorkoutPlan.createdAt,
+        updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+        imageUri,
+      });
+      onReset();
+      navigation.goBack();
+      onResetNote();
+      return toast.success("운동 계획이 수정되었습니다!");
+    } catch {
+      toast.error("운동 계획 수정 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <KeyBoardAvoid
       style={[styles.container, { backgroundColor: themeColor.background }]}
     >
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity onPress={onSubmitWorkoutPlan}>
+              <Checkcircle
+                name="checkcircle"
+                size={30}
+                color={themeColor.tint}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView
         ref={scrollRef}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}

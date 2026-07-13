@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 // component
 import { Pressable, StyleSheet, TouchableOpacity, Image } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -22,9 +22,8 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // expo
-import { useUserStore } from "@/hooks/use-user-store";
+import * as MediaLibrary from "expo-media-library";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
-// import { Image } from "expo-image"
 
 interface ProgressBarProps {
   completed: number;
@@ -108,7 +107,9 @@ export const WorkoutPlan = ({
   hideProgress,
 }: WorkoutPlanProps) => {
   const themeColor = useCurrentThemeColor();
-  const { mediaLibrary } = useUserStore();
+  // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
+  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
+  const hasMediaPermission = mediaPermission?.granted ?? false;
   const { setImageUri } = useImageUriStore();
 
   const getWorkoutIcon = (type: string) => {
@@ -230,12 +231,14 @@ export const WorkoutPlan = ({
             ))}
           </View>
         )}
-        {item.imageUri?.length > 0 && !mediaLibrary && (
-          <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
-            갤러리 접근권한이 필요합니다.
-          </Text>
+        {item.imageUri?.length > 0 && !hasMediaPermission && (
+          <Pressable onPress={() => requestMediaPermission()}>
+            <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
+              사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.
+            </Text>
+          </Pressable>
         )}
-        {mediaLibrary && item.imageUri?.length > 0 && (
+        {hasMediaPermission && item.imageUri?.length > 0 && (
           <View
             style={[
               styles.imageList,

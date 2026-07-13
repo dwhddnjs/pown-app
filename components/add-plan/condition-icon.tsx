@@ -1,6 +1,6 @@
 //component
 import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import { Text, View } from "@/components/Themed"
+import { Text, View } from "@/components/themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook

@@ -1,11 +1,11 @@
 import { StyleSheet } from "react-native"
 import React from "react"
-import { Dialog } from "../Dialog"
+import { Dialog } from "../dialog"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { Button } from "../Button"
+import { Button } from "../button"
 import { useRouter } from "expo-router"
 import { useShortsStore } from "@/hooks/use-shorts-store"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 import { toast } from "sonner-native"
 
 interface RemoveShortsDialogProps {

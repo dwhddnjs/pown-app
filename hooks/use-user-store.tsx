@@ -18,9 +18,6 @@ export type UserTypes = {
   userInfo: UserInfoTypes[];
   workoutList: Record<"back" | "chest" | "shoulder" | "leg" | "arm", string[]>;
   theme: "light" | "dark" | "system";
-  camera: boolean;
-  mediaLibrary: boolean;
-  microphone: boolean;
   setUser: (
     type: keyof Omit<
       UserTypes,
@@ -48,9 +45,6 @@ export const useUserStore = create<UserTypes>()(
   persist(
     (set) => ({
       workoutList: workoutData,
-      camera: false,
-      mediaLibrary: false,
-      microphone: false,
       userInfo: [],
       theme: "system",
       setUserData: (value) =>
@@ -67,9 +61,6 @@ export const useUserStore = create<UserTypes>()(
           userInfo: [],
           workoutList: workoutData,
           theme: "system",
-          camera: false,
-          mediaLibrary: false,
-          microphone: false,
         }),
 
       setAddWorkoutTag: (type, tag) =>

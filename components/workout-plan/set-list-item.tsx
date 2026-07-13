@@ -1,6 +1,6 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import { NumberBallIcon } from "../number-ball-icon";
 import { SetWithCountType } from "@/hooks/use-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
@@ -72,18 +72,19 @@ export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListIte
           ]}
         >
           {item.progress === "완료" ? (
-            <View
+            <TouchableOpacity
               style={[
                 styles.completedIcon,
                 { backgroundColor: themeColor.itemColor },
               ]}
+              onPress={() => setCompleteProgress(planId, item.id)}
             >
               <CheckCircle
                 name="checkcircleo"
                 size={24}
                 color={themeColor.tint}
               />
-            </View>
+            </TouchableOpacity>
           ) : (
             <TouchableOpacity
               style={[

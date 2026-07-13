@@ -1,9 +1,9 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 // component
 import { Pressable, StyleSheet } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 //expo
-import { CameraType, CameraView } from "expo-camera";
+import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 // icon
@@ -20,7 +20,15 @@ const Camera = () => {
   const [facing, setFacing] = useState<CameraType>("back");
   const themeColor = useCurrentThemeColor();
   const router = useRouter();
-  const { imageUri, setImageUri } = usePlanStore();
+  const { setImageUri } = usePlanStore();
+  // 카메라 권한은 앱 시작이 아닌 카메라를 실제로 여는 이 시점에 요청한다
+  const [permission, requestPermission] = useCameraPermissions();
+
+  useEffect(() => {
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
 
   const takePicture = async () => {
     const photo = await ref.current?.takePictureAsync();
@@ -49,7 +57,7 @@ const Camera = () => {
         }}
       >
         <Image
-          source={{ uri } as any}
+          source={{ uri: uri ?? undefined }}
           contentFit="fill"
           style={{ width: "100%", aspectRatio: 9 / 16 }}
         />
@@ -124,6 +132,26 @@ const Camera = () => {
     );
   };
 
+  if (!permission?.granted) {
+    return (
+      <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
+        <View style={styles.permissionContainer}>
+          <Text style={styles.cancelText}>
+            사진을 찍으려면 카메라 접근 권한이 필요해요.
+          </Text>
+          <Pressable onPress={requestPermission}>
+            <Text style={[styles.cancelText, { color: themeColor.tint }]}>
+              권한 허용하기
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.cancelText}>돌아가기</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderPicture() : renderCamera()}
@@ -175,5 +203,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
     fontFamily: "sb-m",
+  },
+  permissionContainer: {
+    alignItems: "center",
+    gap: 20,
+    backgroundColor: "transparent",
   },
 });

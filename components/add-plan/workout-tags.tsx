@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   useColorScheme,
 } from "react-native"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"

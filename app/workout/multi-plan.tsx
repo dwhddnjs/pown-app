@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, Text } from "@/components/Themed";
+import { View, Text } from "@/components/themed";
 import { StatusBar } from "expo-status-bar";
 import {
   Platform,
@@ -7,19 +7,21 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
+import { toast } from "sonner-native";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import Checkcircle from "@expo/vector-icons/AntDesign";
 import { FontAwesome6 } from "@expo/vector-icons";
 
 export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
   const router = useRouter();
-  const { tempPlans, setMultiPlanMode, removeTempPlan, resetMultiPlan } =
-    useMultiPlanStore();
+  const { tempPlans, setMultiPlanMode, resetMultiPlan } = useMultiPlanStore();
+  const { setWorkoutPlan } = useWorkoutPlanStore();
 
   useEffect(() => {
     setMultiPlanMode(true);
@@ -32,8 +34,38 @@ export default function MultiPlanScreen() {
     router.push("/workout/add-multi-plan");
   };
 
+  const onSaveAll = () => {
+    if (tempPlans.length === 0) {
+      return toast.error("추가된 운동이 없어요..");
+    }
+    const baseId = Date.now();
+    tempPlans.forEach((plan, idx) => {
+      setWorkoutPlan({
+        ...plan,
+        id: baseId + idx,
+      });
+    });
+    resetMultiPlan();
+    router.back();
+    toast.success(`${tempPlans.length}개 운동 계획이 추가되었습니다!!`);
+  };
+
   return (
     <View style={styles.container}>
+      <Stack.Screen
+        options={{
+          headerRight: () =>
+            tempPlans.length === 0 ? null : (
+              <TouchableOpacity onPress={onSaveAll}>
+                <Checkcircle
+                  name="checkcircle"
+                  size={30}
+                  color={themeColor.tint}
+                />
+              </TouchableOpacity>
+            ),
+        }}
+      />
       {tempPlans.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialCommunityIcons

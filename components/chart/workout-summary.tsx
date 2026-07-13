@@ -1,7 +1,6 @@
 import React from "react";
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
-import { ThemeColorType } from "@/constants/Colors";
+import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
@@ -16,7 +15,7 @@ const typeLabel: Record<string, string> = {
   arm: "팔",
 };
 
-const WorkoutSummary = () => {
+export const WorkoutSummary = () => {
   const themeColor = useCurrentThemeColor();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
@@ -54,7 +53,7 @@ const WorkoutSummary = () => {
 
   if (totalWorkouts === 0) {
     return (
-      <View style={[styles(themeColor).container]}>
+      <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
         <Text style={{ fontSize: 18, marginLeft: 6 }}>월간 요약</Text>
         <View
           style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
@@ -68,45 +67,58 @@ const WorkoutSummary = () => {
   }
 
   return (
-    <View style={[styles(themeColor).container]}>
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>월간 요약</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
-      <View style={styles(themeColor).grid}>
-        <View style={styles(themeColor).gridItem}>
+      <View style={[styles.grid, { backgroundColor: themeColor.itemColor }]}>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
           <Text
-            style={[styles(themeColor).statValue, { color: themeColor.tint }]}
+            style={[styles.statValue, { color: themeColor.tint }]}
           >
             {totalWorkouts}
           </Text>
-          <Text style={styles(themeColor).statLabel}>총 운동</Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>총 운동</Text>
         </View>
-        <View style={styles(themeColor).gridItem}>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
           <Text
-            style={[styles(themeColor).statValue, { color: themeColor.tint }]}
+            style={[styles.statValue, { color: themeColor.tint }]}
           >
             {uniqueDays}일
           </Text>
-          <Text style={styles(themeColor).statLabel}>운동한 날</Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>운동한 날</Text>
         </View>
-        <View style={styles(themeColor).gridItem}>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
           <Text
-            style={[styles(themeColor).statValue, { color: themeColor.tint }]}
+            style={[styles.statValue, { color: themeColor.tint }]}
           >
             {avgSets}
           </Text>
-          <Text style={styles(themeColor).statLabel}>평균 세트</Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>평균 세트</Text>
         </View>
-        <View style={styles(themeColor).gridItem}>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
           <Text
-            style={[styles(themeColor).statValue, { color: themeColor.tint }]}
+            style={[styles.statValue, { color: themeColor.tint }]}
           >
             {completionRate}%
           </Text>
-          <Text style={styles(themeColor).statLabel}>달성률</Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>달성률</Text>
         </View>
       </View>
       {mostTrained.count > 0 && (
-        <View style={[styles(themeColor).mostTrained, { marginHorizontal: 6 }]}>
+        <View
+          style={[
+            styles.mostTrained,
+            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+          ]}
+        >
           <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
             가장 많이 훈련한 부위
           </Text>
@@ -120,51 +132,37 @@ const WorkoutSummary = () => {
   );
 };
 
-export default WorkoutSummary;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingHorizontal: 12,
-      paddingVertical: 20,
-      borderRadius: 12,
-      marginTop: 24,
-      gap: 12,
-    },
-    grid: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      backgroundColor: color.itemColor,
-      paddingVertical: 8,
-    },
-    gridItem: {
-      alignItems: "center",
-      gap: 4,
-      flex: 1,
-      backgroundColor: color.itemColor,
-    },
-    statValue: {
-      fontSize: 22,
-      fontFamily: "sb-b",
-    },
-    statLabel: {
-      fontSize: 12,
-      fontFamily: "sb-l",
-      color: color.subText,
-    },
-    mostTrained: {
-      flexDirection: "row",
-      justifyContent: "space-between",
-      alignItems: "center",
-      backgroundColor: color.itemColor,
-      paddingTop: 4,
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 4,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+    borderRadius: 12,
+    marginTop: 24,
+    gap: 12,
+  },
+  grid: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 8,
+  },
+  gridItem: {
+    alignItems: "center",
+    gap: 4,
+    flex: 1,
+  },
+  statValue: {
+    fontSize: 22,
+    fontFamily: "sb-b",
+  },
+  statLabel: {
+    fontSize: 12,
+    fontFamily: "sb-l",
+  },
+  mostTrained: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 4,
+  },
+});

@@ -1,13 +1,12 @@
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
-import { Dialog } from "../Dialog";
+import { Text, View } from "../themed";
+import { Dialog } from "../dialog";
 import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
 import RNDateTimePicker from "@react-native-community/datetimepicker";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { Button } from "../Button";
+import { Button } from "../button";
 import { usePlanStore } from "@/hooks/use-plan-store";
-import { useState } from "react";
-import { format } from "date-fns";
+import { useEffect, useState } from "react";
 
 interface SelectTypeDateSheetProps {
   isOpen: boolean;
@@ -16,9 +15,16 @@ interface SelectTypeDateSheetProps {
 
 export const SelectTypeDateSheet = () => {
   const { open, setOpen } = useIsDialogOpenStore();
-  const { setDate } = usePlanStore();
+  const { date, setDate } = usePlanStore();
   const themeColor = useCurrentThemeColor();
-  const [selectedDate, setSelectedDate] = useState(new Date().valueOf());
+  const [selectedDate, setSelectedDate] = useState(date.valueOf());
+
+  // 수정/재선택 시 스피너가 "지금"이 아닌 현재 선택된 날짜에서 시작하도록 동기화
+  useEffect(() => {
+    if (open) {
+      setSelectedDate(date.valueOf());
+    }
+  }, [open, date]);
 
   const onSubmitDate = () => {
     setOpen(false);

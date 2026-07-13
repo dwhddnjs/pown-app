@@ -1,7 +1,7 @@
 import { StyleSheet, TextInput } from "react-native"
 import React from "react"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 
 interface TitleInputProp {
   title: string

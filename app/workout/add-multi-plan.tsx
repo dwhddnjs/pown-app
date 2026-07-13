@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { SetCounterSheet } from "@/components/SetCounterSheet";
-import { Text, View } from "@/components/Themed";
+import { SetCounterSheet } from "@/components/set-counter-sheet";
+import { Text, View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import {
   Keyboard,
@@ -15,11 +15,15 @@ import { ConditionList } from "@/components/add-plan/condition-list";
 import { PlanNote } from "@/components/add-plan/plan-note";
 import { EquipmentBox } from "@/components/add-plan/equipment-box";
 import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
-import { useFocusEffect, useNavigation } from "expo-router";
+import { useNoteStore } from "@/hooks/use-note-store";
+import { Stack, useFocusEffect, useNavigation } from "expo-router";
 import { format } from "date-fns";
+import { toast } from "sonner-native";
+import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
 import Entypo from "@expo/vector-icons/Entypo";
+import Checkcircle from "@expo/vector-icons/AntDesign";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { KeyBoardAvoid } from "@/components/KeyBoardAvoid";
+import { KeyBoardAvoid } from "@/components/keyboard-avoid";
 import { CameraImage } from "@/components/add-plan/camera-image";
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet";
 import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialog";
@@ -59,9 +63,12 @@ const iconButtonData = [
 export default function AddMultiPlan() {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const workoutTagRef = useRef<BottomSheetModal>(null);
-  const { onReset, date } = usePlanStore();
+  const { onReset, ...result } = usePlanStore();
+  const { date } = result;
   const { workoutList } = useUserStore();
-  const { editingPlan, clearEditingPlan } = useMultiPlanStore();
+  const { editingPlan, addTempPlan, updateTempPlan, clearEditingPlan } =
+    useMultiPlanStore();
+  const { onReset: onResetNote } = useNoteStore();
   const navigation = useNavigation();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
@@ -146,11 +153,65 @@ export default function AddMultiPlan() {
     }, [navigation]),
   );
 
+  const onSubmitMultiPlan = async () => {
+    try {
+      if (!result.weight || !result.workout) {
+        return toast.error("운동과 목표 중량은 필수에요..");
+      }
+      const imageUri = await saveImagesToLibrary(result.imageUri);
+
+      const planObj = {
+        id: editingPlan ? editingPlan.id : Date.now(),
+        workout: result.workout,
+        type: result.type || editingPlan?.type || "back",
+        equipment: result.equipment,
+        weight: convertWeightToKg(result.weight, result.weightType),
+        condition: result.condition,
+        content: result.content,
+        title: result.title,
+        setWithCount: result.setWithCount,
+        createdAt: editingPlan
+          ? editingPlan.createdAt
+          : format(result.date, "yyyy.MM.dd HH:mm:ss"),
+        updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
+        imageUri,
+      };
+
+      if (editingPlan) {
+        updateTempPlan(planObj);
+      } else {
+        addTempPlan(planObj);
+      }
+      onReset();
+      clearEditingPlan();
+      navigation.goBack();
+      onResetNote();
+      return toast.success(
+        editingPlan ? "운동 계획이 수정되었습니다!" : "루틴에 운동이 추가되었습니다!",
+      );
+    } catch {
+      toast.error("운동 계획 저장 중 오류가 발생했습니다.");
+    }
+  };
+
   return (
     <KeyBoardAvoid
       style={[styles.container, { backgroundColor: themeColor.background }]}
       keyboardShouldPersistTaps="handled"
     >
+      <Stack.Screen
+        options={{
+          headerRight: () => (
+            <TouchableOpacity onPress={onSubmitMultiPlan}>
+              <Checkcircle
+                name="checkcircle"
+                size={30}
+                color={themeColor.tint}
+              />
+            </TouchableOpacity>
+          ),
+        }}
+      />
       <ScrollView
         ref={scrollRef}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}

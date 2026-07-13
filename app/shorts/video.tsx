@@ -1,9 +1,14 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 // component
 import { Pressable, StyleSheet } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 //expo
-import { CameraType, CameraView } from "expo-camera";
+import {
+  CameraType,
+  CameraView,
+  useCameraPermissions,
+  useMicrophonePermissions,
+} from "expo-camera";
 import { useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 // icon
@@ -35,6 +40,30 @@ export default function Video() {
     player.play();
   });
   const isSquare = useSharedValue(false);
+  // 카메라·마이크 권한은 녹화 화면에 진입한 이 시점에 요청한다
+  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
+  const [micPermission, requestMicPermission] = useMicrophonePermissions();
+
+  useEffect(() => {
+    if (
+      cameraPermission &&
+      !cameraPermission.granted &&
+      cameraPermission.canAskAgain
+    ) {
+      requestCameraPermission();
+    }
+  }, [cameraPermission, requestCameraPermission]);
+
+  useEffect(() => {
+    if (
+      cameraPermission?.granted &&
+      micPermission &&
+      !micPermission.granted &&
+      micPermission.canAskAgain
+    ) {
+      requestMicPermission();
+    }
+  }, [cameraPermission, micPermission, requestMicPermission]);
 
   const animatedShutterStyle = useAnimatedStyle(() => {
     return {
@@ -184,6 +213,32 @@ export default function Video() {
     );
   };
 
+  if (!cameraPermission?.granted || !micPermission?.granted) {
+    return (
+      <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
+        <View style={styles.permissionContainer}>
+          <Text style={styles.cancelText}>
+            숏츠를 촬영하려면 카메라·마이크 접근 권한이 필요해요.
+          </Text>
+          <Pressable
+            onPress={() =>
+              !cameraPermission?.granted
+                ? requestCameraPermission()
+                : requestMicPermission()
+            }
+          >
+            <Text style={[styles.cancelText, { color: themeColor.tint }]}>
+              권한 허용하기
+            </Text>
+          </Pressable>
+          <Pressable onPress={() => router.back()}>
+            <Text style={styles.cancelText}>돌아가기</Text>
+          </Pressable>
+        </View>
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       {uri ? renderVideo() : renderCamera()}
@@ -236,5 +291,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
     fontFamily: "sb-m",
+  },
+  permissionContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 20,
+    paddingHorizontal: 24,
+    backgroundColor: "transparent",
   },
 });

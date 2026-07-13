@@ -1,6 +1,6 @@
 import { Image } from "react-native";
 import React from "react";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 export const EmptyVideos = () => {

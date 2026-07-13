@@ -8,7 +8,7 @@ import { useRouter } from "expo-router"
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { Text } from "../Themed"
+import { Text } from "../themed"
 
 const ShortsTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrentThemeColor()

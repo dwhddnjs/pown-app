@@ -1,7 +1,10 @@
 import { useState } from "react";
 // component
-import { Text, View } from "@/components/Themed";
-import { DrawerContentScrollView } from "@react-navigation/drawer";
+import { Text, View } from "@/components/themed";
+import {
+  DrawerContentScrollView,
+  DrawerContentComponentProps,
+} from "@react-navigation/drawer";
 import { Drawer } from "expo-router/drawer";
 import Accordion from "react-native-collapsible/Accordion";
 import { StyleSheet, TouchableOpacity } from "react-native";
@@ -18,7 +21,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavigation, usePathname, useRouter } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 
-const CustomDrawerContent = (props: any) => {
+const CustomDrawerContent = (props: DrawerContentComponentProps) => {
   const [activeSections, setActiveSections] = useState<number[]>([]);
   const [collapsed, setCollapsed] = useState(true);
   const [multipleSelect, setMultipleSelect] = useState(false);

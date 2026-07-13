@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
       "infoPlist": {

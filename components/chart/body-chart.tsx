@@ -1,10 +1,9 @@
 import React from "react";
 // component
-import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { StyleSheet, useWindowDimensions } from "react-native";
+import { Text, View } from "../themed";
 import { LineChart } from "react-native-gifted-charts";
 // hook
-import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useChartStore } from "@/hooks/use-chart-store";
@@ -12,28 +11,21 @@ import { useChartStore } from "@/hooks/use-chart-store";
 import { getMonthlyBodyData } from "@/lib/function";
 import { ChartEmptyState } from "./chart-empty-state";
 
-const BodyChart = () => {
+export const BodyChart = () => {
   const themeColor = useCurrentThemeColor();
   const { userInfo } = useUserStore();
   const { date } = useChartStore();
-  const monthUserInfo = userInfo.filter((item) => {
-    const getYear = item.createdAt.slice(0, 4);
-    const getMonth = item.createdAt.slice(5, 7);
-    const selectedYear = date.slice(0, 4);
-    const selectedMonth = date.slice(4, 7);
-    return getYear === selectedYear && getMonth === selectedMonth;
-  });
+  const { width } = useWindowDimensions();
 
-  const ptData2 = getMonthlyBodyData(monthUserInfo, date);
-  // console.log("ptData2: ", ptData2)
-
-  const isEmptyData =
-    ptData2
-      .map((item: (typeof ptData2)[0]) => item.value)
-      .reduce((acc: number, cur: number) => acc + cur, 0) === 0;
+  const bodyData = getMonthlyBodyData(userInfo, date);
+  const isEmptyData = bodyData.length === 0;
+  // 화면 폭 - (차트 탭 좌우 패딩 + 카드 패딩 + y축 라벨 영역)
+  const chartWidth = width - 110;
 
   return (
-    <View style={[styles(themeColor).container]}>
+    <View
+      style={[styles.container, { backgroundColor: themeColor.itemColor }]}
+    >
       <Text
         style={{
           fontSize: 18,
@@ -67,19 +59,19 @@ const BodyChart = () => {
           <LineChart
             disableScroll
             areaChart
-            data={ptData2}
+            data={bodyData}
             rotateLabel
-            // maxValue={ptData2[ptData2.length - 1]?.value + 50}
-            width={310}
-            hideDataPoints
-            spacing={10}
+            width={chartWidth}
+            adjustToWidth
+            dataPointsColor={themeColor.tint}
             color={themeColor.tint}
             thickness={2}
             startFillColor={themeColor.pressed}
             endFillColor={themeColor.itemColor}
             startOpacity={0.9}
             endOpacity={0.2}
-            initialSpacing={0}
+            initialSpacing={10}
+            endSpacing={10}
             noOfSections={5}
             hideRules
             yAxisTextStyle={{ color: themeColor.text }}
@@ -90,6 +82,7 @@ const BodyChart = () => {
             xAxisLabelTextStyle={{
               textAlign: "center",
               fontFamily: "sb-l",
+              color: themeColor.text,
             }}
             pointerConfig={{
               pointerStripHeight: 160,
@@ -135,21 +128,11 @@ const BodyChart = () => {
   );
 };
 
-export default BodyChart;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingBottom: 18,
-      borderRadius: 12,
-      gap: 12,
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingBottom: 18,
+    borderRadius: 12,
+    gap: 12,
+  },
+});

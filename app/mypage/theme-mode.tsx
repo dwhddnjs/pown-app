@@ -1,5 +1,5 @@
 // component
-import { Text, View } from "@/components/Themed"
+import { Text, View } from "@/components/themed"
 import { Appearance, StyleSheet, TouchableOpacity } from "react-native"
 import { toast } from "sonner-native"
 // icon

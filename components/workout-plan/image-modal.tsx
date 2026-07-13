@@ -1,27 +1,22 @@
 import React from "react"
 // component
 import { Pressable, StyleSheet } from "react-native"
-import { Text, View } from "../Themed"
+import { View } from "../themed"
 import { Image } from "expo-image"
 // hook
 import { useImageUriStore } from "@/hooks/use-image-uri-store"
 
-const ImageModal = () => {
+export const ImageModal = () => {
   const { uri, onResetImageUri } = useImageUriStore()
   return (
     <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
       <View style={styles.imageContainer}>
-        <Image
-          source={{ uri }}
-          contentFit="fill"
-          style={{ flex: 1, aspectRatio: 9 / 16, borderRadius: 12 }}
-        />
+        <Image source={{ uri }} contentFit="contain" style={{ flex: 1 }} />
       </View>
     </Pressable>
   )
 }
 
-export default ImageModal
 
 const styles = StyleSheet.create({
   overlay: {
@@ -35,9 +30,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   imageContainer: {
-    alignSelf: "center",
+    flex: 1,
     backgroundColor: "transparent",
-    opacity: 1,
-    paddingVertical: 120,
+    paddingVertical: 100,
+    paddingHorizontal: 12,
   },
 })

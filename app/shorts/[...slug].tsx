@@ -1,5 +1,5 @@
 import { ShortsPlayer } from "@/components/shorts/shorts-player";
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 import { useShortsStore } from "@/hooks/use-shorts-store";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useMemo, useRef, useState } from "react";

@@ -2,7 +2,7 @@ import { create } from "zustand"
 
 export type WorkoutTypes = "chest" | "back" | "shoulder" | "leg" | "arm"
 
-type ImageUriType = {
+export type ImageUriType = {
   id: number
   imageUri?: string
 }
@@ -48,6 +48,7 @@ export type PlanStoreType = {
         | "workout"
         | "type"
         | "equipment"
+        | "weightType"
         | "weight"
         | "condition"
         | "title"
@@ -129,17 +130,10 @@ export const usePlanStore = create<PlanStoreType>((set) => ({
       weightType: "kg",
     }),
 
+  // 스프레드 기반 — PlanStoreType에 필드를 추가해도 이 함수는 손댈 필요가 없다
   setPrevPlanValue: (value) =>
     set((prev) => ({
-      workout: value.workout ?? prev.workout,
-      type: value.type ?? prev.type,
-      setWithCount: value.setWithCount ?? prev.setWithCount,
-      weight: value.weight ?? prev.weight,
-      condition: value.condition ?? prev.condition,
-      equipment: value.equipment ?? prev.equipment,
-      title: value.title ?? prev.title,
-      content: value.content ?? prev.content,
-      imageUri: value.imageUri ?? prev.imageUri,
-      date: value.date ?? prev.date,
+      ...prev,
+      ...value,
     })),
 }))

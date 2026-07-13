@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 // component
 import { Pressable, StyleSheet, TextInput } from "react-native";
-import { Text, View } from "../Themed";
-import { IconTitle } from "../IconTitle";
+import { Text, View } from "../themed";
+import { IconTitle } from "../icon-title";
 // icon
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
 // hook

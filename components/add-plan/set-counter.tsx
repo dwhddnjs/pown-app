@@ -1,8 +1,8 @@
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import { Octicons } from "@expo/vector-icons";
-import { Button } from "../Button";
-import { IconTitle } from "../IconTitle";
+import { Button } from "../button";
+import { IconTitle } from "../icon-title";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { SetCounterItem } from "./set-counter-item";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";

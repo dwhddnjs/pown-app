@@ -1,10 +1,7 @@
-const tintColorLight = "#2f95dc";
-const tintColorDark = "#fff";
-
 const Colors = {
   light: {
     text: "#27272a",
-    subText: "#aaaaaa",
+    subText: "#767680",
     background: "#EFEEF3",
     tint: "#00BAAB",
     pressed: "#15e5d3",
@@ -19,7 +16,7 @@ const Colors = {
   },
   dark: {
     text: "#fff",
-    subText: "#666666",
+    subText: "#9a9aa0",
     background: "#1a1a1a",
     tint: "#00ccbb",
     pressed: "#12b5a7",

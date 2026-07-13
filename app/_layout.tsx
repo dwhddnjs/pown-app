@@ -1,5 +1,4 @@
-/* eslint-disable react-hooks/rules-of-hooks -- headerRight/headerLeft 콜백은 React Navigation이 컴포넌트로 렌더하므로 훅 사용이 실제로는 유효함. 저장 로직을 훅으로 추출하는 구조 개선(docs 03-refactoring #1) 때 이 예외를 제거할 것. */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 // component
 import {
   DarkTheme,
@@ -8,27 +7,23 @@ import {
 } from "@react-navigation/native";
 import { Appearance, TouchableOpacity, useColorScheme } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import { toast, Toaster } from "sonner-native";
+import { Toaster } from "sonner-native";
 //expo
 import { useFonts } from "expo-font";
-import { Stack, useGlobalSearchParams, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-import * as MediaLibrary from "expo-media-library";
-import { Camera } from "expo-camera";
 // icons
 import XIcon from "@expo/vector-icons/Feather";
 import ArrowIcon from "@expo/vector-icons/AntDesign";
-import Checkcircle from "@expo/vector-icons/AntDesign";
 // lib
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { format } from "date-fns";
+import {
+  configureReanimatedLogger,
+  ReanimatedLogLevel,
+} from "react-native-reanimated";
 // zustand
-import { useNoteStore } from "@/hooks/use-note-store";
-import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
-import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
-import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
@@ -37,6 +32,13 @@ export { ErrorBoundary } from "expo-router";
 export const unstable_settings = {
   initialRouteName: "(drawer)/(tabs)/workout",
 };
+// @gorhom/bottom-sheet v4가 렌더 중 shared value를 읽어 발생하는 오탐 경고를
+// 막기 위해 Reanimated strict 모드만 끈다 (warn 레벨 로깅은 유지).
+configureReanimatedLogger({
+  level: ReanimatedLogLevel.warn,
+  strict: false,
+});
+
 SplashScreen.preventAutoHideAsync();
 
 SplashScreen.setOptions({
@@ -51,7 +53,7 @@ export default function RootLayout() {
     "sb-m": require("../assets/fonts/SB_M.otf"),
   });
   const colorScheme = useColorScheme();
-  const { theme, setUser } = useUserStore();
+  const { theme } = useUserStore();
 
   useEffect(() => {
     if (loaded) {
@@ -72,25 +74,6 @@ export default function RootLayout() {
       Appearance.setColorScheme("light");
     }
   }, [theme]);
-
-  useEffect(() => {
-    (async () => {
-      try {
-        const { status: cameraStatus } =
-          await Camera.requestCameraPermissionsAsync();
-        const { status: mediaStatus } =
-          await MediaLibrary.requestPermissionsAsync();
-        const { status: micStatus } =
-          await Camera.requestMicrophonePermissionsAsync();
-
-        setUser("camera", cameraStatus === "granted");
-        setUser("mediaLibrary", mediaStatus === "granted");
-        setUser("microphone", micStatus === "granted");
-      } catch (error) {
-        toast.error("권한 요청 중 오류가 발생했습니다.");
-      }
-    })();
-  }, []);
 
   useEffect(() => {
     if (error) throw error;
@@ -213,40 +196,6 @@ function RootLayoutNav() {
               <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
-          headerRight: () => {
-            const { tempPlans, resetMultiPlan } = useMultiPlanStore();
-            const { workoutPlanList, setWorkoutPlan } = useWorkoutPlanStore();
-
-            const onSaveAll = () => {
-              if (tempPlans.length === 0) {
-                return toast.error("추가된 운동이 없어요..");
-              }
-              const baseId = Date.now();
-              tempPlans.forEach((plan, idx) => {
-                setWorkoutPlan({
-                  ...plan,
-                  id: baseId + idx,
-                });
-              });
-              resetMultiPlan();
-              navigation.goBack();
-              toast.success(
-                `${tempPlans.length}개 운동 계획이 추가되었습니다!!`,
-              );
-            };
-
-            if (tempPlans.length === 0) return null;
-
-            return (
-              <TouchableOpacity onPress={onSaveAll}>
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
-            );
-          },
         })}
       />
       <Stack.Screen
@@ -267,31 +216,11 @@ function RootLayoutNav() {
               <XIcon name="x" size={30} color={themeColor.text} />
             </TouchableOpacity>
           ),
-          headerRight: () => {
-            const { title, content } = useNoteStore();
-            const { setPlanValue, onReset } = usePlanStore();
-
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  setPlanValue("title", title);
-                  setPlanValue("content", content);
-                  navigation.goBack();
-                }}
-              >
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
-            );
-          },
         })}
       />
       <Stack.Screen
         name="add-plan/[slug]"
-        options={({ navigation, route }) => ({
+        options={({ navigation }) => ({
           headerTitle: "",
           headerStyle: {
             borderBottomWidth: 0,
@@ -301,103 +230,12 @@ function RootLayoutNav() {
             borderWidth: 2,
           },
           headerShadowVisible: false,
-          headerLeft: () => {
-            const { onReset } = usePlanStore();
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  onReset();
-                  navigation.goBack();
-                }}
-              >
-                <ArrowIcon name="left" size={28} color={themeColor.text} />
-              </TouchableOpacity>
-            );
-          },
-          headerRight: () => {
-            const { workoutPlanList, setWorkoutPlan } = useWorkoutPlanStore();
-            const { onReset, ...result } = usePlanStore();
-            const { onReset: onResetNote } = useNoteStore();
-            const { slug } = useGlobalSearchParams();
-
-            const onSubmitWorkoutPlan = async () => {
-              try {
-                let hasMediaPermission = false;
-                if (result.imageUri.length > 0) {
-                  const { status } =
-                    await MediaLibrary.requestPermissionsAsync();
-                  hasMediaPermission = status === "granted";
-                  if (!hasMediaPermission) {
-                    toast.error(
-                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
-                    );
-                  }
-                }
-                const imageUri =
-                  hasMediaPermission &&
-                  (await Promise.all(
-                    result.imageUri.map(async (item) => {
-                      const asset = await MediaLibrary.createAssetAsync(
-                        item.imageUri as string,
-                      );
-                      const photoLib = await MediaLibrary.getAssetsAsync({
-                        mediaType: "photo",
-                      });
-                      const findAsset = photoLib.assets.find(
-                        (a) => a.uri === asset.uri,
-                      );
-                      const assetInfo =
-                        findAsset &&
-                        (await MediaLibrary.getAssetInfoAsync(findAsset.id));
-
-                      return {
-                        id: item.id,
-                        imageUri: assetInfo?.localUri,
-                      };
-                    }),
-                  ));
-                if (result.weight && result.workout && route.params) {
-                  setWorkoutPlan({
-                    id: Date.now(),
-                    workout: result.workout,
-                    type: slug as string,
-                    equipment: result.equipment,
-                    weight:
-                      result.weightType === "lb"
-                        ? (
-                            Math.round((parseFloat(result.weight) / 2.20462) * 10) /
-                            10
-                          ).toString()
-                        : result.weight,
-                    condition: result.condition,
-                    content: result.content,
-                    title: result.title,
-                    setWithCount: result.setWithCount,
-                    createdAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
-                    updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
-                    imageUri: imageUri ? imageUri : [],
-                  });
-                  onReset();
-                  navigation.goBack();
-                  onResetNote();
-                  return toast.success("운동 계획이 추가되었습니다!");
-                }
-                return toast.error("운동과 목표 중량은 필수에요..");
-              } catch (error) {
-                toast.error("운동 계획 저장 중 오류가 발생했습니다.");
-              }
-            };
-
-            return (
-              <TouchableOpacity onPress={() => onSubmitWorkoutPlan()}>
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
-            );
-          },
+          // 폼 리셋은 화면의 beforeRemove 리스너가, 저장 버튼(headerRight)은 화면 파일이 담당한다
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ArrowIcon name="left" size={28} color={themeColor.text} />
+            </TouchableOpacity>
+          ),
         })}
       />
       <Stack.Screen
@@ -411,126 +249,11 @@ function RootLayoutNav() {
             backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
-          headerLeft: () => {
-            const { onReset } = usePlanStore();
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  onReset();
-                  navigation.goBack();
-                }}
-              >
-                <ArrowIcon name="left" size={28} color={themeColor.text} />
-              </TouchableOpacity>
-            );
-          },
-          headerRight: () => {
-            const { workoutPlanList, setWorkoutPlan, setEditPlan } =
-              useWorkoutPlanStore();
-            const { back } = useRouter();
-            const { onReset, setPrevPlanValue, ...result } = usePlanStore();
-
-            const { onReset: onResetNote } = useNoteStore();
-            const { slug } = useGlobalSearchParams();
-            const getWorkoutPlan = workoutPlanList.find(
-              (item) => slug && item.id === Number(slug[1]),
-            );
-
-            const onSubmitWorkoutPlan = async () => {
-              try {
-                const alreadySavedImages = result.imageUri?.filter((item) =>
-                  item.imageUri?.includes("/DCIM/"),
-                );
-
-                const newImages = result.imageUri?.filter(
-                  (item) => !item.imageUri?.includes("/DCIM/"),
-                );
-
-                let hasMediaPermission = false;
-                if (newImages.length > 0) {
-                  const { status } =
-                    await MediaLibrary.requestPermissionsAsync();
-                  hasMediaPermission = status === "granted";
-                  if (!hasMediaPermission) {
-                    toast.error(
-                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
-                    );
-                  }
-                }
-                const imageUri =
-                  hasMediaPermission &&
-                  (await Promise.all(
-                    newImages.map(async (item) => {
-                      const asset = await MediaLibrary.createAssetAsync(
-                        item.imageUri as string,
-                      );
-                      const photoLib = await MediaLibrary.getAssetsAsync({
-                        mediaType: "photo",
-                      });
-                      const findAsset = photoLib.assets.find(
-                        (a) => a.uri === asset.uri,
-                      );
-                      const assetInfo =
-                        findAsset &&
-                        (await MediaLibrary.getAssetInfoAsync(findAsset.id));
-                      return {
-                        id: item.id,
-                        imageUri: assetInfo?.localUri,
-                      };
-                    }),
-                  ));
-
-                const newImagesList = [
-                  ...(alreadySavedImages || []),
-                  ...(imageUri || []),
-                ];
-
-                if (result.weight && result.workout && getWorkoutPlan) {
-                  setEditPlan({
-                    id: Number(slug[1]),
-                    workout: result.workout,
-                    type: slug[0],
-                    equipment: result.equipment,
-                    weight:
-                      result.weightType === "lb"
-                        ? (
-                            Math.round((parseFloat(result.weight) / 2.20462) * 10) /
-                            10
-                          ).toString()
-                        : result.weight,
-                    condition: result.condition,
-                    content: result.content,
-                    title: result.title,
-                    setWithCount: result.setWithCount,
-                    createdAt: getWorkoutPlan.createdAt,
-                    updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-                    imageUri: newImagesList ? newImagesList : [],
-                  });
-                  onReset();
-                  back();
-                  onResetNote();
-                  return toast.success("운동 계획이 수정되었습니다!");
-                }
-                return toast.error("운동과 목표 중량은 필수에요..");
-              } catch (error) {
-                toast.error("운동 계획 수정 중 오류가 발생했습니다.");
-              }
-            };
-
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  onSubmitWorkoutPlan();
-                }}
-              >
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
-            );
-          },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <ArrowIcon name="left" size={28} color={themeColor.text} />
+            </TouchableOpacity>
+          ),
         })}
       />
       <Stack.Screen
@@ -545,166 +268,6 @@ function RootLayoutNav() {
             backgroundColor: themeColor.background,
           },
           headerShadowVisible: false,
-          headerLeft: () => {
-            const { onReset } = usePlanStore();
-            const { clearEditingPlan } = useMultiPlanStore();
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  onReset();
-                  clearEditingPlan();
-                  navigation.goBack();
-                }}
-              >
-                <ArrowIcon name="left" size={28} color={themeColor.text} />
-              </TouchableOpacity>
-            );
-          },
-          headerRight: () => {
-            const { onReset, ...result } = usePlanStore();
-            const { onReset: onResetNote } = useNoteStore();
-            const {
-              editingPlan,
-              addTempPlan,
-              updateTempPlan,
-              tempPlans,
-              clearEditingPlan,
-            } = useMultiPlanStore();
-
-            const onSubmitMultiPlan = async () => {
-              try {
-                let hasMediaPermission = false;
-                if (result.imageUri.length > 0) {
-                  const { status } =
-                    await MediaLibrary.requestPermissionsAsync();
-                  hasMediaPermission = status === "granted";
-                  if (!hasMediaPermission) {
-                    toast.error(
-                      "사진 보관함 권한이 없어 사진은 저장되지 않아요.",
-                    );
-                  }
-                }
-                const imageUri =
-                  hasMediaPermission &&
-                  (await Promise.all(
-                    result.imageUri.map(async (item) => {
-                      if (item.imageUri?.includes("/DCIM/")) {
-                        return item;
-                      }
-                      const asset = await MediaLibrary.createAssetAsync(
-                        item.imageUri as string,
-                      );
-                      const photoLib = await MediaLibrary.getAssetsAsync({
-                        mediaType: "photo",
-                      });
-                      const findAsset = photoLib.assets.find(
-                        (a) => a.uri === asset.uri,
-                      );
-                      const assetInfo =
-                        findAsset &&
-                        (await MediaLibrary.getAssetInfoAsync(findAsset.id));
-                      return {
-                        id: item.id,
-                        imageUri: assetInfo?.localUri,
-                      };
-                    }),
-                  ));
-
-                if (!result.weight || !result.workout) {
-                  return toast.error("운동과 목표 중량은 필수에요..");
-                }
-
-                const planObj = {
-                  id: editingPlan ? editingPlan.id : Date.now(),
-                  workout: result.workout,
-                  type: result.type || editingPlan?.type || "back",
-                  equipment: result.equipment,
-                  weight:
-                    result.weightType === "lb"
-                      ? (
-                          Math.round((parseFloat(result.weight) / 2.20462) * 10) /
-                          10
-                        ).toString()
-                      : result.weight,
-                  condition: result.condition,
-                  content: result.content,
-                  title: result.title,
-                  setWithCount: result.setWithCount,
-                  createdAt: editingPlan
-                    ? editingPlan.createdAt
-                    : format(result.date, "yyyy.MM.dd HH:mm:ss"),
-                  updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
-                  imageUri: imageUri ? imageUri : [],
-                };
-
-                if (editingPlan) {
-                  updateTempPlan(planObj);
-                  onReset();
-                  clearEditingPlan();
-                  navigation.goBack();
-                  onResetNote();
-                  return toast.success("운동 계획이 수정되었습니다!");
-                }
-
-                addTempPlan(planObj);
-                onReset();
-                clearEditingPlan();
-                navigation.goBack();
-                onResetNote();
-                return toast.success("루틴에 운동이 추가되었습니다!");
-              } catch (error) {
-                toast.error("운동 계획 저장 중 오류가 발생했습니다.");
-              }
-            };
-
-            return (
-              <TouchableOpacity onPress={onSubmitMultiPlan}>
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
-            );
-          },
-        })}
-      />
-      <Stack.Screen
-        name="auth/sign-in"
-        options={({ navigation }) => ({
-          headerTitle: "",
-          headerStyle: {
-            borderBottomWidth: 0,
-            elevation: 0,
-            shadowOpacity: 0,
-            backgroundColor: themeColor.background,
-          },
-          headerShadowVisible: false,
-          animation: "slide_from_bottom",
-          headerLeft: () => (
-            <TouchableOpacity
-              onPress={() => {
-                navigation.goBack();
-              }}
-            >
-              <XIcon name="x" size={30} color={themeColor.text} />
-            </TouchableOpacity>
-          ),
-        })}
-      />
-      <Stack.Screen
-        name="auth/sign-up"
-        options={({ navigation }) => ({
-          headerTitle: "회원가입",
-          headerStyle: {
-            borderBottomWidth: 0,
-            elevation: 0,
-            shadowOpacity: 0,
-            backgroundColor: themeColor.background,
-          },
-          headerTitleStyle: {
-            fontFamily: "sb-m",
-          },
           headerLeft: () => (
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <ArrowIcon name="left" size={28} color={themeColor.text} />
@@ -813,14 +376,6 @@ function RootLayoutNav() {
         name="shorts/[...slug]"
         options={({ navigation }) => ({
           headerTitle: "",
-          // headerStyle: {
-          //   borderBottomWidth: 0,
-          //   elevation: 0,
-          //   shadowOpacity: 0,
-          //   backgroundColor: themeColor.background,
-          // },
-
-          // headerShadowVisible: false,
           headerShown: false,
           headerLeft: () => {
             return (

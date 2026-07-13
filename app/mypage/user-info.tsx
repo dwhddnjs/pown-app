@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 // component
 import { ScrollView, StyleSheet } from "react-native";
-import { Button } from "@/components/Button";
-import { Text, View } from "@/components/Themed";
+import { Button } from "@/components/button";
+import { Text, View } from "@/components/themed";
 import { toast } from "sonner-native";
 import { TitleInput } from "@/components/mypage/title-input";
 // expo
