@@ -1,6 +1,6 @@
 import { UserInfoTypes } from "@/hooks/use-user-store"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import { parse } from "date-fns"
+import { parsePlanDate } from "@/lib/date"
 
 type WorkoutTypeCount = Record<
   "chest" | "back" | "arm" | "leg" | "shoulder",
@@ -52,7 +52,7 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
-    const date = parse(item.createdAt, "yyyy.MM.dd HH:mm:ss", new Date())
+    const date = parsePlanDate(item.createdAt)
     const year = `${date.getFullYear()}년`
     const month = `${String(date.getMonth() + 1).padStart(2, "0")}월` // 월을 2자리로 변환
     const day = `${String(date.getDate()).padStart(2, "0")}일` // 일을 2자리로 변환
@@ -240,38 +240,28 @@ export const convertChartDate = (date: string) => {
   return `${year}년 ${month}월`
 }
 
-type BodyDataItem = { id: number; value: number; date: string }
+type BodyDataItem = { id: number; value: number; date: string; label: string }
 
+// 같은 날짜(yyyy.MM.dd)의 항목은 가장 마지막 기록 하나만 남긴다 — 날짜 키 Map으로 O(n)
 export const removeSameItem = <T extends { createdAt: string }>(
   arr: T[]
 ): T[] => {
-  return arr.reduce<T[]>((acc, item) => {
-    const dateKey = item.createdAt.split(" ")[0] // YYYY.MM.DD만 추출
-    const parsedDate = parse(
-      item.createdAt,
-      "yyyy.MM.dd HH:mm:ss",
-      new Date()
-    ).valueOf()
-    const existingIndex = acc.findIndex((el) =>
-      el.createdAt.startsWith(dateKey)
-    )
-    if (existingIndex === -1) {
-      acc.push(item)
-    } else {
-      const existingDate = parse(
-        acc[existingIndex].createdAt,
-        "yyyy.MM.dd HH:mm:ss",
-        new Date()
-      ).valueOf()
-
-      if (parsedDate > existingDate) {
-        acc[existingIndex] = item
-      }
+  const byDate = new Map<string, T>()
+  for (const item of arr) {
+    const dateKey = item.createdAt.split(" ")[0]
+    const existing = byDate.get(dateKey)
+    if (
+      !existing ||
+      parsePlanDate(item.createdAt).valueOf() >
+        parsePlanDate(existing.createdAt).valueOf()
+    ) {
+      byDate.set(dateKey, item)
     }
-    return acc
-  }, [])
+  }
+  return Array.from(byDate.values())
 }
 
+// 기록이 있는 날만 데이터 포인트로 반환한다 — 빈 날을 0으로 채우면 라인이 0까지 곤두박질치는 삼각파형이 된다
 export const getMonthlyBodyData = (
   rawData: Pick<UserInfoTypes, "createdAt" | "weight">[],
   yearMonth: string
@@ -279,42 +269,24 @@ export const getMonthlyBodyData = (
   const year = yearMonth.slice(0, 4)
   const month = yearMonth.slice(4, 6)
 
-  const filterPlanListData = rawData.filter((item) => {
+  const monthData = rawData.filter((item) => {
     return (
       item.createdAt.slice(0, 4) === year &&
       item.createdAt.slice(5, 7) === month
     )
   })
 
-  const removeSameDateItem = removeSameItem(filterPlanListData)
-
-  const processedData = removeSameDateItem.map((item) => {
-    const y = item.createdAt.slice(0, 4)
-    const m = item.createdAt.slice(5, 7)
-    const d = item.createdAt.slice(8, 10)
-    return {
-      value: item.weight ?? "0",
-      date: `${y}년 ${m}월 ${d}일`,
-    }
-  })
-  const daysInMonth = new Date(parseInt(year, 10), parseInt(month, 10), 0).getDate()
-
-  const result: BodyDataItem[] = []
-  for (let day = 1; day <= daysInMonth; day++) {
-    result.push({
-      id: day,
-      value: 0,
-      date: `${year}년 ${month}월 ${String(day).padStart(2, "0")}일`,
+  return removeSameItem(monthData)
+    .map((item) => {
+      const day = parseInt(item.createdAt.slice(8, 10), 10)
+      return {
+        id: day,
+        value: parseFloat(item.weight ?? "0"),
+        date: `${year}년 ${month}월 ${String(day).padStart(2, "0")}일`,
+        label: `${day}일`,
+      }
     })
-  }
-
-  return result.map((item) => {
-    const findItem = processedData.find((el) => el.date === item.date)
-    return {
-      ...item,
-      value: findItem ? parseFloat(findItem.value) : item.value,
-    }
-  })
+    .sort((a, b) => a.id - b.id)
 }
 
 export const getInitialConsonant = (str: string) => {

@@ -1,9 +1,9 @@
 import React from "react"
 // component
 import { StyleSheet, useColorScheme, FlatList } from "react-native"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 import { ConditionIcon } from "@/components/add-plan/condition-icon"
-import { IconTitle } from "../IconTitle"
+import { IconTitle } from "../icon-title"
 // color
 import Colors from "@/constants/Colors"
 // lib
@@ -32,6 +32,7 @@ export const ConditionList = () => {
         <FlatList
           data={conditionData}
           horizontal
+          showsHorizontalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <ConditionIcon item={item} type="column" />
           )}

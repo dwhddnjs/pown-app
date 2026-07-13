@@ -1,10 +1,9 @@
 import React, { useMemo } from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import { PieChart } from "react-native-gifted-charts";
 // hook
-import { ThemeColorType } from "@/constants/Colors";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
 import {
@@ -15,7 +14,7 @@ import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { ChartEmptyState } from "./chart-empty-state";
 
-const WorkoutPieChart = () => {
+export const WorkoutPieChart = () => {
   const themeColor = useCurrentThemeColor();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
@@ -46,7 +45,7 @@ const WorkoutPieChart = () => {
   );
 
   return (
-    <View style={[styles(themeColor).container]}>
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>
         주로 어느 부위 운동을 했지?
       </Text>
@@ -58,7 +57,10 @@ const WorkoutPieChart = () => {
         />
       ) : (
         <View
-          style={[styles(themeColor).itemContainer, { marginHorizontal: 6 }]}
+          style={[
+            styles.itemContainer,
+            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+          ]}
         >
           <PieChart
             data={percentageData}
@@ -100,28 +102,17 @@ const WorkoutPieChart = () => {
   );
 };
 
-export default WorkoutPieChart;
 
-const styles = (color: ThemeColorType) =>
-  StyleSheet.create({
-    container: {
-      backgroundColor: color.itemColor,
-      paddingHorizontal: 12,
-      paddingVertical: 20,
-      borderRadius: 12,
-      gap: 12,
-    },
-    itemContainer: {
-      backgroundColor: color.itemColor,
-      flexDirection: "row",
-      paddingVertical: 4,
-      justifyContent: "space-between",
-    },
-    emptyContainer: {
-      flexDirection: "row",
-      paddingVertical: 12,
-      paddingHorizontal: 4,
-      gap: 6,
-      backgroundColor: color.itemColor,
-    },
-  });
+const styles = StyleSheet.create({
+  container: {
+    paddingHorizontal: 12,
+    paddingVertical: 20,
+    borderRadius: 12,
+    gap: 12,
+  },
+  itemContainer: {
+    flexDirection: "row",
+    paddingVertical: 4,
+    justifyContent: "space-between",
+  },
+});

@@ -1,6 +1,6 @@
 import { StyleSheet, StyleSheetProperties } from "react-native"
 import React from "react"
-import { View } from "./Themed"
+import { View } from "./themed"
 
 interface IconTitleProps {
   children: React.ReactNode

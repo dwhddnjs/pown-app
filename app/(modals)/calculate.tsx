@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 // component
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 import {
   Animated,
   ScrollView,
@@ -66,8 +66,8 @@ export default function Calculate() {
       !inputNumber || isNaN(num)
         ? "0"
         : type === "lb"
-          ? Math.round(num * 2.20462).toString()
-          : Math.round(num / 2.20462).toString();
+          ? (Math.round(num * 2.20462 * 10) / 10).toString()
+          : (Math.round((num / 2.20462) * 10) / 10).toString();
 
     setTimeout(() => {
       setSelected(type);
@@ -84,7 +84,7 @@ export default function Calculate() {
 
   return (
     <View style={{ flex: 1, paddingTop: 24 }}>
-      <View style={styles(themeColor).tabContainer}>
+      <View style={[styles.tabContainer, { borderColor: themeColor.tint }]}>
         <Animated.View
           pointerEvents="none"
           style={[
@@ -102,30 +102,30 @@ export default function Calculate() {
         />
         <TouchableOpacity
           onPress={() => onSelectedTab("kg")}
-          style={styles(themeColor).tabItem}
+          style={styles.tabItem}
           onLayout={(e) => setTabItemWidth(e.nativeEvent.layout.width)}
         >
           <Text style={{ textAlign: "center" }}>킬로그램/kg</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onSelectedTab("lb")}
-          style={styles(themeColor).tabItem}
+          style={styles.tabItem}
         >
           <Text style={{ textAlign: "center" }}>파운드/lb</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles(themeColor).inputContainer}>
+      <View style={styles.inputContainer}>
         <TextInput
           ref={inputRef}
           keyboardType="numeric"
           placeholder="0"
           textAlign="right"
-          style={[styles(themeColor).input, { color: themeColor.text }]}
+          style={[styles.input, { color: themeColor.text }]}
           value={inputNumber}
           onChangeText={(value) => setInputNumber(value)}
           placeholderTextColor={themeColor.subText}
           returnKeyType="done"
-          onFocus={() => setInputNumber("")}
+          selectTextOnFocus
         />
         <Text style={{ fontSize: 18 }}>{selected === "kg" ? "kg" : "lb"}</Text>
       </View>
@@ -139,7 +139,8 @@ export default function Calculate() {
         {generatePercentageValues(inputNumber)?.map((item, index) => (
           <View
             style={[
-              styles(themeColor).listItem,
+              styles.listItem,
+              { borderColor: themeColor.itemColor },
               index === 0 && {
                 borderTopWidth: 1,
                 borderTopColor: themeColor.itemColor,
@@ -161,45 +162,38 @@ export default function Calculate() {
   );
 }
 
-const styles = (color: any) =>
-  StyleSheet.create({
-    tabContainer: {
-      borderWidth: 2,
-      borderColor: color.tint,
-      padding: 6,
-      borderRadius: 12,
-      flexDirection: "row",
-      marginHorizontal: 20,
-      marginBottom: 20,
-    },
-    tabItem: {
-      flex: 1,
-      height: 36,
-      borderRadius: 6,
-      justifyContent: "center",
-    },
-    inputContainer: {
-      flexDirection: "row",
-      alignItems: "center",
-      gap: 2,
-      paddingVertical: 20,
-      paddingHorizontal: 20,
-      // borderBottomWidth: 1,
-      // // borderColor: color.itemColor,
-      // // borderWidth: 1,
-    },
-    input: {
-      fontSize: 36,
-
-      justifyContent: "flex-end",
-      fontFamily: "sb-m",
-      flex: 1,
-    },
-    listItem: {
-      borderBottomWidth: 1,
-      flexDirection: "row",
-      justifyContent: "space-between",
-      borderColor: color.itemColor,
-      paddingVertical: 20,
-    },
-  });
+const styles = StyleSheet.create({
+  tabContainer: {
+    borderWidth: 2,
+    padding: 6,
+    borderRadius: 12,
+    flexDirection: "row",
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  tabItem: {
+    flex: 1,
+    height: 36,
+    borderRadius: 6,
+    justifyContent: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  input: {
+    fontSize: 36,
+    justifyContent: "flex-end",
+    fontFamily: "sb-m",
+    flex: 1,
+  },
+  listItem: {
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingVertical: 20,
+  },
+});

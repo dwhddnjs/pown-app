@@ -1,9 +1,9 @@
 import { useState } from "react";
 // component
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/Themed";
-import { Dialog } from "@/components/Dialog";
-import { Button } from "@/components/Button";
+import { Text, View } from "@/components/themed";
+import { Dialog } from "@/components/dialog";
+import { Button } from "@/components/button";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { toast } from "sonner-native";
 // zustand

@@ -5,7 +5,7 @@ import { StyleSheet, TouchableOpacity } from "react-native"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // icon
 import { FontAwesome } from "@expo/vector-icons"
-import { Text, View } from "../Themed"
+import { Text, View } from "../themed"
 
 interface TitleSearchHeaderProps {
   onPress: () => void

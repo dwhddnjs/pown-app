@@ -9,7 +9,7 @@ import Animated, {
 } from "react-native-reanimated";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { Text } from "./Themed";
+import { Text } from "./themed";
 
 interface DialogProps {
   children: React.ReactNode;

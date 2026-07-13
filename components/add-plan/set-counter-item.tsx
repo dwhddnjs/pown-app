@@ -1,4 +1,4 @@
-import { Text, View } from "../Themed";
+import { Text, View } from "../themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store";

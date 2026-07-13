@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
-import { View, Text } from "@/components/Themed";
+import { View, Text } from "@/components/themed";
 import { router } from "expo-router";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -21,7 +21,7 @@ interface FabOverlayProps {
 
 const ANIMATION_DURATION = 250;
 
-export default function FabOverlay({ isOpen, onClose }: FabOverlayProps) {
+export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
   const themeColor = useCurrentThemeColor();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(isOpen);

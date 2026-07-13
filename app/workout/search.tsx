@@ -1,12 +1,11 @@
 import { useLayoutEffect, useState } from "react";
 // component
-import { ScrollView, StyleSheet } from "react-native";
-import { Text, View } from "@/components/Themed";
+import { StyleSheet } from "react-native";
+import { Text, View } from "@/components/themed";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { FlashList } from "@shopify/flash-list";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { usePlanStore } from "@/hooks/use-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 // lib
 import { formatDate, groupByDate, setColor } from "@/lib/function";
@@ -17,7 +16,6 @@ export default function Search() {
   const { workoutPlanList } = useWorkoutPlanStore();
   const navigation = useNavigation();
   const [inputValue, setInputValue] = useState("");
-  const { onReset, setPrevPlanValue, ...result } = usePlanStore();
   const themeColor = useCurrentThemeColor();
 
   const filterWorkoutList = (value: string) => {
@@ -50,7 +48,7 @@ export default function Search() {
         tintColor: themeColor.tint,
         cancelButtonText: "취소",
 
-        onChangeText: (e: any) => {
+        onChangeText: (e: { nativeEvent: { text: string } }) => {
           setInputValue(e.nativeEvent.text);
         },
         hideWhenScrolling: false,
@@ -58,91 +56,101 @@ export default function Search() {
     });
   }, [navigation]);
 
+  const searchResult = inputValue
+    ? Object.entries(filterWorkoutList(inputValue))
+    : [];
+
   return (
-    <ScrollView
+    <View
       style={[
         styles.container,
         setColor(themeColor.background, "backgroundColor"),
       ]}
-      keyboardDismissMode="on-drag"
     >
-      {inputValue && (
-        <FlashList
-          data={Object.entries(filterWorkoutList(inputValue))}
-          estimatedItemSize={50}
-          keyExtractor={(item) => item[0]}
-          renderItem={({ item, index }) => {
-            return (
-              <View style={styles.list} key={index}>
+      <FlashList
+        data={searchResult}
+        estimatedItemSize={200}
+        keyExtractor={(item) => item[0]}
+        keyboardDismissMode="on-drag"
+        contentContainerStyle={{ paddingTop: 110 }}
+        renderItem={({ item }) => {
+          return (
+            <View style={styles.list}>
+              <View
+                style={[
+                  styles.planContainer,
+                  {
+                    backgroundColor: themeColor.tint,
+                  },
+                ]}
+              >
+                <Text
+                  style={[styles.dateText, { color: themeColor.background }]}
+                >{`🗓️  ${formatDate(item[0])}`}</Text>
                 <View
                   style={[
-                    styles.planContainer,
+                    styles.dot,
                     {
-                      backgroundColor: themeColor.tint,
+                      backgroundColor: themeColor.background,
                     },
                   ]}
-                >
-                  <Text
-                    style={[styles.dateText, { color: themeColor.background }]}
-                  >{`🗓️  ${formatDate(item[0])}`}</Text>
-                  <View
-                    style={[
-                      styles.dot,
-                      {
-                        backgroundColor: themeColor.background,
-                      },
-                    ]}
-                  />
-                </View>
-
-                <View
-                  style={[
-                    styles.workoutList,
-                    { backgroundColor: themeColor.itemColor },
-                  ]}
-                >
-                  {item[1].map((data, index) => (
-                    <WorkoutPlan
-                      key={data.id}
-                      item={data}
-                      index={index}
-                      totalLength={item[1].length}
-                    />
-                  ))}
-                </View>
+                />
               </View>
-            );
-          }}
-        />
-      )}
-      <View
-        style={{
-          height: 300,
-          alignItems: "center",
-          paddingTop: 80,
+
+              <View
+                style={[
+                  styles.workoutList,
+                  { backgroundColor: themeColor.itemColor },
+                ]}
+              >
+                {item[1].map((data, index) => (
+                  <WorkoutPlan
+                    key={data.id}
+                    item={data}
+                    index={index}
+                    totalLength={item[1].length}
+                  />
+                ))}
+              </View>
+            </View>
+          );
         }}
-      >
-        <Text
-          style={{
-            color: themeColor.subText,
-            textAlign: "center",
-            lineHeight: 24,
-            fontSize: 16,
-          }}
-        >
-          {!inputValue
-            ? `🔍  키워드를 입력해주세요.${"\n"}예:) 바벨, 등, 프레스`
-            : "마지막 운동계획입니다."}
-        </Text>
-      </View>
-    </ScrollView>
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={[styles.emptyText, { color: themeColor.subText }]}>
+              {!inputValue
+                ? `🔍  키워드를 입력해주세요.${"\n"}예:) 바벨, 등, 프레스`
+                : "검색 결과가 없습니다."}
+            </Text>
+          </View>
+        }
+        ListFooterComponent={
+          searchResult.length > 0 ? (
+            <View style={styles.emptyContainer}>
+              <Text style={[styles.emptyText, { color: themeColor.subText }]}>
+                마지막 운동계획입니다.
+              </Text>
+            </View>
+          ) : null
+        }
+      />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 110,
+  },
+  emptyContainer: {
+    alignItems: "center",
+    paddingTop: 80,
+    paddingBottom: 220,
+  },
+  emptyText: {
+    textAlign: "center",
+    lineHeight: 24,
+    fontSize: 16,
   },
   workoutList: {
     borderBottomRightRadius: 12,

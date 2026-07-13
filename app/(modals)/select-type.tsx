@@ -1,4 +1,4 @@
-import { View, Text } from "@/components/Themed";
+import { View, Text } from "@/components/themed";
 import { StatusBar } from "expo-status-bar";
 import { Platform, StyleSheet, TouchableOpacity } from "react-native";
 import Arm from "@/assets/images/svg/arm_icon.svg";
@@ -6,7 +6,7 @@ import Back from "@/assets/images/svg/back_icon.svg";
 import Chest from "@/assets/images/svg/chest_icon.svg";
 import Leg from "@/assets/images/svg/leg_icon.svg";
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
-import { IconTitleButton } from "@/components/IconTitleButton";
+import { IconTitleButton } from "@/components/icon-title-button";
 import { useRouter } from "expo-router";
 import { format } from "date-fns";
 import Entypo from "@expo/vector-icons/Entypo";

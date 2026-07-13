@@ -1,6 +1,6 @@
 import { StyleSheet, useColorScheme } from "react-native"
 import React from "react"
-import { Text, View } from "./Themed"
+import { Text, View } from "./themed"
 import Colors from "@/constants/Colors"
 
 export const NumberBallIcon = ({ children }: { children: React.ReactNode }) => {

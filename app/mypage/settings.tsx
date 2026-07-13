@@ -1,7 +1,7 @@
 // component
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/Themed";
-import { IconTitle } from "@/components/IconTitle";
+import { Text, View } from "@/components/themed";
+import { IconTitle } from "@/components/icon-title";
 import { UserDataCard } from "@/components/mypage/user-data-card";
 // expo
 import { useRouter } from "expo-router";
@@ -36,7 +36,7 @@ export default function Settings() {
             />
             <Text>내정보 작성</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={themeColor.subText} />
+          <AntDesign name="right" size={20} color={themeColor.subText} />
         </TouchableOpacity>
 
         {/* 컬러모드 */}
@@ -52,7 +52,7 @@ export default function Settings() {
             />
             <Text>컬러모드 선택</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={themeColor.subText} />
+          <AntDesign name="right" size={20} color={themeColor.subText} />
         </TouchableOpacity>
 
         {/* 데이터 초기화 */}
@@ -68,7 +68,7 @@ export default function Settings() {
             />
             <Text>데이터 관리</Text>
           </IconTitle>
-          <AntDesign name="up" size={20} color={themeColor.subText} />
+          <AntDesign name="right" size={20} color={themeColor.subText} />
         </TouchableOpacity>
       </View>
     </View>

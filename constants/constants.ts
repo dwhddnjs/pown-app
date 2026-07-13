@@ -1,17 +1,3 @@
-const planData = {
-  id: 1,
-  type: "back",
-  workout: "바벨로우",
-  totalSet: 10,
-  maxWeight: {
-    weight: 100,
-    count: 1,
-  },
-  createdAt: "9시 30분",
-  condition: ["화남", "피곤함", "우울함", "신남"],
-  comment: "아 진짜 개빡치네 너무 아쉽게 못 들었음",
-}
-
 export const equipmentData: string[] = [
   "바벨",
   "덤벨",

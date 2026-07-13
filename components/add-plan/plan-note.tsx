@@ -1,8 +1,8 @@
 import React, { useRef } from "react"
 // component
 import { StyleSheet, TextInput } from "react-native"
-import { Text, View } from "../Themed"
-import { IconTitle } from "../IconTitle"
+import { Text, View } from "../themed"
+import { IconTitle } from "../icon-title"
 // icon
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import { Link } from "expo-router"

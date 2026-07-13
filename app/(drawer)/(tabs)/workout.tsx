@@ -1,18 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef } from "react";
 // component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
-import { Text, View } from "@/components/Themed";
+import { Text, View } from "@/components/themed";
 import {
   NativeScrollEvent,
   NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
-  UIManager,
-  findNodeHandle,
 } from "react-native";
 import { EmptyList } from "@/components/workout-plan/empty-list";
-import { RefView } from "@/components/RefView";
 // zustand
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
@@ -29,14 +26,9 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
-import {
-  AntDesign,
-  MaterialCommunityIcons,
-  SimpleLineIcons,
-} from "@expo/vector-icons";
 
 export default function TabOneScreen() {
-  const { workoutPlanList, onResetPlanList } = useWorkoutPlanStore();
+  const { workoutPlanList } = useWorkoutPlanStore();
   const { date: selectedDate } = useSelectDateStore();
   const sortWorkList = groupByDate(workoutPlanList);
   const headerHeight = useHeaderHeight();
@@ -45,59 +37,44 @@ export default function TabOneScreen() {
   const { open } = useIsModalOpenStore();
 
   const router = useRouter();
-  const itemRef = useRef(new Map());
+  // 날짜 그룹의 y 오프셋을 onLayout에서 한 번만 기록해두고, 스크롤 시에는
+  // 숫자 비교만 한다 (매 프레임 네이티브 measure 호출 제거)
+  const sectionOffsets = useRef(new Map<string, number>());
   const scrollRef = useRef<ScrollView | null>(null);
-  const scrollY = useRef(0);
-
-  const measureView = (ref: any, date: string) => {
-    const nativeRef = findNodeHandle(ref);
-    const nativeScrollRef = findNodeHandle(scrollRef.current);
-    if (nativeRef && nativeScrollRef) {
-      UIManager.measureLayout(
-        nativeRef,
-        nativeScrollRef,
-        () => {},
-        (x: number, y: number, width: number, height: number) => {
-          if (scrollY.current === 0) {
-            navigation.setOptions({
-              title: `🔥오늘도 화이팅!`,
-            });
-          }
-          if (y - scrollY.current < headerHeight - 30) {
-            const splitData = date.split(".");
-            navigation.setOptions({
-              title: `${splitData[0]}년  ${splitData[1]}월`,
-            });
-          }
-        },
-      );
-    }
-  };
 
   const scrollToSelectedDate = useCallback(() => {
     if (!selectedDate) return;
-    const targetRef = itemRef.current.get(selectedDate);
-    if (targetRef) {
-      targetRef.measureLayout(
-        scrollRef.current,
-        (x: number, y: number) => {
-          scrollRef.current?.scrollTo({
-            y: y - headerHeight - 20,
-            animated: true,
-          });
-        },
-        () => {},
-      );
+    const y = sectionOffsets.current.get(selectedDate);
+    if (y != null) {
+      scrollRef.current?.scrollTo({ y: y + 4, animated: true });
     }
-  }, [selectedDate, headerHeight]);
+  }, [selectedDate]);
 
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    scrollY.current = offsetY;
-    itemRef.current.forEach((ref, date: string) => {
-      measureView(ref, date);
-    });
+    if (offsetY <= 0) {
+      navigation.setOptions({ title: "🔥오늘도 화이팅!" });
+      return;
+    }
+    // 헤더 밑으로 지나간 마지막 날짜 그룹이 현재 타이틀
+    let currentDate: string | undefined;
+    for (const date of Object.keys(sortWorkList)) {
+      const y = sectionOffsets.current.get(date);
+      if (y != null && y < offsetY - 30) {
+        currentDate = date;
+      }
+    }
+    if (currentDate) {
+      const splitData = currentDate.split(".");
+      navigation.setOptions({
+        title: `${splitData[0]}년  ${splitData[1]}월`,
+      });
+    }
   };
+
+  useEffect(() => {
+    navigation.setOptions({ title: "🔥오늘도 화이팅!" });
+  }, [navigation]);
 
   useEffect(() => {
     setTimeout(scrollToSelectedDate, 200);
@@ -112,7 +89,25 @@ export default function TabOneScreen() {
   }, [open]);
 
   if (workoutPlanList.length === 0) {
-    return <EmptyList />;
+    return (
+      <View style={{ flex: 1, position: "relative" }}>
+        <EmptyList />
+        <TouchableOpacity
+          onPress={() => {
+            router.push("/(modals)/calculate");
+          }}
+          style={[
+            styles.calculateButton,
+            {
+              backgroundColor: themeColor.background,
+              borderColor: themeColor.tint,
+            },
+          ]}
+        >
+          <MaterialIcons name="calculate" size={36} color={themeColor.tint} />
+        </TouchableOpacity>
+      </View>
+    );
   }
 
   return (
@@ -132,38 +127,35 @@ export default function TabOneScreen() {
           position: "relative",
         }}
       >
-        {Object.entries(sortWorkList).map(([date, plans], index) => (
-          <View style={styles.list} key={date}>
-            <RefView
-              ref={(ref) => {
-                itemRef.current.set(date, ref);
-                if (ref && index === 0) {
-                  measureView(ref, date);
-                }
-              }}
+        {Object.entries(sortWorkList).map(([date, plans]) => (
+          <View
+            style={styles.list}
+            key={date}
+            onLayout={(e) =>
+              sectionOffsets.current.set(date, e.nativeEvent.layout.y)
+            }
+          >
+            <View
+              style={[
+                styles.planContainer,
+                {
+                  backgroundColor: themeColor.tint,
+                },
+              ]}
             >
+              <Text
+                style={[styles.dateText, { color: themeColor.background }]}
+              >{`🗓️  ${formatDate(date)}`}</Text>
+
               <View
                 style={[
-                  styles.planContainer,
+                  styles.dot,
                   {
-                    backgroundColor: themeColor.tint,
+                    backgroundColor: themeColor.background,
                   },
                 ]}
-              >
-                <Text
-                  style={[styles.dateText, { color: themeColor.background }]}
-                >{`🗓️  ${formatDate(date)}`}</Text>
-
-                <View
-                  style={[
-                    styles.dot,
-                    {
-                      backgroundColor: themeColor.background,
-                    },
-                  ]}
-                />
-              </View>
-            </RefView>
+              />
+            </View>
             <View
               style={[
                 styles.workoutList,
