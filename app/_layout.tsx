@@ -5,17 +5,15 @@ import {
   DefaultTheme,
   ThemeProvider,
 } from "@react-navigation/native";
-import { Appearance, TouchableOpacity, useColorScheme } from "react-native";
+import { Appearance, useColorScheme } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toaster } from "sonner-native";
+import { HeaderIconButton } from "@/components/header-icon-button";
 //expo
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
-// icons
-import XIcon from "@expo/vector-icons/Feather";
-import ArrowIcon from "@expo/vector-icons/AntDesign";
 // lib
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -26,6 +24,7 @@ import {
 import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { View } from "@/components/themed";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -125,17 +124,13 @@ function RootLayoutNav() {
           },
           headerShadowVisible: false,
 
-          headerLeft: () => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.goBack();
-                }}
-              >
-                <XIcon name="x" size={30} color={themeColor.text} />
-              </TouchableOpacity>
-            );
-          },
+          headerLeft: () => (
+            <HeaderIconButton
+              type="close"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
+          ),
         })}
       />
       <Stack.Screen
@@ -152,9 +147,11 @@ function RootLayoutNav() {
           headerShadowVisible: false,
 
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="close"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -172,9 +169,11 @@ function RootLayoutNav() {
           headerShadowVisible: false,
 
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="close"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -192,9 +191,11 @@ function RootLayoutNav() {
           animation: "slide_from_bottom",
 
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="close"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -212,9 +213,11 @@ function RootLayoutNav() {
           headerShadowVisible: false,
 
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <XIcon name="x" size={30} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="close"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -232,9 +235,11 @@ function RootLayoutNav() {
           headerShadowVisible: false,
           // 폼 리셋은 화면의 beforeRemove 리스너가, 저장 버튼(headerRight)은 화면 파일이 담당한다
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -250,9 +255,11 @@ function RootLayoutNav() {
           },
           headerShadowVisible: false,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -269,9 +276,11 @@ function RootLayoutNav() {
           },
           headerShadowVisible: false,
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -284,9 +293,7 @@ function RootLayoutNav() {
           },
           animation: "slide_from_bottom",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -296,9 +303,7 @@ function RootLayoutNav() {
           headerTitle: "컬러 모드 선택",
           animation: "slide_from_bottom",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -308,9 +313,7 @@ function RootLayoutNav() {
           headerTitle: "데이터 관리",
           animation: "slide_from_bottom",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -322,9 +325,11 @@ function RootLayoutNav() {
             headerShadowVisible: false,
             gestureEnabled: false,
             headerLeft: () => (
-              <TouchableOpacity onPress={() => navigation.goBack()}>
-                <ArrowIcon name="left" size={28} color={themeColor.text} />
-              </TouchableOpacity>
+              <HeaderIconButton
+                type="back"
+                onPress={() => navigation.goBack()}
+                style={{ marginTop: 16 }}
+              />
             ),
           };
         }}
@@ -339,9 +344,7 @@ function RootLayoutNav() {
           },
           animation: "slide_from_bottom",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -350,9 +353,11 @@ function RootLayoutNav() {
         options={({ navigation }) => ({
           title: "설정",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="left" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
           ),
         })}
       />
@@ -366,9 +371,7 @@ function RootLayoutNav() {
           },
           animation: "slide_from_bottom",
           headerLeft: () => (
-            <TouchableOpacity onPress={() => navigation.goBack()}>
-              <ArrowIcon name="down" size={28} color={themeColor.text} />
-            </TouchableOpacity>
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -377,17 +380,13 @@ function RootLayoutNav() {
         options={({ navigation }) => ({
           headerTitle: "",
           headerShown: false,
-          headerLeft: () => {
-            return (
-              <TouchableOpacity
-                onPress={() => {
-                  navigation.goBack();
-                }}
-              >
-                <ArrowIcon name="left" size={28} color={themeColor.text} />
-              </TouchableOpacity>
-            );
-          },
+          headerLeft: () => (
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+              style={{ marginTop: 16 }}
+            />
+          ),
         })}
       />
     </Stack>

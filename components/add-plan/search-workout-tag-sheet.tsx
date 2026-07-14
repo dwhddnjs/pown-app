@@ -112,7 +112,11 @@ export const SearchWorkoutTagSheet = forwardRef<
             value={inputValue}
           />
         </View>
-        <ScrollView contentContainerStyle={styles.container}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.container}
+        >
           {filterWorkoutTag?.map((item) => (
             <TouchableOpacity
               key={item}

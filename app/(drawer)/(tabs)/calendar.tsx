@@ -92,6 +92,8 @@ export default function Calendar() {
     <View style={{ flex: 1, paddingTop: 24 }}>
       <ScrollView
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingHorizontal: 20,
@@ -136,6 +138,8 @@ export default function Calendar() {
             numColumns={7}
             keyExtractor={(item) => item.toString()}
             nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            showsHorizontalScrollIndicator={false}
             renderItem={({ item }) => {
               const isCurrentMonth = item.getMonth() === date.getMonth();
               const findItem = monthlyPlanData.findLast((el) => {

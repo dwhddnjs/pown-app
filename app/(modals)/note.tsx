@@ -1,7 +1,8 @@
 import React, { useEffect } from "react";
 // component
-import { StyleSheet, TextInput, TouchableOpacity } from "react-native";
+import { StyleSheet, TextInput } from "react-native";
 import { View } from "@/components/themed";
+import { HeaderIconButton } from "@/components/header-icon-button";
 // zustand
 import { useNoteStore } from "@/hooks/use-note-store";
 import { usePlanStore } from "@/hooks/use-plan-store";
@@ -9,8 +10,6 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // expo
 import { Stack, useNavigation } from "expo-router";
-// icon
-import Checkcircle from "@expo/vector-icons/AntDesign";
 
 export default function Note() {
   const { title, content, setValue, onReset } = useNoteStore();
@@ -39,13 +38,11 @@ export default function Note() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <TouchableOpacity onPress={onSaveNote}>
-              <Checkcircle
-                name="checkcircle"
-                size={30}
-                color={themeColor.tint}
-              />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="save"
+              onPress={onSaveNote}
+              style={{ marginTop: 16 }}
+            />
           ),
         }}
       />

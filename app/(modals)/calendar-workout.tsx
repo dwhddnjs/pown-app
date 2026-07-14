@@ -28,6 +28,8 @@ export default function CalendarWorkout() {
       <Text style={{ fontSize: 24, padding: 12 }}>운동 히스토리</Text>
       <FlatList
         data={Object.entries(sortWorkList)}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         ListFooterComponent={<View style={{ height: 120 }} />}
         keyExtractor={(item) => item[0]}
         renderItem={({ item }) => {

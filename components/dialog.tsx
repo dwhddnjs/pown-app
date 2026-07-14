@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, TouchableOpacity, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
 import React, { useEffect } from "react";
 import Animated, {
   useSharedValue,
@@ -8,14 +8,14 @@ import Animated, {
   runOnJS,
 } from "react-native-reanimated";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import { Text } from "./themed";
+import { HeaderIconButton } from "@/components/header-icon-button";
 
 interface DialogProps {
   children: React.ReactNode;
   isOpen: boolean;
   onClose: () => void;
   modalHeight?: number;
+  hideOverlay?: boolean;
 }
 
 export const Dialog = ({
@@ -23,6 +23,7 @@ export const Dialog = ({
   isOpen,
   onClose,
   modalHeight,
+  hideOverlay,
 }: DialogProps) => {
   const themeColor = useCurrentThemeColor();
   const translateY = useSharedValue(50);
@@ -58,6 +59,7 @@ export const Dialog = ({
     <Pressable
       style={[
         styles.overlay,
+        hideOverlay && { backgroundColor: "transparent" },
         modalHeight ? { paddingTop: modalHeight } : { paddingTop: 180 },
       ]}
       onPress={onPress}
@@ -71,13 +73,8 @@ export const Dialog = ({
           animatedStyle,
         ]}
       >
-        <View style={{ justifyContent: "center", alignItems: "flex-end" }}>
-          <TouchableOpacity
-            style={{ paddingHorizontal: 12, paddingVertical: 8 }}
-            onPress={onPress}
-          >
-            <AntDesign name="close" size={24} color={themeColor.subText} />
-          </TouchableOpacity>
+        <View style={styles.closeRow}>
+          <HeaderIconButton type="close" onPress={onPress} />
         </View>
         {children}
       </Animated.View>
@@ -103,5 +100,10 @@ const styles = StyleSheet.create({
     width: "90%",
     borderRadius: 16,
     paddingBottom: 20,
+  },
+  closeRow: {
+    alignItems: "flex-end",
+    paddingTop: 12,
+    paddingRight: 12,
   },
 });

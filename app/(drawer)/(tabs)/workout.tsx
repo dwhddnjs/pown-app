@@ -116,6 +116,8 @@ export default function TabOneScreen() {
         ref={scrollRef}
         onScroll={handleScroll}
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={[
           styles.container,
           {

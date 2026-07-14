@@ -1,161 +1,235 @@
-import { StyleSheet } from "react-native"
-import React, { forwardRef, useCallback, useMemo, useState } from "react"
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
-import { Picker } from "@react-native-picker/picker"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { TouchableOpacity } from "react-native-gesture-handler"
-import { Text, View } from "./themed"
-import { Button } from "./button"
-import { countData, setData, setTypeData } from "@/constants/constants"
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { StyleSheet } from "react-native";
+import React, { forwardRef, useCallback, useMemo, useState } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+} from "react-native-reanimated";
+import { Picker } from "@react-native-picker/picker";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { Text, View } from "./themed";
+import { Button } from "./button";
+import { NumberBallIcon } from "./number-ball-icon";
+import { countData, setTypeData } from "@/constants/constants";
+import { usePlanStore } from "@/hooks/use-plan-store";
 
 interface SetCountSheetProps {
-  onClose: () => void
+  onClose: () => void;
 }
 
 export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
-  ({ onClose }, ref) => {
+  (_props, ref) => {
     const [picker, setPicker] = useState({
       set: "본 세트",
       count: "8 + α",
-    })
-    const { setSetWithCount, setWithCount } = usePlanStore()
-    const themeColor = useCurrentThemeColor()
+    });
+    const [isOpen, setIsOpen] = useState(false);
+    const { setSetWithCount, setWithCount, setFilterSetWithCount } =
+      usePlanStore();
+    const themeColor = useCurrentThemeColor();
+
+    // 시트 상단 y좌표 — 쌓이는 목록을 시트 바로 위에 붙인다
+    const animatedPosition = useSharedValue(0);
+    const overlayStyle = useAnimatedStyle(() => ({
+      height: animatedPosition.value,
+    }));
 
     const onSelectedPicker = (type: string, value: string) => {
-      setPicker({
-        ...picker,
+      setPicker((prev) => ({
+        ...prev,
         [type]: value,
-      })
-    }
+      }));
+    };
 
+    // "추가" — 폼에 즉시 커밋. 시트 위 목록에도 실시간으로 쌓인다.
     const onSetPlanStore = () => {
       setSetWithCount({
         ...picker,
         id: Date.now(),
         progress: "진행중",
-      })
-    }
+      });
+    };
 
-    const snapPoints = useMemo(() => ["50%"], [])
-    const renderBackdrop = useCallback(
-      (props: any) => (
-        <BottomSheetBackdrop
-          appearsOnIndex={0}
-          disappearsOnIndex={-1}
-          {...props}
-        />
-      ),
-      []
-    )
+    const snapPoints = useMemo(() => ["50%"], []);
+    const onSheetChange = useCallback((index: number) => {
+      setIsOpen(index >= 0);
+    }, []);
 
     return (
-      <BottomSheet
-        ref={ref}
-        index={-1}
-        snapPoints={snapPoints}
-        enablePanDownToClose={true}
-        backdropComponent={renderBackdrop}
-        backgroundStyle={{
-          backgroundColor: themeColor.itemColor,
-        }}
-        handleIndicatorStyle={{
-          backgroundColor: themeColor.subText,
-        }}
-      >
-        <View
-          style={{
-            flex: 1,
-            flexDirection: "row",
-            paddingTop: 14,
+      <>
+        {/* 시트 바로 위에 떠서 쌓이는 목록 — 이미 폼에 반영된 setWithCount를 그대로 보여준다 */}
+        {isOpen && setWithCount.length > 0 && (
+          <Animated.View
+            style={[styles.overlay, overlayStyle]}
+            pointerEvents="box-none"
+          >
+            <View style={[styles.panel, { backgroundColor: "transparent" }]}>
+              {setWithCount.map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[
+                    styles.item,
+                    {
+                      borderColor: themeColor.subText,
+                      backgroundColor: themeColor.background,
+                    },
+                  ]}
+                >
+                  <View style={styles.itemInfo}>
+                    <NumberBallIcon>{index + 1}</NumberBallIcon>
+                    <Text style={[styles.itemType, { color: themeColor.tint }]}>
+                      {item.set}
+                    </Text>
+                    <Text
+                      style={[styles.itemCount, { color: themeColor.tint }]}
+                    >{`${item.count} 회`}</Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setFilterSetWithCount(item.id)}
+                    style={{ paddingHorizontal: 4 }}
+                  >
+                    <Ionicons name="trash" size={20} color={themeColor.text} />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </View>
+          </Animated.View>
+        )}
+
+        <BottomSheet
+          ref={ref}
+          index={-1}
+          snapPoints={snapPoints}
+          enablePanDownToClose={true}
+          onChange={onSheetChange}
+          animatedPosition={animatedPosition}
+          backgroundStyle={{
             backgroundColor: themeColor.itemColor,
+          }}
+          handleIndicatorStyle={{
+            backgroundColor: themeColor.subText,
           }}
         >
           <View
             style={{
-              width: "50%",
+              flex: 1,
+              flexDirection: "row",
+              paddingTop: 14,
               backgroundColor: themeColor.itemColor,
             }}
           >
-            <Text
-              style={[
-                styles.title,
-                { color: themeColor.text },
-              ]}
+            <View
+              style={{
+                width: "50%",
+                backgroundColor: themeColor.itemColor,
+              }}
             >
-              세트 유형
-            </Text>
-            <Picker
-              selectedValue={picker.set}
-              onValueChange={(itemValue, itemIndex) =>
-                onSelectedPicker("set", itemValue)
-              }
-            >
-              {setTypeData.map((item) => (
-                <Picker.Item
-                  key={item}
-                  label={String(item)}
-                  value={item}
-                  color={themeColor.text}
-                />
-              ))}
-            </Picker>
-          </View>
+              <Text style={[styles.title, { color: themeColor.text }]}>
+                세트 유형
+              </Text>
+              <Picker
+                selectedValue={picker.set}
+                onValueChange={(itemValue) =>
+                  onSelectedPicker("set", itemValue)
+                }
+              >
+                {setTypeData.map((item) => (
+                  <Picker.Item
+                    key={item}
+                    label={String(item)}
+                    value={item}
+                    color={themeColor.text}
+                  />
+                ))}
+              </Picker>
+            </View>
 
+            <View
+              style={{
+                width: "50%",
+                backgroundColor: themeColor.itemColor,
+              }}
+            >
+              <Text style={[styles.title, { color: themeColor.text }]}>
+                반복 횟수
+              </Text>
+              <Picker
+                selectedValue={picker.count}
+                onValueChange={(itemValue) =>
+                  onSelectedPicker("count", itemValue)
+                }
+              >
+                {countData.map((item) => (
+                  <Picker.Item
+                    key={item}
+                    label={item}
+                    value={item}
+                    color={themeColor.text}
+                  />
+                ))}
+              </Picker>
+            </View>
+          </View>
           <View
             style={{
-              width: "50%",
+              paddingBottom: 44,
               backgroundColor: themeColor.itemColor,
             }}
           >
-            <Text
-              style={[
-                styles.title,
-                { color: themeColor.text },
-              ]}
-            >
-              반복 횟수
-            </Text>
-            <Picker
-              selectedValue={picker.count}
-              onValueChange={(itemValue, itemIndex) =>
-                onSelectedPicker("count", itemValue)
-              }
-            >
-              {countData.map((item) => (
-                <Picker.Item
-                  key={item}
-                  label={item}
-                  value={item}
-                  color={themeColor.text}
-                />
-              ))}
-            </Picker>
+            <Button type="solid" onPress={onSetPlanStore}>
+              추가
+            </Button>
           </View>
-        </View>
-        <View
-          style={{
-            paddingBottom: 44,
-            backgroundColor: themeColor.itemColor,
-          }}
-        >
-          <Button type="solid" onPress={onSetPlanStore}>
-            추가
-          </Button>
-        </View>
-      </BottomSheet>
-    )
-  }
-)
+        </BottomSheet>
+      </>
+    );
+  },
+);
 
-SetCounterSheet.displayName = "SetCounterSheet"
+SetCounterSheet.displayName = "SetCounterSheet";
 
 const styles = StyleSheet.create({
-  container: {},
-
   title: {
     fontSize: 16,
     fontFamily: "sb-m",
     textAlign: "center",
   },
-})
+  // 시트 상단부터 위로 채워지는 투명 컨테이너. 패널은 시트 바로 위에 붙는다.
+  overlay: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    justifyContent: "flex-end",
+  },
+  // 알약을 감싸는 불투명 패널 (뒤 폼 비침 방지)
+  panel: {
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+  },
+  item: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 2,
+    borderRadius: 50,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  itemInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  itemType: {
+    fontFamily: "sb-m",
+    fontSize: 14,
+  },
+  itemCount: {
+    fontFamily: "sb-m",
+    fontSize: 12,
+  },
+});

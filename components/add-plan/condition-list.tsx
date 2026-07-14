@@ -33,6 +33,7 @@ export const ConditionList = () => {
           data={conditionData}
           horizontal
           showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
             <ConditionIcon item={item} type="column" />
           )}
