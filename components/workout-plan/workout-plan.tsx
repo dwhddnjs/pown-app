@@ -108,7 +108,8 @@ export const WorkoutPlan = ({
 }: WorkoutPlanProps) => {
   const themeColor = useCurrentThemeColor();
   // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
-  const [mediaPermission, requestMediaPermission] = MediaLibrary.usePermissions();
+  const [mediaPermission, requestMediaPermission] =
+    MediaLibrary.usePermissions();
   const hasMediaPermission = mediaPermission?.granted ?? false;
   const { setImageUri } = useImageUriStore();
 
@@ -156,7 +157,7 @@ export const WorkoutPlan = ({
         {index !== totalLength - 1 && (
           <View
             style={{
-              width: 2,
+              width: 1,
               height: 16,
               flex: 1,
               backgroundColor: themeColor.subText,

@@ -151,6 +151,8 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
       ) : (
         <DrawerContentScrollView
           {...props}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           style={{
             backgroundColor: themeColor.background,
           }}

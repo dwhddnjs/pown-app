@@ -83,6 +83,8 @@ export default function UserInfo() {
   return (
     <View style={{ flex: 1, paddingBottom: 48 }}>
       <ScrollView
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={[{ backgroundColor: themeColor.background }]}
         contentContainerStyle={{
           gap: 24,

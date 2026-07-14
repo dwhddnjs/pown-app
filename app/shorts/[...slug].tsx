@@ -45,6 +45,7 @@ export default function ShortsView() {
         pagingEnabled
         horizontal={false}
         showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={{ backgroundColor: "black" }}
         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
         onScroll={(e) => {

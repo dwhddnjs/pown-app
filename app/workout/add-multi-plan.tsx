@@ -21,8 +21,8 @@ import { format } from "date-fns";
 import { toast } from "sonner-native";
 import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
 import Entypo from "@expo/vector-icons/Entypo";
-import Checkcircle from "@expo/vector-icons/AntDesign";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { HeaderIconButton } from "@/components/header-icon-button";
 import { KeyBoardAvoid } from "@/components/keyboard-avoid";
 import { CameraImage } from "@/components/add-plan/camera-image";
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet";
@@ -202,19 +202,19 @@ export default function AddMultiPlan() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <TouchableOpacity onPress={onSubmitMultiPlan}>
-              <Checkcircle
-                name="checkcircle"
-                size={30}
-                color={themeColor.tint}
-              />
-            </TouchableOpacity>
+            <HeaderIconButton
+              type="save"
+              onPress={onSubmitMultiPlan}
+              style={{ marginTop: 16 }}
+            />
           ),
         }}
       />
       <ScrollView
         ref={scrollRef}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={{ flex: 1 }}
       >
         <View

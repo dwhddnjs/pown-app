@@ -24,6 +24,8 @@ export default function Chart() {
     <View style={{ flex: 1 }}>
       <ScrollView
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         style={{ flex: 1 }}
         contentContainerStyle={{
           gap: 24,

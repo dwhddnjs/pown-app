@@ -39,6 +39,8 @@ export default function TabTwoScreen() {
         <FlatList
           data={videos}
           numColumns={3}
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           style={{ paddingTop: headerHeight }}
           renderItem={({ item }) => (
             <TouchableOpacity

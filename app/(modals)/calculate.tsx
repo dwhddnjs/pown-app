@@ -131,6 +131,8 @@ export default function Calculate() {
       </View>
       <ScrollView
         scrollEventThrottle={16}
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
           paddingHorizontal: 20,
           flexGrow: 1,

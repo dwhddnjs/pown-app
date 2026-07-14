@@ -32,7 +32,12 @@ export const SelectTypeDateSheet = () => {
   };
 
   return (
-    <Dialog isOpen={open} onClose={() => setOpen(false)} modalHeight={100}>
+    <Dialog
+      isOpen={open}
+      onClose={() => setOpen(false)}
+      modalHeight={100}
+      hideOverlay
+    >
       <View
         style={[
           styles.title,

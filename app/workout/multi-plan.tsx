@@ -14,8 +14,8 @@ import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import Checkcircle from "@expo/vector-icons/AntDesign";
 import { FontAwesome6 } from "@expo/vector-icons";
+import { HeaderIconButton } from "@/components/header-icon-button";
 
 export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
@@ -56,13 +56,11 @@ export default function MultiPlanScreen() {
         options={{
           headerRight: () =>
             tempPlans.length === 0 ? null : (
-              <TouchableOpacity onPress={onSaveAll}>
-                <Checkcircle
-                  name="checkcircle"
-                  size={30}
-                  color={themeColor.tint}
-                />
-              </TouchableOpacity>
+              <HeaderIconButton
+                type="save"
+                onPress={onSaveAll}
+                style={{ marginTop: 16 }}
+              />
             ),
         }}
       />
@@ -84,6 +82,8 @@ export default function MultiPlanScreen() {
         </View>
       ) : (
         <ScrollView
+          showsVerticalScrollIndicator={false}
+          showsHorizontalScrollIndicator={false}
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
         >
