@@ -21,6 +21,12 @@ export const EquipmentChart = () => {
       (acc: number, cur: number) => acc + cur,
     ) === 0;
 
+  // 최대 기록에 여유를 두되 최소 5 — 축을 데이터에 맞춰야 작은 값도 막대가 보인다
+  const maxValue = Math.max(
+    5,
+    Math.ceil(Math.max(...(Object.values(equipmentCount) as number[])) * 1.2),
+  );
+
   const barData1 = useMemo(
     () => [
       {
@@ -82,6 +88,7 @@ export const EquipmentChart = () => {
           <BarChart
             barWidth={24}
             noOfSections={5}
+            maxValue={maxValue}
             barBorderRadius={4}
             frontColor={themeColor.subText}
             disableScroll

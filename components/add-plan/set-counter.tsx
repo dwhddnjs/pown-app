@@ -9,9 +9,12 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface SetCounterProps {
   onOpen: () => void;
+  // 시트가 열려 있으면 폼 본문 아이템을 숨긴다.
+  // (시트 위 오버레이 목록과 겹쳐 보이는 문제 방지 — 기존 아이템이 시트 위로 올라간 느낌)
+  isSheetOpen: boolean;
 }
 
-export const SetCounter = ({ onOpen }: SetCounterProps) => {
+export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
   const { setWithCount } = usePlanStore();
   const themeColor = useCurrentThemeColor();
 
@@ -32,7 +35,7 @@ export const SetCounter = ({ onOpen }: SetCounterProps) => {
       >
         선택하기
       </Button>
-      {setWithCount.length > 0 && (
+      {!isSheetOpen && setWithCount.length > 0 && (
         <View style={{ gap: 8 }}>
           {setWithCount?.map((item, index) => (
             <SetCounterItem key={item.id} item={item} index={index} />

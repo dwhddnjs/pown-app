@@ -1,7 +1,9 @@
-import { StyleSheet, TextInput } from "react-native"
 import React from "react"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+// component
+import { StyleSheet, TextInput } from "react-native"
 import { Text, View } from "../themed"
+// hooks
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 
 interface TitleInputProp {
   title: string
@@ -22,30 +24,24 @@ export const TitleInput = ({
 
   return (
     <View style={styles.itemContainer}>
-      <Text>{title}</Text>
+      <Text style={[styles.title, { color: themeColor.subText }]}>
+        {title}
+      </Text>
       <View
-        style={[
-          styles.container,
-          {
-            borderColor: themeColor.subText,
-          },
-        ]}
+        style={[styles.container, { backgroundColor: themeColor.itemColor }]}
       >
         <TextInput
-          style={[
-            styles.input,
-            {
-              color: themeColor.tint,
-            },
-          ]}
+          style={[styles.input, { color: themeColor.text }]}
           keyboardType="numeric"
-          //   onFocus={(e) => onFocus(e.target)}
-
           value={value}
           onChangeText={(value) => onChangeValue(type, value)}
           placeholder="0"
+          placeholderTextColor={themeColor.subText}
+          selectionColor={themeColor.tint}
         />
-        <Text>{label}</Text>
+        <Text style={[styles.label, { color: themeColor.subText }]}>
+          {label}
+        </Text>
       </View>
     </View>
   )
@@ -53,23 +49,31 @@ export const TitleInput = ({
 
 const styles = StyleSheet.create({
   itemContainer: {
+    flex: 1,
     gap: 8,
   },
-  input: {
-    textAlign: "right",
-    minWidth: 60,
-    fontSize: 16,
+  title: {
+    fontSize: 12,
     fontFamily: "sb-l",
+    paddingLeft: 2,
   },
   container: {
     flexDirection: "row",
-    borderWidth: 2,
-    alignSelf: "flex-start",
-    paddingVertical: 8,
+    alignItems: "center",
+    height: 48,
+    borderRadius: 12,
+    borderCurve: "continuous",
+    paddingHorizontal: 14,
     gap: 4,
-    paddingLeft: 0,
-    paddingRight: 8,
-    borderRadius: 10,
-    // marginHorizontal: 24,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: "sb-m",
+    fontVariant: ["tabular-nums"],
+  },
+  label: {
+    fontSize: 13,
+    fontFamily: "sb-l",
   },
 })

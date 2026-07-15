@@ -1,98 +1,142 @@
 // component
-import { StyleSheet, TouchableOpacity } from "react-native";
-import { Text, View } from "@/components/themed";
-import { IconTitle } from "@/components/icon-title";
+import { ScrollView, StyleSheet } from "react-native";
 import { UserDataCard } from "@/components/mypage/user-data-card";
-// expo
-import { useRouter } from "expo-router";
-// icon
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { SettingSection } from "@/components/mypage/setting-section";
+import { SettingItem } from "@/components/mypage/setting-item";
+import { toast } from "sonner-native";
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+// expo
+import { useRouter } from "expo-router";
+import * as Linking from "expo-linking";
+import Constants from "expo-constants";
+// icon
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+
+const THEME_LABEL = {
+  light: "라이트",
+  dark: "다크",
+  system: "시스템",
+} as const;
 
 export default function Settings() {
-  const { onReset, ...result } = useUserStore();
+  const { theme } = useUserStore();
   const themeColor = useCurrentThemeColor();
 
   const { push } = useRouter();
 
+  const appVersion = Constants.expoConfig?.version ?? "";
+
+  const onContact = async () => {
+    try {
+      await Linking.openURL(
+        `mailto:syd1215no@gmail.com?subject=${encodeURIComponent("Pown 문의")}`,
+      );
+    } catch {
+      toast.error("메일 앱을 열 수 없어요.");
+    }
+  };
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={{ backgroundColor: themeColor.background }}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}
+    >
       <UserDataCard />
-      <View style={styles.settingsContainer}>
-        {/* 내정보 */}
-        <TouchableOpacity
-          style={[styles.settings, { backgroundColor: themeColor.itemColor }]}
-          onPress={() => push("/mypage/user-info")}
-        >
-          <IconTitle style={{ backgroundColor: themeColor.itemColor }}>
+
+      <SettingSection title="일반">
+        <SettingItem
+          icon={
             <MaterialCommunityIcons
               name="account-edit"
               size={20}
               color={themeColor.tint}
             />
-            <Text>내정보 작성</Text>
-          </IconTitle>
-          <AntDesign name="right" size={20} color={themeColor.subText} />
-        </TouchableOpacity>
-
-        {/* 컬러모드 */}
-        <TouchableOpacity
-          style={[styles.settings, { backgroundColor: themeColor.itemColor }]}
-          onPress={() => push("/mypage/theme-mode")}
-        >
-          <IconTitle style={{ backgroundColor: themeColor.itemColor }}>
+          }
+          title="내정보 작성"
+          chevron
+          onPress={() => push("/mypage/user-info")}
+        />
+        <SettingItem
+          icon={
             <MaterialCommunityIcons
               name="circle-half-full"
               size={20}
               color={themeColor.tint}
             />
-            <Text>컬러모드 선택</Text>
-          </IconTitle>
-          <AntDesign name="right" size={20} color={themeColor.subText} />
-        </TouchableOpacity>
-
-        {/* 데이터 초기화 */}
-        <TouchableOpacity
-          style={[styles.settings, { backgroundColor: themeColor.itemColor }]}
-          onPress={() => push("/mypage/reset-data")}
-        >
-          <IconTitle style={{ backgroundColor: themeColor.itemColor }}>
+          }
+          title="컬러모드 선택"
+          value={THEME_LABEL[theme]}
+          chevron
+          onPress={() => push("/mypage/theme-mode")}
+        />
+        <SettingItem
+          icon={
             <MaterialCommunityIcons
-              name="database-remove"
+              name="calculator-variant"
               size={20}
               color={themeColor.tint}
             />
-            <Text>데이터 관리</Text>
-          </IconTitle>
-          <AntDesign name="right" size={20} color={themeColor.subText} />
-        </TouchableOpacity>
-      </View>
-    </View>
+          }
+          title="중량 계산기"
+          chevron
+          onPress={() => push("/(modals)/calculate")}
+        />
+      </SettingSection>
+
+      <SettingSection title="데이터">
+        <SettingItem
+          icon={
+            <MaterialCommunityIcons
+              name="database-outline"
+              size={20}
+              color={themeColor.tint}
+            />
+          }
+          title="데이터 관리"
+          value="백업 · 복원 · 초기화"
+          chevron
+          onPress={() => push("/mypage/reset-data")}
+        />
+      </SettingSection>
+
+      <SettingSection title="앱 정보">
+        <SettingItem
+          icon={
+            <MaterialCommunityIcons
+              name="email-outline"
+              size={20}
+              color={themeColor.tint}
+            />
+          }
+          title="문의하기"
+          chevron
+          onPress={onContact}
+        />
+        <SettingItem
+          icon={
+            <MaterialCommunityIcons
+              name="information-outline"
+              size={20}
+              color={themeColor.tint}
+            />
+          }
+          title="앱 버전"
+          value={appVersion}
+        />
+      </SettingSection>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  content: {
     paddingHorizontal: 20,
-    gap: 12,
     paddingTop: 24,
-  },
-
-  settingsContainer: {
-    gap: 12,
-  },
-  settings: {
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 10,
+    paddingBottom: 48,
+    gap: 24,
   },
 });

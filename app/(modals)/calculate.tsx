@@ -62,9 +62,10 @@ export default function Calculate() {
     }).start();
 
     const num = parseFloat(inputNumber);
+    // 입력이 없으면 변환하지 않고 빈값 유지 (0을 강제로 넣지 않는다 — 리스트는 빈값을 0으로 표시)
     const converted =
       !inputNumber || isNaN(num)
-        ? "0"
+        ? ""
         : type === "lb"
           ? (Math.round(num * 2.20462 * 10) / 10).toString()
           : (Math.round((num / 2.20462) * 10) / 10).toString();

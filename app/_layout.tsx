@@ -194,7 +194,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -291,6 +290,7 @@ function RootLayoutNav() {
           headerTitleStyle: {
             fontFamily: "sb-m",
           },
+          headerShadowVisible: false,
           animation: "slide_from_bottom",
           headerLeft: () => (
             <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
@@ -301,6 +301,10 @@ function RootLayoutNav() {
         name="mypage/theme-mode"
         options={({ navigation }) => ({
           headerTitle: "컬러 모드 선택",
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          headerShadowVisible: false,
           animation: "slide_from_bottom",
           headerLeft: () => (
             <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
@@ -311,6 +315,10 @@ function RootLayoutNav() {
         name="mypage/reset-data"
         options={({ navigation }) => ({
           headerTitle: "데이터 관리",
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          headerShadowVisible: false,
           animation: "slide_from_bottom",
           headerLeft: () => (
             <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
@@ -324,11 +332,13 @@ function RootLayoutNav() {
             headerTitle: "운동 검색",
             headerShadowVisible: false,
             gestureEnabled: false,
+            // 네이티브 서치바가 헤더 아래에 붙는다. margin은 헤더 높이를 바꿔 타이틀까지
+            // 밀리므로, 레이아웃에 영향 없는 translateY로 백 버튼만 위로 올려 서치바와 여백을 준다.
             headerLeft: () => (
               <HeaderIconButton
                 type="back"
                 onPress={() => navigation.goBack()}
-                style={{ marginTop: 16 }}
+                style={{ marginBottom: 8 }}
               />
             ),
           };
@@ -352,11 +362,15 @@ function RootLayoutNav() {
         name="mypage/settings"
         options={({ navigation }) => ({
           title: "설정",
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          headerShadowVisible: false,
           headerLeft: () => (
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
+              // style={{ marginTop: 16 }}
             />
           ),
         })}

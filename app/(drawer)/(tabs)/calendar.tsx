@@ -1,10 +1,5 @@
 import React, { useState } from "react";
-import {
-  TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  ScrollView,
-} from "react-native";
+import { TouchableOpacity, StyleSheet, ScrollView } from "react-native";
 import {
   format,
   startOfMonth,
@@ -14,6 +9,7 @@ import {
   endOfWeek,
   parse,
   isBefore,
+  isSameMonth,
   startOfDay,
 } from "date-fns";
 import { Text, View } from "@/components/themed";
@@ -101,11 +97,13 @@ export default function Calendar() {
           backgroundColor: themeColor.background,
           gap: 24,
         }}
-        nestedScrollEnabled={true}
       >
         <View style={{ gap: 4 }}>
           <View style={styles.titleContainer}>
-            <Text style={{ fontSize: 24 }}>이번달 헬스장 간 횟수</Text>
+            <Text style={{ fontSize: 24 }}>
+              {isSameMonth(date, new Date()) ? "이번달" : format(date, "M월")}{" "}
+              헬스장 간 횟수
+            </Text>
             <Text style={{ fontSize: 20, color: themeColor.tint }}>
               {workoutCount}회
             </Text>
@@ -133,20 +131,17 @@ export default function Calendar() {
             ))}
           </View>
 
-          <FlatList
-            data={days}
-            numColumns={7}
-            keyExtractor={(item) => item.toString()}
-            nestedScrollEnabled={true}
-            showsVerticalScrollIndicator={false}
-            showsHorizontalScrollIndicator={false}
-            renderItem={({ item }) => {
+          {/* 고정 35~42칸 그리드라 가상화가 불필요 — ScrollView 안 FlatList 중첩 에러(VirtualizedLists) 방지 */}
+          <View
+            style={[styles.daysGrid, { backgroundColor: themeColor.itemColor }]}
+          >
+            {days.map((item) => {
               const isCurrentMonth = item.getMonth() === date.getMonth();
               const findItem = monthlyPlanData.findLast((el) => {
                 const split = el.createdAt.split(".");
-                const date = format(item, "yyyyMMdd");
+                const dayKey = format(item, "yyyyMMdd");
                 const itemDate = `${split[0]}${split[1]}${split[2].slice(0, 2)}`;
-                return date === itemDate;
+                return dayKey === itemDate;
               });
               const isToday = todayDate === format(item, "yyyyMMdd");
               const beforeToday = isBefore(
@@ -156,6 +151,7 @@ export default function Calendar() {
 
               return (
                 <TouchableOpacity
+                  key={item.toString()}
                   style={[
                     styles.numberIcon,
                     { opacity: isCurrentMonth ? 1 : 0.4 },
@@ -187,8 +183,8 @@ export default function Calendar() {
                   </Text>
                 </TouchableOpacity>
               );
-            }}
-          />
+            })}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -202,8 +198,12 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 6,
   },
+  daysGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+  },
   numberIcon: {
-    flex: 1,
+    width: `${100 / 7}%`,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",

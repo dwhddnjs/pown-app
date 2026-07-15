@@ -66,16 +66,19 @@ export const SbdChart = () => {
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       <Text style={{ fontSize: 18, marginLeft: 6 }}>3대중량의 변화</Text>
-      <Text
-        style={{
-          fontSize: 12,
-          fontFamily: "sb-l",
-          marginLeft: 6,
-          color: themeColor.subText,
-        }}
-      >
-        회색: 최초 기록  ·  컬러: 선택한 달의 마지막 기록
-      </Text>
+      {/* 범례 설명은 차트가 그려질 때만 의미가 있다 */}
+      {firstWeight && (
+        <Text
+          style={{
+            fontSize: 12,
+            fontFamily: "sb-l",
+            marginLeft: 6,
+            color: themeColor.subText,
+          }}
+        >
+          회색: 최초 기록  ·  컬러: 선택한 달의 마지막 기록
+        </Text>
+      )}
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {!firstWeight ? (
         <ChartEmptyState

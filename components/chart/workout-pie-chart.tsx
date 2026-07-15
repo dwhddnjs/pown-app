@@ -73,7 +73,13 @@ export const WorkoutPieChart = () => {
             textBackgroundRadius={26}
             backgroundColor={themeColor.itemColor}
           />
-          <View style={{ backgroundColor: themeColor.itemColor }}>
+          <View
+            style={{
+              backgroundColor: themeColor.itemColor,
+              justifyContent: "center",
+              gap: 6,
+            }}
+          >
             {(
               percentageData as {
                 value: number;
@@ -81,20 +87,32 @@ export const WorkoutPieChart = () => {
                 title: string;
                 text: string;
               }[]
-            ).map((item) => (
-              <View
-                style={{
-                  flexDirection: "row",
-                  backgroundColor: themeColor.itemColor,
-                }}
-                key={item.title}
-              >
-                <Text style={{ color: item.color, fontSize: 12 }}>
-                  {item.title} :{" "}
-                </Text>
-                <Text style={{ fontSize: 12 }}>{item.text}</Text>
-              </View>
-            ))}
+            )
+              // 0%인 부위는 범례에서 제외 — 라이트 테마에서 컬러 텍스트 대비가 낮아 색은 견본으로만 표시
+              .filter((item) => item.value > 0)
+              .map((item) => (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    gap: 6,
+                    backgroundColor: themeColor.itemColor,
+                  }}
+                  key={item.title}
+                >
+                  <View
+                    style={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: 5,
+                      backgroundColor: item.color,
+                    }}
+                  />
+                  <Text style={{ fontSize: 12 }}>
+                    {item.title} {item.text}
+                  </Text>
+                </View>
+              ))}
           </View>
         </View>
       )}
