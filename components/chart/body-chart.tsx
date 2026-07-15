@@ -26,23 +26,8 @@ export const BodyChart = () => {
     <View
       style={[styles.container, { backgroundColor: themeColor.itemColor }]}
     >
-      <Text
-        style={{
-          fontSize: 18,
-          paddingHorizontal: 12,
-          paddingTop: 20,
-          marginLeft: 6,
-        }}
-      >
-        몸무게의 변화
-      </Text>
-      <View
-        style={{
-          height: 1,
-          backgroundColor: themeColor.tabIconDefault,
-          marginHorizontal: 12,
-        }}
-      />
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>몸무게의 변화</Text>
+      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyData ? (
         <ChartEmptyState
           message="기록된 몸무게 데이터가 없습니다."
@@ -53,7 +38,6 @@ export const BodyChart = () => {
           style={{
             backgroundColor: themeColor.itemColor,
             paddingVertical: 4,
-            paddingLeft: 12,
           }}
         >
           <LineChart
@@ -131,7 +115,8 @@ export const BodyChart = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingBottom: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 12,
     borderRadius: 12,
     gap: 12,
   },

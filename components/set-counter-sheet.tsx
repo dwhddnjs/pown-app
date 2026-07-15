@@ -17,10 +17,12 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 
 interface SetCountSheetProps {
   onClose: () => void;
+  // 시트 열림/닫힘을 부모에 알린다 (폼 본문 아이템 숨김 처리에 사용)
+  onOpenChange?: (isOpen: boolean) => void;
 }
 
 export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
-  (_props, ref) => {
+  ({ onOpenChange }, ref) => {
     const [picker, setPicker] = useState({
       set: "본 세트",
       count: "8 + α",
@@ -53,9 +55,14 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     };
 
     const snapPoints = useMemo(() => ["50%"], []);
-    const onSheetChange = useCallback((index: number) => {
-      setIsOpen(index >= 0);
-    }, []);
+    const onSheetChange = useCallback(
+      (index: number) => {
+        const open = index >= 0;
+        setIsOpen(open);
+        onOpenChange?.(open);
+      },
+      [onOpenChange],
+    );
 
     return (
       <>

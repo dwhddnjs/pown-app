@@ -1,32 +1,27 @@
 import React from "react"
 // component
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native"
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { SafeAreaView } from "react-native-safe-area-context"
 // expo
 import { BlurView } from "expo-blur"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useChartStore } from "@/hooks/use-chart-store"
-import { convertChartDate } from "@/lib/function"
+import { useCalendarStore } from "@/hooks/use-calendar-store"
+// lib
+import { format, isSameMonth } from "date-fns"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
-import { useCalendarStore } from "@/hooks/use-calendar-store"
-import { format } from "date-fns"
 
-const CalenderHeader = () => {
+const CalendarHeader = () => {
   const themeColor = useCurrentThemeColor()
   const { date, nextMonth, prevMonth } = useCalendarStore()
 
   const title = format(date, "yyyy년 MM월")
+  const isCurrentMonth = isSameMonth(date, new Date())
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
-      <SafeAreaView>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.container}>
           <TouchableOpacity
             style={[styles.button, { paddingLeft: 12 }]}
@@ -38,7 +33,11 @@ const CalenderHeader = () => {
             {title}
           </Text>
           <TouchableOpacity
-            style={[styles.button, { paddingRight: 12 }]}
+            style={[
+              styles.button,
+              { paddingRight: 12, opacity: isCurrentMonth ? 0.3 : 1 },
+            ]}
+            disabled={isCurrentMonth}
             onPress={() => nextMonth()}
           >
             <AntDesign name="rightcircleo" size={28} color={themeColor.tint} />
@@ -49,7 +48,7 @@ const CalenderHeader = () => {
   )
 }
 
-export default CalenderHeader
+export default CalendarHeader
 
 const styles = StyleSheet.create({
   blur: {

@@ -71,6 +71,7 @@ export default function AddMultiPlan() {
   const { onReset: onResetNote } = useNoteStore();
   const navigation = useNavigation();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
+  const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const themeColor = useCurrentThemeColor();
   const [currentScrollY, setCurrentScrollY] = useState(0);
@@ -273,7 +274,7 @@ export default function AddMultiPlan() {
           onFocusScroll={onFocusScroll}
           currentScrollY={currentScrollY}
         />
-        <SetCounter onOpen={onSheetOpen} />
+        <SetCounter onOpen={onSheetOpen} isSheetOpen={isSetCounterSheetOpen} />
         <ConditionList />
         <PlanNote
           onFocusScroll={onFocusScroll}
@@ -282,7 +283,11 @@ export default function AddMultiPlan() {
         <CameraImage />
         <View style={{ height: 250 }} />
       </ScrollView>
-      <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
+      <SetCounterSheet
+        ref={bottomSheetModalRef}
+        onClose={onSheetClose}
+        onOpenChange={setIsSetCounterSheetOpen}
+      />
       <SearchWorkoutTagSheet
         workoutList={workoutList[selectedType]}
         ref={workoutTagRef}

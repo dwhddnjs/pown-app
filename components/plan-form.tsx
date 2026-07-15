@@ -42,6 +42,7 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
   const navigation = useNavigation();
   const themeColor = useCurrentThemeColor();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
+  const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const [currentScrollY, setCurrentScrollY] = useState(0);
 
   const workoutListData = workoutList[workoutType];
@@ -106,7 +107,7 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
         {/* 목표중량 */}
         <TopWeight onFocusScroll={onFocusScroll} currentScrollY={currentScrollY} />
         {/* 세트와 횟수 */}
-        <SetCounter onOpen={onSheetOpen} />
+        <SetCounter onOpen={onSheetOpen} isSheetOpen={isSetCounterSheetOpen} />
         {/* 컨디션 */}
         <ConditionList />
         {/* 퀵노트 전체 노트 */}
@@ -115,7 +116,11 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
         <CameraImage />
         <View style={{ height: 250 }} />
       </ScrollView>
-      <SetCounterSheet ref={bottomSheetModalRef} onClose={onSheetClose} />
+      <SetCounterSheet
+        ref={bottomSheetModalRef}
+        onClose={onSheetClose}
+        onOpenChange={setIsSetCounterSheetOpen}
+      />
       <SearchWorkoutTagSheet
         workoutList={workoutListData}
         ref={workoutTagRef}
