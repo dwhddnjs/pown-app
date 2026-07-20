@@ -282,7 +282,7 @@ export const getMonthlyBodyData = (
       return {
         id: day,
         value: parseFloat(item.weight ?? "0"),
-        date: `${year}년 ${month}월 ${String(day).padStart(2, "0")}일`,
+        date: `${year.slice(2)}/${month}/${String(day).padStart(2, "0")}`,
         label: `${day}일`,
       }
     })

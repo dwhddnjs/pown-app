@@ -16,7 +16,8 @@
       "bundleIdentifier": "com.anonymous.workout-app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "UIDesignRequiresCompatibility": true
+        "UIDesignRequiresCompatibility": true,
+        "LSApplicationQueriesSchemes": ["googlegmail"]
       }
     },
     "android": {
