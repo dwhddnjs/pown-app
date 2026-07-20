@@ -119,15 +119,6 @@ export const SbdChart = () => {
               textAlign: "center",
               fontFamily: "sb-l",
             }}
-            showLine
-            lineConfig={{
-              color: themeColor.success,
-              thickness: 3,
-              curved: true,
-              hideDataPoints: true,
-              shiftY: 60,
-              initialSpacing: 2,
-            }}
           />
         </View>
       )}

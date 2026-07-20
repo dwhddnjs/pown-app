@@ -11,6 +11,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // expo
 import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
+import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 // icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -29,14 +30,27 @@ export default function Settings() {
 
   const appVersion = Constants.expoConfig?.version ?? "";
 
+  const contactEmail = "syd1215no@gmail.com";
+
+  // Gmail 앱을 우선 열고, 없으면 기본 메일 앱, 둘 다 없으면(시뮬레이터·메일 미설정) 주소를 클립보드에 복사한다.
   const onContact = async () => {
+    const subject = encodeURIComponent("Pown 문의");
+    const gmailUrl = `googlegmail://co?to=${contactEmail}&subject=${subject}`;
+    const mailto = `mailto:${contactEmail}?subject=${subject}`;
     try {
-      await Linking.openURL(
-        `mailto:syd1215no@gmail.com?subject=${encodeURIComponent("Pown 문의")}`,
-      );
+      if (await Linking.canOpenURL(gmailUrl)) {
+        await Linking.openURL(gmailUrl);
+        return;
+      }
+      if (await Linking.canOpenURL(mailto)) {
+        await Linking.openURL(mailto);
+        return;
+      }
     } catch {
-      toast.error("메일 앱을 열 수 없어요.");
+      // 아래 클립보드 폴백으로 이어진다
     }
+    await Clipboard.setStringAsync(contactEmail);
+    toast.success("메일 주소가 복사되었어요");
   };
 
   return (
