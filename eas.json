@@ -9,7 +9,8 @@
       "channel": "preview"
     },
     "production": {
-      "channel": "production"
+      "channel": "production",
+      "image": "latest"
     },
     "development": {
       "developmentClient": true,

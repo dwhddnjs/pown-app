@@ -11,7 +11,7 @@
     "newArchEnabled": true,
     "jsEngine": "hermes",
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
       "infoPlist": {
@@ -40,7 +40,7 @@
       [
         "expo-splash-screen",
         {
-          "supportsTablet": false,
+          "supportsTablet": true,
           "backgroundColor": "#EFEEF3",
           "image": "./assets/images/icon2.png",
           "imageWidth": 200,
