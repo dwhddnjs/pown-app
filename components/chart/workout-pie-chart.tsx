@@ -41,7 +41,7 @@ export const WorkoutPieChart = () => {
       { value: listCount.leg, color: "#3A76E2", title: tBodyPart("leg", lang) },
       { value: listCount.arm, color: "#9A48C1", title: tBodyPart("arm", lang) },
     ],
-    [listCount],
+    [listCount, lang],
   );
 
   const percentageData = useMemo(

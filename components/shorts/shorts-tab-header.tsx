@@ -1,20 +1,13 @@
 import React from "react"
 import { useT } from "@/hooks/use-t"
 // component
-import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native"
-import { DrawerToggleButton } from "@react-navigation/drawer"
+import { SafeAreaView, StyleSheet, View } from "react-native"
 // expo
 import { BlurView } from "expo-blur"
-import { useRouter } from "expo-router"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-// hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Text } from "../themed"
 
-const ShortsTabHeader = ({ title }: { title?: string }) => {
+const ShortsTabHeader = () => {
   const t = useT()
-  const themeColor = useCurrentThemeColor()
-  const { push } = useRouter()
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>

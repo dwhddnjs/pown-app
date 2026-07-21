@@ -98,12 +98,13 @@ export const useUserStore = create<UserTypes>()(
   ),
 );
 
-const deviceLang = (): Lang =>
+// 기기 언어는 앱 실행 중 바뀌지 않는다 — 렌더마다 네이티브를 읽지 않도록 한 번만 계산
+const DEVICE_LANG: Lang =
   getLocales()[0]?.languageCode === "ko" ? "ko" : "en";
 
 // 명시 선택이 없으면 기기 언어. 훅 밖(lib의 토스트 등)에서는 getLanguage() 사용.
 export const useLanguage = (): Lang =>
-  useUserStore((s) => s.language) ?? deviceLang();
+  useUserStore((s) => s.language) ?? DEVICE_LANG;
 
 export const getLanguage = (): Lang =>
-  useUserStore.getState().language ?? deviceLang();
+  useUserStore.getState().language ?? DEVICE_LANG;

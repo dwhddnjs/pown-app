@@ -40,11 +40,10 @@ const isAppOwned = (item: ImageUriType) => isAppOwnedMedia(item.imageUri)
 export const saveImagesToLibrary = async (
   images: ImageUriType[],
 ): Promise<ImageUriType[]> => {
-  const alreadySaved = images.filter(isAppOwned)
   const newImages = images.filter((item) => !isAppOwned(item))
 
   if (newImages.length === 0) {
-    return alreadySaved
+    return images
   }
 
   // 갓 촬영한 캐시 사진만 사진첩에 저장한다 — 이미 사진첩에 있는 구 데이터를 중복 저장하지 않도록
@@ -84,7 +83,9 @@ export const saveImagesToLibrary = async (
     }),
   )
 
-  return [...alreadySaved, ...saved]
+  // 원본 순서 유지 — 수정 후 저장할 때 사진 순서가 뒤바뀌지 않도록
+  const savedById = new Map(saved.map((item) => [item.id, item]))
+  return images.map((item) => savedById.get(item.id) ?? item)
 }
 
 // 저장은 항상 kg 기준 — lb 입력이면 kg으로 변환(소수 1자리 반올림)

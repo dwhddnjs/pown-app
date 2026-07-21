@@ -5,9 +5,8 @@ import { Text, View } from "../themed";
 import { LineChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useLanguage } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
-import { useUserStore } from "@/hooks/use-user-store";
 import { useChartStore } from "@/hooks/use-chart-store";
 // lib
 import { getMonthlyBodyData } from "@/lib/function";

@@ -74,7 +74,7 @@ export default function Search() {
         hideWhenScrolling: false,
       },
     });
-  }, [navigation]);
+  }, [navigation, t, themeColor.tint]);
 
   const searchResult = inputValue
     ? Object.entries(filterWorkoutList(inputValue))

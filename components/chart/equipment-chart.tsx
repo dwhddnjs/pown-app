@@ -65,7 +65,7 @@ export const EquipmentChart = () => {
         frontColor: themeColor.tint,
       },
     ],
-    [equipmentCount, themeColor.tint],
+    [equipmentCount, themeColor.tint, lang],
   );
 
   return (

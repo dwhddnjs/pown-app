@@ -5,10 +5,9 @@ import { Text, View } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useLanguage } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 import { tWorkout } from "@/lib/i18n";
 import { useT } from "@/hooks/use-t";
-import { useUserStore } from "@/hooks/use-user-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { ChartEmptyState } from "./chart-empty-state";

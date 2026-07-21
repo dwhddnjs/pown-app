@@ -23,7 +23,7 @@ type Manifest = {
   stores: {
     user: Pick<
       ReturnType<typeof useUserStore.getState>,
-      "userInfo" | "workoutList" | "theme"
+      "userInfo" | "workoutList" | "theme" | "language"
     >
     workoutPlan: Pick<
       ReturnType<typeof useWorkoutPlanStore.getState>,
@@ -69,19 +69,22 @@ export const createBackup = async () => {
       intermediates: true,
     })
 
-    const { userInfo, workoutList, theme } = useUserStore.getState()
+    const { userInfo, workoutList, theme, language } = useUserStore.getState()
     const { workoutPlanList } = useWorkoutPlanStore.getState()
     const { videos } = useShortsStore.getState()
 
     const bundledPlans = await Promise.all(
       workoutPlanList.map(async (plan) => ({
         ...plan,
-        imageUri: await Promise.all(
-          (plan.imageUri || []).map(async (image) => ({
-            ...image,
-            imageUri: await bundleMedia(stagingMediaDir, image.imageUri),
-          })),
-        ),
+        // 담지 못한 이미지는 복원 시 빈 슬롯이 되므로 아예 뺀다
+        imageUri: (
+          await Promise.all(
+            (plan.imageUri || []).map(async (image) => ({
+              ...image,
+              imageUri: await bundleMedia(stagingMediaDir, image.imageUri),
+            })),
+          )
+        ).filter((image) => image.imageUri),
       })),
     )
 
@@ -99,7 +102,7 @@ export const createBackup = async () => {
       version: 1,
       exportedAt: new Date().toISOString(),
       stores: {
-        user: { userInfo, workoutList, theme },
+        user: { userInfo, workoutList, theme, language },
         workoutPlan: { workoutPlanList: bundledPlans },
         shorts: { videos: bundledVideos },
       },
@@ -157,6 +160,8 @@ export const restoreBackup = async () => {
     if ((await FileSystem.getInfoAsync(archiveMedia)).exists) {
       const files = await FileSystem.readDirectoryAsync(archiveMedia)
       for (const file of files) {
+        // zip slip 방어 — 아카이브는 사용자가 고른 임의 파일일 수 있다
+        if (file.includes("/") || file.includes("..")) continue
         await rmrf(mediaDir + file)
         await FileSystem.copyAsync({
           from: archiveMedia + file,
@@ -170,6 +175,7 @@ export const restoreBackup = async () => {
     setUser("userInfo", user.userInfo)
     if (user.workoutList) setUser("workoutList", user.workoutList)
     if (user.theme) setUser("theme", user.theme)
+    if (user.language) setUser("language", user.language)
     useWorkoutPlanStore.getState().onSetMockout(workoutPlan.workoutPlanList)
     useShortsStore.getState().onSetVideos(shorts.videos)
 
