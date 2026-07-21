@@ -5,6 +5,9 @@ import { Text, View } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tEquipment } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 import { getEquipmentCount } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
@@ -12,6 +15,8 @@ import { ChartEmptyState } from "./chart-empty-state";
 
 export const EquipmentChart = () => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
   const equipmentCount = getEquipmentCount(monthlyPlanData);
@@ -31,32 +36,32 @@ export const EquipmentChart = () => {
     () => [
       {
         value: equipmentCount.babel,
-        label: "바벨",
+        label: tEquipment("바벨", lang),
         frontColor: themeColor.tint,
       },
       {
         value: equipmentCount.dumbel,
-        label: "덤벨",
+        label: tEquipment("덤벨", lang),
         frontColor: themeColor.tint,
       },
       {
         value: equipmentCount.machine,
-        label: "머신",
+        label: tEquipment("머신", lang),
         frontColor: themeColor.tint,
       },
       {
         value: equipmentCount.smith,
-        label: "스미스",
+        label: tEquipment("스미스", lang),
         frontColor: themeColor.tint,
       },
       {
         value: equipmentCount.cable,
-        label: "케이블",
+        label: tEquipment("케이블", lang),
         frontColor: themeColor.tint,
       },
       {
         value: equipmentCount.body,
-        label: "맨몸",
+        label: tEquipment("맨몸", lang),
         frontColor: themeColor.tint,
       },
     ],
@@ -65,7 +70,7 @@ export const EquipmentChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>주로 뭐로 운동했지?</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.equipmentTitle")}</Text>
       <View
         style={{
           height: 1,
@@ -74,7 +79,7 @@ export const EquipmentChart = () => {
       />
       {isEmptyCount ? (
         <ChartEmptyState
-          message="기록된 운동장비 데이터가 없습니다."
+          message={t("chart.equipmentEmpty")}
           themeColor={themeColor}
         />
       ) : (
@@ -107,9 +112,17 @@ export const EquipmentChart = () => {
                 {item?.value}
               </Text>
             )}
+            // 영어 기구명은 기본 라벨 폭(barWidth=24)에서 "Bar…"로 잘리고,
+            // 넓히면 옆 라벨과 겹친다 → 영어일 때만 기울여 전체를 보여준다.
+            // 한국어는 원래 다 들어가므로 그대로 둔다.
+            labelWidth={lang === "en" ? 60 : undefined}
+            rotateLabel={lang === "en"}
+            xAxisLabelsHeight={lang === "en" ? 44 : undefined}
+            xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
             xAxisLabelTextStyle={{
               color: themeColor.text,
               fontWeight: "bold",
+              fontSize: lang === "en" ? 9 : undefined,
               fontFamily: "sb-l",
             }}
             yAxisTextStyle={{

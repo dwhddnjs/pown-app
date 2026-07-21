@@ -14,7 +14,8 @@ import { EmptyList } from "@/components/workout-plan/empty-list";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 // lib
-import { formatDate, groupByDate } from "@/lib/function";
+import { convertChartDate, formatDate, groupByDate } from "@/lib/function";
+import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { useNavigation, useRouter } from "expo-router";
 
@@ -22,6 +23,7 @@ import { useNavigation, useRouter } from "expo-router";
 import { useHeaderHeight } from "@react-navigation/elements";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -33,6 +35,8 @@ export default function TabOneScreen() {
   const sortWorkList = groupByDate(workoutPlanList);
   const headerHeight = useHeaderHeight();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const navigation = useNavigation();
   const { open } = useIsModalOpenStore();
 
@@ -53,7 +57,7 @@ export default function TabOneScreen() {
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     if (offsetY <= 0) {
-      navigation.setOptions({ title: "🔥오늘도 화이팅!" });
+      navigation.setOptions({ title: t("header.cheer") });
       return;
     }
     // 헤더 밑으로 지나간 마지막 날짜 그룹이 현재 타이틀
@@ -67,14 +71,14 @@ export default function TabOneScreen() {
     if (currentDate) {
       const splitData = currentDate.split(".");
       navigation.setOptions({
-        title: `${splitData[0]}년  ${splitData[1]}월`,
+        title: convertChartDate(`${splitData[0]}${splitData[1]}`, lang),
       });
     }
   };
 
   useEffect(() => {
-    navigation.setOptions({ title: "🔥오늘도 화이팅!" });
-  }, [navigation]);
+    navigation.setOptions({ title: t("header.cheer") });
+  }, [navigation, t]);
 
   useEffect(() => {
     setTimeout(scrollToSelectedDate, 200);
@@ -147,7 +151,7 @@ export default function TabOneScreen() {
             >
               <Text
                 style={[styles.dateText, { color: themeColor.background }]}
-              >{`🗓️  ${formatDate(date)}`}</Text>
+              >{`🗓️  ${formatDate(date, lang)}`}</Text>
 
               <View
                 style={[
@@ -177,15 +181,15 @@ export default function TabOneScreen() {
         ))}
         <View
           style={{
-            height: 200,
+            height: 240,
             alignItems: "center",
-            paddingTop: 64,
+            paddingTop: 48,
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
             <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
             <Text style={{ color: themeColor.subText }}>
-              마지막 운동계획입니다.
+              {t("workout.lastPlan")}
             </Text>
           </View>
         </View>

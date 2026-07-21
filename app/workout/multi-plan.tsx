@@ -10,6 +10,7 @@ import {
 import { Stack, useRouter } from "expo-router";
 import { toast } from "sonner-native";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
@@ -19,6 +20,7 @@ import { HeaderIconButton } from "@/components/header-icon-button";
 
 export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
   const router = useRouter();
   const { tempPlans, setMultiPlanMode, resetMultiPlan } = useMultiPlanStore();
   const { setWorkoutPlan } = useWorkoutPlanStore();
@@ -36,7 +38,7 @@ export default function MultiPlanScreen() {
 
   const onSaveAll = () => {
     if (tempPlans.length === 0) {
-      return toast.error("추가된 운동이 없어요..");
+      return toast.error(t("routine.noWorkout"));
     }
     const baseId = Date.now();
     tempPlans.forEach((plan, idx) => {
@@ -47,7 +49,7 @@ export default function MultiPlanScreen() {
     });
     resetMultiPlan();
     router.back();
-    toast.success(`${tempPlans.length}개 운동 계획이 추가되었습니다!!`);
+    toast.success(t("routine.savedCount", { n: tempPlans.length }));
   };
 
   return (
@@ -73,10 +75,10 @@ export default function MultiPlanScreen() {
           />
           <View style={{ gap: 4, alignItems: "center" }}>
             <Text style={[styles.emptyTitle, { color: themeColor.subText }]}>
-              추가된 운동이 없습니다
+              {t("routine.emptyTitle")}
             </Text>
             <Text style={[styles.emptySubtitle, { color: themeColor.subText }]}>
-              아래 버튼을 눌러 운동을 추가해보세요
+              {t("routine.emptyDesc")}
             </Text>
           </View>
         </View>

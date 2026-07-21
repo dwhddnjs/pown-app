@@ -1,3 +1,1 @@
-import CalendarHeader from "./calendar-header"
-
-export { CalendarHeader }
+export { CalendarGrid } from "./calendar-grid"

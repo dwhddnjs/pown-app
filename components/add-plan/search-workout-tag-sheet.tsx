@@ -16,9 +16,12 @@ import React, {
 } from "react"
 import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 import { FontAwesome } from "@expo/vector-icons"
 import { searchByInitial, sortWorkoutPlanList } from "@/lib/function"
 import { usePlanStore } from "@/hooks/use-plan-store"
+import { useLanguage } from "@/hooks/use-user-store"
+import { tWorkout } from "@/lib/i18n"
 
 interface SearchWorkoutTagSheetProps {
   onClose: () => void
@@ -31,6 +34,8 @@ export const SearchWorkoutTagSheet = forwardRef<
   SearchWorkoutTagSheetProps
 >(({ onClose, workoutList, isOpen }, ref) => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
+  const lang = useLanguage()
   const { workout, setPlanValue } = usePlanStore()
   const [inputValue, setInputValue] = useState("")
   const inputRef = useRef<TextInput | null>(null)
@@ -43,7 +48,11 @@ export const SearchWorkoutTagSheet = forwardRef<
     if (inputValue.length === 1 && /[ㄱ-ㅎ]/.test(inputValue)) {
       return searchByInitial(tag, inputValue)
     }
-    return nameLower.includes(searchLower)
+    // 저장값(한국어)과 표시 라벨 양쪽으로 매칭 — 영어로 입력해도 찾히게
+    return (
+      nameLower.includes(searchLower) ||
+      tWorkout(tag, lang).toLowerCase().includes(searchLower)
+    )
   })
 
   const renderBackdrop = useCallback(
@@ -106,7 +115,7 @@ export const SearchWorkoutTagSheet = forwardRef<
           </View>
           <TextInput
             ref={inputRef}
-            placeholder="찾으시는 운동계획이 있으신가요?"
+            placeholder={t("tag.searchPlaceholder")}
             style={{ color: themeColor.text }}
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}
@@ -138,13 +147,13 @@ export const SearchWorkoutTagSheet = forwardRef<
                   },
                 ]}
               >
-                {item}
+                {tWorkout(item, lang)}
               </Text>
             </TouchableOpacity>
           ))}
           {filterWorkoutTag?.length === 0 && (
             <Text style={{ color: themeColor.subText, fontFamily: "sb-m" }}>
-              음.. 찾으시는 운동이 없네요?
+              {t("tag.notFound")}
             </Text>
           )}
         </ScrollView>

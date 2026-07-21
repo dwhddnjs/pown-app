@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useT } from "@/hooks/use-t";
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { View, Text } from "@/components/themed";
 import { router } from "expo-router";
@@ -22,6 +23,7 @@ interface FabOverlayProps {
 const ANIMATION_DURATION = 250;
 
 export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
+  const t = useT();
   const themeColor = useCurrentThemeColor();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(isOpen);
@@ -102,7 +104,7 @@ export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
               color={themeColor.tint}
             />
           </TouchableOpacity>
-          <Text style={styles.actionLabel}>루틴 추가</Text>
+          <Text style={styles.actionLabel}>{t("routine.addRoutine")}</Text>
         </Animated.View>
 
         <Animated.View style={[styles.menuItem, singleButtonStyle]}>
@@ -117,7 +119,7 @@ export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
               color={themeColor.tint}
             />
           </TouchableOpacity>
-          <Text style={styles.actionLabel}>운동 추가</Text>
+          <Text style={styles.actionLabel}>{t("routine.addWorkout")}</Text>
         </Animated.View>
       </View>
     </View>

@@ -5,6 +5,8 @@ import { Text, View } from "@/components/themed"
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useLanguage } from "@/hooks/use-user-store"
+import { tCondition } from "@/lib/i18n"
 // icon
 import GoodIcon from "@expo/vector-icons/MaterialCommunityIcons"
 import TiredIcon from "@expo/vector-icons/MaterialCommunityIcons"
@@ -61,6 +63,7 @@ export const getIcon = (value: string, size: number, color: string) => {
 export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
   const { condition, setCondition, setFilterCondition } = usePlanStore()
   const themeColor = useCurrentThemeColor()
+  const lang = useLanguage()
 
   const onPressCondition = () => {
     if (condition.includes(item.condition)) {
@@ -101,7 +104,7 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
             },
           ]}
         >
-          {item.condition}
+          {tCondition(item.condition, lang)}
         </Text>
       </TouchableOpacity>
     ),
@@ -118,7 +121,7 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
       >
         {getIcon(item.condition, 16, themeColor.tint)}
         <Text style={[styles.rowText, { color: themeColor.tint }]}>
-          {item.condition}
+          {tCondition(item.condition, lang)}
         </Text>
       </View>
     ),

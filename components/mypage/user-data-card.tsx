@@ -3,7 +3,9 @@ import React from "react"
 import { StyleSheet, TouchableOpacity, View } from "react-native"
 import { Text } from "../themed"
 // zustand
-import { useUserStore } from "@/hooks/use-user-store"
+import { useLanguage, useUserStore } from "@/hooks/use-user-store"
+import { useT } from "@/hooks/use-t"
+import { tWorkout } from "@/lib/i18n"
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 // expo
@@ -15,12 +17,14 @@ export const UserDataCard = () => {
   const { userInfo } = useUserStore()
   const currentUserInfo = userInfo[userInfo.length - 1]
   const themeColor = useCurrentThemeColor()
+  const t = useT()
+  const lang = useLanguage()
   const { push } = useRouter()
 
   const bigThree = [
-    { id: 1, title: "스쿼트", weight: currentUserInfo?.sq },
-    { id: 2, title: "벤치프레스", weight: currentUserInfo?.bp },
-    { id: 3, title: "데드리프트", weight: currentUserInfo?.dl },
+    { id: 1, title: tWorkout("스쿼트", lang), weight: currentUserInfo?.sq },
+    { id: 2, title: tWorkout("벤치프레스", lang), weight: currentUserInfo?.bp },
+    { id: 3, title: tWorkout("데드리프트", lang), weight: currentUserInfo?.dl },
   ]
   const total = bigThree.reduce(
     (acc, item) => acc + (Number(item.weight) || 0),
@@ -30,27 +34,27 @@ export const UserDataCard = () => {
   const bodyInfo = [
     {
       id: 1,
-      title: "키",
+      title: t("userInfo.height"),
       value: currentUserInfo?.height ? `${currentUserInfo.height}cm` : "-",
     },
     {
       id: 2,
-      title: "몸무게",
+      title: t("userInfo.weight"),
       value: currentUserInfo?.weight ? `${currentUserInfo.weight}kg` : "-",
     },
     {
       id: 3,
-      title: "나이",
-      value: currentUserInfo?.age ? `${currentUserInfo.age}세` : "-",
+      title: t("userInfo.age"),
+      value: currentUserInfo?.age ? t("userInfo.ageValue", { n: currentUserInfo.age }) : "-",
     },
     {
       id: 4,
-      title: "성별",
+      title: t("userInfo.gender"),
       value:
         currentUserInfo?.gender === "male"
-          ? "남자"
+          ? t("userInfo.male")
           : currentUserInfo?.gender === "female"
-          ? "여자"
+          ? t("userInfo.female")
           : "-",
     },
   ]
@@ -63,14 +67,13 @@ export const UserDataCard = () => {
         activeOpacity={0.8}
       >
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyTitle}>3대 중량을 기록해보세요</Text>
+          <Text style={styles.emptyTitle}>{t("userInfo.emptyTitle")}</Text>
           <Text style={[styles.emptyDesc, { color: themeColor.subText }]}>
-            내정보를 작성하면 스쿼트 · 벤치프레스 · 데드리프트{"\n"}기록이
-            여기에 표시돼요
+            {t("userInfo.emptyDesc")}
           </Text>
           <View style={styles.emptyLink}>
             <Text style={[styles.emptyLinkText, { color: themeColor.tint }]}>
-              작성하러 가기
+              {t("userInfo.goWrite")}
             </Text>
             <AntDesign name="right" size={12} color={themeColor.tint} />
           </View>
@@ -87,11 +90,11 @@ export const UserDataCard = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.label, { color: themeColor.subText }]}>
-          3대 중량
+          {t("userInfo.sbd")}
         </Text>
         <View style={styles.editRow}>
           <Text style={[styles.editText, { color: themeColor.subText }]}>
-            수정
+            {t("common.edit")}
           </Text>
           <AntDesign name="right" size={11} color={themeColor.subText} />
         </View>

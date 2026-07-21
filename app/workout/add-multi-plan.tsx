@@ -22,12 +22,15 @@ import { toast } from "sonner-native";
 import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
 import Entypo from "@expo/vector-icons/Entypo";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { HeaderIconButton } from "@/components/header-icon-button";
 import { KeyBoardAvoid } from "@/components/keyboard-avoid";
 import { CameraImage } from "@/components/add-plan/camera-image";
 import { SearchWorkoutTagSheet } from "@/components/add-plan/search-workout-tag-sheet";
 import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialog";
-import { useUserStore } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
+import { formatPlanDateTime } from "@/lib/date";
+import { tBodyPart } from "@/lib/i18n";
 import { RemoveWorkoutTagDialog } from "@/components/add-plan/remove-workout-tag-dialog";
 import { TitleSearchHeader } from "@/components/add-plan/title-search-header";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
@@ -53,11 +56,11 @@ export interface InputRefObject {
 }
 
 const iconButtonData = [
-  { id: 1, title: "등", icon: Back, type: "back" as WorkoutTypes },
-  { id: 2, title: "가슴", icon: Chest, type: "chest" as WorkoutTypes },
-  { id: 3, title: "어깨", icon: Shoulder, type: "shoulder" as WorkoutTypes },
-  { id: 4, title: "하체", icon: Leg, type: "leg" as WorkoutTypes },
-  { id: 5, title: "팔", icon: Arm, type: "arm" as WorkoutTypes },
+  { id: 1, titleKey: "back", icon: Back, type: "back" as WorkoutTypes },
+  { id: 2, titleKey: "chest", icon: Chest, type: "chest" as WorkoutTypes },
+  { id: 3, titleKey: "shoulder", icon: Shoulder, type: "shoulder" as WorkoutTypes },
+  { id: 4, titleKey: "leg", icon: Leg, type: "leg" as WorkoutTypes },
+  { id: 5, titleKey: "arm", icon: Arm, type: "arm" as WorkoutTypes },
 ];
 
 export default function AddMultiPlan() {
@@ -74,6 +77,8 @@ export default function AddMultiPlan() {
   const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const scrollRef = useRef<ScrollView>(null);
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const [currentScrollY, setCurrentScrollY] = useState(0);
   const { open, setOpen } = useIsDialogOpenStore();
 
@@ -157,7 +162,7 @@ export default function AddMultiPlan() {
   const onSubmitMultiPlan = async () => {
     try {
       if (!result.weight || !result.workout) {
-        return toast.error("운동과 목표 중량은 필수에요..");
+        return toast.error(t("plan.requireFields"));
       }
       const imageUri = await saveImagesToLibrary(result.imageUri);
 
@@ -188,10 +193,10 @@ export default function AddMultiPlan() {
       navigation.goBack();
       onResetNote();
       return toast.success(
-        editingPlan ? "운동 계획이 수정되었습니다!" : "루틴에 운동이 추가되었습니다!",
+        editingPlan ? t("plan.updated") : t("routine.addedToRoutine"),
       );
     } catch {
-      toast.error("운동 계획 저장 중 오류가 발생했습니다.");
+      toast.error(t("plan.addFailed"));
     }
   };
 
@@ -228,13 +233,13 @@ export default function AddMultiPlan() {
         >
           {/* 날짜 선택 */}
           <View style={styles.dateSection}>
-            <Text style={{ fontSize: 24 }}>지금 어느 부위를 조질까?</Text>
+            <Text style={{ fontSize: 24 }}>{t("plan.selectPart")}</Text>
             <TouchableOpacity
               style={styles.dateButton}
               onPress={() => setOpen(true)}
             >
               <Text style={{ color: themeColor.tint }}>
-                {`📆 ${format(date, "yyyy년 M월 d일 HH시 mm분")}`}
+                {`📆 ${formatPlanDateTime(date, lang)}`}
               </Text>
               <Entypo name="select-arrows" size={18} color={themeColor.tint} />
             </TouchableOpacity>
@@ -260,7 +265,7 @@ export default function AddMultiPlan() {
                   <item.icon width={58} height={58} />
                 </View>
                 <Text style={[styles.typeLabel, { color: themeColor.text }]}>
-                  {item.title}
+                  {tBodyPart(item.titleKey, lang)}
                 </Text>
               </TouchableOpacity>
             ))}

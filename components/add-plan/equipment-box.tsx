@@ -6,10 +6,15 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 import { equipmentData } from "@/constants/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tEquipmentShort } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 
 export const EquipmentBox = () => {
   const { equipment, setPlanValue } = usePlanStore();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
 
   const onPressEquipment = (item: string) => {
     setPlanValue("equipment", item);
@@ -26,7 +31,7 @@ export const EquipmentBox = () => {
           size={20}
           color={themeColor.tint}
         />
-        <Text style={{ fontSize: 16 }}>기구 종류</Text>
+        <Text style={{ fontSize: 16 }}>{t("plan.equipment")}</Text>
       </IconTitle>
       <View style={[styles.box, { borderColor: themeColor.tint }]}>
         {equipmentData.map((item) => (
@@ -35,8 +40,6 @@ export const EquipmentBox = () => {
             style={[
               styles.item,
               equipment === item && {
-                paddingHorizontal: 12,
-                paddingVertical: 8,
                 backgroundColor: themeColor.tint,
                 borderRadius: 8,
               },
@@ -44,14 +47,17 @@ export const EquipmentBox = () => {
             onPress={() => onPressEquipment(item)}
           >
             <Text
+              numberOfLines={1}
               style={[
+                // 영어는 6칸 폭에 안 맞아 축약형을 쓰고 글자도 한 단계 줄인다
+                lang === "en" && { fontSize: 13 },
                 { color: themeColor.tint },
                 equipment === item && {
                   color: themeColor.text,
                 },
               ]}
             >
-              {item}
+              {tEquipmentShort(item, lang)}
             </Text>
           </TouchableOpacity>
         ))}
@@ -71,19 +77,17 @@ const styles = StyleSheet.create({
   text: {},
 
   item: {
-    paddingHorizontal: 12,
+    // 6칸 균등 분할 — 선택 배경이 어느 항목에 들어가도 폭이 안 흔들린다
+    flex: 1,
+    alignItems: "center",
     paddingVertical: 8,
   },
 
   box: {
     flexDirection: "row",
-    // alignSelf: "flex-start",
     justifyContent: "space-between",
     borderWidth: 2,
-
     borderRadius: 14,
-    // marginHorizontal: 24,
-    // flexWrap: "wrap",
     paddingHorizontal: 4,
     paddingVertical: 4,
   },

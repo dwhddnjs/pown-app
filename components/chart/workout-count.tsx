@@ -11,12 +11,14 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 import { ChartEmptyState } from "./chart-empty-state";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { sortWorkoutPlanList } from "@/lib/function";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 
 export const WorkoutCount = () => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
   const listCount = sortWorkoutPlanList(monthlyPlanData);
@@ -31,11 +33,11 @@ export const WorkoutCount = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>기록한 운동 횟수</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.countTitle")}</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <ChartEmptyState
-          message="기록된 운동 데이터가 없습니다."
+          message={t("chart.countEmpty")}
           themeColor={themeColor}
         />
       ) : (
@@ -52,7 +54,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Back />
-            <Text style={{ color: themeColor.tint }}>{listCount.back}회</Text>
+            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.back })}</Text>
           </View>
           <View
             style={[
@@ -61,7 +63,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Chest />
-            <Text style={{ color: themeColor.tint }}>{listCount.chest}회</Text>
+            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.chest })}</Text>
           </View>
           <View
             style={[
@@ -71,7 +73,7 @@ export const WorkoutCount = () => {
           >
             <Shoulder />
             <Text style={{ color: themeColor.tint }}>
-              {listCount.shoulder}회
+              {t("common.count", { n: listCount.shoulder })}
             </Text>
           </View>
           <View
@@ -81,7 +83,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Leg />
-            <Text style={{ color: themeColor.tint }}>{listCount.leg}회</Text>
+            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.leg })}</Text>
           </View>
           <View
             style={[
@@ -90,7 +92,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Arm />
-            <Text style={{ color: themeColor.tint }}>{listCount.arm}회</Text>
+            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.arm })}</Text>
           </View>
         </View>
       )}

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useT } from "@/hooks/use-t";
 // component
 import { Text, View } from "@/components/themed";
 import {
@@ -13,6 +14,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
 
 export default function Calculate() {
+  const t = useT();
   const themeColor = useCurrentThemeColor();
   const [selected, setSelected] = useState("kg");
   const [inputNumber, setInputNumber] = useState("");
@@ -106,13 +108,13 @@ export default function Calculate() {
           style={styles.tabItem}
           onLayout={(e) => setTabItemWidth(e.nativeEvent.layout.width)}
         >
-          <Text style={{ textAlign: "center" }}>킬로그램/kg</Text>
+          <Text style={{ textAlign: "center" }}>{t("calc.kg")}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onSelectedTab("lb")}
           style={styles.tabItem}
         >
-          <Text style={{ textAlign: "center" }}>파운드/lb</Text>
+          <Text style={{ textAlign: "center" }}>{t("calc.lb")}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.inputContainer}>

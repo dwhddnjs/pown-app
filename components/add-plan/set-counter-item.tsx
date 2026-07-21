@@ -4,6 +4,9 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store";
 import { NumberBallIcon } from "../number-ball-icon";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tSetType } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 
 interface SetCounterItemProps {
   item: SetWithCountType;
@@ -14,6 +17,8 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
   const { setFilterSetWithCount, setSetWithCount, setWithCount } =
     usePlanStore();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
 
   return (
     <View style={styles.container}>
@@ -36,11 +41,11 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
         >
           <NumberBallIcon>{index + 1}</NumberBallIcon>
           <Text style={[styles.type, { color: themeColor.tint }]}>
-            {item.set}
+            {tSetType(item.set, lang)}
           </Text>
           <Text
             style={[styles.typeText, { color: themeColor.tint }]}
-          >{`${item.count} 회`}</Text>
+          >{t("common.reps", { n: item.count })}</Text>
         </View>
         <View
           style={[

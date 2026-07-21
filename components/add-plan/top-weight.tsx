@@ -8,6 +8,7 @@ import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
 // hook
 import { usePlanStore } from "@/hooks/use-plan-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 // animation
 import Animated, {
   useSharedValue,
@@ -27,6 +28,7 @@ export const TopWeight = ({
   const { weight, setPlanValue, weightType } = usePlanStore();
   const inputRef = useRef<TextInput>(null);
   const themeColor = useCurrentThemeColor();
+  const t = useT();
 
   const BUTTON_WIDTH = 42;
   const PADDING = 4;
@@ -57,7 +59,7 @@ export const TopWeight = ({
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon name="weight-kilogram" size={20} color={themeColor.tint} />
-        <Text style={{ fontSize: 16 }}>목표 중량</Text>
+        <Text style={{ fontSize: 16 }}>{t("plan.targetWeight")}</Text>
       </IconTitle>
 
       <View

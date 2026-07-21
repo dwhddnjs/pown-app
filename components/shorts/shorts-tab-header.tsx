@@ -1,4 +1,5 @@
 import React from "react"
+import { useT } from "@/hooks/use-t"
 // component
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native"
 import { DrawerToggleButton } from "@react-navigation/drawer"
@@ -11,6 +12,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Text } from "../themed"
 
 const ShortsTabHeader = ({ title }: { title?: string }) => {
+  const t = useT()
   const themeColor = useCurrentThemeColor()
   const { push } = useRouter()
 
@@ -18,7 +20,7 @@ const ShortsTabHeader = ({ title }: { title?: string }) => {
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          <Text style={{ fontSize: 16 }}>내 운동 숏츠</Text>
+          <Text style={{ fontSize: 16 }}>{t("shorts.title")}</Text>
         </View>
       </SafeAreaView>
     </BlurView>

@@ -8,6 +8,7 @@ import { BlurView } from "expo-blur";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { convertChartDate } from "@/lib/function";
+import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { format } from "date-fns";
 // icon
@@ -15,12 +16,9 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 
 export const ChartHeader = () => {
   const themeColor = useCurrentThemeColor();
+  const lang = useLanguage();
   const { date, setDate } = useChartStore();
   const isCurrentMonth = date === format(new Date(), "yyyyMM");
-
-  const onClickDate = (type: "prev" | "next") => {
-    setDate(type);
-  };
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
@@ -28,12 +26,12 @@ export const ChartHeader = () => {
         <View style={styles.container}>
           <TouchableOpacity
             style={[styles.button, { paddingLeft: 12 }]}
-            onPress={() => onClickDate("prev")}
+            onPress={() => setDate("prev")}
           >
             <AntDesign name="leftcircleo" size={28} color={themeColor.tint} />
           </TouchableOpacity>
           <Text style={[styles.title, { color: themeColor.text }]}>
-            {convertChartDate(date)}
+            {convertChartDate(date, lang)}
           </Text>
           <TouchableOpacity
             style={[
@@ -41,9 +39,7 @@ export const ChartHeader = () => {
               { paddingRight: 12, opacity: isCurrentMonth ? 0.3 : 1 },
             ]}
             disabled={isCurrentMonth}
-            onPress={() => {
-              onClickDate("next");
-            }}
+            onPress={() => setDate("next")}
           >
             <AntDesign name="rightcircleo" size={28} color={themeColor.tint} />
           </TouchableOpacity>
@@ -52,7 +48,6 @@ export const ChartHeader = () => {
     </BlurView>
   );
 };
-
 
 const styles = StyleSheet.create({
   blur: {

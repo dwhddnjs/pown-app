@@ -7,6 +7,7 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useNoteStore } from "@/hooks/use-note-store";
 // expo
 import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useT } from "@/hooks/use-t";
 // lib
 import { format } from "date-fns";
 import { toast } from "sonner-native";
@@ -18,6 +19,7 @@ export default function EditPlan() {
   const { onReset: onResetNote } = useNoteStore();
   const { slug } = useLocalSearchParams();
   const navigation = useNavigation();
+  const t = useT();
 
   const getWorkoutPlan = workoutPlanList.find(
     (item) => item.id === Number(slug?.[1]),
@@ -32,7 +34,7 @@ export default function EditPlan() {
   const onSubmitWorkoutPlan = async () => {
     try {
       if (!result.weight || !result.workout || !getWorkoutPlan) {
-        return toast.error("운동과 목표 중량은 필수에요..");
+        return toast.error(t("plan.requireFields"));
       }
       const imageUri = await saveImagesToLibrary(result.imageUri);
       setEditPlan({
@@ -52,9 +54,9 @@ export default function EditPlan() {
       onReset();
       navigation.goBack();
       onResetNote();
-      return toast.success("운동 계획이 수정되었습니다!");
+      return toast.success(t("plan.updated"));
     } catch {
-      toast.error("운동 계획 수정 중 오류가 발생했습니다.");
+      toast.error(t("plan.updateFailed"));
     }
   };
 

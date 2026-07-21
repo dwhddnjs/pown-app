@@ -5,6 +5,8 @@ import { Text, View } from "../themed";
 import { LineChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { useT } from "@/hooks/use-t";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useChartStore } from "@/hooks/use-chart-store";
 // lib
@@ -17,11 +19,13 @@ const CHART_HEIGHT = 200;
 
 export const BodyChart = () => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { userInfo } = useUserStore();
   const { date } = useChartStore();
   const { width } = useWindowDimensions();
 
-  const bodyData = getMonthlyBodyData(userInfo, date);
+  const bodyData = getMonthlyBodyData(userInfo, date, lang);
   const isEmptyData = bodyData.length === 0;
 
   // 데이터가 1개면 라인/영역이 안 그려지고 점만 찍힌다.
@@ -63,11 +67,11 @@ export const BodyChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>몸무게의 변화</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.bodyTitle")}</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyData ? (
         <ChartEmptyState
-          message="기록된 몸무게 데이터가 없습니다."
+          message={t("chart.bodyEmpty")}
           themeColor={themeColor}
         />
       ) : (

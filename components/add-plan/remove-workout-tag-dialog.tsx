@@ -4,6 +4,7 @@ import { Text, View } from "../themed"
 import { Dialog } from "../dialog"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 import { Button } from "../button"
 import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store"
 import { useUserStore } from "@/hooks/use-user-store"
@@ -20,12 +21,13 @@ export const RemoveWorkoutTagDialog = ({
   const { workout, setPlanValue } = usePlanStore()
   const { setRemoveWorkoutTag } = useUserStore()
   const themeColor = useCurrentThemeColor()
+  const t = useT()
 
   const onRemoveWorkoutTag = () => {
     setRemoveWorkoutTag(workoutType, workout)
     setIsRemoveOpen(false)
     setPlanValue("workout", "")
-    toast.success("운동이 삭제 되었습니다.")
+    toast.success(t("tag.removed"))
   }
 
   return (
@@ -48,7 +50,7 @@ export const RemoveWorkoutTagDialog = ({
               fontSize: 18,
             }}
           >
-            정말 선택된 운동을 삭제 할까요?
+            {t("tag.removeTitle")}
           </Text>
           <Text
             style={{
@@ -76,7 +78,7 @@ export const RemoveWorkoutTagDialog = ({
             }}
             onPress={() => setIsRemoveOpen(false)}
           >
-            취소
+            {t("common.cancel")}
           </Button>
           <Button
             type="solid"
@@ -87,7 +89,7 @@ export const RemoveWorkoutTagDialog = ({
             }}
             onPress={onRemoveWorkoutTag}
           >
-            삭제하기
+            {t("common.deleteAction")}
           </Button>
         </View>
       </View>

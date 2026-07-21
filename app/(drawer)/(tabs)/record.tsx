@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
 // component
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView } from "react-native";
 import { View } from "@/components/themed";
 import {
   BodyChart,
@@ -20,17 +20,19 @@ import { useHeaderHeight } from "@react-navigation/elements";
 // expo
 import { useFocusEffect } from "expo-router";
 
-export default function Chart() {
+export default function Record() {
   const themeColor = useCurrentThemeColor();
   const headerHeight = useHeaderHeight();
-  const { date, onReset } = useChartStore();
+  const { date } = useChartStore();
   const scrollRef = useRef<ScrollView>(null);
 
-  // 탭에 들어올 때마다 현재 달로 리셋 — 과거 달에 머문 채 방치되는 것 방지
+  // 월은 리셋하지 않는다 — use-chart-store는 이 탭과 운동 달력 화면이 공유하는
+  // "지금 보고 있는 달"이라, 달력에서 월을 고르고 돌아왔을 때 되돌리면 안 된다.
+  // 스크롤만 올린다(월이 그대로면 아래 useEffect가 돌지 않으므로 여기서 처리).
   useFocusEffect(
     useCallback(() => {
-      onReset();
-    }, [onReset]),
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
+    }, []),
   );
 
   useEffect(() => {
@@ -64,5 +66,3 @@ export default function Chart() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({});

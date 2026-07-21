@@ -2,6 +2,7 @@ import React, { useState } from "react"
 import { Dialog } from "../dialog"
 import { Text, View } from "../themed"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 import { TextInput } from "react-native-gesture-handler"
 import { Button } from "../button"
 import { StyleSheet } from "react-native"
@@ -18,19 +19,20 @@ export const AddWorkoutTagDialog = ({
   workoutType,
 }: AddWorkoutTagDialogProp) => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
   const [inputValue, setInputValue] = useState("")
   const { workoutList, setAddWorkoutTag, setRemoveWorkoutTag } = useUserStore()
   const { isOpen, setOpen } = useWorkoutTagDialogStore()
 
   const onAddWorkoutTag = () => {
     if (workoutList[workoutType].includes(inputValue)) {
-      toast.error("이미 존재하는 운동인데요?")
+      toast.error(t("tag.exists"))
       return
     }
     setAddWorkoutTag(workoutType, inputValue)
     setOpen(false)
     setInputValue("")
-    toast.success("운동이 추가되었습니다.")
+    toast.success(t("tag.added"))
   }
 
   return (
@@ -49,11 +51,11 @@ export const AddWorkoutTagDialog = ({
           }}
         >
           <Text style={{ fontSize: 16 }}>
-            새로운 운동 종목을 추가를 원하나요?
+            {t("tag.addTitle")}
           </Text>
         </View>
         <TextInput
-          placeholder="운동 이름을 기입해주세요.."
+          placeholder={t("tag.namePlaceholder")}
           style={[
             styles.input,
             {
@@ -66,7 +68,7 @@ export const AddWorkoutTagDialog = ({
         />
       </View>
       <Button type="solid" onPress={onAddWorkoutTag}>
-        추가하기
+        {t("common.addAction")}
       </Button>
     </Dialog>
   )

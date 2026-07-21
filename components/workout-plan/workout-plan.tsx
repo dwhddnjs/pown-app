@@ -21,9 +21,11 @@ import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 // zustand
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 // expo
 import * as MediaLibrary from "expo-media-library";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
+import { isAppOwnedMedia, resolveMediaUri } from "@/lib/media";
 
 interface ProgressBarProps {
   completed: number;
@@ -40,6 +42,7 @@ const ProgressBar = ({
   bgColor,
   textColor,
 }: ProgressBarProps) => {
+  const t = useT();
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
   const progress = useSharedValue(pct);
 
@@ -67,7 +70,7 @@ const ProgressBar = ({
         }}
       >
         <Text style={{ fontSize: 11, fontFamily: "sb-l", color: textColor }}>
-          {completed}/{total} 세트 완료
+          {t("workout.setsDone", { completed, total })}
         </Text>
         <Text
           style={{
@@ -107,10 +110,14 @@ export const WorkoutPlan = ({
   hideProgress,
 }: WorkoutPlanProps) => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
   // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
   const [mediaPermission, requestMediaPermission] =
     MediaLibrary.usePermissions();
-  const hasMediaPermission = mediaPermission?.granted ?? false;
+  // 앱 소유 사진(media/)은 권한 없이도 보이고, 구 데이터(사진첩 참조)만 권한이 필요하다
+  const hasMediaPermission =
+    (mediaPermission?.granted ?? false) ||
+    !item.imageUri?.some((image) => !isAppOwnedMedia(image.imageUri));
   const { setImageUri } = useImageUriStore();
 
   const getWorkoutIcon = (type: string) => {
@@ -235,7 +242,7 @@ export const WorkoutPlan = ({
         {item.imageUri?.length > 0 && !hasMediaPermission && (
           <Pressable onPress={() => requestMediaPermission()}>
             <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
-              사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.
+              {t("workout.galleryPermission")}
             </Text>
           </Pressable>
         )}
@@ -254,11 +261,11 @@ export const WorkoutPlan = ({
                 <Pressable
                   key={imageItem.id}
                   style={{ flex: 4, backgroundColor: themeColor.itemColor }}
-                  onPress={() => setImageUri(imageItem.imageUri as string)}
+                  onPress={() => setImageUri(resolveMediaUri(imageItem.imageUri) as string)}
                 >
                   <Image
                     key={imageItem.id}
-                    source={{ uri: imageItem.imageUri }}
+                    source={{ uri: resolveMediaUri(imageItem.imageUri) }}
                     style={[
                       styles.image,
                       {

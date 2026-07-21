@@ -16,8 +16,11 @@
       "bundleIdentifier": "com.anonymous.workout-app",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleLocalizations": ["ko", "en"],
         "UIDesignRequiresCompatibility": true,
-        "LSApplicationQueriesSchemes": ["googlegmail"]
+        "LSApplicationQueriesSchemes": [
+          "googlegmail"
+        ]
       }
     },
     "android": {
@@ -71,7 +74,16 @@
           "supportsBackgroundPlayback": false,
           "supportsPictureInPicture": false
         }
-      ]
+      ],
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "15.5"
+          }
+        }
+      ],
+      "expo-localization"
     ],
     "experiments": {
       "typedRoutes": true

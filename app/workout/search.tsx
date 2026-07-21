@@ -6,7 +6,10 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { FlashList } from "@shopify/flash-list";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tEquipment, tWorkout } from "@/lib/i18n";
 // lib
 import { formatDate, groupByDate, setColor } from "@/lib/function";
 // expo
@@ -17,24 +20,41 @@ export default function Search() {
   const navigation = useNavigation();
   const [inputValue, setInputValue] = useState("");
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
+
+  // 부위는 한/영 어느 쪽으로 입력해도 type 키로 변환한다
+  const PART_KEYWORDS: Record<string, string> = {
+    등: "back",
+    back: "back",
+    어깨: "shoulder",
+    shoulder: "shoulder",
+    shoulders: "shoulder",
+    하체: "leg",
+    leg: "leg",
+    legs: "leg",
+    팔: "arm",
+    arm: "arm",
+    arms: "arm",
+    가슴: "chest",
+    chest: "chest",
+  };
 
   const filterWorkoutList = (value: string) => {
+    const convertValue = PART_KEYWORDS[value.trim().toLowerCase()] ?? value;
+    const lower = convertValue.toLowerCase();
+
     const result = workoutPlanList.filter((workout) => {
-      let convertValue = value;
-
-      if (value == "등") convertValue = "back";
-      if (value == "어깨") convertValue = "shoulder";
-      if (value == "하체") convertValue = "leg";
-      if (value == "팔") convertValue = "arm";
-      if (value == "가슴") convertValue = "chest";
-
       return (
         workout.equipment.includes(convertValue) ||
         workout.type.includes(convertValue) ||
         workout.workout.includes(convertValue) ||
         workout.content.includes(convertValue) ||
         workout.title.includes(convertValue) ||
-        workout.weight.includes(convertValue)
+        workout.weight.includes(convertValue) ||
+        // 표시 라벨(영어)로도 매칭 — 영어 사용자가 "Bench"로 찾을 수 있게
+        tWorkout(workout.workout, lang).toLowerCase().includes(lower) ||
+        tEquipment(workout.equipment, lang).toLowerCase().includes(lower)
       );
     });
     return groupByDate(result);
@@ -46,7 +66,7 @@ export default function Search() {
         placeholder: "Search",
         autoFocus: true,
         tintColor: themeColor.tint,
-        cancelButtonText: "취소",
+        cancelButtonText: t("search.cancel"),
 
         onChangeText: (e: { nativeEvent: { text: string } }) => {
           setInputValue(e.nativeEvent.text);
@@ -88,7 +108,7 @@ export default function Search() {
               >
                 <Text
                   style={[styles.dateText, { color: themeColor.background }]}
-                >{`🗓️  ${formatDate(item[0])}`}</Text>
+                >{`🗓️  ${formatDate(item[0], lang)}`}</Text>
                 <View
                   style={[
                     styles.dot,
@@ -121,8 +141,8 @@ export default function Search() {
           <View style={styles.emptyContainer}>
             <Text style={[styles.emptyText, { color: themeColor.subText }]}>
               {!inputValue
-                ? `🔍  키워드를 입력해주세요.${"\n"}예:) 바벨, 등, 프레스`
-                : "검색 결과가 없습니다."}
+                ? t("search.hint")
+                : t("search.noResult")}
             </Text>
           </View>
         }
@@ -130,7 +150,7 @@ export default function Search() {
           searchResult.length > 0 ? (
             <View style={styles.emptyContainer}>
               <Text style={[styles.emptyText, { color: themeColor.subText }]}>
-                마지막 운동계획입니다.
+                {t("workout.lastPlan")}
               </Text>
             </View>
           ) : null

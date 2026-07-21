@@ -3,6 +3,7 @@ import React from "react"
 import { StyleSheet, TouchableOpacity } from "react-native"
 // color
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 // icon
 import { FontAwesome } from "@expo/vector-icons"
 import { Text, View } from "../themed"
@@ -13,10 +14,11 @@ interface TitleSearchHeaderProps {
 
 export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
 
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>🔥 어떤 운동 하실건가요?</Text>
+      <Text style={styles.title}>{t("plan.whichWorkout")}</Text>
       <TouchableOpacity onPress={onPress} style={{ padding: 8 }}>
         <FontAwesome name="search" size={20} color={themeColor.text} />
       </TouchableOpacity>
@@ -33,7 +35,8 @@ const styles = StyleSheet.create({
   },
 
   title: {
+    // 제목이 길어도 검색 아이콘을 화면 밖으로 밀지 않게 제목 쪽이 먼저 줄어든다
+    flexShrink: 1,
     fontSize: 24,
-    textAlign: "center",
   },
 })

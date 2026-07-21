@@ -8,12 +8,12 @@ import { ChartHeader } from "@/components/chart";
 import { Tabs } from "expo-router";
 import { BlurView } from "expo-blur";
 // icon
-import AntDesign from "@expo/vector-icons/AntDesign";
 import { SymbolView } from "expo-symbols";
 import Entypo from "@expo/vector-icons/Entypo";
+import Ionicons from "@expo/vector-icons/Ionicons";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { CalendarHeader } from "@/components/calendar";
+import { useT } from "@/hooks/use-t";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import * as Haptics from "expo-haptics";
 import { ImageModal } from "@/components/workout-plan/image-modal";
@@ -29,6 +29,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 export default function TabLayout() {
+  const t = useT();
   const themColor = useCurrentThemeColor();
   const { uri } = useImageUriStore();
   const [fabOpen, setFabOpen] = useState(false);
@@ -94,7 +95,7 @@ export default function TabLayout() {
                 size={32}
               />
             ),
-            tabBarLabel: "운동계획",
+            tabBarLabel: t("tab.workout"),
             header: ({ navigation, route, options }) => (
               <WorkoutTabHeader title={options.title} />
             ),
@@ -102,11 +103,11 @@ export default function TabLayout() {
           }}
         />
         <Tabs.Screen
-          name="chart"
+          name="record"
           options={{
-            title: "차트",
+            title: t("tab.record"),
             tabBarIcon: ({ color }) => (
-              <AntDesign name="piechart" size={24} color={color} />
+              <Entypo name="calendar" size={24} color={color} />
             ),
             header: ({ navigation, route, options }) => {
               return <ChartHeader />;
@@ -148,22 +149,9 @@ export default function TabLayout() {
           })}
         />
         <Tabs.Screen
-          name="calendar"
-          options={{
-            title: "캘린더",
-            tabBarIcon: ({ color }) => (
-              <Entypo name="calendar" size={24} color={color} />
-            ),
-            header: ({ navigation, route, options }) => {
-              return <CalendarHeader />;
-            },
-            headerTransparent: true,
-          }}
-        />
-        <Tabs.Screen
           name="shorts"
           options={{
-            title: "내 숏츠",
+            title: t("tab.shorts"),
             tabBarIcon: ({ color }) => (
               <Entypo name="video" size={24} color={color} />
             ),
@@ -171,6 +159,16 @@ export default function TabLayout() {
               return <ShortsTabHeader />;
             },
             headerTransparent: true,
+          }}
+        />
+        <Tabs.Screen
+          name="my"
+          options={{
+            title: t("tab.my"),
+            tabBarIcon: ({ color }) => (
+              <Ionicons name="person" size={24} color={color} />
+            ),
+            headerShadowVisible: false,
           }}
         />
         <Tabs.Screen name="index" redirect />

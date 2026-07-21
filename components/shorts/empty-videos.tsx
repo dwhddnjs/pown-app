@@ -1,9 +1,11 @@
 import { Image } from "react-native";
+import { useT } from "@/hooks/use-t"
 import React from "react";
 import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 export const EmptyVideos = () => {
+  const t = useT()
   const themeColor = useCurrentThemeColor();
   return (
     <View
@@ -26,7 +28,7 @@ export const EmptyVideos = () => {
           lineHeight: 24,
         }}
       >
-        운동 숏츠가 없습니다. {"\n"}추가해주세요!
+        {t("shorts.empty")}
       </Text>
     </View>
   );

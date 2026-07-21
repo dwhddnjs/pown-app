@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native"
+import { useT } from "@/hooks/use-t"
 import React from "react"
 import { Dialog } from "../dialog"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
@@ -19,6 +20,7 @@ export const RemoveShortsDialog = ({
   setIsOpen,
   position,
 }: RemoveShortsDialogProps) => {
+  const t = useT()
   const themeColor = useCurrentThemeColor()
   const { back } = useRouter()
   const { videos, setRemoveVideo } = useShortsStore()
@@ -43,7 +45,7 @@ export const RemoveShortsDialog = ({
               fontSize: 18,
             }}
           >
-            정말 숏츠 영상을 삭제 할까요?
+            {t("shorts.removeTitle")}
           </Text>
           <Text
             style={{
@@ -71,7 +73,7 @@ export const RemoveShortsDialog = ({
             }}
             onPress={setIsOpen}
           >
-            취소
+            {t("common.cancel")}
           </Button>
           <Button
             type="solid"
@@ -84,11 +86,11 @@ export const RemoveShortsDialog = ({
               const video = videos[position]
               if (!video) return
               setRemoveVideo(video.id)
-              toast.success("숏츠가 삭제 되었습니다.")
+              toast.success(t("shorts.removed"))
               back()
             }}
           >
-            삭제하기
+            {t("common.deleteAction")}
           </Button>
         </View>
       </View>

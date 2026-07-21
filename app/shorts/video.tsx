@@ -10,6 +10,7 @@ import {
   useMicrophonePermissions,
 } from "expo-camera";
 import { useRouter } from "expo-router";
+import { useT } from "@/hooks/use-t";
 import { useVideoPlayer, VideoView } from "expo-video";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -25,13 +26,14 @@ import { useShortsStore } from "@/hooks/use-shorts-store";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { toast } from "sonner-native";
 import * as MediaLibrary from "expo-media-library";
-import * as FileSystem from "expo-file-system";
+import { persistMediaLocally } from "@/lib/media";
 
 export default function Video() {
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
   const [facing, setFacing] = useState<CameraType>("back");
   const themeColor = useCurrentThemeColor();
+  const t = useT();
   const router = useRouter();
   const { setAddVideo } = useShortsStore();
   const [isRecording, setIsRecording] = useState(false);
@@ -80,7 +82,7 @@ export default function Video() {
       const data = await ref.current.recordAsync();
       setUri(data?.uri as string);
     } catch (error) {
-      toast.error("녹화 중 오류가 발생했습니다.");
+      toast.error(t("shorts.recordFailed"));
     } finally {
       setIsRecording(false);
     }
@@ -99,26 +101,30 @@ export default function Video() {
     try {
       if (uri) {
         const id = Date.now();
-        // recordAsync가 주는 캐시 경로는 iOS가 언제든 비울 수 있어 영구 경로로 옮겨 저장한다
+        // recordAsync가 주는 캐시 경로는 iOS가 언제든 비울 수 있어 앱 내부 저장소로 옮긴다
         const asset = await MediaLibrary.createAssetAsync(uri);
         const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
         const thumbnail = await VideoThumbnails.getThumbnailAsync(uri, {
           time: 0,
         });
-        const thumbnailUri = `${FileSystem.documentDirectory}shorts-thumbnail-${id}.jpg`;
-        await FileSystem.copyAsync({ from: thumbnail.uri, to: thumbnailUri });
         setAddVideo({
           id,
-          video: assetInfo.localUri ?? asset.uri,
-          thumbnail: thumbnailUri,
+          video: await persistMediaLocally(
+            assetInfo.localUri ?? asset.uri,
+            `shorts-${id}.mp4`,
+          ),
+          thumbnail: await persistMediaLocally(
+            thumbnail.uri,
+            `shorts-thumb-${id}.jpg`,
+          ),
           createdAt: new Date().toISOString(),
         });
         setUri(null);
       }
       router.back();
-      toast.success("숏츠가 추가 되었습니다");
+      toast.success(t("shorts.added"));
     } catch (error) {
-      toast.error("숏츠 저장 중 오류가 발생했습니다.");
+      toast.error(t("shorts.addFailed"));
     }
   };
 
@@ -143,7 +149,7 @@ export default function Video() {
                 fontSize: 16,
               }}
             >
-              다시 찍기
+              {t("shorts.retake")}
             </Text>
           </Pressable>
           <Pressable
@@ -155,7 +161,7 @@ export default function Video() {
                 fontSize: 16,
               }}
             >
-              비디오 사용
+              {t("shorts.useVideo")}
             </Text>
           </Pressable>
         </View>
@@ -177,7 +183,7 @@ export default function Video() {
       >
         <View style={styles.shutterContainer}>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>취소</Text>
+            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
           </Pressable>
 
           <Pressable
@@ -218,7 +224,7 @@ export default function Video() {
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.cancelText}>
-            숏츠를 촬영하려면 카메라·마이크 접근 권한이 필요해요.
+            {t("shorts.permission")}
           </Text>
           <Pressable
             onPress={() =>
@@ -228,11 +234,11 @@ export default function Video() {
             }
           >
             <Text style={[styles.cancelText, { color: themeColor.tint }]}>
-              권한 허용하기
+              {t("common.allowPermission")}
             </Text>
           </Pressable>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>돌아가기</Text>
+            <Text style={styles.cancelText}>{t("common.goBack")}</Text>
           </Pressable>
         </View>
       </View>
