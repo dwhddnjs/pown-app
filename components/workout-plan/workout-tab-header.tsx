@@ -15,10 +15,12 @@ import FontAwesome from "@expo/vector-icons/FontAwesome"
 import * as Haptics from "expo-haptics"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 import { useNavigation, DrawerActions } from "@react-navigation/native"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
   const { push } = useRouter()
   const navigation = useNavigation()
 
@@ -40,7 +42,7 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
             style={{
               fontSize: 18,
               color:
-                title === "🔥오늘도 화이팅!"
+                title === t("header.cheer")
                   ? themeColor.tint
                   : themeColor.text,
               textAlign: "center",

@@ -1,6 +1,7 @@
-import { UserInfoTypes } from "@/hooks/use-user-store"
+import { getLanguage, UserInfoTypes } from "@/hooks/use-user-store"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
 import { parsePlanDate } from "@/lib/date"
+import { Lang } from "@/lib/i18n"
 
 type WorkoutTypeCount = Record<
   "chest" | "back" | "arm" | "leg" | "shoulder",
@@ -25,11 +26,31 @@ export const formatTime = (value: string) => {
   return `${splitValueAgain[0]}:${splitValueAgain[1]}`
 }
 
-export const formatDate = (value: string) => {
+const EN_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+]
+
+const enMonth = (month: string) => EN_MONTHS[parseInt(month, 10) - 1] ?? month
+
+// "2025.03.14" → "2025년 03월 14일" / "Mar 14, 2025"
+export const formatDate = (value: string, lang: Lang = getLanguage()) => {
   if (!value) return ""
   const splitValue = value.split(".")
   if (!splitValue[0] || !splitValue[1] || !splitValue[2]) return value
-  return `${splitValue[0]}년 ${splitValue[1]}월 ${splitValue[2]}일`
+  const [year, month, day] = splitValue
+  if (lang === "ko") return `${year}년 ${month}월 ${day}일`
+  return `${enMonth(month)} ${parseInt(day, 10)}, ${year}`
 }
 
 export const setColor = (color: string, type: string) => {
@@ -38,24 +59,19 @@ export const setColor = (color: string, type: string) => {
   }
 }
 
-interface MonthGroup {
-  title: string
-  content: string[]
-}
-
-interface YearGroup {
-  title: string
-  content: MonthGroup[]
-}
-
-export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
+// 드로어 폴더 트리. 그룹 키는 항상 숫자 문자열("2025"/"03"/"14")로 두고
+// title(표시용)만 언어에 따라 만든다 — 정렬과 날짜 조립이 키에 걸려 있다.
+export const transformWorkoutData = (
+  data: WorkoutPlanTypes[],
+  lang: Lang = getLanguage()
+) => {
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
     const date = parsePlanDate(item.createdAt)
-    const year = `${date.getFullYear()}년`
-    const month = `${String(date.getMonth() + 1).padStart(2, "0")}월` // 월을 2자리로 변환
-    const day = `${String(date.getDate()).padStart(2, "0")}일` // 일을 2자리로 변환
+    const year = `${date.getFullYear()}`
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
 
     if (!groupedData[year]) {
       groupedData[year] = {}
@@ -70,12 +86,19 @@ export const transformWorkoutData = (data: WorkoutPlanTypes[]) => {
   return Object.entries(groupedData)
     .sort((a, b) => b[0].localeCompare(a[0]))
     .map(([year, months]) => ({
-      title: year,
+      value: year,
+      title: lang === "ko" ? `${year}년` : year,
       content: Object.entries(months)
         .sort((a, b) => parseInt(b[0]) - parseInt(a[0]))
         .map(([month, days]) => ({
-          title: month,
-          content: Array.from(days).sort((a, b) => parseInt(b) - parseInt(a)),
+          value: month,
+          title: lang === "ko" ? `${month}월` : enMonth(month),
+          content: Array.from(days)
+            .sort((a, b) => parseInt(b) - parseInt(a))
+            .map((day) => ({
+              value: day,
+              title: lang === "ko" ? `${day}일` : String(parseInt(day, 10)),
+            })),
         })),
     }))
 }
@@ -231,13 +254,13 @@ export const getEquipmentCount = (
   return Object.fromEntries(countMap) as EquipmentCountResult
 }
 
-export const convertChartDate = (date: string) => {
+export const convertChartDate = (date: string, lang: Lang = getLanguage()) => {
   if (!date) {
     return ""
   }
   const year = date.slice(0, 4)
   const month = date.slice(4, 6)
-  return `${year}년 ${month}월`
+  return lang === "ko" ? `${year}년 ${month}월` : `${enMonth(month)} ${year}`
 }
 
 type BodyDataItem = { id: number; value: number; date: string; label: string }
@@ -264,7 +287,8 @@ export const removeSameItem = <T extends { createdAt: string }>(
 // 기록이 있는 날만 데이터 포인트로 반환한다 — 빈 날을 0으로 채우면 라인이 0까지 곤두박질치는 삼각파형이 된다
 export const getMonthlyBodyData = (
   rawData: Pick<UserInfoTypes, "createdAt" | "weight">[],
-  yearMonth: string
+  yearMonth: string,
+  lang: Lang = getLanguage()
 ): BodyDataItem[] => {
   const year = yearMonth.slice(0, 4)
   const month = yearMonth.slice(4, 6)
@@ -283,7 +307,7 @@ export const getMonthlyBodyData = (
         id: day,
         value: parseFloat(item.weight ?? "0"),
         date: `${year.slice(2)}/${month}/${String(day).padStart(2, "0")}`,
-        label: `${day}일`,
+        label: lang === "ko" ? `${day}일` : String(day),
       }
     })
     .sort((a, b) => a.id - b.id)

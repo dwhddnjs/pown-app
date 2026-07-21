@@ -5,7 +5,6 @@ type ChartStore = {
   date: string; // yyyyMM
 
   setDate: (type: "prev" | "next") => void;
-  onReset: () => void;
 };
 
 const currentYearMonth = () => format(new Date(), "yyyyMM");
@@ -29,5 +28,4 @@ export const useChartStore = create<ChartStore>((set) => ({
       }
       return { date: next };
     }),
-  onReset: () => set({ date: currentYearMonth() }),
 }));

@@ -1,4 +1,5 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
+import { useT } from "@/hooks/use-t";
 import React from "react";
 import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -10,6 +11,7 @@ import { useRouter } from "expo-router";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export const EmptyList = () => {
+  const t = useT();
   const themeColor = useCurrentThemeColor();
   const headerHeight = useHeaderHeight();
   const router = useRouter();
@@ -33,7 +35,7 @@ export const EmptyList = () => {
           <FontAwesome6 name="plus" size={14} color={themeColor.subText} />
         </View>
         <Text style={[styles.title, { color: themeColor.subText }]}>
-          운동계획 추가
+          {t("workout.addPlan")}
         </Text>
       </TouchableOpacity>
     </View>

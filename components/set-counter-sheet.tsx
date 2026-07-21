@@ -9,11 +9,14 @@ import { Picker } from "@react-native-picker/picker";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { Text, View } from "./themed";
 import { Button } from "./button";
 import { NumberBallIcon } from "./number-ball-icon";
 import { countData, setTypeData } from "@/constants/constants";
 import { usePlanStore } from "@/hooks/use-plan-store";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tSetType } from "@/lib/i18n";
 
 interface SetCountSheetProps {
   onClose: () => void;
@@ -31,6 +34,8 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     const { setSetWithCount, setWithCount, setFilterSetWithCount } =
       usePlanStore();
     const themeColor = useCurrentThemeColor();
+    const t = useT();
+    const lang = useLanguage();
 
     // 시트 상단 y좌표 — 쌓이는 목록을 시트 바로 위에 붙인다
     const animatedPosition = useSharedValue(0);
@@ -87,7 +92,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   <View style={styles.itemInfo}>
                     <NumberBallIcon>{index + 1}</NumberBallIcon>
                     <Text style={[styles.itemType, { color: themeColor.tint }]}>
-                      {item.set}
+                      {tSetType(item.set, lang)}
                     </Text>
                     <Text
                       style={[styles.itemCount, { color: themeColor.tint }]}
@@ -134,7 +139,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
               }}
             >
               <Text style={[styles.title, { color: themeColor.text }]}>
-                세트 유형
+                {t("plan.setType")}
               </Text>
               <Picker
                 selectedValue={picker.set}
@@ -145,7 +150,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                 {setTypeData.map((item) => (
                   <Picker.Item
                     key={item}
-                    label={String(item)}
+                    label={tSetType(item, lang)}
                     value={item}
                     color={themeColor.text}
                   />
@@ -160,7 +165,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
               }}
             >
               <Text style={[styles.title, { color: themeColor.text }]}>
-                반복 횟수
+                {t("plan.repCount")}
               </Text>
               <Picker
                 selectedValue={picker.count}
@@ -186,7 +191,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
             }}
           >
             <Button type="solid" onPress={onSetPlanStore}>
-              추가
+              {t("common.add")}
             </Button>
           </View>
         </BottomSheet>

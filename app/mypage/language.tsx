@@ -1,39 +1,35 @@
 // component
-import { Appearance, StyleSheet } from "react-native";
+import { StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { SettingSection } from "@/components/mypage/setting-section";
 import { SettingItem } from "@/components/mypage/setting-item";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+// lib
+import { Lang, LANG_LABEL } from "@/lib/i18n";
 // expo
 import { useRouter } from "expo-router";
 // icon
 import Entypo from "@expo/vector-icons/Entypo";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-const THEME_OPTIONS = [
-  { key: "light", title: "theme.lightMode", icon: "white-balance-sunny" },
-  { key: "dark", title: "theme.darkMode", icon: "weather-night" },
-  { key: "system", title: "theme.systemMode", icon: "cellphone" },
-] as const;
+const LANG_OPTIONS: { key: Lang; flag: string }[] = [
+  { key: "ko", flag: "🇰🇷" },
+  { key: "en", flag: "🇺🇸" },
+];
 
-export default function ThemeMode() {
-  const { setUser, theme } = useUserStore();
+export default function Language() {
+  const { setUser } = useUserStore();
+  const language = useLanguage();
   const { back } = useRouter();
 
   const themeColor = useCurrentThemeColor();
   const t = useT();
 
-  const onSubmitTheme = (theme: "light" | "dark" | "system") => {
-    let result: "light" | "dark" | "system" | null = theme;
-    if (theme === "system") {
-      result = null;
-    }
-    setUser("theme", theme);
-    Appearance.setColorScheme(result as Exclude<typeof result, "system">);
+  const onSubmitLanguage = (lang: Lang) => {
+    setUser("language", lang);
     back();
   };
 
@@ -41,30 +37,24 @@ export default function ThemeMode() {
     <View style={styles.container}>
       <View style={styles.textContainer}>
         <Text style={[styles.title, { color: themeColor.tint }]}>
-          {t("theme.title")}
+          {t("language.title")}
         </Text>
         <Text style={[styles.desc, { color: themeColor.subText }]}>
-          {t("theme.desc")}
+          {t("language.desc")}
         </Text>
       </View>
       <SettingSection>
-        {THEME_OPTIONS.map((option) => (
+        {LANG_OPTIONS.map((option) => (
           <SettingItem
             key={option.key}
-            icon={
-              <MaterialCommunityIcons
-                name={option.icon}
-                size={20}
-                color={themeColor.tint}
-              />
-            }
-            title={t(option.title)}
+            icon={<Text style={styles.flag}>{option.flag}</Text>}
+            title={LANG_LABEL[option.key]}
             right={
-              theme === option.key ? (
+              language === option.key ? (
                 <Entypo name="check" size={18} color={themeColor.tint} />
               ) : undefined
             }
-            onPress={() => onSubmitTheme(option.key)}
+            onPress={() => onSubmitLanguage(option.key)}
           />
         ))}
       </SettingSection>
@@ -89,5 +79,8 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     fontSize: 13,
     lineHeight: 19,
+  },
+  flag: {
+    fontSize: 18,
   },
 });

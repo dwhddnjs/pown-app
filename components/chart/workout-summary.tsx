@@ -1,24 +1,27 @@
 import React from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { sortWorkoutPlanList } from "@/lib/function";
+import { useLanguage } from "@/hooks/use-user-store";
+import { useT } from "@/hooks/use-t";
+import { tBodyPart } from "@/lib/i18n";
 import { ChartEmptyState } from "./chart-empty-state";
-
-const typeLabel: Record<string, string> = {
-  chest: "가슴",
-  back: "등",
-  shoulder: "어깨",
-  leg: "하체",
-  arm: "팔",
-};
+// expo
+import { useRouter } from "expo-router";
+// icon
+import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export const WorkoutSummary = () => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
+  const { push } = useRouter();
 
   const totalWorkouts = monthlyPlanData.length;
   const listCount = sortWorkoutPlanList(monthlyPlanData);
@@ -51,92 +54,124 @@ export const WorkoutSummary = () => {
     monthlyPlanData.map((p) => p.createdAt.split(" ")[0]),
   ).size;
 
-  if (totalWorkouts === 0) {
-    return (
-      <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-        <Text style={{ fontSize: 18, marginLeft: 6 }}>월간 요약</Text>
-        <View
-          style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
-        />
-        <ChartEmptyState
-          message="이번 달 운동 기록이 없습니다."
-          themeColor={themeColor}
-        />
-      </View>
-    );
-  }
-
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>월간 요약</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.monthlySummary")}</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
-      <View style={[styles.grid, { backgroundColor: themeColor.itemColor }]}>
-        <View
-          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-        >
-          <Text
-            style={[styles.statValue, { color: themeColor.tint }]}
+      {totalWorkouts === 0 ? (
+        <ChartEmptyState
+          message={t("chart.emptyMonth")}
+          themeColor={themeColor}
+        />
+      ) : (
+        <>
+          <View
+            style={[styles.grid, { backgroundColor: themeColor.itemColor }]}
           >
-            {totalWorkouts}
-          </Text>
-          <Text style={[styles.statLabel, { color: themeColor.subText }]}>총 운동</Text>
-        </View>
-        <View
-          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-        >
-          <Text
-            style={[styles.statValue, { color: themeColor.tint }]}
+            <View
+              style={[
+                styles.gridItem,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+                {totalWorkouts}
+              </Text>
+              <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+                {t("chart.totalWorkout")}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.gridItem,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+                {t("common.days", { n: uniqueDays })}
+              </Text>
+              <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+                {t("chart.workoutDays")}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.gridItem,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+                {avgSets}
+              </Text>
+              <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+                {t("chart.avgSets")}
+              </Text>
+            </View>
+            <View
+              style={[
+                styles.gridItem,
+                { backgroundColor: themeColor.itemColor },
+              ]}
+            >
+              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+                {completionRate}%
+              </Text>
+              <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+                {t("chart.completionRate")}
+              </Text>
+            </View>
+          </View>
+          {mostTrained.count > 0 && (
+            <View
+              style={[
+                styles.mostTrained,
+                { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+              ]}
+            >
+              <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
+                {t("chart.mostTrained")}
+              </Text>
+              <Text style={{ color: themeColor.tint, fontSize: 16 }}>
+                {tBodyPart(mostTrained.type, lang)} (
+                {t("common.count", { n: mostTrained.count })})
+              </Text>
+            </View>
+          )}
+          <View
+            style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
+          />
+          {/* 캘린더는 "날짜 → 그날 기록" 탐색 도구라 상시 노출 대신 여기서 연다.
+              기록이 없는 달엔 빈 달력만 열리므로 링크도 감춘다. */}
+          {/* SettingItem과 같은 평평한 row — 아이콘/텍스트를 중첩 View로 묶으면 정렬이 틀어진다 */}
+          <TouchableOpacity
+            style={styles.calendarLink}
+            onPress={() => push("/workout/calendar")}
+            activeOpacity={0.6}
           >
-            {uniqueDays}일
-          </Text>
-          <Text style={[styles.statLabel, { color: themeColor.subText }]}>운동한 날</Text>
-        </View>
-        <View
-          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-        >
-          <Text
-            style={[styles.statValue, { color: themeColor.tint }]}
-          >
-            {avgSets}
-          </Text>
-          <Text style={[styles.statLabel, { color: themeColor.subText }]}>평균 세트</Text>
-        </View>
-        <View
-          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-        >
-          <Text
-            style={[styles.statValue, { color: themeColor.tint }]}
-          >
-            {completionRate}%
-          </Text>
-          <Text style={[styles.statLabel, { color: themeColor.subText }]}>달성률</Text>
-        </View>
-      </View>
-      {mostTrained.count > 0 && (
-        <View
-          style={[
-            styles.mostTrained,
-            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
-          ]}
-        >
-          <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
-            가장 많이 훈련한 부위
-          </Text>
-          <Text style={{ color: themeColor.tint, fontSize: 16 }}>
-            {typeLabel[mostTrained.type] ?? mostTrained.type} (
-            {mostTrained.count}회)
-          </Text>
-        </View>
+            <MaterialCommunityIcons
+              name="calendar-month-outline"
+              size={20}
+              color={themeColor.tint}
+              // 아이콘 폰트는 글리프가 line box 안에서 디센더만큼 아래에 앉는다.
+              // alignItems로는 박스만 맞춰져 글자보다 낮아 보이므로 광학적으로 보정한다.
+              style={{ transform: [{ translateY: -2 }] }}
+            />
+            <Text style={styles.calendarLinkText}>{t("chart.openCalendar")}</Text>
+            <AntDesign name="right" size={15} color={themeColor.subText} />
+          </TouchableOpacity>
+        </>
       )}
     </View>
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
-    paddingVertical: 20,
+    paddingTop: 20,
+    // 마지막 줄(달력 링크)은 자체 padding + 글자 line box의 디센더 여유분이 더 붙어
+    // 그대로 20을 주면 아래가 8pt 더 떠 보인다. 시각적 여백을 위와 맞춘 값.
+    paddingBottom: 12,
     borderRadius: 12,
     marginTop: 24,
     gap: 12,
@@ -156,6 +191,8 @@ const styles = StyleSheet.create({
     fontFamily: "sb-b",
   },
   statLabel: {
+    // 영어 라벨은 두 줄로 접히므로 가운데 정렬해야 숫자와 축이 맞는다
+    textAlign: "center",
     fontSize: 12,
     fontFamily: "sb-l",
   },
@@ -164,5 +201,16 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingTop: 4,
+  },
+  calendarLink: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+  },
+  calendarLinkText: {
+    flex: 1,
+    fontSize: 15,
   },
 });

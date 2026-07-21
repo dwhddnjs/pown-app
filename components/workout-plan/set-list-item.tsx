@@ -6,6 +6,9 @@ import { SetWithCountType } from "@/hooks/use-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import CheckCircle from "@expo/vector-icons/AntDesign";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tProgress, tSetType } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 
 interface SetListItemProps {
   item: SetWithCountType;
@@ -17,6 +20,8 @@ interface SetListItemProps {
 export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListItemProps) => {
   const { setCompleteProgress } = useWorkoutPlanStore();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
@@ -44,11 +49,11 @@ export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListIte
           ]}
         >
           <Text style={[styles.setType, { color: themeColor.tint }]}>
-            {item.set}
+            {tSetType(item.set, lang)}
           </Text>
           <Text
             style={[styles.count, { color: themeColor.text }]}
-          >{`${item.count} 회`}</Text>
+          >{t("common.reps", { n: item.count })}</Text>
         </View>
         {!hideProgress && (
           <Text
@@ -60,7 +65,7 @@ export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListIte
               },
             ]}
           >
-            {item.progress}
+            {tProgress(item.progress, lang)}
           </Text>
         )}
       </View>
@@ -96,7 +101,7 @@ export const SetListItem = ({ item, planId, setIndex, hideProgress }: SetListIte
               ]}
               onPress={() => setCompleteProgress(planId, item.id)}
             >
-              <Text style={styles.buttonText}>완료</Text>
+              <Text style={styles.buttonText}>{tProgress("완료", lang)}</Text>
             </TouchableOpacity>
           )}
         </View>

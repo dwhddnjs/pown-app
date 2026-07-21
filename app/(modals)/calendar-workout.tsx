@@ -1,5 +1,6 @@
 // component
 import { View, Text } from "@/components/themed";
+import { useT } from "@/hooks/use-t";
 import { StyleSheet, FlatList } from "react-native";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 // expo
@@ -14,6 +15,7 @@ import {
 } from "@/hooks/use-workout-plan-store";
 
 export default function CalendarWorkout() {
+  const t = useT();
   const themeColor = useCurrentThemeColor();
   const { date } = useLocalSearchParams<{ date: string }>();
   const { workoutPlanList } = useWorkoutPlanStore();
@@ -25,7 +27,7 @@ export default function CalendarWorkout() {
 
   return (
     <View style={styles.container}>
-      <Text style={{ fontSize: 24, padding: 12 }}>운동 히스토리</Text>
+      <Text style={{ fontSize: 24, padding: 12 }}>{t("workout.history")}</Text>
       <FlatList
         data={Object.entries(sortWorkList)}
         showsVerticalScrollIndicator={false}

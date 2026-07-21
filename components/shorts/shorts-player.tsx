@@ -1,4 +1,5 @@
 import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store"
+import { resolveMediaUri } from "@/lib/media"
 import { useEvent } from "expo"
 import { useVideoPlayer, VideoView } from "expo-video"
 import React, { useEffect, useRef } from "react"
@@ -15,7 +16,7 @@ export const ShortsPlayer = ({
   isActive,
   height,
 }: ShortsPlayerProps) => {
-  const player = useVideoPlayer(video.video, (player) => {
+  const player = useVideoPlayer(resolveMediaUri(video.video), (player) => {
     player.loop = true
   })
 

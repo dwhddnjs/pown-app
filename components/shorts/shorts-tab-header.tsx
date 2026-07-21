@@ -1,24 +1,19 @@
 import React from "react"
+import { useT } from "@/hooks/use-t"
 // component
-import { SafeAreaView, StyleSheet, TouchableOpacity, View } from "react-native"
-import { DrawerToggleButton } from "@react-navigation/drawer"
+import { SafeAreaView, StyleSheet, View } from "react-native"
 // expo
 import { BlurView } from "expo-blur"
-import { useRouter } from "expo-router"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-// hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { Text } from "../themed"
 
-const ShortsTabHeader = ({ title }: { title?: string }) => {
-  const themeColor = useCurrentThemeColor()
-  const { push } = useRouter()
+const ShortsTabHeader = () => {
+  const t = useT()
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
       <SafeAreaView>
         <View style={styles.container}>
-          <Text style={{ fontSize: 16 }}>내 운동 숏츠</Text>
+          <Text style={{ fontSize: 16 }}>{t("shorts.title")}</Text>
         </View>
       </SafeAreaView>
     </BlurView>

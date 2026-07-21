@@ -8,7 +8,10 @@ import { useRouter } from "expo-router"
 import { Image } from "expo-image"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 import { usePlanStore } from "@/hooks/use-plan-store"
+// lib
+import { resolveMediaUri } from "@/lib/media"
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { toast } from "sonner-native"
@@ -17,6 +20,7 @@ interface CameraImageProps {}
 
 export const CameraImage = ({}: CameraImageProps) => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
   const router = useRouter()
   const { imageUri, setRemoveImageUri } = usePlanStore()
 
@@ -29,28 +33,28 @@ export const CameraImage = ({}: CameraImageProps) => {
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
           <AntDesign name="camera" size={20} color={themeColor.tint} />
-          <Text style={{ fontSize: 16 }}>사진 추가</Text>
+          <Text style={{ fontSize: 16 }}>{t("plan.photo")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
+        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
       </View>
       <Button
         type="bordered"
         onPress={() => {
           // 카메라 권한은 카메라 화면이 열릴 때 그 화면에서 직접 요청한다
           if (imageUri.length === 4) {
-            return toast.error("최대 4개까지 가능합니다")
+            return toast.error(t("plan.photoMax"))
           }
           router.push("/add-plan/camera")
         }}
       >
-        사진찍기
+        {t("plan.takePhoto")}
       </Button>
       <View style={styles.imageListContainer}>
         {imageUri.map((item) => (
           <View style={{ flex: 4, position: "relative" }} key={item.id}>
             <Image
               key={item.id}
-              source={{ uri: item.imageUri }}
+              source={{ uri: resolveMediaUri(item.imageUri) }}
               contentFit="cover"
               style={[
                 styles.image,

@@ -5,9 +5,12 @@ import { SettingSection } from "@/components/mypage/setting-section";
 import { SettingItem } from "@/components/mypage/setting-item";
 import { toast } from "sonner-native";
 // zustand
-import { useUserStore } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
+// lib
+import { LANG_LABEL, TKey } from "@/lib/i18n";
 // expo
 import { useRouter } from "expo-router";
 import * as Linking from "expo-linking";
@@ -16,15 +19,17 @@ import Constants from "expo-constants";
 // icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-const THEME_LABEL = {
-  light: "라이트",
-  dark: "다크",
-  system: "시스템",
-} as const;
+const THEME_LABEL: Record<"light" | "dark" | "system", TKey> = {
+  light: "my.theme.light",
+  dark: "my.theme.dark",
+  system: "my.theme.system",
+};
 
-export default function Settings() {
+export default function My() {
   const { theme } = useUserStore();
+  const language = useLanguage();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
 
   const { push } = useRouter();
 
@@ -34,7 +39,7 @@ export default function Settings() {
 
   // Gmail 앱을 우선 열고, 없으면 기본 메일 앱, 둘 다 없으면(시뮬레이터·메일 미설정) 주소를 클립보드에 복사한다.
   const onContact = async () => {
-    const subject = encodeURIComponent("Pown 문의");
+    const subject = encodeURIComponent(t("my.contactSubject"));
     const gmailUrl = `googlegmail://co?to=${contactEmail}&subject=${subject}`;
     const mailto = `mailto:${contactEmail}?subject=${subject}`;
     try {
@@ -50,7 +55,7 @@ export default function Settings() {
       // 아래 클립보드 폴백으로 이어진다
     }
     await Clipboard.setStringAsync(contactEmail);
-    toast.success("메일 주소가 복사되었어요");
+    toast.success(t("my.emailCopied"));
   };
 
   return (
@@ -61,7 +66,7 @@ export default function Settings() {
     >
       <UserDataCard />
 
-      <SettingSection title="일반">
+      <SettingSection title={t("my.general")}>
         <SettingItem
           icon={
             <MaterialCommunityIcons
@@ -70,7 +75,7 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="내정보 작성"
+          title={t("my.userInfo")}
           chevron
           onPress={() => push("/mypage/user-info")}
         />
@@ -82,10 +87,23 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="컬러모드 선택"
-          value={THEME_LABEL[theme]}
+          title={t("my.themeMode")}
+          value={t(THEME_LABEL[theme])}
           chevron
           onPress={() => push("/mypage/theme-mode")}
+        />
+        <SettingItem
+          icon={
+            <MaterialCommunityIcons
+              name="translate"
+              size={20}
+              color={themeColor.tint}
+            />
+          }
+          title={t("my.language")}
+          value={LANG_LABEL[language]}
+          chevron
+          onPress={() => push("/mypage/language")}
         />
         <SettingItem
           icon={
@@ -95,13 +113,13 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="중량 계산기"
+          title={t("my.calculator")}
           chevron
           onPress={() => push("/(modals)/calculate")}
         />
       </SettingSection>
 
-      <SettingSection title="데이터">
+      <SettingSection title={t("my.data")}>
         <SettingItem
           icon={
             <MaterialCommunityIcons
@@ -110,14 +128,14 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="데이터 관리"
-          value="백업 · 복원 · 초기화"
+          title={t("my.dataManage")}
+          value={t("my.dataManageDesc")}
           chevron
           onPress={() => push("/mypage/reset-data")}
         />
       </SettingSection>
 
-      <SettingSection title="앱 정보">
+      <SettingSection title={t("my.appInfo")}>
         <SettingItem
           icon={
             <MaterialCommunityIcons
@@ -126,7 +144,7 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="문의하기"
+          title={t("my.contact")}
           chevron
           onPress={onContact}
         />
@@ -138,7 +156,7 @@ export default function Settings() {
               color={themeColor.tint}
             />
           }
-          title="앱 버전"
+          title={t("my.appVersion")}
           value={appVersion}
         />
       </SettingSection>
@@ -150,7 +168,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 24,
-    paddingBottom: 48,
+    paddingBottom: 180,
     gap: 24,
   },
 });

@@ -4,6 +4,9 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../themed";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tCondition } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 // data
 import { conditionData } from "@/constants/constants";
 // lib
@@ -16,6 +19,8 @@ import { ChartEmptyState } from "./chart-empty-state";
 
 export const ConditionCount = () => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { date } = useChartStore();
   const { monthlyPlanData } = useMonthlyPlanData(date);
   const getCount = getConditionCount(monthlyPlanData);
@@ -27,11 +32,11 @@ export const ConditionCount = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>컨디션 별 횟수</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.conditionTitle")}</Text>
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {isEmptyCount ? (
         <ChartEmptyState
-          message="기록된 컨디션 데이터가 없습니다."
+          message={t("chart.conditionEmpty")}
           themeColor={themeColor}
         />
       ) : (
@@ -64,7 +69,7 @@ export const ConditionCount = () => {
               </View>
               {getIcon(item.condition, 44, themeColor.tint)}
               <Text style={[styles.iconText, { color: themeColor.tint }]}>
-                {item.condition}
+                {tCondition(item.condition, lang)}
               </Text>
             </View>
           ))}

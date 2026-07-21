@@ -8,46 +8,51 @@ import Leg from "@/assets/images/svg/leg_icon.svg";
 import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 import { IconTitleButton } from "@/components/icon-title-button";
 import { useRouter } from "expo-router";
-import { format } from "date-fns";
+import { formatPlanDateTime } from "@/lib/date";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tBodyPart } from "@/lib/i18n";
 import Entypo from "@expo/vector-icons/Entypo";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
 import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
 import { usePlanStore } from "@/hooks/use-plan-store";
 
 export default function ModalScreen() {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { open, setOpen } = useIsDialogOpenStore();
   const { date } = usePlanStore();
 
   const iconButtonData = [
     {
       id: 1,
-      title: "등",
+      title: tBodyPart("back", lang),
       icon: Back,
       type: "back",
     },
     {
       id: 2,
-      title: "가슴",
+      title: tBodyPart("chest", lang),
       icon: Chest,
       type: "chest",
     },
     {
       id: 3,
-      title: "어깨",
+      title: tBodyPart("shoulder", lang),
       icon: Shoulder,
       type: "shoulder",
     },
     {
       id: 4,
-      title: "하체",
+      title: tBodyPart("leg", lang),
       icon: Leg,
       type: "leg",
     },
     {
       id: 5,
-      title: "팔",
+      title: tBodyPart("arm", lang),
       icon: Arm,
       type: "arm",
     },
@@ -57,13 +62,13 @@ export default function ModalScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.titleDate}>
-        <Text style={styles.title}>지금 어느 부위를 조질까?</Text>
+        <Text style={styles.title}>{t("plan.selectPart")}</Text>
         <TouchableOpacity
           style={styles.dateButton}
           onPress={() => setOpen(true)}
         >
           <Text style={[styles.date, { color: themeColor.tint }]}>
-            {`📆 ${format(date, "yyyy년 M월 d일 HH시 mm분")}`}
+            {`📆 ${formatPlanDateTime(date, lang)}`}
           </Text>
           <Entypo name="select-arrows" size={18} color={themeColor.tint} />
         </TouchableOpacity>
@@ -99,6 +104,7 @@ const styles = StyleSheet.create({
   },
 
   titleDate: {
+    paddingHorizontal: 20,
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
@@ -110,6 +116,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
+    // 영어 제목은 두 줄로 접히므로 가운데 정렬이 필요하다
+    textAlign: "center",
   },
   date: {
     fontSize: 14,

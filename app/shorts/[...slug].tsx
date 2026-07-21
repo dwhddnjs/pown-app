@@ -9,6 +9,8 @@ import ArrowIcon from "@expo/vector-icons/AntDesign";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import Feather from "@expo/vector-icons/Feather";
 import { format } from "date-fns";
+import { formatDate } from "@/lib/function";
+import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
 
 export default function ShortsView() {
@@ -16,6 +18,7 @@ export default function ShortsView() {
 
   const { videos, setRemoveVideo } = useShortsStore();
   const themeColor = useCurrentThemeColor();
+  const lang = useLanguage();
   const { back } = useRouter();
   const initailPage = useMemo(() => {
     const index = videos.findIndex((v) => v.id === parseInt(slug?.[0]));
@@ -78,7 +81,7 @@ export default function ShortsView() {
         </TouchableOpacity>
         <Text style={{ fontSize: 16 }}>
           {videos[position]?.createdAt
-            ? format(new Date(videos[position].createdAt), "yyyy년 MM월 dd일")
+            ? formatDate(format(new Date(videos[position].createdAt), "yyyy.MM.dd"), lang)
             : ""}
         </Text>
         <TouchableOpacity

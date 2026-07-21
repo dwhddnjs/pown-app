@@ -17,6 +17,8 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useShortsStore } from "@/hooks/use-shorts-store";
+// lib
+import { resolveMediaUri } from "@/lib/media";
 // icons
 import Entypo from "@expo/vector-icons/Entypo";
 import { EmptyVideos } from "@/components/shorts/empty-videos";
@@ -52,7 +54,10 @@ export default function TabTwoScreen() {
               }}
               onPress={() => push(`/shorts/${item.id}`)}
             >
-              <Image source={{ uri: item.thumbnail }} style={styles.image} />
+              <Image
+                source={{ uri: resolveMediaUri(item.thumbnail) }}
+                style={styles.image}
+              />
             </TouchableOpacity>
           )}
         />

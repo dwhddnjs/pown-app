@@ -10,6 +10,9 @@ import { Text, View } from "../themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useLanguage } from "@/hooks/use-user-store"
+import { tWorkout } from "@/lib/i18n"
+import { useT } from "@/hooks/use-t"
 // icon
 import FontAwesome from "@expo/vector-icons/FontAwesome"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
@@ -23,6 +26,8 @@ interface WorkoutTagsProps {
 export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
   const { workout, setPlanValue } = usePlanStore()
   const themeColor = useCurrentThemeColor()
+  const t = useT()
+  const lang = useLanguage()
   const { setOpen, setIsRemoveOpen } = useWorkoutTagDialogStore()
   const pathname = usePathname().split("/")
 
@@ -35,7 +40,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
   }
   const onOpenRemoveDialog = () => {
     if (!workout) {
-      toast.error("삭제하실 운동을 선택해주세요.")
+      toast.error(t("tag.selectToRemove"))
       return
     }
     setIsRemoveOpen(true)
@@ -65,7 +70,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
                 },
               ]}
             >
-              {item}
+              {tWorkout(item, lang)}
             </Text>
           </TouchableOpacity>
         ))}

@@ -5,7 +5,9 @@ import { Text, View } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useUserStore } from "@/hooks/use-user-store";
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
+import { tWorkout } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { ChartEmptyState } from "./chart-empty-state";
@@ -18,6 +20,8 @@ export const SbdChart = () => {
   const lastestWeight = monthlyUserInfoData[monthlyUserInfoData.length - 1];
 
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const data: {
     value?: number;
     frontColor: string;
@@ -28,7 +32,7 @@ export const SbdChart = () => {
       value: firstWeight?.sq != null ? Number(firstWeight.sq) : undefined,
       frontColor: themeColor?.subText,
       spacing: 8,
-      label: "스쿼트",
+      label: tWorkout("스쿼트", lang),
     },
     {
       value: lastestWeight?.sq != null ? Number(lastestWeight.sq) : undefined,
@@ -38,7 +42,7 @@ export const SbdChart = () => {
       value: firstWeight?.bp != null ? Number(firstWeight.bp) : undefined,
       frontColor: themeColor?.subText,
       spacing: 8,
-      label: "벤치프레스",
+      label: tWorkout("벤치프레스", lang),
     },
     {
       value: lastestWeight?.bp != null ? Number(lastestWeight.bp) : undefined,
@@ -48,7 +52,7 @@ export const SbdChart = () => {
       value: firstWeight?.dl != null ? Number(firstWeight.dl) : undefined,
       frontColor: themeColor?.subText,
       spacing: 8,
-      label: "데드리프트",
+      label: tWorkout("데드리프트", lang),
     },
     {
       value: lastestWeight?.dl != null ? Number(lastestWeight.dl) : undefined,
@@ -65,7 +69,7 @@ export const SbdChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>3대중량의 변화</Text>
+      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.sbdTitle")}</Text>
       {/* 범례 설명은 차트가 그려질 때만 의미가 있다 */}
       {firstWeight && (
         <Text
@@ -76,13 +80,13 @@ export const SbdChart = () => {
             color: themeColor.subText,
           }}
         >
-          회색: 최초 기록  ·  컬러: 선택한 달의 마지막 기록
+          {t("chart.sbdLegend")}
         </Text>
       )}
       <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
       {!firstWeight ? (
         <ChartEmptyState
-          message="기록된 3대중량 데이터가 없습니다."
+          message={t("chart.sbdEmpty")}
           themeColor={themeColor}
         />
       ) : (

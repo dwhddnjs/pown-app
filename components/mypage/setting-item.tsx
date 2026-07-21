@@ -46,7 +46,10 @@ export const SettingItem = ({
         {title}
       </Text>
       {!!value && (
-        <Text style={[styles.value, { color: themeColor.subText }]}>
+        <Text
+          numberOfLines={1}
+          style={[styles.value, { color: themeColor.subText }]}
+        >
           {value}
         </Text>
       )}
@@ -75,10 +78,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   title: {
-    flex: 1,
+    // flex:1 축약(flexBasis 0% + flexShrink 1)이면 영어처럼 긴 라벨이 두 줄로 깨진다.
+    // 내용 크기를 기준으로 잡고(auto) 줄어들지 않게 해서, 공간이 모자라면 value가 줄어들게 한다.
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: "auto",
     fontSize: 15,
   },
   value: {
+    flexShrink: 1,
     fontSize: 14,
     fontFamily: "sb-l",
   },

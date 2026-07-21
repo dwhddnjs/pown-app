@@ -24,6 +24,7 @@ import {
 import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { View } from "@/components/themed";
 
 export { ErrorBoundary } from "expo-router";
@@ -97,6 +98,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const t = useT();
   const themeColor = useCurrentThemeColor();
   return (
     <Stack
@@ -180,7 +182,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="workout/multi-plan"
         options={({ navigation }) => ({
-          headerTitle: "루틴 추가",
+          headerTitle: t("header.addRoutine"),
           headerStyle: {
             borderBottomWidth: 0,
             elevation: 0,
@@ -286,7 +288,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="mypage/user-info"
         options={({ navigation }) => ({
-          headerTitle: "내정보 작성",
+          headerTitle: t("header.userInfo"),
           headerTitleStyle: {
             fontFamily: "sb-m",
           },
@@ -300,7 +302,21 @@ function RootLayoutNav() {
       <Stack.Screen
         name="mypage/theme-mode"
         options={({ navigation }) => ({
-          headerTitle: "컬러 모드 선택",
+          headerTitle: t("header.themeMode"),
+          headerTitleStyle: {
+            fontFamily: "sb-m",
+          },
+          headerShadowVisible: false,
+          animation: "slide_from_bottom",
+          headerLeft: () => (
+            <HeaderIconButton type="down" onPress={() => navigation.goBack()} />
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="mypage/language"
+        options={({ navigation }) => ({
+          headerTitle: t("header.language"),
           headerTitleStyle: {
             fontFamily: "sb-m",
           },
@@ -314,7 +330,7 @@ function RootLayoutNav() {
       <Stack.Screen
         name="mypage/reset-data"
         options={({ navigation }) => ({
-          headerTitle: "데이터 관리",
+          headerTitle: t("header.dataManage"),
           headerTitleStyle: {
             fontFamily: "sb-m",
           },
@@ -329,7 +345,7 @@ function RootLayoutNav() {
         name="workout/search"
         options={({ navigation }) => {
           return {
-            headerTitle: "운동 검색",
+            headerTitle: t("header.search"),
             headerShadowVisible: false,
             gestureEnabled: false,
             // 네이티브 서치바가 헤더 아래에 붙는다. margin은 헤더 높이를 바꿔 타이틀까지
@@ -345,9 +361,22 @@ function RootLayoutNav() {
         }}
       />
       <Stack.Screen
+        name="workout/calendar"
+        options={({ navigation }) => ({
+          // headerTitle은 화면에서 보고 있는 달로 설정한다 (workout/calendar.tsx)
+          headerShadowVisible: false,
+          headerLeft: () => (
+            <HeaderIconButton
+              type="back"
+              onPress={() => navigation.goBack()}
+            />
+          ),
+        })}
+      />
+      <Stack.Screen
         name="add-plan/camera"
         options={({ navigation }) => ({
-          headerTitle: "사진 찍기",
+          headerTitle: t("header.camera"),
           headerShown: false,
           headerTitleStyle: {
             fontFamily: "sb-m",
@@ -359,26 +388,9 @@ function RootLayoutNav() {
         })}
       />
       <Stack.Screen
-        name="mypage/settings"
-        options={({ navigation }) => ({
-          title: "설정",
-          headerTitleStyle: {
-            fontFamily: "sb-m",
-          },
-          headerShadowVisible: false,
-          headerLeft: () => (
-            <HeaderIconButton
-              type="back"
-              onPress={() => navigation.goBack()}
-              // style={{ marginTop: 16 }}
-            />
-          ),
-        })}
-      />
-      <Stack.Screen
         name="shorts/video"
         options={({ navigation }) => ({
-          headerTitle: "비디오 촬영",
+          headerTitle: t("header.video"),
           headerShown: false,
           headerTitleStyle: {
             fontFamily: "sb-m",

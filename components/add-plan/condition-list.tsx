@@ -12,9 +12,11 @@ import { conditionData } from "@/constants/constants"
 import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 
 export const ConditionList = () => {
   const themeColor = useCurrentThemeColor()
+  const t = useT()
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>
@@ -24,9 +26,9 @@ export const ConditionList = () => {
             size={20}
             color={themeColor.tint}
           />
-          <Text style={{ fontSize: 16 }}>지금 컨디션</Text>
+          <Text style={{ fontSize: 16 }}>{t("plan.condition")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
+        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
       </View>
       <View style={styles.container}>
         <FlatList

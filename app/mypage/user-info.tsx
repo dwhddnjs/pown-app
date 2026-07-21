@@ -6,11 +6,13 @@ import { Text, View } from "@/components/themed"
 import { toast } from "sonner-native"
 import { TitleInput } from "@/components/mypage/title-input"
 // zustand
-import { useUserStore } from "@/hooks/use-user-store"
+import { useLanguage, useUserStore } from "@/hooks/use-user-store"
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 // lib
 import { format } from "date-fns"
+import { tWorkout } from "@/lib/i18n"
 // expo
 import { useRouter } from "expo-router"
 
@@ -32,6 +34,8 @@ export default function UserInfo() {
   )
 
   const themeColor = useCurrentThemeColor()
+  const t = useT()
+  const lang = useLanguage();
 
   const { back } = useRouter()
 
@@ -51,20 +55,20 @@ export default function UserInfo() {
       !value.bp ||
       !value.dl
     ) {
-      return toast.error("정보를 모두 기입해주세요!")
+      return toast.error(t("userInfo.required"))
     }
     setUserData({
       ...value,
       gender,
       createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
     })
-    toast.success("내정보가 추가 되었습니다!")
+    toast.success(t("userInfo.saved"))
     back()
   }
 
   const genderOptions = [
-    { key: "male", label: "남자" },
-    { key: "female", label: "여자" },
+    { key: "male", label: t("userInfo.male") },
+    { key: "female", label: t("userInfo.female") },
   ] as const
 
   return (
@@ -76,36 +80,34 @@ export default function UserInfo() {
       >
         <View style={styles.textContainer}>
           <Text style={[styles.title, { color: themeColor.tint }]}>
-            당신의 정보를 입력하세요.
+            {t("userInfo.title")}
           </Text>
           <Text style={[styles.desc, { color: themeColor.subText }]}>
-            3대 중량, 나이, 성별, 신체 정보를 기입해보세요. 또한 중량이 늘 때,
-            몸무게가 줄 때마다 기록을 갱신해보세요. 차트 데이터 기록에
-            도움됩니다.
+            {t("userInfo.desc")}
           </Text>
         </View>
 
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: themeColor.subText }]}>
-            3대 중량
+            {t("userInfo.sbd")}
           </Text>
           <View style={styles.inputRow}>
             <TitleInput
-              title="스쿼트"
+              title={tWorkout("스쿼트", lang)}
               label="kg"
               value={value.sq}
               onChangeValue={onSetValue}
               type="sq"
             />
             <TitleInput
-              title="벤치프레스"
+              title={tWorkout("벤치프레스", lang)}
               label="kg"
               value={value.bp}
               onChangeValue={onSetValue}
               type="bp"
             />
             <TitleInput
-              title="데드리프트"
+              title={tWorkout("데드리프트", lang)}
               label="kg"
               value={value.dl}
               onChangeValue={onSetValue}
@@ -116,26 +118,26 @@ export default function UserInfo() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: themeColor.subText }]}>
-            신체 정보
+            {t("userInfo.body")}
           </Text>
           <View style={styles.inputRow}>
             <TitleInput
-              title="키"
+              title={t("userInfo.height")}
               label="cm"
               value={value.height}
               onChangeValue={onSetValue}
               type="height"
             />
             <TitleInput
-              title="몸무게"
+              title={t("userInfo.weight")}
               label="kg"
               value={value.weight}
               onChangeValue={onSetValue}
               type="weight"
             />
             <TitleInput
-              title="나이"
-              label="살"
+              title={t("userInfo.age")}
+              label={t("userInfo.ageUnit")}
               value={value.age}
               onChangeValue={onSetValue}
               type="age"
@@ -145,7 +147,7 @@ export default function UserInfo() {
 
         <View style={styles.section}>
           <Text style={[styles.sectionLabel, { color: themeColor.subText }]}>
-            성별
+            {t("userInfo.gender")}
           </Text>
           <View style={styles.inputRow}>
             {genderOptions.map((option) => {
@@ -179,7 +181,7 @@ export default function UserInfo() {
         </View>
       </ScrollView>
       <Button type="solid" onPress={onSubmitValue}>
-        저장
+        {t("common.save")}
       </Button>
     </View>
   )

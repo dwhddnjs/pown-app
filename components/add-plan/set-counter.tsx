@@ -6,6 +6,7 @@ import { IconTitle } from "../icon-title";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { SetCounterItem } from "./set-counter-item";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 
 interface SetCounterProps {
   onOpen: () => void;
@@ -17,15 +18,16 @@ interface SetCounterProps {
 export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
   const { setWithCount } = usePlanStore();
   const themeColor = useCurrentThemeColor();
+  const t = useT();
 
   return (
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
           <Octicons name="number" size={20} color={themeColor.tint} />
-          <Text style={{ fontSize: 16 }}>세트와 횟수</Text>
+          <Text style={{ fontSize: 16 }}>{t("plan.setAndReps")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>(선택)</Text>
+        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
       </View>
       <Button
         type="bordered"
@@ -33,7 +35,7 @@ export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
           onOpen();
         }}
       >
-        선택하기
+        {t("common.select")}
       </Button>
       {!isSheetOpen && setWithCount.length > 0 && (
         <View style={{ gap: 8 }}>

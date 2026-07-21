@@ -16,12 +16,15 @@ import {
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // lib
 import { formatTime } from "@/lib/function";
+import { tEquipment, tWorkout } from "@/lib/i18n";
+import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { Ionicons } from "@expo/vector-icons";
 import { useActionSheet } from "@expo/react-native-action-sheet";
 import { usePathname, useRouter } from "expo-router";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 
 interface WeightDateProps {
   id: number;
@@ -41,6 +44,8 @@ export const WeightDate = ({
   equipment,
 }: WeightDateProps) => {
   const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
   const { showActionSheetWithOptions } = useActionSheet();
   const { push } = useRouter();
   const { setRemovePlan } = useWorkoutPlanStore();
@@ -49,7 +54,7 @@ export const WeightDate = ({
   const isMultiPlan = pathname.includes("multi-plan");
 
   const onPress = () => {
-    const options = ["삭제", "수정", "취소"];
+    const options = [t("common.delete"), t("common.edit"), t("common.cancel")];
     const destructiveButtonIndex = 0;
     const cancelButtonIndex = 2;
 
@@ -76,10 +81,10 @@ export const WeightDate = ({
           case destructiveButtonIndex:
             if (isMultiPlan) {
               removeTempPlan(id);
-              toast.success("운동계획이 삭제 되었습니다!");
+              toast.success(t("workout.deleted"));
             } else {
               setRemovePlan(id);
-              toast.success("운동계획이 삭제 되었습니다!");
+              toast.success(t("workout.deleted"));
             }
             break;
 
@@ -108,9 +113,9 @@ export const WeightDate = ({
       </View>
       <Text
         style={[styles.title, { color: themeColor.tint }]}
-      >{`${equipment} ${workout}`}</Text>
+      >{`${tEquipment(equipment, lang)} ${tWorkout(workout, lang)}`}</Text>
       <Text style={[styles.weight, { color: themeColor.text }]}>
-        {`목표 • ${weight}kg`}{" "}
+        {t("workout.target", { weight })}{" "}
       </Text>
     </View>
   );

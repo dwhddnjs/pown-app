@@ -6,6 +6,7 @@ import { Text, View } from "@/components/themed";
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useT } from "@/hooks/use-t";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
 // hook
@@ -14,6 +15,7 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const Camera = () => {
+  const t = useT();
   const ref = useRef<CameraView>(null);
   const [uri, setUri] = useState<string | null>(null);
 
@@ -76,7 +78,7 @@ const Camera = () => {
                 fontSize: 16,
               }}
             >
-              다시 찍기
+              {t("camera.retake")}
             </Text>
           </Pressable>
           <Pressable
@@ -88,7 +90,7 @@ const Camera = () => {
                 fontSize: 16,
               }}
             >
-              사진 사용
+              {t("camera.usePhoto")}
             </Text>
           </Pressable>
         </View>
@@ -107,7 +109,7 @@ const Camera = () => {
       >
         <View style={styles.shutterContainer}>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>취소</Text>
+            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
           </Pressable>
 
           <Pressable onPress={takePicture}>
@@ -137,15 +139,15 @@ const Camera = () => {
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.cancelText}>
-            사진을 찍으려면 카메라 접근 권한이 필요해요.
+            {t("camera.permission")}
           </Text>
           <Pressable onPress={requestPermission}>
             <Text style={[styles.cancelText, { color: themeColor.tint }]}>
-              권한 허용하기
+              {t("common.allowPermission")}
             </Text>
           </Pressable>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>돌아가기</Text>
+            <Text style={styles.cancelText}>{t("common.goBack")}</Text>
           </Pressable>
         </View>
       </View>

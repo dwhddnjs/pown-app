@@ -10,6 +10,7 @@ import { Link } from "expo-router"
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
 
 interface PlanNoteProps {
   onFocusScroll: (positionY: number) => void
@@ -19,6 +20,7 @@ interface PlanNoteProps {
 export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
   const { title, content, setPlanValue } = usePlanStore()
   const themeColor = useCurrentThemeColor()
+  const t = useT()
   const inputRef = useRef<TextInput>(null)
 
   return (
@@ -26,13 +28,13 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
       <View style={styles.container}>
         <IconTitle style={{ gap: 7, paddingLeft: 20, paddingBottom: 10 }}>
           <NoteIcon name="note-text" size={20} color={themeColor.tint} />
-          <Text style={{ fontSize: 16 }}>퀵 노트</Text>
+          <Text style={{ fontSize: 16 }}>{t("plan.quickNote")}</Text>
         </IconTitle>
         <Link
           href="/(modals)/note"
           style={[styles.link, { color: themeColor.tint }]}
         >
-          전체노트 열기
+          {t("plan.openFullNote")}
         </Link>
       </View>
 
@@ -57,7 +59,7 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
               color: themeColor.text,
             },
           ]}
-          placeholder="특이사항을 적어주세요 (선택)"
+          placeholder={t("plan.notePlaceholder")}
           placeholderTextColor={themeColor.subText}
           value={content}
           onChangeText={(value) => setPlanValue("content", value)}

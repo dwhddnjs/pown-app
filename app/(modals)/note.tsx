@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import { useT } from "@/hooks/use-t";
 // component
 import { StyleSheet, TextInput } from "react-native";
 import { View } from "@/components/themed";
@@ -12,6 +13,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { Stack, useNavigation } from "expo-router";
 
 export default function Note() {
+  const t = useT();
   const { title, content, setValue, onReset } = useNoteStore();
   const { setPlanValue } = usePlanStore();
   const navigation = useNavigation();
@@ -48,7 +50,7 @@ export default function Note() {
       />
       <TextInput
         value={title}
-        placeholder="제목 입력..."
+        placeholder={t("plan.titlePlaceholder")}
         style={[
           styles.titleInput,
           {
@@ -69,7 +71,7 @@ export default function Note() {
             color: themeColor.text,
           },
         ]}
-        placeholder="설명을 넣어주세요..."
+        placeholder={t("plan.contentPlaceholder")}
         placeholderTextColor={themeColor.subText}
         onChangeText={(value) => setValue("content", value)}
       />
