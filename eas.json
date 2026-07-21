@@ -10,7 +10,7 @@
     },
     "production": {
       "channel": "production",
-      "image": "latest"
+      "ios": { "image": "latest" }
     },
     "development": {
       "developmentClient": true,
