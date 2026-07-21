@@ -83,7 +83,8 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      "./plugins/with-fmt-consteval-fix"
     ],
     "experiments": {
       "typedRoutes": true
