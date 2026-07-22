@@ -108,8 +108,14 @@ const Camera = () => {
         responsiveOrientationWhenOrientationLocked
       >
         <View style={styles.shutterContainer}>
-          <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
+          {/* 텍스트로 두면 영어("Cancel")에서 길어져 셔터가 밀린다 — 아이콘으로 폭을 고정한다 */}
+          <Pressable
+            onPress={() => router.back()}
+            style={{ paddingVertical: 24 }}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+          >
+            <FontAwesome6 name="xmark" size={28} color="white" />
           </Pressable>
 
           <Pressable onPress={takePicture}>
@@ -142,7 +148,7 @@ const Camera = () => {
             {t("camera.permission")}
           </Text>
           <Pressable onPress={requestPermission}>
-            <Text style={[styles.cancelText, { color: themeColor.tint }]}>
+            <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}
             </Text>
           </Pressable>

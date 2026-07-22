@@ -27,7 +27,7 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
           styles.item,
           {
             backgroundColor: themeColor.background,
-            borderColor: themeColor.subText,
+            borderColor: themeColor.tint,
           },
         ]}
       >
@@ -40,11 +40,11 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
           ]}
         >
           <NumberBallIcon>{index + 1}</NumberBallIcon>
-          <Text style={[styles.type, { color: themeColor.tint }]}>
+          <Text style={[styles.type, { color: themeColor.tintText }]}>
             {tSetType(item.set, lang)}
           </Text>
           <Text
-            style={[styles.typeText, { color: themeColor.tint }]}
+            style={[styles.typeText, { color: themeColor.tintText }]}
           >{t("common.reps", { n: item.count })}</Text>
         </View>
         <View
@@ -63,7 +63,7 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
             style={{ paddingLeft: 12, paddingRight: 4 }}
             onPress={() => setSetWithCount({ ...item, id: Date.now() })}
           >
-            <Ionicons name="copy" size={20} color={themeColor.tint} />
+            <Ionicons name="copy" size={20} color={themeColor.tintText} />
           </TouchableOpacity>
         </View>
       </View>

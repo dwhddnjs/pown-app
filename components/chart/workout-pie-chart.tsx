@@ -51,10 +51,10 @@ export const WorkoutPieChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>
+      <Text style={{ fontSize: 18 }}>
         {t("chart.partTitle")}
       </Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {isEmptyCount ? (
         <ChartEmptyState
           message={t("chart.partEmpty")}
@@ -64,7 +64,7 @@ export const WorkoutPieChart = () => {
         <View
           style={[
             styles.itemContainer,
-            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+            { backgroundColor: themeColor.itemColor },
           ]}
         >
           <PieChart

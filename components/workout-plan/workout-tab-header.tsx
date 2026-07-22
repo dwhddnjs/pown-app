@@ -43,7 +43,7 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
               fontSize: 18,
               color:
                 title === t("header.cheer")
-                  ? themeColor.tint
+                  ? themeColor.tintText
                   : themeColor.text,
               textAlign: "center",
               fontFamily: "sb-m",

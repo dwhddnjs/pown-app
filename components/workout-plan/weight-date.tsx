@@ -1,18 +1,9 @@
 import React from "react";
 // component
-import {
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useColorScheme,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { toast } from "sonner-native";
 // zustand
-import {
-  useWorkoutPlanStore,
-  WorkoutPlanTypes,
-} from "@/hooks/use-workout-plan-store";
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 // lib
 import { formatTime } from "@/lib/function";
@@ -112,7 +103,7 @@ export const WeightDate = ({
         )}
       </View>
       <Text
-        style={[styles.title, { color: themeColor.tint }]}
+        style={[styles.title, { color: themeColor.tintText }]}
       >{`${tEquipment(equipment, lang)} ${tWorkout(workout, lang)}`}</Text>
       <Text style={[styles.weight, { color: themeColor.text }]}>
         {t("workout.target", { weight })}{" "}

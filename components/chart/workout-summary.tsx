@@ -56,8 +56,10 @@ export const WorkoutSummary = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.monthlySummary")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <Text style={{ fontSize: 18 }}>
+        {t("chart.monthlySummary")}
+      </Text>
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {totalWorkouts === 0 ? (
         <ChartEmptyState
           message={t("chart.emptyMonth")}
@@ -74,7 +76,7 @@ export const WorkoutSummary = () => {
                 { backgroundColor: themeColor.itemColor },
               ]}
             >
-              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+              <Text style={[styles.statValue, { color: themeColor.tintText }]}>
                 {totalWorkouts}
               </Text>
               <Text style={[styles.statLabel, { color: themeColor.subText }]}>
@@ -87,7 +89,7 @@ export const WorkoutSummary = () => {
                 { backgroundColor: themeColor.itemColor },
               ]}
             >
-              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+              <Text style={[styles.statValue, { color: themeColor.tintText }]}>
                 {t("common.days", { n: uniqueDays })}
               </Text>
               <Text style={[styles.statLabel, { color: themeColor.subText }]}>
@@ -100,7 +102,7 @@ export const WorkoutSummary = () => {
                 { backgroundColor: themeColor.itemColor },
               ]}
             >
-              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+              <Text style={[styles.statValue, { color: themeColor.tintText }]}>
                 {avgSets}
               </Text>
               <Text style={[styles.statLabel, { color: themeColor.subText }]}>
@@ -113,7 +115,7 @@ export const WorkoutSummary = () => {
                 { backgroundColor: themeColor.itemColor },
               ]}
             >
-              <Text style={[styles.statValue, { color: themeColor.tint }]}>
+              <Text style={[styles.statValue, { color: themeColor.tintText }]}>
                 {completionRate}%
               </Text>
               <Text style={[styles.statLabel, { color: themeColor.subText }]}>
@@ -125,20 +127,20 @@ export const WorkoutSummary = () => {
             <View
               style={[
                 styles.mostTrained,
-                { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+                { backgroundColor: themeColor.itemColor },
               ]}
             >
               <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
                 {t("chart.mostTrained")}
               </Text>
-              <Text style={{ color: themeColor.tint, fontSize: 16 }}>
+              <Text style={{ color: themeColor.tintText, fontSize: 16 }}>
                 {tBodyPart(mostTrained.type, lang)} (
                 {t("common.count", { n: mostTrained.count })})
               </Text>
             </View>
           )}
           <View
-            style={{ height: 1, backgroundColor: themeColor.tabIconDefault }}
+            style={{ height: 1, backgroundColor: themeColor.divider }}
           />
           {/* 캘린더는 "날짜 → 그날 기록" 탐색 도구라 상시 노출 대신 여기서 연다.
               기록이 없는 달엔 빈 달력만 열리므로 링크도 감춘다. */}
@@ -151,12 +153,11 @@ export const WorkoutSummary = () => {
             <MaterialCommunityIcons
               name="calendar-month-outline"
               size={20}
-              color={themeColor.tint}
-              // 아이콘 폰트는 글리프가 line box 안에서 디센더만큼 아래에 앉는다.
-              // alignItems로는 박스만 맞춰져 글자보다 낮아 보이므로 광학적으로 보정한다.
-              style={{ transform: [{ translateY: -2 }] }}
+              color={themeColor.tintText}
             />
-            <Text style={styles.calendarLinkText}>{t("chart.openCalendar")}</Text>
+            <Text style={styles.calendarLinkText}>
+              {t("chart.openCalendar")}
+            </Text>
             <AntDesign name="right" size={15} color={themeColor.subText} />
           </TouchableOpacity>
         </>
@@ -206,11 +207,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingHorizontal: 6,
     paddingVertical: 4,
   },
   calendarLinkText: {
     flex: 1,
     fontSize: 15,
+    // 아이콘(20)과 같은 line box 높이를 줘야 alignItems:"center"가 글리프 기준으로 맞는다
+    lineHeight: 20,
   },
 });

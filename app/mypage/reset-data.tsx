@@ -43,7 +43,7 @@ export default function ResetData() {
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: themeColor.tint }]}>
+        <Text style={[styles.title, { color: themeColor.tintText }]}>
           {t("data.title")}
         </Text>
         <Text style={[styles.desc, { color: themeColor.subText }]}>
@@ -56,7 +56,7 @@ export default function ResetData() {
             <MaterialCommunityIcons
               name="tray-arrow-up"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("data.backup")}
@@ -68,7 +68,7 @@ export default function ResetData() {
             <MaterialCommunityIcons
               name="tray-arrow-down"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("data.restore")}

@@ -44,7 +44,7 @@ export const Button = ({ type, children, style, ...props }: ButtonProps) => {
           style={[
             styles().title,
             type === "bordered" && {
-              color: themeColor.tint,
+              color: themeColor.tintText,
             },
           ]}
         >

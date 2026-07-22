@@ -63,7 +63,7 @@ export default function Search() {
     navigation.setOptions({
       headerSearchBarOptions: {
         visible: true,
-        placeholder: "Search",
+        placeholder: t("search.placeholder"),
         autoFocus: true,
         tintColor: themeColor.tint,
         cancelButtonText: t("search.cancel"),
@@ -107,16 +107,8 @@ export default function Search() {
                 ]}
               >
                 <Text
-                  style={[styles.dateText, { color: themeColor.background }]}
+                  style={[styles.dateText, { color: themeColor.onTint }]}
                 >{`🗓️  ${formatDate(item[0], lang)}`}</Text>
-                <View
-                  style={[
-                    styles.dot,
-                    {
-                      backgroundColor: themeColor.background,
-                    },
-                  ]}
-                />
               </View>
 
               <View
@@ -181,15 +173,6 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  date: {
-    fontSize: 14,
-    fontFamily: "sb-l",
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
-  },
   list: {
     paddingHorizontal: 20,
     paddingVertical: 24,
@@ -207,11 +190,5 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 14,
     fontFamily: "sb-l",
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 50,
-    marginTop: 4,
   },
 });

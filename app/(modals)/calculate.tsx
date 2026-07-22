@@ -108,13 +108,27 @@ export default function Calculate() {
           style={styles.tabItem}
           onLayout={(e) => setTabItemWidth(e.nativeEvent.layout.width)}
         >
-          <Text style={{ textAlign: "center" }}>{t("calc.kg")}</Text>
+          <Text
+            style={{
+              textAlign: "center",
+              color: selected === "kg" ? themeColor.onTint : themeColor.text,
+            }}
+          >
+            {t("calc.kg")}
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => onSelectedTab("lb")}
           style={styles.tabItem}
         >
-          <Text style={{ textAlign: "center" }}>{t("calc.lb")}</Text>
+          <Text
+            style={{
+              textAlign: "center",
+              color: selected === "lb" ? themeColor.onTint : themeColor.text,
+            }}
+          >
+            {t("calc.lb")}
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.inputContainer}>
@@ -156,7 +170,7 @@ export default function Calculate() {
             <Text style={{ fontSize: 16, color: themeColor.text }}>
               {item.title}
             </Text>
-            <Text style={{ fontSize: 16, color: themeColor.tint }}>
+            <Text style={{ fontSize: 16, color: themeColor.tintText }}>
               {item.value}
             </Text>
           </View>

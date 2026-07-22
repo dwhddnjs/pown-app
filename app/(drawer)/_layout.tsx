@@ -25,7 +25,6 @@ import { MaterialIcons } from "@expo/vector-icons";
 
 const CustomDrawerContent = (props: DrawerContentComponentProps) => {
   const [activeSections, setActiveSections] = useState<number[]>([]);
-  const [collapsed, setCollapsed] = useState(true);
   const [multipleSelect, setMultipleSelect] = useState(false);
   const { workoutPlanList } = useWorkoutPlanStore();
   const themeColor = useCurrentThemeColor();
@@ -178,7 +177,6 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
               <View
                 style={[
                   styles.header,
-                  isActive ? styles.active : styles.inactive,
                   { backgroundColor: themeColor.background },
                 ]}
               >
@@ -199,7 +197,6 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
                 <View
                   style={[
                     styles.content,
-                    isActive ? styles.active : styles.inactive,
                     { backgroundColor: themeColor.background },
                   ]}
                 >
@@ -212,7 +209,6 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
                       <View
                         style={[
                           styles.header,
-                          isActive2 ? styles.active : styles.inactive,
                           {
                             backgroundColor: themeColor.background,
                           },
@@ -237,7 +233,6 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
                       <View
                         style={[
                           styles.content,
-                          isActive2 ? styles.active : styles.inactive,
                           {
                             backgroundColor: themeColor.background,
                           },
@@ -303,16 +298,6 @@ export default function Layout() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F5FCFF",
-  },
-  title: {
-    textAlign: "center",
-    fontSize: 22,
-    fontWeight: "300",
-    marginBottom: 20,
-  },
   emptyFolder: {
     flexDirection: "row",
     gap: 8,
@@ -320,8 +305,6 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   header: {
-    backgroundColor: "#1a1a1a",
-    // paddingLeft: 10,
     gap: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -336,52 +319,5 @@ const styles = StyleSheet.create({
     paddingLeft: 36,
     paddingVertical: 6,
     gap: 8,
-    backgroundColor: "#fff",
-  },
-  active: {
-    backgroundColor: "#1a1a1a",
-  },
-  inactive: {
-    backgroundColor: "#1a1a1a",
-  },
-  selectors: {
-    marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  selector: {
-    // backgroundColor: "#F5FCFF",
-    padding: 10,
-  },
-  activeSelector: {
-    fontWeight: "bold",
-  },
-  selectTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    padding: 10,
-  },
-  multipleToggle: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginVertical: 30,
-    alignItems: "center",
-  },
-  multipleToggle__title: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  calculateButton: {
-    width: 64,
-    height: 64,
-    opacity: 0.8,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderRadius: 50,
-    position: "absolute",
-    bottom: 64,
-    right: 20,
-    zIndex: 1000,
   },
 });

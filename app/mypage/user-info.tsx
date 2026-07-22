@@ -16,6 +16,15 @@ import { tWorkout } from "@/lib/i18n"
 // expo
 import { useRouter } from "expo-router"
 
+const RANGES: Record<string, [number, number]> = {
+  height: [100, 250],
+  weight: [20, 300],
+  age: [1, 120],
+  sq: [1, 500],
+  bp: [1, 500],
+  dl: [1, 500],
+}
+
 export default function UserInfo() {
   const { setUserData, userInfo } = useUserStore()
 
@@ -57,6 +66,14 @@ export default function UserInfo() {
     ) {
       return toast.error(t("userInfo.required"))
     }
+    // 키 1111cm 같은 값이 그대로 저장돼 차트·요약을 망가뜨리는 걸 막는다
+    const outOfRange = Object.entries(RANGES).some(([key, [min, max]]) => {
+      const n = Number(value[key as keyof typeof value])
+      return !Number.isFinite(n) || n < min || n > max
+    })
+    if (outOfRange) {
+      return toast.error(t("userInfo.outOfRange"))
+    }
     setUserData({
       ...value,
       gender,
@@ -79,7 +96,7 @@ export default function UserInfo() {
         contentContainerStyle={styles.content}
       >
         <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: themeColor.tint }]}>
+          <Text style={[styles.title, { color: themeColor.tintText }]}>
             {t("userInfo.title")}
           </Text>
           <Text style={[styles.desc, { color: themeColor.subText }]}>
@@ -168,7 +185,7 @@ export default function UserInfo() {
                     style={[
                       styles.genderText,
                       {
-                        color: isSelected ? themeColor.tint : themeColor.subText,
+                        color: isSelected ? themeColor.tintText : themeColor.subText,
                       },
                     ]}
                   >

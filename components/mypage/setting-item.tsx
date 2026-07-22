@@ -1,6 +1,6 @@
 import React from "react";
 // component
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text } from "../themed";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";

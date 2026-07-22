@@ -238,10 +238,10 @@ export default function AddMultiPlan() {
               style={styles.dateButton}
               onPress={() => setOpen(true)}
             >
-              <Text style={{ color: themeColor.tint }}>
+              <Text style={{ color: themeColor.tintText }}>
                 {`📆 ${formatPlanDateTime(date, lang)}`}
               </Text>
-              <Entypo name="select-arrows" size={18} color={themeColor.tint} />
+              <Entypo name="select-arrows" size={18} color={themeColor.tintText} />
             </TouchableOpacity>
           </View>
 

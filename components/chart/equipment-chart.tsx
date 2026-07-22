@@ -26,11 +26,15 @@ export const EquipmentChart = () => {
       (acc: number, cur: number) => acc + cur,
     ) === 0;
 
-  // 최대 기록에 여유를 두되 최소 5 — 축을 데이터에 맞춰야 작은 값도 막대가 보인다
-  const maxValue = Math.max(
+  // 최대 기록에 여유를 두되 최소 5 — 축을 데이터에 맞춰야 작은 값도 막대가 보인다.
+  // maxValue가 NO_OF_SECTIONS의 배수가 아니면 눈금이 1.6 간격이 되어 라벨이
+  // 0,1,3,4,6,8 처럼 찍힌다 → 반드시 배수로 올림한다.
+  const NO_OF_SECTIONS = 5;
+  const rawMax = Math.max(
     5,
     Math.ceil(Math.max(...(Object.values(equipmentCount) as number[])) * 1.2),
   );
+  const maxValue = Math.ceil(rawMax / NO_OF_SECTIONS) * NO_OF_SECTIONS;
 
   const barData1 = useMemo(
     () => [
@@ -70,11 +74,11 @@ export const EquipmentChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.equipmentTitle")}</Text>
+      <Text style={{ fontSize: 18 }}>{t("chart.equipmentTitle")}</Text>
       <View
         style={{
           height: 1,
-          backgroundColor: themeColor.tabIconDefault,
+          backgroundColor: themeColor.divider,
         }}
       />
       {isEmptyCount ? (
@@ -92,7 +96,7 @@ export const EquipmentChart = () => {
         >
           <BarChart
             barWidth={24}
-            noOfSections={5}
+            noOfSections={NO_OF_SECTIONS}
             maxValue={maxValue}
             barBorderRadius={4}
             frontColor={themeColor.subText}

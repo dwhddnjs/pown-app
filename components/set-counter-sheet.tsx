@@ -84,18 +84,18 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                   style={[
                     styles.item,
                     {
-                      borderColor: themeColor.subText,
+                      borderColor: themeColor.tint,
                       backgroundColor: themeColor.background,
                     },
                   ]}
                 >
                   <View style={styles.itemInfo}>
                     <NumberBallIcon>{index + 1}</NumberBallIcon>
-                    <Text style={[styles.itemType, { color: themeColor.tint }]}>
+                    <Text style={[styles.itemType, { color: themeColor.tintText }]}>
                       {tSetType(item.set, lang)}
                     </Text>
                     <Text
-                      style={[styles.itemCount, { color: themeColor.tint }]}
+                      style={[styles.itemCount, { color: themeColor.tintText }]}
                     >{`${item.count} 회`}</Text>
                   </View>
                   <TouchableOpacity

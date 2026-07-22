@@ -33,8 +33,8 @@ export const WorkoutCount = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.countTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <Text style={{ fontSize: 18 }}>{t("chart.countTitle")}</Text>
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {isEmptyCount ? (
         <ChartEmptyState
           message={t("chart.countEmpty")}
@@ -44,7 +44,7 @@ export const WorkoutCount = () => {
         <View
           style={[
             styles.iconListContainer,
-            { backgroundColor: themeColor.itemColor, marginHorizontal: 6 },
+            { backgroundColor: themeColor.itemColor },
           ]}
         >
           <View
@@ -54,7 +54,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Back />
-            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.back })}</Text>
+            <Text style={{ color: themeColor.tintText }}>{t("common.count", { n: listCount.back })}</Text>
           </View>
           <View
             style={[
@@ -63,7 +63,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Chest />
-            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.chest })}</Text>
+            <Text style={{ color: themeColor.tintText }}>{t("common.count", { n: listCount.chest })}</Text>
           </View>
           <View
             style={[
@@ -72,7 +72,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Shoulder />
-            <Text style={{ color: themeColor.tint }}>
+            <Text style={{ color: themeColor.tintText }}>
               {t("common.count", { n: listCount.shoulder })}
             </Text>
           </View>
@@ -83,7 +83,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Leg />
-            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.leg })}</Text>
+            <Text style={{ color: themeColor.tintText }}>{t("common.count", { n: listCount.leg })}</Text>
           </View>
           <View
             style={[
@@ -92,7 +92,7 @@ export const WorkoutCount = () => {
             ]}
           >
             <Arm />
-            <Text style={{ color: themeColor.tint }}>{t("common.count", { n: listCount.arm })}</Text>
+            <Text style={{ color: themeColor.tintText }}>{t("common.count", { n: listCount.arm })}</Text>
           </View>
         </View>
       )}

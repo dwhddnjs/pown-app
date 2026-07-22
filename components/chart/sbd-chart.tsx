@@ -61,7 +61,10 @@ export const SbdChart = () => {
   ];
 
   const barValues = data.map((item) => item.value ?? 0);
-  // 최대 기록보다 한 눈금 여유를 두고 50kg 단위로 올림 — 축 라벨은 자동 생성에 맡긴다
+  // 최대 기록보다 한 눈금 여유를 두고 50kg 단위로 올림.
+  // 50의 배수를 5구간으로 나눠야 눈금이 10 단위 정수로 떨어진다
+  // (6구간이면 1250/6 = 208.33 → 208,416,625... 처럼 읽을 수 없는 라벨이 된다).
+  const NO_OF_SECTIONS = 5;
   const maxValue = Math.max(
     100,
     Math.ceil((Math.max(...barValues, 0) * 1.1) / 50) * 50,
@@ -69,21 +72,20 @@ export const SbdChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.sbdTitle")}</Text>
+      <Text style={{ fontSize: 18 }}>{t("chart.sbdTitle")}</Text>
       {/* 범례 설명은 차트가 그려질 때만 의미가 있다 */}
       {firstWeight && (
         <Text
           style={{
             fontSize: 12,
             fontFamily: "sb-l",
-            marginLeft: 6,
             color: themeColor.subText,
           }}
         >
           {t("chart.sbdLegend")}
         </Text>
       )}
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {!firstWeight ? (
         <ChartEmptyState
           message={t("chart.sbdEmpty")}
@@ -104,7 +106,7 @@ export const SbdChart = () => {
             barBorderRadius={4}
             yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
             maxValue={maxValue}
-            noOfSections={6}
+            noOfSections={NO_OF_SECTIONS}
             labelWidth={65}
             yAxisThickness={1}
             xAxisThickness={1}

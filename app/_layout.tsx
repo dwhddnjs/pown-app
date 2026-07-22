@@ -25,7 +25,6 @@ import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
-import { View } from "@/components/themed";
 
 export { ErrorBoundary } from "expo-router";
 

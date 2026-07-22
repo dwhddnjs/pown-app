@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 // component
-import { Pressable, StyleSheet, TouchableOpacity, Image } from "react-native";
+import { Pressable, StyleSheet, Image } from "react-native";
 import { Text, View } from "../themed";
 import Animated, {
   useSharedValue,
@@ -96,6 +96,9 @@ const ProgressBar = ({
   );
 };
 
+// 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
+const IMAGE_GAP = 8;
+
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes;
   index: number;
@@ -119,6 +122,7 @@ export const WorkoutPlan = ({
     (mediaPermission?.granted ?? false) ||
     !item.imageUri?.some((image) => !isAppOwnedMedia(image.imageUri));
   const { setImageUri } = useImageUriStore();
+  const [gridWidth, setGridWidth] = useState(0);
 
   const getWorkoutIcon = (type: string) => {
     let result;
@@ -252,16 +256,27 @@ export const WorkoutPlan = ({
               styles.imageList,
               {
                 backgroundColor: themeColor.itemColor,
-                marginTop: 12,
+                marginTop: 4,
               },
             ]}
+            onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
           >
             {item.imageUri.map((imageItem) => {
               return (
                 <Pressable
                   key={imageItem.id}
-                  style={{ flex: 4, backgroundColor: themeColor.itemColor }}
-                  onPress={() => setImageUri(resolveMediaUri(imageItem.imageUri) as string)}
+                  style={[
+                    {
+                      width:
+                        item.imageUri.length === 1 || !gridWidth
+                          ? "100%"
+                          : (gridWidth - IMAGE_GAP) / 2,
+                    },
+                    { backgroundColor: themeColor.itemColor },
+                  ]}
+                  onPress={() =>
+                    setImageUri(resolveMediaUri(imageItem.imageUri) as string)
+                  }
                 >
                   <Image
                     key={imageItem.id}
@@ -311,12 +326,13 @@ const styles = StyleSheet.create({
   },
   imageList: {
     flexDirection: "row",
-    gap: 6,
-    flexWrap: "nowrap",
+    flexWrap: "wrap",
+    gap: IMAGE_GAP,
   },
   image: {
     aspectRatio: 1,
-    borderRadius: 14,
+    borderRadius: 18,
+    borderCurve: "continuous",
     borderWidth: 1,
   },
 });

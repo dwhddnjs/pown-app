@@ -1,5 +1,5 @@
 //component
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import { StyleSheet, TouchableOpacity } from "react-native"
 import { Text, View } from "@/components/themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
@@ -92,15 +92,15 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
           item.condition,
           26,
           condition.includes(item.condition)
-            ? themeColor.background
-            : themeColor.tint
+            ? themeColor.onTint
+            : themeColor.tintText
         )}
         <Text
           style={[
             styles.text,
-            { color: themeColor.tint },
+            { color: themeColor.tintText },
             condition.includes(item.condition) && {
-              color: themeColor.background,
+              color: themeColor.onTint,
             },
           ]}
         >
@@ -119,8 +119,8 @@ export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
         ]}
         key={item.id}
       >
-        {getIcon(item.condition, 16, themeColor.tint)}
-        <Text style={[styles.rowText, { color: themeColor.tint }]}>
+        {getIcon(item.condition, 16, themeColor.tintText)}
+        <Text style={[styles.rowText, { color: themeColor.tintText }]}>
           {tCondition(item.condition, lang)}
         </Text>
       </View>

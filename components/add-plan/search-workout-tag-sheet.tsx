@@ -18,7 +18,7 @@ import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useT } from "@/hooks/use-t"
 import { FontAwesome } from "@expo/vector-icons"
-import { searchByInitial, sortWorkoutPlanList } from "@/lib/function"
+import { searchByInitial } from "@/lib/function"
 import { usePlanStore } from "@/hooks/use-plan-store"
 import { useLanguage } from "@/hooks/use-user-store"
 import { tWorkout } from "@/lib/i18n"
@@ -99,7 +99,7 @@ export const SearchWorkoutTagSheet = forwardRef<
           style={[
             styles.searchIconContainer,
             {
-              borderColor: themeColor.subText,
+              borderColor: themeColor.tint,
             },
           ]}
         >
@@ -141,7 +141,7 @@ export const SearchWorkoutTagSheet = forwardRef<
               <Text
                 style={[
                   styles.title,
-                  { color: themeColor.tint },
+                  { color: themeColor.tintText },
                   item === workout && {
                     color: themeColor.text,
                   },

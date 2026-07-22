@@ -34,24 +34,39 @@ export const BodyChart = () => {
       ? [bodyData[0], { ...bodyData[0], label: "", hideDataPoint: true }]
       : bodyData;
 
-  // 차트를 카드 폭에 꽉 채운다 + 마지막 회전 라벨 잘림 방지.
-  // 차트 내부 가로 뷰포트(=width prop)가 카드 폭과 같으면, 마지막 라벨을 보이려 점을
-  // 안쪽으로 넣어야 하고 → 오른쪽에 빈 여백이 남는다.
-  // 해결: 마지막 점을 카드 오른쪽 끝에 붙이고, 뷰포트를 카드 밖(패딩)으로 LABEL_OVERFLOW
-  // 만큼 넓혀 회전 라벨이 그 넘치는 공간에 그려지게 한다(카드/탭은 클리핑 안 함).
+  // gifted-charts는 x축 라벨을 점보다 왼쪽에 치우쳐 그린다(실측). marginLeft로 되민다.
+  // marginLeft는 라벨 컨테이너 폭도 같이 줄여 실제 이동량은 값의 절반이다.
+  const xAxisLabelStyle = {
+    textAlign: "center" as const,
+    fontFamily: "sb-l",
+    fontSize: 12,
+    color: themeColor.text,
+    marginLeft: 20,
+  };
+
+  // 선·영역을 축 좌우 끝에 딱 붙이려 첫/마지막 점을 축 끝에 둔다(spacing 0).
+  // 그러면 두 라벨의 바깥쪽 절반이 SVG 캔버스를 벗어나 잘리므로, 그 절반만큼
+  // transform으로 안쪽으로 당긴다(정렬은 그만큼 어긋나지만 양 끝 라벨뿐).
+  const edgeLabelData = chartData.map((d, i) =>
+    i === 0
+      ? { ...d, labelTextStyle: { ...xAxisLabelStyle, marginLeft: 14 } }
+      : i === chartData.length - 1
+        ? {
+            ...d,
+            labelTextStyle: {
+              ...xAxisLabelStyle,
+              transform: [{ translateX: -16 }],
+            },
+          }
+        : d,
+  );
+
   const Y_AXIS_LABEL_WIDTH = 40;
-  const INITIAL_SPACING = 6;
-  const LABEL_OVERFLOW = 28;
   // 카드 콘텐츠 폭 = 화면폭 - (차트 탭 패딩 20*2 + 카드 패딩 12*2)
   const cardContentWidth = width - 64;
-  // 마지막 점의 플롯 x좌표(카드 오른쪽 끝에 붙도록)
-  const lastPlotX = cardContentWidth - Y_AXIS_LABEL_WIDTH;
-  // 뷰포트를 라벨이 넘칠 만큼만 카드 밖으로 확장
-  const chartWidth = lastPlotX + LABEL_OVERFLOW;
+  const chartWidth = cardContentWidth - Y_AXIS_LABEL_WIDTH;
   const pointSpacing =
-    chartData.length > 1
-      ? (lastPlotX - INITIAL_SPACING) / (chartData.length - 1)
-      : 0;
+    chartData.length > 1 ? chartWidth / (chartData.length - 1) : 0;
 
   // 몸무게는 좁은 대역(예: 70~80kg)에서 움직이므로 0부터 그리면 변화가 안 보인다.
   // 데이터 min/max 주변을 5kg 눈금으로 감싸 y축을 잡는다. (offset 아래로는 잘리므로 주의)
@@ -66,8 +81,8 @@ export const BodyChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.bodyTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <Text style={{ fontSize: 18 }}>{t("chart.bodyTitle")}</Text>
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {isEmptyData ? (
         <ChartEmptyState
           message={t("chart.bodyEmpty")}
@@ -76,6 +91,9 @@ export const BodyChart = () => {
       ) : (
         <View
           style={{
+            // gifted-charts가 그리는 축·격자선 실폭은 width prop보다 20pt쯤 넓다.
+            // 계산으로 맞추지 말고 카드 안쪽 폭에서 잘라낸다(equipment-chart와 동일).
+            overflow: "hidden",
             backgroundColor: themeColor.itemColor,
             paddingVertical: 4,
           }}
@@ -83,37 +101,33 @@ export const BodyChart = () => {
           <LineChart
             disableScroll
             areaChart
-            data={chartData}
-            rotateLabel
+            data={edgeLabelData}
             height={CHART_HEIGHT}
             width={chartWidth}
             spacing={pointSpacing}
             dataPointsColor={themeColor.tint}
-            color={themeColor.tint}
+            color={themeColor.tintText}
             thickness={2}
             startFillColor={themeColor.pressed}
             endFillColor={themeColor.itemColor}
             startOpacity={0.9}
             endOpacity={0.2}
-            initialSpacing={INITIAL_SPACING}
+            initialSpacing={0}
             endSpacing={0}
             noOfSections={noOfSections}
             maxValue={maxValue}
             yAxisOffset={yAxisOffset}
             stepValue={maxValue / noOfSections}
-            hideRules
+            // 같은 탭의 막대 차트들과 축·격자 표현을 맞춘다
+            rulesType="dashed"
+            rulesColor={themeColor.divider}
             yAxisLabelWidth={Y_AXIS_LABEL_WIDTH}
             yAxisTextStyle={{ color: themeColor.text }}
-            yAxisThickness={0}
+            yAxisThickness={1}
             xAxisColor={themeColor.subText}
-            xAxisThickness={0}
+            xAxisThickness={1}
             yAxisColor={themeColor.subText}
-            xAxisLabelTextStyle={{
-              textAlign: "center",
-              fontFamily: "sb-l",
-              fontSize: 12,
-              color: themeColor.text,
-            }}
+            xAxisLabelTextStyle={xAxisLabelStyle}
             pointerConfig={{
               // pointerStripHeight = 차트 높이 → 세로선이 위→아래 꽉 참 + 라벨 marginTop 0(보임).
               pointerStripHeight: CHART_HEIGHT,
@@ -162,7 +176,7 @@ export const BodyChart = () => {
                   >
                     <Text style={{ fontSize: 10 }}>{items[0].date}</Text>
                     <Text
-                      style={{ fontWeight: "bold", color: themeColor.tint }}
+                      style={{ fontWeight: "bold", color: themeColor.tintText }}
                     >
                       {items[0].value + "kg"}
                     </Text>

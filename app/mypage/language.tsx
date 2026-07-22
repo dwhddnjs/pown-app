@@ -36,7 +36,7 @@ export default function Language() {
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: themeColor.tint }]}>
+        <Text style={[styles.title, { color: themeColor.tintText }]}>
           {t("language.title")}
         </Text>
         <Text style={[styles.desc, { color: themeColor.subText }]}>
@@ -51,7 +51,7 @@ export default function Language() {
             title={LANG_LABEL[option.key]}
             right={
               language === option.key ? (
-                <Entypo name="check" size={18} color={themeColor.tint} />
+                <Entypo name="check" size={18} color={themeColor.tintText} />
               ) : undefined
             }
             onPress={() => onSubmitLanguage(option.key)}

@@ -29,7 +29,7 @@ export const EquipmentBox = () => {
         <MaterialCommunityIcons
           name="dumbbell"
           size={20}
-          color={themeColor.tint}
+          color={themeColor.tintText}
         />
         <Text style={{ fontSize: 16 }}>{t("plan.equipment")}</Text>
       </IconTitle>
@@ -51,7 +51,7 @@ export const EquipmentBox = () => {
               style={[
                 // 영어는 6칸 폭에 안 맞아 축약형을 쓰고 글자도 한 단계 줄인다
                 lang === "en" && { fontSize: 13 },
-                { color: themeColor.tint },
+                { color: themeColor.tintText },
                 equipment === item && {
                   color: themeColor.text,
                 },

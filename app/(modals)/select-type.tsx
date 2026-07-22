@@ -67,10 +67,10 @@ export default function ModalScreen() {
           style={styles.dateButton}
           onPress={() => setOpen(true)}
         >
-          <Text style={[styles.date, { color: themeColor.tint }]}>
+          <Text style={[styles.date, { color: themeColor.tintText }]}>
             {`📆 ${formatPlanDateTime(date, lang)}`}
           </Text>
-          <Entypo name="select-arrows" size={18} color={themeColor.tint} />
+          <Entypo name="select-arrows" size={18} color={themeColor.tintText} />
         </TouchableOpacity>
       </View>
 
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    paddingTop: 165,
+    paddingTop: 180,
     gap: 50,
   },
 

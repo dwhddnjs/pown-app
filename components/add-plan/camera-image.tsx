@@ -1,5 +1,6 @@
+import { useState } from "react"
 // component
-import { StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
+import { StyleSheet, TouchableOpacity } from "react-native"
 import { Text, View } from "../themed"
 import { Button } from "../button"
 import { IconTitle } from "../icon-title"
@@ -16,6 +17,10 @@ import { resolveMediaUri } from "@/lib/media"
 import AntDesign from "@expo/vector-icons/AntDesign"
 import { toast } from "sonner-native"
 
+// 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
+const IMAGE_GAP = 8
+const LIST_PADDING = 20
+
 interface CameraImageProps {}
 
 export const CameraImage = ({}: CameraImageProps) => {
@@ -23,6 +28,7 @@ export const CameraImage = ({}: CameraImageProps) => {
   const t = useT()
   const router = useRouter()
   const { imageUri, setRemoveImageUri } = usePlanStore()
+  const [gridWidth, setGridWidth] = useState(0)
 
   const onRemoveImageUri = (id: number) => {
     setRemoveImageUri(id)
@@ -32,10 +38,10 @@ export const CameraImage = ({}: CameraImageProps) => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
-          <AntDesign name="camera" size={20} color={themeColor.tint} />
+          <AntDesign name="camera" size={20} color={themeColor.tintText} />
           <Text style={{ fontSize: 16 }}>{t("plan.photo")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
       </View>
       <Button
         type="bordered"
@@ -49,9 +55,21 @@ export const CameraImage = ({}: CameraImageProps) => {
       >
         {t("plan.takePhoto")}
       </Button>
-      <View style={styles.imageListContainer}>
+      <View
+        style={styles.imageListContainer}
+        onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
+      >
         {imageUri.map((item) => (
-          <View style={{ flex: 4, position: "relative" }} key={item.id}>
+          <View
+            style={{
+              position: "relative",
+              width:
+                imageUri.length === 1 || !gridWidth
+                  ? "100%"
+                  : (gridWidth - LIST_PADDING * 2 - IMAGE_GAP) / 2,
+            }}
+            key={item.id}
+          >
             <Image
               key={item.id}
               source={{ uri: resolveMediaUri(item.imageUri) }}
@@ -97,19 +115,19 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   imageListContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: LIST_PADDING,
     paddingVertical: 12,
     flexDirection: "row",
-    gap: 8,
-    flexWrap: "nowrap",
+    flexWrap: "wrap",
+    gap: IMAGE_GAP,
   },
   image: {
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 18,
+    borderCurve: "continuous",
     borderWidth: 1,
   },
   closeButton: {
-    flex: 4,
     position: "absolute",
     right: -4,
     top: -4,

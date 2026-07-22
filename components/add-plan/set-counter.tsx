@@ -24,10 +24,10 @@ export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
-          <Octicons name="number" size={20} color={themeColor.tint} />
+          <Octicons name="number" size={20} color={themeColor.tintText} />
           <Text style={{ fontSize: 16 }}>{t("plan.setAndReps")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
       </View>
       <Button
         type="bordered"

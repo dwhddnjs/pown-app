@@ -1,15 +1,20 @@
-import { StyleSheet, useColorScheme } from "react-native"
-import React from "react"
-import { Text, View } from "./themed"
-import Colors from "@/constants/Colors"
+import { StyleSheet, useColorScheme } from "react-native";
+import React from "react";
+import { Text, View } from "./themed";
+import Colors from "@/constants/Colors";
 
 export const NumberBallIcon = ({ children }: { children: React.ReactNode }) => {
-  const colorScheme = useColorScheme()
+  const colorScheme = useColorScheme();
   return (
     <View
       style={[
         styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].subText },
+        // { backgroundColor: Colors[colorScheme ?? "light"].subText },
+        {
+          borderColor: Colors[colorScheme ?? "light"].tint,
+          borderWidth: 1.5,
+          backgroundColor: "transparent",
+        },
       ]}
     >
       <Text
@@ -18,8 +23,8 @@ export const NumberBallIcon = ({ children }: { children: React.ReactNode }) => {
         {children}
       </Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -32,8 +37,8 @@ const styles = StyleSheet.create({
 
   text: {
     marginTop: 2,
-    fontFamily: "sb-b",
+    fontFamily: "sb-m",
     textAlign: "center",
-    fontSize: 12,
+    fontSize: 10,
   },
-})
+});

@@ -122,7 +122,7 @@ export default function MultiPlanScreen() {
           ]}
           activeOpacity={0.7}
         >
-          <FontAwesome6 name="plus" size={30} color={themeColor.tint} />
+          <FontAwesome6 name="plus" size={30} color={themeColor.tintText} />
         </TouchableOpacity>
       </View>
 
