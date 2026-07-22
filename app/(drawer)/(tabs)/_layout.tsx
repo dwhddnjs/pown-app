@@ -71,13 +71,15 @@ export default function TabLayout() {
       />
     ),
     tabBarActiveTintColor: themColor.tabIconSelected,
+    // 탭바가 반투명 BlurView라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다
+    tabBarInactiveTintColor: themColor.tabIconDefault,
     tabBarItemStyle: {
       paddingBottom: 3,
       paddingTop: 3,
     },
     tabBarLabelStyle: {
       fontFamily: "sb-m",
-      fontSize: 8,
+      fontSize: 10,
     },
   };
 
@@ -92,7 +94,7 @@ export default function TabLayout() {
                 name="dumbbell.fill"
                 type="hierarchical"
                 tintColor={color}
-                size={32}
+                size={24}
               />
             ),
             tabBarLabel: t("tab.workout"),
@@ -133,7 +135,7 @@ export default function TabLayout() {
                   <FontAwesome6
                     name="plus"
                     size={28}
-                    color={themColor.background}
+                    color={themColor.fabIcon}
                   />
                 </Animated.View>
               </View>

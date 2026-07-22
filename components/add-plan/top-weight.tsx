@@ -58,7 +58,7 @@ export const TopWeight = ({
   return (
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
       <IconTitle style={{ gap: 8 }}>
-        <WeightIcon name="weight-kilogram" size={20} color={themeColor.tint} />
+        <WeightIcon name="weight-kilogram" size={20} color={themeColor.tintText} />
         <Text style={{ fontSize: 16 }}>{t("plan.targetWeight")}</Text>
       </IconTitle>
 
@@ -73,7 +73,7 @@ export const TopWeight = ({
           onPress={() => {
             inputRef.current?.focus();
           }}
-          style={[styles.container, { borderColor: themeColor.subText }]}
+          style={[styles.container, { borderColor: themeColor.tint }]}
         >
           <TextInput
             ref={inputRef}
@@ -83,7 +83,7 @@ export const TopWeight = ({
                 onFocusScroll(targetPosition);
               });
             }}
-            style={[styles.input, { color: themeColor.tint }]}
+            style={[styles.input, { color: themeColor.tintText }]}
             maxLength={5}
             keyboardType="numeric"
             value={weight}
@@ -98,7 +98,7 @@ export const TopWeight = ({
           style={[
             styles.typeButtonContainer,
             {
-              borderColor: themeColor.subText,
+              borderColor: themeColor.tint,
             },
           ]}
         >

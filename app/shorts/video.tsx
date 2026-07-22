@@ -233,7 +233,7 @@ export default function Video() {
                 : requestMicPermission()
             }
           >
-            <Text style={[styles.cancelText, { color: themeColor.tint }]}>
+            <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}
             </Text>
           </Pressable>

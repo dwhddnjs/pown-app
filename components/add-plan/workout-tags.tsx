@@ -1,11 +1,6 @@
 import React from "react"
 // component
-import {
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  useColorScheme,
-} from "react-native"
+import { StyleSheet, TouchableOpacity } from "react-native"
 import { Text, View } from "../themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
@@ -64,9 +59,9 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
             <Text
               style={[
                 styles.title,
-                { color: themeColor.tint },
+                { color: themeColor.tintText },
                 item === workout && {
-                  color: themeColor.text,
+                  color: themeColor.onTint,
                 },
               ]}
             >
@@ -80,7 +75,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
           style={[
             styles.buttonContainer,
             {
-              borderColor: themeColor.subText,
+              borderColor: themeColor.tint,
             },
           ]}
         >
@@ -89,19 +84,19 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
               styles.plusButton,
               {
                 backgroundColor: themeColor.tint,
-                borderColor: themeColor.subText,
+                borderColor: themeColor.tint,
               },
             ]}
             onPress={() => setOpen(true)}
           >
-            <FontAwesome name="plus" size={14} color={themeColor.text} />
+            <FontAwesome name="plus" size={14} color={themeColor.onTint} />
           </TouchableOpacity>
           <TouchableOpacity
             style={[
               styles.plusButton,
               {
                 backgroundColor: themeColor.itemColor,
-                borderColor: themeColor.subText,
+                borderColor: themeColor.tint,
               },
             ]}
             onPress={() => onOpenRemoveDialog()}

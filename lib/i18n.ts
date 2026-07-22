@@ -103,6 +103,7 @@ const ko = {
 
   // 검색
   "search.cancel": "취소",
+  "search.placeholder": "운동 · 부위 · 기구 검색",
   "search.hint": "🔍  키워드를 입력해주세요.\n예:) 바벨, 등, 프레스",
   "search.noResult": "검색 결과가 없습니다.",
 
@@ -176,7 +177,7 @@ const ko = {
   "theme.systemMode": "시스템 기본 설정",
   "theme.title": "컬러모드를 선택해 보세요!",
   "theme.desc":
-    "다크모드가 마음에 안 들면 라이트모드로 사용해보세요 밝은 화면과 좋은 눈뽕이 당신과 함께 할 것 입니다 하지만 다크모드를 권장합니다.",
+    "다크 모드가 마음에 들지 않는다면 라이트 모드로 바꿔보세요.\n시스템 기본 설정을 고르면 기기 설정을 그대로 따라갑니다.",
 
   // 언어
   "language.title": "언어를 선택해 보세요!",
@@ -197,6 +198,7 @@ const ko = {
   "userInfo.male": "남자",
   "userInfo.female": "여자",
   "userInfo.required": "정보를 모두 기입해주세요!",
+  "userInfo.outOfRange": "입력한 값의 범위를 다시 확인해주세요.",
   "userInfo.saved": "내정보가 추가 되었습니다!",
   "userInfo.ageValue": "{n}세",
   "userInfo.emptyTitle": "3대 중량을 기록해보세요",
@@ -207,7 +209,7 @@ const ko = {
   // 데이터 관리
   "data.title": "당신이 기록한 운동 계획을 보관하세요.",
   "data.desc":
-    "앱을 삭제하면 기록 했던 모든 운동 계획이 삭제됩니다. 나중에 당신이 돌아올 수 있다는 여지를 두기 위해 백업 파일로 저장해서 보관하는건 어떨까요?",
+    "앱을 삭제하면 기록했던 모든 운동 계획이 사라집니다.\n나중에 다시 돌아올 수 있도록 백업 파일로 저장해 보관하는 건 어떨까요?",
   "data.backupSection": "백업 · 복원",
   "data.backup": "백업",
   "data.backupDesc": ".pown 파일로 내보내기",
@@ -315,6 +317,7 @@ const en: Record<TKey, string> = {
   "tag.selectToRemove": "Select a workout to delete.",
 
   "search.cancel": "Cancel",
+  "search.placeholder": "Search workout, part, equipment",
   "search.hint": "🔍  Type a keyword.\ne.g. Barbell, Back, Press",
   "search.noResult": "No results found.",
 
@@ -402,6 +405,7 @@ const en: Record<TKey, string> = {
   "userInfo.male": "Male",
   "userInfo.female": "Female",
   "userInfo.required": "Please fill in every field!",
+  "userInfo.outOfRange": "Some values look out of range. Please check them.",
   "userInfo.saved": "Profile saved!",
   "userInfo.ageValue": "{n} yrs",
   "userInfo.emptyTitle": "Record your Big 3",

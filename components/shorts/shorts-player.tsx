@@ -1,9 +1,9 @@
-import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store"
+import { ShortsVideoTypes } from "@/hooks/use-shorts-store"
 import { resolveMediaUri } from "@/lib/media"
 import { useEvent } from "expo"
 import { useVideoPlayer, VideoView } from "expo-video"
-import React, { useEffect, useRef } from "react"
-import { StyleSheet, Dimensions } from "react-native"
+import React, { useEffect } from "react"
+import { StyleSheet } from "react-native"
 
 interface ShortsPlayerProps {
   video: ShortsVideoTypes

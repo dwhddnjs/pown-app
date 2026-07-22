@@ -59,7 +59,7 @@ export const AddWorkoutTagDialog = ({
           style={[
             styles.input,
             {
-              borderColor: themeColor.subText,
+              borderColor: themeColor.tint,
               color: themeColor.text,
             },
           ]}

@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 // component
 import {
   Dimensions,
@@ -7,11 +6,9 @@ import {
   TouchableOpacity,
   Image,
 } from "react-native";
-import { Text, View } from "@/components/themed";
+import { View } from "@/components/themed";
 // expo
 import { useRouter } from "expo-router";
-// zustand
-import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -24,7 +21,6 @@ import Entypo from "@expo/vector-icons/Entypo";
 import { EmptyVideos } from "@/components/shorts/empty-videos";
 
 export default function TabTwoScreen() {
-  const { onReset, ...result } = useUserStore();
   const themeColor = useCurrentThemeColor();
   const screenWidth = Dimensions.get("window").width;
   const { videos } = useShortsStore();
@@ -72,19 +68,13 @@ export default function TabTwoScreen() {
         ]}
         onPress={() => push("/shorts/video")}
       >
-        <Entypo name="video-camera" size={28} color={themeColor.tint} />
+        <Entypo name="video-camera" size={28} color={themeColor.tintText} />
       </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  box: {
-    borderWidth: 1,
-    borderColor: "white",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   image: {
     width: "100%",
     aspectRatio: 9 / 16,

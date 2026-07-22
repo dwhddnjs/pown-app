@@ -72,7 +72,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="account-edit"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.userInfo")}
@@ -84,7 +84,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="circle-half-full"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.themeMode")}
@@ -97,7 +97,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="translate"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.language")}
@@ -110,7 +110,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="calculator-variant"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.calculator")}
@@ -125,7 +125,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="database-outline"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.dataManage")}
@@ -141,7 +141,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="email-outline"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.contact")}
@@ -153,7 +153,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="information-outline"
               size={20}
-              color={themeColor.tint}
+              color={themeColor.tintText}
             />
           }
           title={t("my.appVersion")}

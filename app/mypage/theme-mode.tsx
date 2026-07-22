@@ -40,7 +40,7 @@ export default function ThemeMode() {
   return (
     <View style={styles.container}>
       <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: themeColor.tint }]}>
+        <Text style={[styles.title, { color: themeColor.tintText }]}>
           {t("theme.title")}
         </Text>
         <Text style={[styles.desc, { color: themeColor.subText }]}>
@@ -55,13 +55,13 @@ export default function ThemeMode() {
               <MaterialCommunityIcons
                 name={option.icon}
                 size={20}
-                color={themeColor.tint}
+                color={themeColor.tintText}
               />
             }
             title={t(option.title)}
             right={
               theme === option.key ? (
-                <Entypo name="check" size={18} color={themeColor.tint} />
+                <Entypo name="check" size={18} color={themeColor.tintText} />
               ) : undefined
             }
             onPress={() => onSubmitTheme(option.key)}

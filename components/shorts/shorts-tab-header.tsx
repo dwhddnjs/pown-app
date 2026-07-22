@@ -30,7 +30,6 @@ const styles = StyleSheet.create({
   },
   container: {
     backgroundColor: "transparent",
-    // height: 50,
     width: "100%",
     paddingVertical: 8,
     paddingLeft: 8,

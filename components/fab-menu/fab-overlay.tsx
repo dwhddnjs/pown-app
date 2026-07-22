@@ -162,5 +162,7 @@ const styles = StyleSheet.create({
   actionLabel: {
     fontSize: 12,
     fontFamily: "sb-l",
+    // 60% 검정 오버레이 위에 뜨는 라벨이라 테마와 무관하게 흰색이어야 읽힌다
+    color: "#fff",
   },
 });

@@ -27,12 +27,12 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
     <View style={styles.main}>
       <View style={styles.container}>
         <IconTitle style={{ gap: 7, paddingLeft: 20, paddingBottom: 10 }}>
-          <NoteIcon name="note-text" size={20} color={themeColor.tint} />
+          <NoteIcon name="note-text" size={20} color={themeColor.tintText} />
           <Text style={{ fontSize: 16 }}>{t("plan.quickNote")}</Text>
         </IconTitle>
         <Link
           href="/(modals)/note"
-          style={[styles.link, { color: themeColor.tint }]}
+          style={[styles.link, { color: themeColor.tintText }]}
         >
           {t("plan.openFullNote")}
         </Link>
@@ -55,7 +55,7 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
           style={[
             styles.input,
             {
-              borderColor: themeColor.subText,
+              borderColor: themeColor.tint,
               color: themeColor.text,
             },
           ]}

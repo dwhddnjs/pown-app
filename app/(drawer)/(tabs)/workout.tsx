@@ -108,7 +108,7 @@ export default function TabOneScreen() {
             },
           ]}
         >
-          <MaterialIcons name="calculate" size={36} color={themeColor.tint} />
+          <MaterialIcons name="calculate" size={36} color={themeColor.tintText} />
         </TouchableOpacity>
       </View>
     );
@@ -150,17 +150,8 @@ export default function TabOneScreen() {
               ]}
             >
               <Text
-                style={[styles.dateText, { color: themeColor.background }]}
+                style={[styles.dateText, { color: themeColor.onTint }]}
               >{`🗓️  ${formatDate(date, lang)}`}</Text>
-
-              <View
-                style={[
-                  styles.dot,
-                  {
-                    backgroundColor: themeColor.background,
-                  },
-                ]}
-              />
             </View>
             <View
               style={[
@@ -206,7 +197,7 @@ export default function TabOneScreen() {
           },
         ]}
       >
-        <MaterialIcons name="calculate" size={36} color={themeColor.tint} />
+        <MaterialIcons name="calculate" size={36} color={themeColor.tintText} />
       </TouchableOpacity>
     </View>
   );
@@ -215,15 +206,6 @@ export default function TabOneScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  date: {
-    fontSize: 14,
-    fontFamily: "sb-l",
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
   },
   workoutList: {
     borderBottomRightRadius: 12,
@@ -239,19 +221,6 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-  },
-  separator: {
-    marginVertical: 30,
-    height: 1,
-    width: "80%",
-  },
-  empty: {
-    width: 100,
-    height: 150,
-  },
   calculateButton: {
     width: 56,
     height: 56,
@@ -278,11 +247,5 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 14,
     fontFamily: "sb-l",
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 50,
-    marginTop: 4,
   },
 });

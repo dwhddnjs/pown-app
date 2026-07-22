@@ -1,11 +1,10 @@
 import React from "react"
 // component
-import { StyleSheet, useColorScheme, FlatList } from "react-native"
+import { StyleSheet, FlatList } from "react-native"
 import { Text, View } from "../themed"
 import { ConditionIcon } from "@/components/add-plan/condition-icon"
 import { IconTitle } from "../icon-title"
 // color
-import Colors from "@/constants/Colors"
 // lib
 import { conditionData } from "@/constants/constants"
 // icon
@@ -24,11 +23,11 @@ export const ConditionList = () => {
           <BatteryIcon
             name="battery-heart-variant"
             size={20}
-            color={themeColor.tint}
+            color={themeColor.tintText}
           />
           <Text style={{ fontSize: 16 }}>{t("plan.condition")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tint }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
       </View>
       <View style={styles.container}>
         <FlatList

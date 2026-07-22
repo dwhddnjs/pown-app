@@ -60,6 +60,11 @@ export const CalendarGrid = () => {
   const firstDay = startOfWeek(firstDayOfMonth);
   const lastDay = endOfWeek(lastDayOfMonth);
   const days = eachDayOfInterval({ start: firstDay, end: lastDay });
+  // 셀 폭을 100/7% 로 주면 7칸 합이 부동소수점 오차로 100%를 넘겨 마지막 칸(토)이 줄바꿈된다.
+  // 주 단위로 끊어 flex:1 로 깔면 요일 헤더와 열이 정확히 맞는다.
+  const weeks = Array.from({ length: days.length / 7 }, (_, i) =>
+    days.slice(i * 7, i * 7 + 7),
+  );
 
   const getDayIcon = (isBeforeToday: boolean, findItem?: WorkoutPlanTypes) => {
     const icons = {
@@ -79,7 +84,8 @@ export const CalendarGrid = () => {
     if (isBeforeToday) {
       return (
         <View style={[styles.emptyIcon, { backgroundColor: themeColor.empty }]}>
-          <Ionicons name="close" size={24} color={themeColor.itemColor} />
+          {/* empty(#1e1e1e/#EFEEF3) 위에 itemColor를 올리면 대비 1.2:1로 사실상 안 보인다 */}
+          <Ionicons name="close" size={24} color={themeColor.subText} />
         </View>
       );
     }
@@ -111,7 +117,7 @@ export const CalendarGrid = () => {
                 })}{" "}
             {t("calendar.gymVisits")}
           </Text>
-          <Text style={{ fontSize: 20, color: themeColor.tint }}>
+          <Text style={{ fontSize: 20, color: themeColor.tintText }}>
             {t("common.count", { n: workoutCount })}
           </Text>
         </View>
@@ -139,56 +145,62 @@ export const CalendarGrid = () => {
         </View>
 
         {/* 고정 35~42칸 그리드라 가상화가 불필요 — ScrollView 안 FlatList 중첩 에러(VirtualizedLists) 방지 */}
-        <View
-          style={[styles.daysGrid, { backgroundColor: themeColor.itemColor }]}
-        >
-          {days.map((item) => {
-            const isCurrentMonth = item.getMonth() === monthDate.getMonth();
-            const findItem = monthlyPlanData.findLast((el) => {
-              const split = el.createdAt.split(".");
-              const dayKey = format(item, "yyyyMMdd");
-              const itemDate = `${split[0]}${split[1]}${split[2].slice(0, 2)}`;
-              return dayKey === itemDate;
-            });
-            const isToday = todayDate === format(item, "yyyyMMdd");
-            const beforeToday = isBefore(
-              startOfDay(item),
-              startOfDay(new Date()),
-            );
+        {weeks.map((week) => (
+          <View
+            key={week[0].toString()}
+            style={[styles.week, { backgroundColor: themeColor.itemColor }]}
+          >
+            {week.map((item) => {
+              const isCurrentMonth = item.getMonth() === monthDate.getMonth();
+              const findItem = monthlyPlanData.findLast((el) => {
+                const split = el.createdAt.split(".");
+                const dayKey = format(item, "yyyyMMdd");
+                const itemDate = `${split[0]}${split[1]}${split[2].slice(0, 2)}`;
+                return dayKey === itemDate;
+              });
+              const isToday = todayDate === format(item, "yyyyMMdd");
+              const beforeToday = isBefore(
+                startOfDay(item),
+                startOfDay(new Date()),
+              );
 
-            return (
-              <TouchableOpacity
-                key={item.toString()}
-                style={[styles.numberIcon, { opacity: isCurrentMonth ? 1 : 0.4 }]}
-                onPress={() => onOpenWorkoutModal(findItem)}
-              >
-                <View
+              return (
+                <TouchableOpacity
+                  key={item.toString()}
                   style={[
-                    {
-                      borderRadius: 50,
-                      borderWidth: 1,
-                      borderColor: themeColor.background,
-                    },
-                    isToday && {
-                      borderWidth: 3,
-                      borderColor: themeColor.tint,
-                    },
+                    styles.numberIcon,
+                    { opacity: isCurrentMonth ? 1 : 0.4 },
                   ]}
+                  onPress={() => onOpenWorkoutModal(findItem)}
                 >
-                  {getDayIcon(beforeToday, findItem)}
-                </View>
-                <Text
-                  style={[
-                    { fontFamily: "sb-l", color: themeColor.text },
-                    isToday && { fontFamily: "sb-m", color: themeColor.tint },
-                  ]}
-                >
-                  {format(item, "d")}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+                  <View
+                    style={[
+                      {
+                        borderRadius: 50,
+                        borderWidth: 1,
+                        borderColor: themeColor.background,
+                      },
+                      isToday && {
+                        borderWidth: 3,
+                        borderColor: themeColor.tint,
+                      },
+                    ]}
+                  >
+                    {getDayIcon(beforeToday, findItem)}
+                  </View>
+                  <Text
+                    style={[
+                      { fontFamily: "sb-l", color: themeColor.text },
+                      isToday && { fontFamily: "sb-m", color: themeColor.tintText },
+                    ]}
+                  >
+                    {format(item, "d")}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -201,12 +213,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingHorizontal: 6,
   },
-  daysGrid: {
+  week: {
     flexDirection: "row",
-    flexWrap: "wrap",
   },
   numberIcon: {
-    width: `${100 / 7}%`,
+    flex: 1,
     borderRadius: 50,
     justifyContent: "center",
     alignItems: "center",

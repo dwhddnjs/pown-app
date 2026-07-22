@@ -32,8 +32,8 @@ export const ConditionCount = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18, marginLeft: 6 }}>{t("chart.conditionTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.tabIconDefault }} />
+      <Text style={{ fontSize: 18 }}>{t("chart.conditionTitle")}</Text>
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {isEmptyCount ? (
         <ChartEmptyState
           message={t("chart.conditionEmpty")}
@@ -54,21 +54,33 @@ export const ConditionCount = () => {
               ]}
               key={item.id}
             >
+              {/* 아이콘과 같은 크기의 래퍼를 둬야 배지가 글리프 밖 모서리에 붙는다 */}
               <View
                 style={[
-                  styles.numberCount,
-                  { backgroundColor: themeColor.subText },
+                  styles.iconBox,
+                  { backgroundColor: themeColor.itemColor },
                 ]}
               >
-                <Text style={{ fontSize: 10 }}>
-                  {(() => {
-                    const key = convertConditionType(item.condition);
-                    return key ? (getCount[key] ?? 0) : 0;
-                  })()}
-                </Text>
+                <View
+                  style={[
+                    styles.numberCount,
+                    {
+                      borderColor: themeColor.tint,
+                      borderWidth: 1.5,
+                      backgroundColor: "transparent",
+                    },
+                  ]}
+                >
+                  <Text style={{ fontSize: 10 }}>
+                    {(() => {
+                      const key = convertConditionType(item.condition);
+                      return key ? (getCount[key] ?? 0) : 0;
+                    })()}
+                  </Text>
+                </View>
+                {getIcon(item.condition, 44, themeColor.tint)}
               </View>
-              {getIcon(item.condition, 44, themeColor.tint)}
-              <Text style={[styles.iconText, { color: themeColor.tint }]}>
+              <Text style={[styles.iconText, { color: themeColor.tintText }]}>
                 {tCondition(item.condition, lang)}
               </Text>
             </View>
@@ -79,7 +91,6 @@ export const ConditionCount = () => {
   );
 };
 
-
 const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 12,
@@ -88,17 +99,20 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconListContainer: {
-    justifyContent: "center",
-    alignItems: "center",
     flexDirection: "row",
-    gap: 9,
+    rowGap: 12,
     paddingVertical: 4,
     flexWrap: "wrap",
   },
+  // 9개를 5열 고정 폭으로 깔아야 2행(4개)이 가운데로 밀리지 않고 열이 맞는다
   iconItem: {
     justifyContent: "center",
     alignItems: "center",
-    minWidth: 54,
+    width: "20%",
+  },
+  iconBox: {
+    width: 44,
+    height: 44,
     position: "relative",
   },
   iconText: {
@@ -112,8 +126,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 50,
     position: "absolute",
-    top: -2,
-    left: -2,
+    top: -6,
+    left: -6,
     zIndex: 1,
   },
 });

@@ -72,10 +72,10 @@ export const UserDataCard = () => {
             {t("userInfo.emptyDesc")}
           </Text>
           <View style={styles.emptyLink}>
-            <Text style={[styles.emptyLinkText, { color: themeColor.tint }]}>
+            <Text style={[styles.emptyLinkText, { color: themeColor.tintText }]}>
               {t("userInfo.goWrite")}
             </Text>
-            <AntDesign name="right" size={12} color={themeColor.tint} />
+            <AntDesign name="right" size={12} color={themeColor.tintText} />
           </View>
         </View>
       </TouchableOpacity>
@@ -99,9 +99,9 @@ export const UserDataCard = () => {
           <AntDesign name="right" size={11} color={themeColor.subText} />
         </View>
       </View>
-      <Text style={[styles.total, { color: themeColor.tint }]}>
+      <Text style={[styles.total, { color: themeColor.tintText }]}>
         {total}
-        <Text style={[styles.totalUnit, { color: themeColor.tint }]}>
+        <Text style={[styles.totalUnit, { color: themeColor.tintText }]}>
           {" "}
           kg
         </Text>
