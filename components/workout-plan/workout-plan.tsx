@@ -106,12 +106,13 @@ interface WorkoutPlanProps {
   hideProgress?: boolean;
 }
 
-export const WorkoutPlan = ({
+// 완료 토글 시 전체 리스트가 리렌더되지 않도록 메모 — 참조가 유지된 플랜은 스킵한다
+export const WorkoutPlan = React.memo(function WorkoutPlan({
   item,
   index,
   totalLength,
   hideProgress,
-}: WorkoutPlanProps) => {
+}: WorkoutPlanProps) {
   const themeColor = useCurrentThemeColor();
   const t = useT();
   // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
@@ -296,7 +297,7 @@ export const WorkoutPlan = ({
       </View>
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

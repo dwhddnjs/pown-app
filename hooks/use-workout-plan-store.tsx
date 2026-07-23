@@ -41,36 +41,30 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
         }),
       setCompleteProgress: (id: number, itemId: number) =>
         set((prev) => {
-          const newWorkoutList = [...prev.workoutPlanList];
-          const findIndex = newWorkoutList.findIndex((item) => item.id === id);
+          const findIndex = prev.workoutPlanList.findIndex(
+            (item) => item.id === id,
+          );
           if (findIndex === -1) return prev;
-          const selectItem = newWorkoutList[findIndex].setWithCount.map(
-            (item) => {
-              if (item.id === itemId) {
-                return {
+
+          // createdAt이 안 바뀌므로 순서는 그대로 — 재정렬 없이 제자리 갱신해
+          // 토글된 플랜 하나만 새 참조로 만든다(나머지는 참조 유지 → 리렌더 최소화)
+          const target = prev.workoutPlanList[findIndex];
+          const setWithCount = target.setWithCount.map((item) =>
+            item.id === itemId
+              ? {
                   ...item,
                   // 완료를 실수로 눌러도 다시 탭해 진행중으로 되돌릴 수 있게 토글
                   progress:
                     item.progress === "완료"
                       ? ("진행중" as const)
                       : ("완료" as const),
-                };
-              }
-              return item;
-            },
+                }
+              : item,
           );
 
-          const newObj = {
-            ...newWorkoutList[findIndex],
-            setWithCount: selectItem,
-          };
-
-          const newArr = newWorkoutList.filter((item) => item.id !== id);
-          const result = sortByCreatedAtDesc([...newArr, newObj]);
-
-          return {
-            workoutPlanList: result,
-          };
+          const workoutPlanList = [...prev.workoutPlanList];
+          workoutPlanList[findIndex] = { ...target, setWithCount };
+          return { workoutPlanList };
         }),
       setRemovePlan: (id: number) =>
         set((prev) => ({

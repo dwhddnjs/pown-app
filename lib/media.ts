@@ -33,6 +33,14 @@ export const resolveMediaUri = <T extends string | undefined>(stored: T): T =>
     ? FileSystem.documentDirectory + stored
     : stored) as T
 
+// 앱 소유 media/ 파일만 삭제 — 구 데이터(절대경로·ph://)는 건드리지 않는다
+export const removeAppOwnedMedia = (stored?: string) => {
+  if (!isAppOwnedMedia(stored)) return
+  FileSystem.deleteAsync(resolveMediaUri(stored), { idempotent: true }).catch(
+    () => {},
+  )
+}
+
 const isAppOwned = (item: ImageUriType) => isAppOwnedMedia(item.imageUri)
 
 // 촬영한 임시 사진(캐시 경로)을 앱 내부 저장소로 복사해 상대경로로 바꿔 돌려준다.

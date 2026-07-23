@@ -29,26 +29,28 @@ export const SetListItem = ({
   const lang = useLanguage();
 
   return (
-    <View
-      style={[
-        styles.container,
-        {
-          backgroundColor: themeColor.itemColor,
-          borderBottomColor: themeColor.divider,
-        },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
+      {/* 구분선은 완료 버튼 전까지만 — 버튼 아래는 선이 없다 */}
       <View
         style={[
-          styles.ballContainer,
-          { backgroundColor: themeColor.itemColor },
+          styles.leftGroup,
+          {
+            backgroundColor: themeColor.itemColor,
+            borderBottomColor: themeColor.divider,
+          },
         ]}
       >
-        <NumberBallIcon>{setIndex}</NumberBallIcon>
-      </View>
-      <View
-        style={[styles.setCounter, { backgroundColor: themeColor.itemColor }]}
-      >
+        <View
+          style={[
+            styles.ballContainer,
+            { backgroundColor: themeColor.itemColor },
+          ]}
+        >
+          <NumberBallIcon>{setIndex}</NumberBallIcon>
+        </View>
+        <View
+          style={[styles.setCounter, { backgroundColor: themeColor.itemColor }]}
+        >
         <View
           style={[
             styles.setCounterContainer,
@@ -75,6 +77,7 @@ export const SetListItem = ({
             {tProgress(item.progress, lang)}
           </Text>
         )}
+        </View>
       </View>
       {!hideProgress && (
         <View
@@ -85,6 +88,7 @@ export const SetListItem = ({
         >
           {item.progress === "완료" ? (
             <TouchableOpacity
+              activeOpacity={1}
               style={[
                 styles.completedIcon,
                 { backgroundColor: themeColor.itemColor },
@@ -92,26 +96,19 @@ export const SetListItem = ({
               onPress={() => setCompleteProgress(planId, item.id)}
             >
               <CheckCircle
-                name="checkcircleo"
-                size={24}
-                color={themeColor.tintText}
+                name="checkcircle"
+                size={28}
+                color={themeColor.tint}
               />
             </TouchableOpacity>
           ) : (
             <TouchableOpacity
-              style={[
-                styles.button,
-                {
-                  backgroundColor: themeColor.subText,
-                  borderRadius: 8,
-                },
-              ]}
+              activeOpacity={1}
+              style={[styles.button, { backgroundColor: themeColor.tint }]}
               onPress={() => setCompleteProgress(planId, item.id)}
             >
-              {/* subText 배경 위 기본 텍스트색은 2.2:1 — itemColor로 반전해야 AA를 넘는다 */}
-              <Text
-                style={[styles.buttonText, { color: themeColor.itemColor }]}
-              >
+              {/* tint로 채운 면 위 글자는 onTint(양 테마 7:1↑) — 흰색은 대비 미달 */}
+              <Text style={[styles.buttonText, { color: themeColor.onTint }]}>
                 {tProgress("완료", lang)}
               </Text>
             </TouchableOpacity>
@@ -125,7 +122,13 @@ export const SetListItem = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    // 구분선을 행 전체에 걸어야 완료 여부(버튼 폭 변화)와 무관하게 길이가 일정하다
+    // 구분선(leftGroup)과 완료 버튼 사이 간격
+    gap: 8,
+  },
+  // 구분선은 이 그룹(넘버볼+세트정보)에만 — 완료 버튼 아래로는 이어지지 않는다
+  leftGroup: {
+    flex: 1,
+    flexDirection: "row",
     borderBottomWidth: 1,
   },
   ballContainer: { paddingTop: 2 },
@@ -160,15 +163,16 @@ const styles = StyleSheet.create({
   button: {
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
+    paddingHorizontal: 14,
+    // 앱 전반의 알약 모양(세트 아이템·넘버볼)과 통일
+    borderRadius: 50,
   },
-
   buttonText: {
+    fontFamily: "sb-m",
     fontSize: 12,
   },
   completedIcon: {
     justifyContent: "center",
-
     paddingHorizontal: 10,
   },
 });
