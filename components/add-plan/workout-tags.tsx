@@ -1,45 +1,45 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet, TouchableOpacity } from "react-native"
-import { Text, View } from "../themed"
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View } from "../themed";
 // zustand
-import { usePlanStore } from "@/hooks/use-plan-store"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useLanguage } from "@/hooks/use-user-store"
-import { tWorkout } from "@/lib/i18n"
-import { useT } from "@/hooks/use-t"
+import { usePlanStore } from "@/hooks/use-plan-store";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tWorkout } from "@/lib/i18n";
+import { useT } from "@/hooks/use-t";
 // icon
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
-import { toast } from "sonner-native"
-import { usePathname } from "expo-router"
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store";
+import { toast } from "sonner-native";
+import { usePathname } from "expo-router";
 
 interface WorkoutTagsProps {
-  workoutList: string[]
+  workoutList: string[];
 }
 
 export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
-  const { workout, setPlanValue } = usePlanStore()
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
-  const lang = useLanguage()
-  const { setOpen, setIsRemoveOpen } = useWorkoutTagDialogStore()
-  const pathname = usePathname().split("/")
+  const { workout, setPlanValue } = usePlanStore();
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
+  const { setOpen, setIsRemoveOpen } = useWorkoutTagDialogStore();
+  const pathname = usePathname().split("/");
 
   const onPressWorkout = (item: string) => {
     if (workout === item) {
-      setPlanValue("workout", "")
-      return
+      setPlanValue("workout", "");
+      return;
     }
-    setPlanValue("workout", item)
-  }
+    setPlanValue("workout", item);
+  };
   const onOpenRemoveDialog = () => {
     if (!workout) {
-      toast.error(t("tag.selectToRemove"))
-      return
+      toast.error(t("tag.selectToRemove"));
+      return;
     }
-    setIsRemoveOpen(true)
-  }
+    setIsRemoveOpen(true);
+  };
 
   return (
     <View>
@@ -96,7 +96,7 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
               styles.plusButton,
               {
                 backgroundColor: themeColor.itemColor,
-                borderColor: themeColor.tint,
+                borderColor: themeColor.subText,
               },
             ]}
             onPress={() => onOpenRemoveDialog()}
@@ -106,8 +106,8 @@ export const WorkoutTags = ({ workoutList }: WorkoutTagsProps) => {
         </View>
       )}
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -116,7 +116,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 4,
     paddingHorizontal: 12,
   },
   tag: {
@@ -140,14 +141,14 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     alignItems: "center",
-    gap: 8,
+    gap: 4,
     flexDirection: "row",
     justifyContent: "center",
-    borderWidth: 2,
+
     alignSelf: "flex-end",
 
     marginRight: 20,
     borderRadius: 50,
     padding: 4,
   },
-})
+});

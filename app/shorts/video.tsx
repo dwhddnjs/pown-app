@@ -11,7 +11,7 @@ import {
 } from "expo-camera";
 import { useRouter } from "expo-router";
 import { useT } from "@/hooks/use-t";
-import { useVideoPlayer, VideoView } from "expo-video";
+import { ShortsPlayer } from "@/components/shorts/shorts-player";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
 // hook
@@ -25,8 +25,8 @@ import Animated, {
 import { useShortsStore } from "@/hooks/use-shorts-store";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { toast } from "sonner-native";
-import * as MediaLibrary from "expo-media-library";
 import { persistMediaLocally } from "@/lib/media";
+import { StatusBar } from "expo-status-bar";
 
 export default function Video() {
   const ref = useRef<CameraView>(null);
@@ -37,10 +37,10 @@ export default function Video() {
   const router = useRouter();
   const { setAddVideo } = useShortsStore();
   const [isRecording, setIsRecording] = useState(false);
-  const player = useVideoPlayer(uri, (player) => {
-    player.loop = true;
-    player.play();
-  });
+  // 카메라 세션 준비 전 recordAsync 호출은 네이티브 크래시를 낼 수 있다
+  const [isCameraReady, setIsCameraReady] = useState(false);
+  // 연타 시 isRecording state 반영 전에 recordAsync가 중복 호출되는 레이스 방지
+  const isRecordingRef = useRef(false);
   const isSquare = useSharedValue(false);
   // 카메라·마이크 권한은 녹화 화면에 진입한 이 시점에 요청한다
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
@@ -76,7 +76,8 @@ export default function Video() {
   });
 
   const onStartRecording = async () => {
-    if (!ref.current) return;
+    if (!ref.current || !isCameraReady || isRecordingRef.current) return;
+    isRecordingRef.current = true;
     try {
       setIsRecording(true);
       const data = await ref.current.recordAsync();
@@ -84,6 +85,7 @@ export default function Video() {
     } catch (error) {
       toast.error(t("shorts.recordFailed"));
     } finally {
+      isRecordingRef.current = false;
       setIsRecording(false);
     }
   };
@@ -94,6 +96,7 @@ export default function Video() {
   };
 
   const toggleFacing = () => {
+    if (isRecording) return;
     setFacing((prev) => (prev === "back" ? "front" : "back"));
   };
 
@@ -102,17 +105,12 @@ export default function Video() {
       if (uri) {
         const id = Date.now();
         // recordAsync가 주는 캐시 경로는 iOS가 언제든 비울 수 있어 앱 내부 저장소로 옮긴다
-        const asset = await MediaLibrary.createAssetAsync(uri);
-        const assetInfo = await MediaLibrary.getAssetInfoAsync(asset);
         const thumbnail = await VideoThumbnails.getThumbnailAsync(uri, {
           time: 0,
         });
         setAddVideo({
           id,
-          video: await persistMediaLocally(
-            assetInfo.localUri ?? asset.uri,
-            `shorts-${id}.mp4`,
-          ),
+          video: await persistMediaLocally(uri, `shorts-${id}.mp4`),
           thumbnail: await persistMediaLocally(
             thumbnail.uri,
             `shorts-thumb-${id}.jpg`,
@@ -130,8 +128,8 @@ export default function Video() {
 
   const renderVideo = () => {
     return (
-      <SafeAreaView style={{ flex: 1 }}>
-        <VideoView style={styles.video} player={player} allowsFullscreen />
+      <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
+        <ShortsPlayer uri={uri as string} isActive />
         <View
           style={[
             {
@@ -171,25 +169,35 @@ export default function Video() {
 
   const renderCamera = () => {
     return (
-      <CameraView
-        ref={ref}
-        facing={facing}
-        style={{
-          flex: 1,
-        }}
-        mode="video"
-        mute={false}
-        responsiveOrientationWhenOrientationLocked
-      >
+      <View style={{ flex: 1 }}>
+        <CameraView
+          ref={ref}
+          facing={facing}
+          style={StyleSheet.absoluteFill}
+          mode="video"
+          mute={false}
+          onCameraReady={() => setIsCameraReady(true)}
+          responsiveOrientationWhenOrientationLocked
+        />
         <View style={styles.shutterContainer}>
-          <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
+          <Pressable
+            onPress={() => router.back()}
+            style={{ paddingVertical: 24 }}
+            accessibilityRole="button"
+            accessibilityLabel={t("common.cancel")}
+          >
+            <FontAwesome6 name="xmark" size={28} color="white" />
           </Pressable>
 
           <Pressable
             onPress={() => {
-              isSquare.value = !isSquare.value;
-              isRecording ? onStopRecording() : onStartRecording();
+              if (isRecording) {
+                isSquare.value = false;
+                onStopRecording();
+              } else if (isCameraReady && !isRecordingRef.current) {
+                isSquare.value = true;
+                onStartRecording();
+              }
             }}
           >
             {({ pressed }) => (
@@ -203,7 +211,6 @@ export default function Video() {
               >
                 <Animated.View
                   style={[
-                    // styles.shutterBtnInner,
                     animatedShutterStyle,
                     { backgroundColor: themeColor.fail },
                   ]}
@@ -215,7 +222,7 @@ export default function Video() {
             <FontAwesome6 name="rotate-left" size={24} color="white" />
           </Pressable>
         </View>
-      </CameraView>
+      </View>
     );
   };
 
@@ -247,6 +254,7 @@ export default function Video() {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
+      <StatusBar style="light" />
       {uri ? renderVideo() : renderCamera()}
     </View>
   );
@@ -255,17 +263,6 @@ export default function Video() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingTop: 24,
-  },
-  camera: {
-    flex: 1,
-    width: "100%",
-  },
-
-  video: {
-    flex: 1,
-    // width: 350,
-    // height: 275,
   },
   shutterContainer: {
     position: "absolute",
@@ -288,11 +285,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  // shutterBtnInner: {
-  //   width: 64,
-  //   height: 64,
-  //   borderRadius: 50,
-  // },
   cancelText: {
     fontSize: 16,
     color: "white",

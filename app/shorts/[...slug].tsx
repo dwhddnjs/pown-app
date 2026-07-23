@@ -12,20 +12,22 @@ import { format } from "date-fns";
 import { formatDate } from "@/lib/function";
 import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
+import { StatusBar } from "expo-status-bar";
 
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>();
 
-  const { videos, setRemoveVideo } = useShortsStore();
+  const { videos } = useShortsStore();
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
   const { back } = useRouter();
-  const initailPage = useMemo(() => {
+  const initialPage = useMemo(() => {
     const index = videos.findIndex((v) => v.id === parseInt(slug?.[0]));
     return index >= 0 ? index : 0;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [position, setPosition] = useState(initailPage);
+  const [position, setPosition] = useState(initialPage);
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<ScrollView>(null);
 
@@ -36,13 +38,17 @@ export default function ShortsView() {
       return;
     }
     ref.current.scrollTo({
-      y: position * height,
+      y: initialPage * height,
       animated: false,
     });
-  }, [height]);
+  }, [height, initialPage]);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: themeColor.hard }}>
+    <SafeAreaView
+      edges={["bottom"]}
+      style={{ flex: 1, backgroundColor: themeColor.hard }}
+    >
+      <StatusBar style="light" />
       <ScrollView
         ref={ref}
         pagingEnabled
@@ -52,6 +58,9 @@ export default function ShortsView() {
         style={{ backgroundColor: "black" }}
         onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
         onScroll={(e) => {
+          if (!height) {
+            return;
+          }
           const offsetY = e.nativeEvent.contentOffset.y;
           const index = Math.round(offsetY / height);
           if (index !== position) {
@@ -62,7 +71,7 @@ export default function ShortsView() {
         {videos.map((item, index) => {
           return (
             <ShortsPlayer
-              video={item}
+              uri={item.video}
               key={item.id}
               height={height}
               isActive={index === position}
@@ -101,13 +110,6 @@ export default function ShortsView() {
 }
 
 const styles = StyleSheet.create({
-  video: {
-    flex: 1,
-  },
-  page: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   backButtonContainer: {
     paddingVertical: 20,
     paddingHorizontal: 24,

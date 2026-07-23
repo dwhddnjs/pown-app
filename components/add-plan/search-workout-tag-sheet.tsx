@@ -8,13 +8,12 @@ import {
 } from "react-native"
 import React, {
   forwardRef,
-  useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react"
-import BottomSheet, { BottomSheetBackdrop } from "@gorhom/bottom-sheet"
+import BottomSheet from "@gorhom/bottom-sheet"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useT } from "@/hooks/use-t"
 import { FontAwesome } from "@expo/vector-icons"
@@ -55,16 +54,6 @@ export const SearchWorkoutTagSheet = forwardRef<
     )
   })
 
-  const renderBackdrop = useCallback(
-    (props: any) => (
-      <BottomSheetBackdrop
-        appearsOnIndex={0}
-        disappearsOnIndex={-1}
-        {...props}
-      />
-    ),
-    []
-  )
   const onPressWorkout = (item: string) => {
     if (workout === item) {
       setPlanValue("workout", "")
@@ -85,7 +74,6 @@ export const SearchWorkoutTagSheet = forwardRef<
       index={-1}
       snapPoints={snapPoints}
       enablePanDownToClose={true}
-      backdropComponent={renderBackdrop}
       onClose={onClose}
       backgroundStyle={{
         backgroundColor: themeColor.itemColor,

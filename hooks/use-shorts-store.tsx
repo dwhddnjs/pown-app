@@ -1,3 +1,4 @@
+import { removeAppOwnedMedia } from "@/lib/media"
 import { storage } from "@/lib/storage"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
@@ -19,23 +20,32 @@ type ShortsStoreTypes = {
 
 export const useShortsStore = create<ShortsStoreTypes>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       videos: [],
       setAddVideo: (video) =>
         set((prev) => ({
           ...prev,
           videos: [...prev.videos, video],
         })),
-      setRemoveVideo: (videoId) =>
+      setRemoveVideo: (videoId) => {
+        const target = get().videos.find((item) => item.id === videoId)
+        removeAppOwnedMedia(target?.video)
+        removeAppOwnedMedia(target?.thumbnail)
         set((prev) => ({
           ...prev,
-          videos: [...prev.videos].filter((item) => item.id !== videoId),
-        })),
+          videos: prev.videos.filter((item) => item.id !== videoId),
+        }))
+      },
       onSetVideos: (videos) => set({ videos }),
-      onResetVideo: () =>
+      onResetVideo: () => {
+        get().videos.forEach((video) => {
+          removeAppOwnedMedia(video.video)
+          removeAppOwnedMedia(video.thumbnail)
+        })
         set({
           videos: [],
-        }),
+        })
+      },
     }),
     {
       name: "shorts",

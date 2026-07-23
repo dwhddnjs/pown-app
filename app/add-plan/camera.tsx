@@ -100,13 +100,14 @@ const Camera = () => {
 
   const renderCamera = () => {
     return (
-      <CameraView
-        style={styles.camera}
-        ref={ref}
-        facing={facing}
-        mute={false}
-        responsiveOrientationWhenOrientationLocked
-      >
+      <View style={styles.camera}>
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          ref={ref}
+          facing={facing}
+          mute={false}
+          responsiveOrientationWhenOrientationLocked
+        />
         <View style={styles.shutterContainer}>
           {/* 텍스트로 두면 영어("Cancel")에서 길어져 셔터가 밀린다 — 아이콘으로 폭을 고정한다 */}
           <Pressable
@@ -136,7 +137,7 @@ const Camera = () => {
             <FontAwesome6 name="rotate-left" size={24} color="white" />
           </Pressable>
         </View>
-      </CameraView>
+      </View>
     );
   };
 
@@ -177,7 +178,6 @@ const styles = StyleSheet.create({
   },
   camera: {
     flex: 1,
-
     width: "100%",
   },
   shutterContainer: {
