@@ -14,8 +14,12 @@ const Colors = {
     // 탭바 FAB 플러스 전용 — 항상 tint 원 위라 양 테마 흰색 계열로 통일
     fabIcon: "#fff",
     divider: "#D8D7DE",
-    tabIconDefault: "#8A8A8E",
-    tabIconSelected: "#009488",
+    // 선택색은 다크와 동일한 #00ccbb로 통일(기존 #009488).
+    // 비선택은 선택색보다 확실히 연하게 빼서 두 상태를 명도로 가른다.
+    // 주의: 두 색의 상호 대비는 1.07:1로 여전히 낮다 — 실제 구분은 색상(hue)에 의존한다.
+    // 탭바(#ffffff) 대비도 각각 1.89:1 / 2.03:1로 WCAG 비텍스트 3:1 미달. 별도 개선 필요.
+    tabIconDefault: "#BCBCC0",
+    tabIconSelected: "#00ccbb",
     tabBar: "#ffffff",
     itemColor: "#ffffff",
     success: "#3A76E2",

@@ -8,11 +8,14 @@ export type ShortsVideoTypes = {
   thumbnail: string
   video: string
   createdAt: string
+  title?: string
+  content?: string
 }
 
 type ShortsStoreTypes = {
   videos: ShortsVideoTypes[]
   setAddVideo: (video: ShortsVideoTypes) => void
+  setMemo: (videoId: number, memo: { title: string; content: string }) => void
   setRemoveVideo: (videoId: number) => void
   onSetVideos: (videos: ShortsVideoTypes[]) => void
   onResetVideo: () => void
@@ -27,6 +30,14 @@ export const useShortsStore = create<ShortsStoreTypes>()(
           ...prev,
           videos: [...prev.videos, video],
         })),
+      setMemo: (videoId, memo) =>
+        set((prev) => {
+          const index = prev.videos.findIndex((item) => item.id === videoId)
+          if (index === -1) return prev
+          const videos = [...prev.videos]
+          videos[index] = { ...videos[index], ...memo }
+          return { ...prev, videos }
+        }),
       setRemoveVideo: (videoId) => {
         const target = get().videos.find((item) => item.id === videoId)
         removeAppOwnedMedia(target?.video)
