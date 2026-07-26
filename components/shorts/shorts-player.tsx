@@ -18,7 +18,6 @@ import Feather from "@expo/vector-icons/Feather"
 interface ShortsPlayerProps {
   uri: string
   isActive?: boolean
-  height?: number
   onPressMemo?: () => void
   // 메모 시트로 영상 영역이 줄었을 때 — 잘라내지 않고 전체가 보이게 한다
   compact?: boolean
@@ -33,7 +32,6 @@ const KNOB = 12
 export const ShortsPlayer = ({
   uri,
   isActive,
-  height,
   onPressMemo,
   compact,
   progressSV,
@@ -46,6 +44,7 @@ export const ShortsPlayer = ({
   // PanResponder 콜백은 생성 시점 값을 캡처하므로 최신 값을 ref로 읽는다
   const seekingRef = useRef(false)
   const trackWidthRef = useRef(0)
+  const trackLeftRef = useRef(0)
   const themeColor = useCurrentThemeColor()
 
   const scale = useSharedValue(1)
@@ -116,9 +115,11 @@ export const ShortsPlayer = ({
     opacity.value = withDelay(400, withTiming(0, { duration: 220 }))
   }
 
-  const seekToX = (x: number) => {
+  // 인자는 항상 화면 절대 X — grant(pageX)와 move(moveX)가 같은 좌표계를 쓰게 맞춘다
+  const seekToX = (pageX: number) => {
     const width = trackWidthRef.current
     if (!width || !player.duration) return
+    const x = pageX - trackLeftRef.current
     const ratio = Math.min(1, Math.max(0, x / width))
     updateProgress(ratio)
     player.currentTime = ratio * player.duration
@@ -133,7 +134,10 @@ export const ShortsPlayer = ({
         onPanResponderGrant: (e) => {
           seekingRef.current = true
           setIsSeeking(true)
-          seekToX(e.nativeEvent.locationX)
+          // 막대의 화면 절대 X를 터치에서 직접 뽑는다(measure 불필요).
+          // 자식(막대·손잡이)이 pointerEvents="none"이라 locationX는 항상 이 View 기준
+          trackLeftRef.current = e.nativeEvent.pageX - e.nativeEvent.locationX
+          seekToX(e.nativeEvent.pageX)
         },
         onPanResponderMove: (_, gesture) => seekToX(gesture.moveX),
         onPanResponderRelease: () => {
@@ -155,7 +159,7 @@ export const ShortsPlayer = ({
 
   return (
     <Pressable
-      style={[{ width: "100%" }, height ? { height } : { flex: 1 }]}
+      style={{ width: "100%", flex: 1 }}
       onPress={onTogglePlay}
     >
       <VideoView
@@ -201,7 +205,10 @@ export const ShortsPlayer = ({
         }}
         {...panResponder.panHandlers}
       >
-        <View style={[styles.progressTrack, isSeeking && styles.trackActive]}>
+        <View
+          pointerEvents="none"
+          style={[styles.progressTrack, isSeeking && styles.trackActive]}
+        >
           <View
             style={[
               styles.progressFill,
@@ -214,6 +221,7 @@ export const ShortsPlayer = ({
         </View>
         {!progressSV && (
           <View
+            pointerEvents="none"
             style={[
               styles.knob,
               {

@@ -11,10 +11,10 @@ import React, {
   useState,
 } from "react";
 import {
-  Dimensions,
   Keyboard,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ArrowIcon from "@expo/vector-icons/AntDesign";
@@ -36,7 +36,6 @@ import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
 import { StatusBar } from "expo-status-bar";
 
-const SCREEN_WIDTH = Dimensions.get("window").width;
 const KNOB = 12;
 const BAR_HEIGHT = 3;
 
@@ -44,6 +43,8 @@ export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>();
 
   const { videos } = useShortsStore();
+  // 아이패드는 회전하므로 모듈 로드 시점 폭을 고정하면 안 된다
+  const { width: screenWidth } = useWindowDimensions();
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
   const { back } = useRouter();
@@ -115,8 +116,8 @@ export default function ShortsView() {
   const knobStyle = useAnimatedStyle(() => ({
     top: pageHeight.value - BAR_HEIGHT / 2 - KNOB / 2,
     left: Math.min(
-      Math.max(progressSV.value * SCREEN_WIDTH - KNOB / 2, 0),
-      SCREEN_WIDTH - KNOB,
+      Math.max(progressSV.value * screenWidth - KNOB / 2, 0),
+      screenWidth - KNOB,
     ),
     opacity: pageHeight.value > 0 ? 1 : 0,
   }));
