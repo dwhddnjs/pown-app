@@ -85,7 +85,15 @@ export default function TabLayout() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Tabs screenOptions={tabOption}>
+      <Tabs
+        screenOptions={tabOption}
+        screenListeners={({ route }) => ({
+          tabPress: () => {
+            // add는 자체 리스너에서 Medium 임팩트를 준다
+            if (route.name !== "add") Haptics.selectionAsync();
+          },
+        })}
+      >
         <Tabs.Screen
           name="workout"
           options={{
@@ -94,7 +102,8 @@ export default function TabLayout() {
                 name="dumbbell.fill"
                 type="hierarchical"
                 tintColor={color}
-                size={24}
+                // SF Symbol은 가로로 납작해서 같은 size로도 아이콘 폰트보다 작아 보인다
+                size={32}
               />
             ),
             tabBarLabel: t("tab.workout"),
@@ -109,7 +118,7 @@ export default function TabLayout() {
           options={{
             title: t("tab.record"),
             tabBarIcon: ({ color }) => (
-              <Entypo name="calendar" size={24} color={color} />
+              <Entypo name="calendar" size={22} color={color} />
             ),
             header: ({ navigation, route, options }) => {
               return <ChartHeader />;
@@ -155,7 +164,7 @@ export default function TabLayout() {
           options={{
             title: t("tab.shorts"),
             tabBarIcon: ({ color }) => (
-              <Entypo name="video" size={24} color={color} />
+              <Entypo name="video" size={26} color={color} />
             ),
             header: ({ navigation, route, options }) => {
               return <ShortsTabHeader />;
@@ -168,7 +177,7 @@ export default function TabLayout() {
           options={{
             title: t("tab.my"),
             tabBarIcon: ({ color }) => (
-              <Ionicons name="person" size={24} color={color} />
+              <Ionicons name="person" size={23} color={color} />
             ),
             headerShadowVisible: false,
           }}
