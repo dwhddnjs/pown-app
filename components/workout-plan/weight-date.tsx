@@ -1,18 +1,16 @@
-import React from "react";
+import React, { useRef } from "react";
 // component
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { toast } from "sonner-native";
 // zustand
-import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
-import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
+import { usePlanMenuStore } from "@/hooks/use-plan-menu-store";
 // lib
 import { formatTime } from "@/lib/function";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { Ionicons } from "@expo/vector-icons";
-import { useActionSheet } from "@expo/react-native-action-sheet";
-import { usePathname, useRouter } from "expo-router";
+import * as Haptics from "expo-haptics";
+import { usePathname } from "expo-router";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -37,53 +35,16 @@ export const WeightDate = ({
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
-  const { showActionSheetWithOptions } = useActionSheet();
-  const { push } = useRouter();
-  const { setRemovePlan } = useWorkoutPlanStore();
-  const { removeTempPlan, setEditingPlan, tempPlans } = useMultiPlanStore();
   const pathname = usePathname();
-  const isMultiPlan = pathname.includes("multi-plan");
+  // 메뉴는 앱에 하나만 있는 PlanMenu가 띄운다 — 행은 버튼 좌표만 올린다
+  const openPlanMenu = usePlanMenuStore((state) => state.openPlanMenu);
+  const anchorRef = useRef<View>(null);
 
   const onPress = () => {
-    const options = [t("common.delete"), t("common.edit"), t("common.cancel")];
-    const destructiveButtonIndex = 0;
-    const cancelButtonIndex = 2;
-
-    showActionSheetWithOptions(
-      {
-        options,
-        cancelButtonIndex,
-        destructiveButtonIndex,
-      },
-      (selectedIndex: number | undefined) => {
-        switch (selectedIndex) {
-          case 1:
-            if (isMultiPlan) {
-              const plan = tempPlans.find((p) => p.id === id);
-              if (plan) {
-                setEditingPlan(plan);
-                push("/workout/add-multi-plan");
-              }
-            } else {
-              push(`/edit-plan/${type}/${id}`);
-            }
-            break;
-
-          case destructiveButtonIndex:
-            if (isMultiPlan) {
-              removeTempPlan(id);
-              toast.success(t("workout.deleted"));
-            } else {
-              setRemovePlan(id);
-              toast.success(t("workout.deleted"));
-            }
-            break;
-
-          case cancelButtonIndex:
-            break;
-        }
-      },
-    );
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    anchorRef.current?.measureInWindow((x, y, width, height) => {
+      openPlanMenu({ id, type, y, height, rightEdge: x + width });
+    });
   };
 
   return (
@@ -93,13 +54,15 @@ export const WeightDate = ({
           {formatTime(date)}
         </Text>
         {pathname !== "/calendar-workout" && (
-          <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
-            <Ionicons
-              name="ellipsis-horizontal"
-              size={20}
-              color={themeColor.text}
-            />
-          </TouchableOpacity>
+          <View ref={anchorRef} collapsable={false}>
+            <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
+              <Ionicons
+                name="ellipsis-horizontal"
+                size={20}
+                color={themeColor.text}
+              />
+            </TouchableOpacity>
+          </View>
         )}
       </View>
       <Text

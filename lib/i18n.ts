@@ -41,7 +41,6 @@ const ko = {
   "header.search": "운동 검색",
   "header.camera": "사진 찍기",
   "header.video": "비디오 촬영",
-  "header.cheer": "🔥오늘도 화이팅!",
 
   // 드로어
   "drawer.title": "나의 운동 기록",
@@ -106,6 +105,14 @@ const ko = {
   "search.placeholder": "운동 · 부위 · 기구 검색",
   "search.hint": "🔍  키워드를 입력해주세요.\n예:) 바벨, 등, 프레스",
   "search.noResult": "검색 결과가 없습니다.",
+
+  // 운동 잔디
+  "grass.title": "운동 잔디",
+  "grass.count": "{n}개",
+  "grass.plans": "운동계획 {n}개",
+  "grass.none": "계획 없음",
+  "grass.less": "적음",
+  "grass.more": "많음",
 
   // 차트 · 기록
   "chart.monthlySummary": "월간 요약",
@@ -260,7 +267,6 @@ const en: Record<TKey, string> = {
   "header.search": "Search Workouts",
   "header.camera": "Take Photo",
   "header.video": "Record Video",
-  "header.cheer": "🔥Let's go today!",
 
   "drawer.title": "My Workout Log",
   "drawer.counts": "{folders} folders,  {files} files",
@@ -320,6 +326,13 @@ const en: Record<TKey, string> = {
   "search.placeholder": "Search workout, part, equipment",
   "search.hint": "🔍  Type a keyword.\ne.g. Barbell, Back, Press",
   "search.noResult": "No results found.",
+
+  "grass.title": "Workout Grass",
+  "grass.count": "{n} plans",
+  "grass.plans": "{n} workouts",
+  "grass.none": "No workouts",
+  "grass.less": "Less",
+  "grass.more": "More",
 
   "chart.monthlySummary": "Monthly Summary",
   "chart.emptyMonth": "No workouts recorded this month.",
