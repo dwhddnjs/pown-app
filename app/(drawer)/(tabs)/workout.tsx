@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
 // component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { YearGrass } from "@/components/grass";
 import { Text, View } from "@/components/themed";
 import {
   NativeScrollEvent,
@@ -54,12 +55,20 @@ export default function TabOneScreen() {
     }
   }, [selectedDate]);
 
+  // setOptions는 매번 새 옵션 객체를 만들어 네비게이터 전체를 리렌더한다 —
+  // 스크롤 프레임마다 부르지 않도록 값이 실제로 바뀔 때만 통과시킨다
+  const lastTitle = useRef<string | null>(null);
+  const setTitle = useCallback(
+    (title: string) => {
+      if (lastTitle.current === title) return;
+      lastTitle.current = title;
+      navigation.setOptions({ title });
+    },
+    [navigation],
+  );
+
   const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
-    if (offsetY <= 0) {
-      navigation.setOptions({ title: t("header.cheer") });
-      return;
-    }
     // 헤더 밑으로 지나간 마지막 날짜 그룹이 현재 타이틀
     let currentDate: string | undefined;
     for (const date of Object.keys(sortWorkList)) {
@@ -68,17 +77,18 @@ export default function TabOneScreen() {
         currentDate = date;
       }
     }
-    if (currentDate) {
-      const splitData = currentDate.split(".");
-      navigation.setOptions({
-        title: convertChartDate(`${splitData[0]}${splitData[1]}`, lang),
-      });
+    // 아직 첫 날짜 그룹 위(잔디 영역)를 보고 있는 중이면 타이틀 자리에 로고
+    if (!currentDate) {
+      setTitle("");
+      return;
     }
+    const splitData = currentDate.split(".");
+    setTitle(convertChartDate(`${splitData[0]}${splitData[1]}`, lang));
   };
 
   useEffect(() => {
-    navigation.setOptions({ title: t("header.cheer") });
-  }, [navigation, t]);
+    setTitle("");
+  }, [setTitle]);
 
   useEffect(() => {
     setTimeout(scrollToSelectedDate, 200);
@@ -133,6 +143,9 @@ export default function TabOneScreen() {
           position: "relative",
         }}
       >
+        <View style={styles.grass}>
+          <YearGrass />
+        </View>
         {Object.entries(sortWorkList).map(([date, plans]) => (
           <View
             style={styles.list}
@@ -215,6 +228,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
+  grass: {
+    // 아래 날짜 그룹(list)과 같은 좌우 여백. 세로는 list의 paddingVertical과 합쳐
+    // 24 간격이 되도록 위만 준다.
+    paddingHorizontal: 20,
+    paddingTop: 24,
+  },
   list: {
     paddingHorizontal: 20,
     paddingVertical: 24,

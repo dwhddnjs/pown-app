@@ -9,11 +9,11 @@ import { Appearance, useColorScheme } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toaster } from "sonner-native";
 import { HeaderIconButton } from "@/components/header-icon-button";
+import { PlanMenu } from "@/components/workout-plan/plan-menu";
 //expo
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 // lib
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import {
@@ -85,11 +85,10 @@ export default function RootLayout() {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <GestureHandlerRootView style={{ flex: 1 }}>
-        <ActionSheetProvider>
-          <BottomSheetModalProvider>
-            <RootLayoutNav />
-          </BottomSheetModalProvider>
-        </ActionSheetProvider>
+        <BottomSheetModalProvider>
+          <RootLayoutNav />
+        </BottomSheetModalProvider>
+        <PlanMenu />
         <Toaster />
       </GestureHandlerRootView>
     </ThemeProvider>
