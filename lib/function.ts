@@ -68,12 +68,10 @@ export const transformWorkoutData = (
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
-    // createdAt은 "yyyy.MM.dd HH:mm:ss" 고정 포맷이라 date-fns parse가 필요 없다.
-    // 여긴 드로어를 열 때마다 전체 목록을 돌기 때문에 항목당 파싱 비용이 그대로
-    // 탭 전환 지연으로 나타났다. 이미 0 패딩된 문자열이라 결과도 동일하다.
-    const year = item.createdAt.slice(0, 4)
-    const month = item.createdAt.slice(5, 7)
-    const day = item.createdAt.slice(8, 10)
+    const date = parsePlanDate(item.createdAt)
+    const year = `${date.getFullYear()}`
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
 
     if (!groupedData[year]) {
       groupedData[year] = {}

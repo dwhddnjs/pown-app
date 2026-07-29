@@ -69,7 +69,6 @@ export default function CalendarWorkout() {
                     item={data}
                     index={index}
                     totalLength={item[1].length}
-                    hideMenu
                   />
                 ))}
               </View>

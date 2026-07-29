@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 // component
-import {
-  Pressable,
-  StyleSheet,
-  Image,
-  View as RNView,
-  type ImageSourcePropType,
-} from "react-native";
+import { Pressable, StyleSheet, Image } from "react-native";
 import { Text, View } from "../themed";
 import { NoteText } from "./note-text";
 import { SetListItem } from "./set-list-item";
 // icon
-import { ConditionTag } from "./condition-tag";
+import { ConditionIcon } from "../add-plan/condition-icon";
 import { WeightDate } from "./weight-date";
-
+import Back from "@/assets/images/svg/back_icon.svg";
+import Arm from "@/assets/images/svg/arm_icon.svg";
+import Chest from "@/assets/images/svg/chest_icon.svg";
+import Leg from "@/assets/images/svg/leg_icon.svg";
+import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 // zustand
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -23,38 +21,6 @@ import * as MediaLibrary from "expo-media-library";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import { isAppOwnedMedia, resolveMediaUri } from "@/lib/media";
 
-// 이 화면만 SVG 대신 PNG를 쓴다. 원래 svg는 벡터가 아니라 <pattern> 안에
-// base64 래스터(96x96)를 품고 있었고, react-native-svg는 그걸 **셀 인스턴스마다**
-// 파싱·디코드한다 — 빠른 플릭에서 30칸을 한꺼번에 갈아끼울 때 가장 비쌌던 항목.
-// PNG는 같은 96x96 원본을 그대로 꺼낸 것이라 화질 변화가 없고, RN 이미지 캐시가
-// 디코드한 비트맵을 소스별로 한 번만 유지한다(30셀 → 디코드 5회).
-// 스크롤하지 않는 화면(select-type·calendar-grid 등)은 계속 svg를 쓴다.
-const WORKOUT_ICON_SIZE = 54;
-const WORKOUT_ICON: Record<
-  string,
-  { src: ImageSourcePropType; circle: string }
-> = {
-  chest: {
-    src: require("@/assets/images/icons/chest_icon.png"),
-    circle: "#ffc134",
-  },
-  back: {
-    src: require("@/assets/images/icons/back_icon.png"),
-    circle: "#F13C33",
-  },
-  leg: {
-    src: require("@/assets/images/icons/leg_icon.png"),
-    circle: "#3A76E2",
-  },
-  arm: {
-    src: require("@/assets/images/icons/arm_icon.png"),
-    circle: "#9A48C1",
-  },
-  shoulder: {
-    src: require("@/assets/images/icons/shoulder_icon.png"),
-    circle: "#3CC42E",
-  },
-};
 interface ProgressBarProps {
   completed: number;
   total: number;
@@ -189,19 +155,7 @@ interface WorkoutPlanProps {
   index: number;
   totalLength: number;
   hideProgress?: boolean;
-  hideMenu?: boolean;
 }
-
-// 원은 borderRadius View, 글리프만 이미지 — svg가 하던 것과 결과가 같다
-// (svg도 단색 원 path 위에 같은 래스터를 덮는 구조였다)
-const WorkoutIcon = ({ type }: { type: string }) => {
-  const icon = WORKOUT_ICON[type] ?? WORKOUT_ICON.shoulder;
-  return (
-    <RNView style={[styles.workoutIcon, { backgroundColor: icon.circle }]}>
-      <Image source={icon.src} style={styles.workoutIconImage} />
-    </RNView>
-  );
-};
 
 // 완료 토글 시 전체 리스트가 리렌더되지 않도록 메모 — 참조가 유지된 플랜은 스킵한다
 export const WorkoutPlan = React.memo(function WorkoutPlan({
@@ -209,9 +163,31 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
   index,
   totalLength,
   hideProgress,
-  hideMenu,
 }: WorkoutPlanProps) {
   const themeColor = useCurrentThemeColor();
+
+  const getWorkoutIcon = (type: string) => {
+    let result;
+    switch (type) {
+      case "chest":
+        result = <Chest />;
+        break;
+      case "back":
+        result = <Back />;
+        break;
+      case "leg":
+        result = <Leg />;
+        break;
+      case "arm":
+        result = <Arm />;
+        break;
+      default:
+        result = <Shoulder />;
+        break;
+    }
+
+    return result;
+  };
 
   return (
     <View
@@ -230,7 +206,7 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           },
         ]}
       >
-        <WorkoutIcon type={item.type} />
+        {getWorkoutIcon(item.type)}
         {index !== totalLength - 1 && (
           <View
             style={{
@@ -258,7 +234,6 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           weight={item.weight}
           date={item.createdAt as string}
           type={item.type}
-          hideMenu={hideMenu}
         />
         {/* 컨디션 */}
         {item.condition.length > 0 && (
@@ -268,8 +243,12 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
               { backgroundColor: themeColor.itemColor },
             ]}
           >
-            {item.condition.map((condition, index) => (
-              <ConditionTag key={index} condition={condition} />
+            {item.condition.map((item, index) => (
+              <ConditionIcon
+                key={index}
+                item={{ id: index + 1, condition: item }}
+                type="row"
+              />
             ))}
           </View>
         )}
@@ -327,16 +306,6 @@ const styles = StyleSheet.create({
     gap: 14,
     flexDirection: "row",
     alignItems: "flex-start",
-  },
-  workoutIcon: {
-    width: WORKOUT_ICON_SIZE,
-    height: WORKOUT_ICON_SIZE,
-    borderRadius: WORKOUT_ICON_SIZE / 2,
-    overflow: "hidden",
-  },
-  workoutIconImage: {
-    width: WORKOUT_ICON_SIZE,
-    height: WORKOUT_ICON_SIZE,
   },
   iconLine: {
     // justifyContent: "center",
