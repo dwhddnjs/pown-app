@@ -1,6 +1,6 @@
 //component
 import { StyleSheet, TouchableOpacity } from "react-native"
-import { Text, View } from "@/components/themed"
+import { Text } from "@/components/themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
 // hook
@@ -23,7 +23,6 @@ interface ConditionIconProps {
     id: number
     condition: string
   }
-  type: "column" | "row"
 }
 
 export const getIcon = (value: string, size: number, color: string) => {
@@ -60,74 +59,49 @@ export const getIcon = (value: string, size: number, color: string) => {
   return result
 }
 
-export const ConditionIcon = ({ item, type }: ConditionIconProps) => {
+// 계획 추가/수정 폼의 선택 가능한 컨디션 버튼. 읽기 전용 태그는
+// components/workout-plan/condition-tag.tsx가 담당한다 (폼 스토어를 안 구독한다)
+export const ConditionIcon = ({ item }: ConditionIconProps) => {
   const { condition, setCondition, setFilterCondition } = usePlanStore()
   const themeColor = useCurrentThemeColor()
   const lang = useLanguage()
+  const selected = condition.includes(item.condition)
 
   const onPressCondition = () => {
-    if (condition.includes(item.condition)) {
+    if (selected) {
       setFilterCondition(item.condition)
       return
     }
     setCondition(item.condition)
   }
 
-  const renderComponent = {
-    column: (
-      <TouchableOpacity
+  return (
+    <TouchableOpacity
+      style={[
+        styles.icon,
+        { borderColor: themeColor.tint },
+        item.id === 1 && { marginLeft: 20 },
+        item.id === 9 && { marginRight: 20 },
+        selected && { backgroundColor: themeColor.tint },
+      ]}
+      onPress={onPressCondition}
+    >
+      {getIcon(
+        item.condition,
+        26,
+        selected ? themeColor.onTint : themeColor.tintText
+      )}
+      <Text
         style={[
-          styles.icon,
-          { borderColor: themeColor.tint },
-          item.id === 1 && { marginLeft: 20 },
-          item.id === 9 && { marginRight: 20 },
-          condition.includes(item.condition) && {
-            backgroundColor: themeColor.tint,
-          },
+          styles.text,
+          { color: themeColor.tintText },
+          selected && { color: themeColor.onTint },
         ]}
-        key={item.id}
-        onPress={onPressCondition}
       >
-        {getIcon(
-          item.condition,
-          26,
-          condition.includes(item.condition)
-            ? themeColor.onTint
-            : themeColor.tintText
-        )}
-        <Text
-          style={[
-            styles.text,
-            { color: themeColor.tintText },
-            condition.includes(item.condition) && {
-              color: themeColor.onTint,
-            },
-          ]}
-        >
-          {tCondition(item.condition, lang)}
-        </Text>
-      </TouchableOpacity>
-    ),
-    row: (
-      <View
-        style={[
-          styles.rowIcon,
-          {
-            backgroundColor: themeColor.itemColor,
-            borderColor: themeColor.tint,
-          },
-        ]}
-        key={item.id}
-      >
-        {getIcon(item.condition, 16, themeColor.tintText)}
-        <Text style={[styles.rowText, { color: themeColor.tintText }]}>
-          {tCondition(item.condition, lang)}
-        </Text>
-      </View>
-    ),
-  }
-
-  return renderComponent[type]
+        {tCondition(item.condition, lang)}
+      </Text>
+    </TouchableOpacity>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -141,25 +115,6 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     gap: 0.5,
     marginLeft: 10,
-  },
-
-  rowIcon: {
-    borderWidth: 2,
-    alignSelf: "flex-start",
-
-    borderRadius: 50,
-    paddingLeft: 2,
-    paddingRight: 6,
-    paddingVertical: 2,
-    flexDirection: "row",
-    gap: 2,
-    alignItems: "center",
-    marginRight: 6,
-    marginBottom: 5,
-  },
-  rowText: {
-    fontSize: 10,
-    fontFamily: "sb-l",
   },
 
   text: {

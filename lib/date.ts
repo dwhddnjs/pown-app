@@ -14,9 +14,9 @@ export const formatPlanDateTime = (date: Date, lang: Lang) =>
     ? format(date, "yyyy년 M월 d일 HH시 mm분", { locale: ko })
     : format(date, "MMM d, yyyy HH:mm", { locale: enUS })
 
-export const sortByCreatedAtDesc =<T extends { createdAt: string }>(
+// "yyyy.MM.dd HH:mm:ss"는 자리수가 고정돼 있어 사전순 = 시간순이다.
+// 비교 함수 안에서 parse를 부르면 정렬 한 번에 O(n log n)번 파싱하게 된다 —
+// 계획을 추가/수정할 때마다 전체 목록을 다시 정렬하므로 그 비용이 그대로 드러난다.
+export const sortByCreatedAtDesc = <T extends { createdAt: string }>(
   list: T[]
-): T[] =>
-  [...list].sort(
-    (a, b) => parsePlanDate(b.createdAt).getTime() - parsePlanDate(a.createdAt).getTime()
-  )
+): T[] => [...list].sort((a, b) => b.createdAt.localeCompare(a.createdAt))

@@ -39,9 +39,14 @@ export const PlanMenu = () => {
   const { push } = useRouter();
   const pathname = usePathname();
   const isMultiPlan = pathname.includes("multi-plan");
-  const { setRemovePlan } = useWorkoutPlanStore();
-  const { removeTempPlan, setEditingPlan, tempPlans } = useMultiPlanStore();
-  const { target, closePlanMenu } = usePlanMenuStore();
+  // 앱 최상위에 상시 마운트돼 있으니 셀렉터로 좁힌다 — 스토어를 통째로
+  // 구조분해하면 세트 완료 토글 하나에도 루트가 리렌더된다
+  const setRemovePlan = useWorkoutPlanStore((state) => state.setRemovePlan);
+  const removeTempPlan = useMultiPlanStore((state) => state.removeTempPlan);
+  const setEditingPlan = useMultiPlanStore((state) => state.setEditingPlan);
+  const tempPlans = useMultiPlanStore((state) => state.tempPlans);
+  const target = usePlanMenuStore((state) => state.target);
+  const closePlanMenu = usePlanMenuStore((state) => state.closePlanMenu);
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const {
