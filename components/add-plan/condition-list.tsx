@@ -36,7 +36,7 @@ export const ConditionList = () => {
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
           renderItem={({ item, index }) => (
-            <ConditionIcon item={item} />
+            <ConditionIcon item={item} type="column" />
           )}
           // estimatedItemSize={65}
         />

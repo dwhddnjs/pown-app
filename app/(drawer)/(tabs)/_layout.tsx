@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 // compoents
 import { StyleSheet } from "react-native";
 import { View } from "@/components/themed";
@@ -48,48 +48,40 @@ export default function TabLayout() {
     ],
   }));
 
-  // FAB 토글로도 이 컴포넌트가 리렌더되는데, 매번 새 객체를 만들면 screenOptions
-  // identity가 바뀌어 네비게이터가 옵션을 다시 적용한다 — 테마가 바뀔 때만 만든다
-  const tabOption = useMemo(
-    () => ({
-      // 기록 탭은 차트 7개가 마운트된 상태로 남아 운동계획이 바뀔 때마다 백그라운드에서
-      // 다시 그려졌다. freeze는 언마운트가 아니라 렌더 중단이라 스크롤/상태는 보존된다.
-      freezeOnBlur: true,
-      headerStyle: {
-        backgroundColor: themColor.background,
-      },
-      headerTitleStyle: {
-        fontFamily: "sb-m",
-        color: themColor.text,
-      },
-      tabBarStyle: {
-        backgroundColor: "transparent",
-        borderTopWidth: 0,
-        paddingHorizontal: 12,
-        position: "absolute" as const,
-        zIndex: 200,
-      },
-      tabBarBackground: () => (
-        <BlurView
-          intensity={80}
-          tint="systemChromeMaterial"
-          style={StyleSheet.absoluteFill}
-        />
-      ),
-      tabBarActiveTintColor: themColor.tabIconSelected,
-      // 탭바가 반투명 BlurView라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다
-      tabBarInactiveTintColor: themColor.tabIconDefault,
-      tabBarItemStyle: {
-        paddingBottom: 3,
-        paddingTop: 3,
-      },
-      tabBarLabelStyle: {
-        fontFamily: "sb-m",
-        fontSize: 10,
-      },
-    }),
-    [themColor],
-  );
+  const tabOption = {
+    headerStyle: {
+      backgroundColor: themColor.background,
+    },
+    headerTitleStyle: {
+      fontFamily: "sb-m",
+      color: themColor.text,
+    },
+    tabBarStyle: {
+      backgroundColor: "transparent",
+      borderTopWidth: 0,
+      paddingHorizontal: 12,
+      position: "absolute" as const,
+      zIndex: 200,
+    },
+    tabBarBackground: () => (
+      <BlurView
+        intensity={80}
+        tint="systemChromeMaterial"
+        style={StyleSheet.absoluteFill}
+      />
+    ),
+    tabBarActiveTintColor: themColor.tabIconSelected,
+    // 탭바가 반투명 BlurView라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다
+    tabBarInactiveTintColor: themColor.tabIconDefault,
+    tabBarItemStyle: {
+      paddingBottom: 3,
+      paddingTop: 3,
+    },
+    tabBarLabelStyle: {
+      fontFamily: "sb-m",
+      fontSize: 10,
+    },
+  };
 
   return (
     <View style={{ flex: 1 }}>
@@ -115,7 +107,9 @@ export default function TabLayout() {
               />
             ),
             tabBarLabel: t("tab.workout"),
-            header: () => <WorkoutTabHeader />,
+            header: ({ navigation, route, options }) => (
+              <WorkoutTabHeader title={options.title} />
+            ),
             headerTransparent: true,
           }}
         />

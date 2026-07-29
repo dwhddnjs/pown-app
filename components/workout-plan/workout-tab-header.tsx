@@ -16,18 +16,14 @@ import FontAwesome from "@expo/vector-icons/FontAwesome"
 import * as Haptics from "expo-haptics"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useWorkoutTitleStore } from "@/hooks/use-workout-title-store"
 import { useNavigation, DrawerActions } from "@react-navigation/native"
 // icon
 import PownLogo from "@/assets/images/svg/pown-logo.svg"
 
-const WorkoutTabHeader = () => {
+const WorkoutTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrentThemeColor()
   const { push } = useRouter()
   const navigation = useNavigation()
-  // 스크롤 타이틀은 스토어에서 직접 받는다 — navigation.setOptions를 거치면
-  // 달이 바뀔 때마다 탭 네비게이터 전체가 리렌더된다
-  const title = useWorkoutTitleStore((state) => state.title)
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
