@@ -12,11 +12,12 @@ import {
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
+import { useWorkoutTitleStore } from "@/hooks/use-workout-title-store";
 // lib
 import { convertChartDate, formatDate, groupByDate } from "@/lib/function";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -45,11 +46,21 @@ type Row =
 
 const GRASS_ROW: Row = { kind: "grass" };
 
-// 1px이라도 보이면 viewable — 잔디가 완전히 지나가야 날짜 타이틀로 바뀐다
-const VIEWABILITY_CONFIG = { itemVisiblePercentThreshold: 0 };
+// 1px이라도 보이면 viewable — 잔디가 완전히 지나가야 날짜 타이틀로 바뀐다.
+// minimumViewTime 0: 기본값 250ms 경로는 250ms 뒤에 "그때 보였던 셀 ∩ 지금 보이는 셀"로
+// 판정한다(ViewabilityHelper). 0이면 타이머 없이 동기로 판정해 타이틀이 한 프레임 더 붙는다.
+// FlashList 주석은 0이 빠른 스크롤에 불리하다고 경고하지만, 이 콜백은 스토어에 값만
+// 넣고(같은 달이면 리스너도 안 깨움) 끝나므로 부담이 없다.
+const VIEWABILITY_CONFIG = {
+  itemVisiblePercentThreshold: 0,
+  minimumViewTime: 0,
+};
 
-// 화면 밖으로 미리 그려둘 거리(px) — 한 화면 반쯤. 빠른 플릭이 도달하기 전에
-// 셀이 준비돼 있게 한다. (기본 250은 강한 플릭을 못 따라간다)
+// 화면 밖으로 미리 그려둘 거리(px). FlashList는 이 값의 2배를 버퍼로 잡고
+// 스크롤 방향으로 0.3/0.7로 나눠 쓴다 (진행 방향 1680px ≈ 1.5화면).
+// 3000까지 올려도 빠른 플릭의 빈 화면은 그대로였다 — 버퍼 폭 문제가 아니라
+// 카드 하나를 그리는 비용 문제다(카드를 텍스트 한 줄로 바꾸면 깜빡임 수준으로 줄어든다).
+// 올릴수록 첫 렌더와 메모리만 무거워지므로 원래 값을 유지한다.
 const DRAW_DISTANCE = 1200;
 
 const getItemType = (item: Row) => item.kind;
@@ -61,7 +72,6 @@ export default function TabOneScreen() {
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
-  const navigation = useNavigation();
   const { open } = useIsModalOpenStore();
 
   const router = useRouter();
@@ -101,17 +111,9 @@ export default function TabOneScreen() {
     return allRows.slice(starts[startDateIndex] ?? 0);
   }, [allRows, starts, startDateIndex]);
 
-  // setOptions는 매번 새 옵션 객체를 만들어 네비게이터 전체를 리렌더한다 —
-  // 값이 실제로 바뀔 때만 통과시킨다
-  const lastTitle = useRef<string | null>(null);
-  const setTitle = useCallback(
-    (title: string) => {
-      if (lastTitle.current === title) return;
-      lastTitle.current = title;
-      navigation.setOptions({ title });
-    },
-    [navigation],
-  );
+  // 타이틀은 헤더만 구독하는 스토어로 보낸다 — setOptions로 보내면 달이 바뀔 때마다
+  // 탭 네비게이터 전체가 리렌더된다. 같은 값 걸러내기는 스토어가 한다.
+  const setTitle = useWorkoutTitleStore((state) => state.setTitle);
 
   // onViewableItemsChanged는 리스트 생성 후 교체할 수 없다 — 핸들러 참조는 고정하고
   // 안에서 쓰는 값만 ref로 최신화한다

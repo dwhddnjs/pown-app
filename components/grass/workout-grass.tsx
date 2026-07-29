@@ -69,9 +69,11 @@ const yearLabel = (year: string, lang: Lang) =>
 
 const levelOf = (count: number) => (count > 4 ? 4 : count);
 
+// opacity는 0단계에도 명시한다 — 셀이 뷰 하나뿐이라 눌렀을 때의 activeOpacity를
+// 이 값에서 계산해야 한다 (아래 GrassCell 주석)
 const cellColor = (count: number, themeColor: ThemeColorType) =>
   count === 0
-    ? { backgroundColor: themeColor.empty }
+    ? { backgroundColor: themeColor.empty, opacity: 1 }
     : {
         backgroundColor: themeColor.tint,
         opacity: LEVEL_OPACITY[levelOf(count) - 1],
@@ -105,19 +107,20 @@ const GrassCell = React.memo(
       return <RNView style={styles.cell} />;
     }
 
+    const fill = cellColor(count, themeColor);
+
     return (
       <TouchableOpacity
-        activeOpacity={0.6}
+        // activeOpacity는 절대값이라 그냥 0.6을 주면 옅은 셀이 눌렸을 때 오히려
+        // 밝아진다. 예전엔 단계 불투명도를 안쪽 뷰에 줘서 피했는데, 셀이 371개라
+        // 뷰가 두 배로 늘어난다 — 셀 자기 단계에 비례시키면 뷰 하나로 끝난다.
+        activeOpacity={fill.opacity * 0.6}
         // 10pt 셀은 손가락으로 겨냥하기 어렵다 — 탭 영역만 사방 4pt 넓힌다.
         // 이웃과 겹치는 만큼 가장자리는 옆 날짜가 잡힐 수 있지만 아예 안 눌리는 편보다 낫다.
         hitSlop={4}
         onPress={() => onPress({ key: dateKey, count, x, y })}
-        style={styles.cell}
-      >
-        {/* 단계 불투명도는 안쪽에 준다 — 터치 피드백(activeOpacity)은 절대값이라
-            바깥에 같이 주면 옅은 셀이 눌렀을 때 오히려 밝아진다 */}
-        <RNView style={[styles.cellFill, cellColor(count, themeColor)]} />
-      </TouchableOpacity>
+        style={[styles.cell, fill]}
+      />
     );
   },
 );
@@ -528,9 +531,6 @@ const styles = StyleSheet.create({
   cell: {
     width: CELL,
     height: CELL,
-  },
-  cellFill: {
-    flex: 1,
     borderRadius: 2,
   },
   axisText: {

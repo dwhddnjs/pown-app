@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 // component
 import { Text, View } from "@/components/themed";
 import {
@@ -29,7 +29,12 @@ const CustomDrawerContent = (props: DrawerContentComponentProps) => {
   const { workoutPlanList } = useWorkoutPlanStore();
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
-  const sortData = transformWorkoutData(workoutPlanList, lang);
+  // Layout이 usePathname()을 구독해서 라우트가 바뀔 때마다 여기까지 리렌더된다 —
+  // 전체 목록을 다시 그룹핑하지 않도록 목록/언어가 바뀔 때만 계산한다
+  const sortData = useMemo(
+    () => transformWorkoutData(workoutPlanList, lang),
+    [workoutPlanList, lang],
+  );
   const t = useT();
   const navigation = useNavigation();
   const { push } = useRouter();

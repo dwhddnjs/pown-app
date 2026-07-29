@@ -10,7 +10,6 @@ import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { Ionicons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { usePathname } from "expo-router";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -22,6 +21,9 @@ interface WeightDateProps {
   date: string;
   equipment: string;
   type: string;
+  // 캘린더 모달에서만 ⋯를 감춘다. 예전엔 usePathname()으로 경로를 봤는데,
+  // 라우터 컨텍스트를 구독하면 화면을 옮길 때마다 보이는 모든 카드가 리렌더된다.
+  hideMenu?: boolean;
 }
 
 export const WeightDate = ({
@@ -31,11 +33,11 @@ export const WeightDate = ({
   date,
   type,
   equipment,
+  hideMenu,
 }: WeightDateProps) => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
-  const pathname = usePathname();
   // 메뉴는 앱에 하나만 있는 PlanMenu가 띄운다 — 행은 버튼 좌표만 올린다
   const openPlanMenu = usePlanMenuStore((state) => state.openPlanMenu);
   const anchorRef = useRef<View>(null);
@@ -53,7 +55,7 @@ export const WeightDate = ({
         <Text style={[styles.date, { color: themeColor.subText }]}>
           {formatTime(date)}
         </Text>
-        {pathname !== "/calendar-workout" && (
+        {!hideMenu && (
           <View ref={anchorRef} collapsable={false}>
             <TouchableOpacity onPress={onPress} style={{ paddingLeft: 16 }}>
               <Ionicons
