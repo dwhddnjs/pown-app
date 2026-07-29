@@ -25,7 +25,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { usePopover } from "@/hooks/use-popover";
 import { useT } from "@/hooks/use-t";
 
-const MENU_WIDTH = 150;
+const MENU_WIDTH = 120;
 // 버튼과 메뉴 사이 간격
 const MENU_GAP = 6;
 
@@ -117,8 +117,8 @@ export const PlanMenu = () => {
               right: windowWidth - anchor.rightEdge,
               // 버튼이 있는 모서리에서 자라나게
               transformOrigin: flipped ? "bottom right" : "top right",
-              backgroundColor: themeColor.itemColor,
-              borderColor: themeColor.divider,
+              backgroundColor: themeColor.background,
+              // borderColor: themeColor.divider,
             },
             menuStyle,
           ]}
@@ -130,7 +130,7 @@ export const PlanMenu = () => {
             <Ionicons name="pencil" size={17} color={themeColor.text} />
           </TouchableOpacity>
           <View
-            style={[styles.menuLine, { backgroundColor: themeColor.divider }]}
+            style={[styles.menuLine, { backgroundColor: themeColor.itemColor }]}
           />
           <TouchableOpacity style={styles.menuItem} onPress={onDelete}>
             <Text style={[styles.menuText, { color: themeColor.fail }]}>
@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   menu: {
     position: "absolute",
     width: MENU_WIDTH,
-    borderWidth: 1,
+    // borderWidth: 1,
     borderRadius: 12,
     borderCurve: "continuous",
     overflow: "hidden",
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
   },
   menuLine: {
-    height: StyleSheet.hairlineWidth,
+    height: 1,
+    marginHorizontal: 8,
   },
 });

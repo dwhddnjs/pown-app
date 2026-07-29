@@ -18,7 +18,7 @@ import * as Haptics from "expo-haptics"
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useNavigation, DrawerActions } from "@react-navigation/native"
 // icon
-import PowLogo from "@/assets/images/svg/pow_logo2.svg"
+import PownLogo from "@/assets/images/svg/pown-logo.svg"
 
 const WorkoutTabHeader = ({ title }: { title?: string }) => {
   const themeColor = useCurrentThemeColor()
@@ -62,7 +62,7 @@ const WorkoutTabHeader = ({ title }: { title?: string }) => {
               </Text>
             </Animated.View>
           ) : (
-            <PowLogo width={44} height={22} />
+            <PownLogo width={48} height={20} />
           )}
           <View style={[styles.side, { justifyContent: "flex-end" }]}>
             <TouchableOpacity

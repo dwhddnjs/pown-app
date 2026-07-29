@@ -40,11 +40,7 @@ export default function Note() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <HeaderIconButton
-              type="save"
-              onPress={onSaveNote}
-              style={{ marginTop: 16 }}
-            />
+            <HeaderIconButton type="save" onPress={onSaveNote} />
           ),
         }}
       />

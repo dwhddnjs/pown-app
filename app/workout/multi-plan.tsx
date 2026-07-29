@@ -58,11 +58,7 @@ export default function MultiPlanScreen() {
         options={{
           headerRight: () =>
             tempPlans.length === 0 ? null : (
-              <HeaderIconButton
-                type="save"
-                onPress={onSaveAll}
-                style={{ marginTop: 16 }}
-              />
+              <HeaderIconButton type="save" onPress={onSaveAll} />
             ),
         }}
       />

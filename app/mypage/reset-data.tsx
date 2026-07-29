@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 // component
-import { StyleSheet } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { Dialog } from "@/components/dialog";
 import { Button } from "@/components/button";
@@ -9,35 +9,72 @@ import { SettingItem } from "@/components/mypage/setting-item";
 import { toast } from "sonner-native";
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
-import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import {
+  useWorkoutPlanStore,
+  WorkoutPlanTypes,
+} from "@/hooks/use-workout-plan-store";
 import { useShortsStore } from "@/hooks/use-shorts-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useT } from "@/hooks/use-t"
+import { useT } from "@/hooks/use-t";
 // lib
 import { createBackup, restoreBackup } from "@/lib/backup";
+import seedWorkoutPlans from "@/assets/seed-workout-plans.json";
 // expo
 import { useRouter } from "expo-router";
 // icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
+// 숨김 기능: 화면 우측 최하단을 이만큼 연속으로 눌러야 시드 주입이 뜬다
+const SEED_TAP_COUNT = 5;
+
+type Confirm = {
+  title: string;
+  desc: string;
+  action: string;
+  actionColor: string;
+  onConfirm: () => void;
+};
+
 export default function ResetData() {
-  const { onResetPlanList } = useWorkoutPlanStore();
+  const { onResetPlanList, onSetMockout } = useWorkoutPlanStore();
 
   const { onReset } = useUserStore();
   const { onResetVideo } = useShortsStore();
   const { back } = useRouter();
   const themeColor = useCurrentThemeColor();
   const t = useT();
-  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
+  const [confirm, setConfirm] = useState<Confirm | null>(null);
+  const seedTaps = useRef(0);
 
-  const onSubmit = () => {
-    setIsResetDialogOpen(false);
+  const onResetAll = () => {
+    setConfirm(null);
     onResetPlanList();
     onReset();
     onResetVideo();
     toast.success(t("data.resetDone"));
     back();
+  };
+
+  const onSeed = () => {
+    setConfirm(null);
+    // JSON import는 progress 같은 리터럴 유니온을 string으로 넓혀서 읽는다
+    onSetMockout(seedWorkoutPlans as WorkoutPlanTypes[]);
+    toast.success(t("data.seedDone", { n: seedWorkoutPlans.length }));
+    back();
+  };
+
+  const onSeedTap = () => {
+    seedTaps.current += 1;
+    if (seedTaps.current < SEED_TAP_COUNT) return;
+    seedTaps.current = 0;
+    setConfirm({
+      title: t("data.seedConfirm", { n: seedWorkoutPlans.length }),
+      desc: t("data.seedDesc"),
+      action: t("data.seedAction"),
+      actionColor: themeColor.tint,
+      onConfirm: onSeed,
+    });
   };
 
   return (
@@ -87,13 +124,22 @@ export default function ResetData() {
           }
           title={t("data.resetAll")}
           titleColor={themeColor.fail}
-          onPress={() => setIsResetDialogOpen(true)}
+          onPress={() =>
+            setConfirm({
+              title: t("data.resetConfirm"),
+              desc: "* 운동 기록·내정보·숏츠가 모두 삭제되며 복구할 수 없어요.",
+              action: t("common.deleteAction"),
+              actionColor: themeColor.fail,
+              onConfirm: onResetAll,
+            })
+          }
         />
       </SettingSection>
-      {isResetDialogOpen && (
+      <Pressable style={styles.seedHitArea} onPress={onSeedTap} />
+      {confirm && (
         <Dialog
-          isOpen={isResetDialogOpen}
-          onClose={() => setIsResetDialogOpen(false)}
+          isOpen={!!confirm}
+          onClose={() => setConfirm(null)}
           modalHeight={300}
         >
           <View
@@ -104,9 +150,7 @@ export default function ResetData() {
             }}
           >
             <View style={{ backgroundColor: themeColor.itemColor, gap: 4 }}>
-              <Text style={{ fontSize: 18 }}>
-                {t("data.resetConfirm")}
-              </Text>
+              <Text style={{ fontSize: 18 }}>{confirm.title}</Text>
               <Text
                 style={{
                   fontSize: 14,
@@ -114,7 +158,7 @@ export default function ResetData() {
                   fontFamily: "sb-l",
                 }}
               >
-                * 운동 기록·내정보·숏츠가 모두 삭제되며 복구할 수 없어요.
+                {confirm.desc}
               </Text>
             </View>
             <View
@@ -131,7 +175,7 @@ export default function ResetData() {
                   marginHorizontal: 0,
                   backgroundColor: themeColor.subText,
                 }}
-                onPress={() => setIsResetDialogOpen(false)}
+                onPress={() => setConfirm(null)}
               >
                 {t("common.cancel")}
               </Button>
@@ -140,11 +184,11 @@ export default function ResetData() {
                 style={{
                   flex: 1,
                   marginHorizontal: 0,
-                  backgroundColor: themeColor.fail,
+                  backgroundColor: confirm.actionColor,
                 }}
-                onPress={onSubmit}
+                onPress={confirm.onConfirm}
               >
-                {t("common.deleteAction")}
+                {confirm.action}
               </Button>
             </View>
           </View>
@@ -171,5 +215,13 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     fontSize: 13,
     lineHeight: 19,
+  },
+  // 우측 최하단 숨김 탭 영역 — 보이지 않고, 다른 항목과 겹치지 않는 빈 자리다
+  seedHitArea: {
+    position: "absolute",
+    right: 0,
+    bottom: 0,
+    width: 80,
+    height: 80,
   },
 });

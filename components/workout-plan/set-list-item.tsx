@@ -1,4 +1,4 @@
-import { StyleSheet, TouchableOpacity } from "react-native";
+import { Pressable, StyleSheet } from "react-native";
 import React from "react";
 import { Text, View } from "../themed";
 import { NumberBallIcon } from "../number-ball-icon";
@@ -17,13 +17,18 @@ interface SetListItemProps {
   hideProgress?: boolean;
 }
 
-export const SetListItem = ({
+// 계획 하나에 세트가 5개씩 달리고 화면에는 계획이 수십 개 올라간다 — 빠른 스크롤에서
+// 이 컴포넌트의 마운트 비용이 그대로 화면이 비는 시간이 된다. 스토어는 액션 하나만
+// 골라 구독하고(전체 구독이면 기록이 바뀔 때마다 전부 리렌더), memo로 감싼다.
+export const SetListItem = React.memo(function SetListItem({
   item,
   planId,
   setIndex,
   hideProgress,
-}: SetListItemProps) => {
-  const { setCompleteProgress } = useWorkoutPlanStore();
+}: SetListItemProps) {
+  const setCompleteProgress = useWorkoutPlanStore(
+    (state) => state.setCompleteProgress,
+  );
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
@@ -86,9 +91,10 @@ export const SetListItem = ({
             { backgroundColor: themeColor.itemColor },
           ]}
         >
+          {/* 원래 TouchableOpacity였지만 activeOpacity={1}이라 페이드가 없었다 —
+              Animated.Value를 세트마다 하나씩 만들 이유가 없어 Pressable로 바꿨다 */}
           {item.progress === "완료" ? (
-            <TouchableOpacity
-              activeOpacity={1}
+            <Pressable
               style={[
                 styles.completedIcon,
                 { backgroundColor: themeColor.itemColor },
@@ -100,10 +106,9 @@ export const SetListItem = ({
                 size={28}
                 color={themeColor.tint}
               />
-            </TouchableOpacity>
+            </Pressable>
           ) : (
-            <TouchableOpacity
-              activeOpacity={1}
+            <Pressable
               style={[styles.button, { backgroundColor: themeColor.tint }]}
               onPress={() => setCompleteProgress(planId, item.id)}
             >
@@ -111,13 +116,13 @@ export const SetListItem = ({
               <Text style={[styles.buttonText, { color: themeColor.onTint }]}>
                 {tProgress("완료", lang)}
               </Text>
-            </TouchableOpacity>
+            </Pressable>
           )}
         </View>
       )}
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

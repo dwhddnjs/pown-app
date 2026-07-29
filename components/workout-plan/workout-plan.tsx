@@ -1,13 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 // component
 import { Pressable, StyleSheet, Image } from "react-native";
 import { Text, View } from "../themed";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from "react-native-reanimated";
 import { NoteText } from "./note-text";
 import { SetListItem } from "./set-list-item";
 // icon
@@ -35,6 +29,9 @@ interface ProgressBarProps {
   textColor: string;
 }
 
+// 예전엔 막대를 Reanimated로 채웠다. 셀 하나마다 shared value와 UI 스레드
+// mapper가 새로 생기는데, 빠른 스크롤에서는 이게 초당 수십 번 만들어졌다 버려진다 —
+// 화면이 비어 보이던 주 원인. 채움 애니메이션을 포기하고 폭만 바로 준다.
 const ProgressBar = ({
   completed,
   total,
@@ -44,21 +41,6 @@ const ProgressBar = ({
 }: ProgressBarProps) => {
   const t = useT();
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const progress = useSharedValue(pct);
-
-  useEffect(() => {
-    progress.value = withTiming(pct, {
-      duration: 800,
-      easing: Easing.out(Easing.cubic),
-    });
-  }, [pct]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    width: `${progress.value}%`,
-    height: "100%",
-    borderRadius: 3,
-    backgroundColor: tintColor,
-  }));
 
   return (
     <View style={{ gap: 4, backgroundColor: "transparent" }}>
@@ -90,7 +72,14 @@ const ProgressBar = ({
           overflow: "hidden",
         }}
       >
-        <Animated.View style={animatedStyle} />
+        <View
+          style={{
+            width: `${pct}%`,
+            height: "100%",
+            borderRadius: 3,
+            backgroundColor: tintColor,
+          }}
+        />
       </View>
     </View>
   );
@@ -98,6 +87,68 @@ const ProgressBar = ({
 
 // 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
 const IMAGE_GAP = 8;
+
+interface PlanImagesProps {
+  imageUri: WorkoutPlanTypes["imageUri"];
+  bgColor: string;
+  subTextColor: string;
+}
+
+// 권한 조회와 이미지 스토어 구독을 "사진이 있는 계획"에만 둔다 — 리스트 셀마다
+// 네이티브 권한을 조회하면 빠른 스크롤에서 셀 마운트가 프레임 예산을 넘겨 빈 칸이 보인다
+const PlanImages = ({ imageUri, bgColor, subTextColor }: PlanImagesProps) => {
+  const t = useT();
+  // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
+  const [mediaPermission, requestMediaPermission] =
+    MediaLibrary.usePermissions();
+  const { setImageUri } = useImageUriStore();
+  const [gridWidth, setGridWidth] = useState(0);
+
+  // 앱 소유 사진(media/)은 권한 없이도 보이고, 구 데이터(사진첩 참조)만 권한이 필요하다
+  const hasMediaPermission =
+    (mediaPermission?.granted ?? false) ||
+    !imageUri.some((image) => !isAppOwnedMedia(image.imageUri));
+
+  if (!hasMediaPermission) {
+    return (
+      <Pressable onPress={() => requestMediaPermission()}>
+        <Text style={{ color: subTextColor, fontFamily: "sb-l" }}>
+          {t("workout.galleryPermission")}
+        </Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View
+      style={[styles.imageList, { backgroundColor: bgColor, marginTop: 4 }]}
+      onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
+    >
+      {imageUri.map((imageItem) => (
+        <Pressable
+          key={imageItem.id}
+          style={[
+            {
+              width:
+                imageUri.length === 1 || !gridWidth
+                  ? "100%"
+                  : (gridWidth - IMAGE_GAP) / 2,
+            },
+            { backgroundColor: bgColor },
+          ]}
+          onPress={() =>
+            setImageUri(resolveMediaUri(imageItem.imageUri) as string)
+          }
+        >
+          <Image
+            source={{ uri: resolveMediaUri(imageItem.imageUri) }}
+            style={[styles.image, { borderColor: bgColor }]}
+          />
+        </Pressable>
+      ))}
+    </View>
+  );
+};
 
 interface WorkoutPlanProps {
   item: WorkoutPlanTypes;
@@ -114,16 +165,6 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
   hideProgress,
 }: WorkoutPlanProps) {
   const themeColor = useCurrentThemeColor();
-  const t = useT();
-  // 영속 플래그 대신 실시간 권한 상태를 본다 — 설정에서 권한을 바꿔도 바로 반영된다
-  const [mediaPermission, requestMediaPermission] =
-    MediaLibrary.usePermissions();
-  // 앱 소유 사진(media/)은 권한 없이도 보이고, 구 데이터(사진첩 참조)만 권한이 필요하다
-  const hasMediaPermission =
-    (mediaPermission?.granted ?? false) ||
-    !item.imageUri?.some((image) => !isAppOwnedMedia(image.imageUri));
-  const { setImageUri } = useImageUriStore();
-  const [gridWidth, setGridWidth] = useState(0);
 
   const getWorkoutIcon = (type: string) => {
     let result;
@@ -244,55 +285,12 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
             ))}
           </View>
         )}
-        {item.imageUri?.length > 0 && !hasMediaPermission && (
-          <Pressable onPress={() => requestMediaPermission()}>
-            <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
-              {t("workout.galleryPermission")}
-            </Text>
-          </Pressable>
-        )}
-        {hasMediaPermission && item.imageUri?.length > 0 && (
-          <View
-            style={[
-              styles.imageList,
-              {
-                backgroundColor: themeColor.itemColor,
-                marginTop: 4,
-              },
-            ]}
-            onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
-          >
-            {item.imageUri.map((imageItem) => {
-              return (
-                <Pressable
-                  key={imageItem.id}
-                  style={[
-                    {
-                      width:
-                        item.imageUri.length === 1 || !gridWidth
-                          ? "100%"
-                          : (gridWidth - IMAGE_GAP) / 2,
-                    },
-                    { backgroundColor: themeColor.itemColor },
-                  ]}
-                  onPress={() =>
-                    setImageUri(resolveMediaUri(imageItem.imageUri) as string)
-                  }
-                >
-                  <Image
-                    key={imageItem.id}
-                    source={{ uri: resolveMediaUri(imageItem.imageUri) }}
-                    style={[
-                      styles.image,
-                      {
-                        borderColor: themeColor.itemColor,
-                      },
-                    ]}
-                  />
-                </Pressable>
-              );
-            })}
-          </View>
+        {item.imageUri?.length > 0 && (
+          <PlanImages
+            imageUri={item.imageUri}
+            bgColor={themeColor.itemColor}
+            subTextColor={themeColor.subText}
+          />
         )}
       </View>
     </View>
@@ -308,8 +306,6 @@ const styles = StyleSheet.create({
     gap: 14,
     flexDirection: "row",
     alignItems: "flex-start",
-    // borderWidth: 1,
-    flex: 1,
   },
   iconLine: {
     // justifyContent: "center",
