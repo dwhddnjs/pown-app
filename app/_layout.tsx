@@ -128,7 +128,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -150,7 +149,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -172,7 +170,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -215,7 +212,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -237,7 +233,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -257,7 +252,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -278,7 +272,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}
@@ -408,7 +401,6 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 16 }}
             />
           ),
         })}

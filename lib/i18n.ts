@@ -49,6 +49,7 @@ const ko = {
 
   // 운동계획 목록
   "workout.lastPlan": "마지막 운동계획입니다.",
+  "workout.backToLatest": "최신 기록으로",
   "workout.addPlan": "운동계획 추가",
   "workout.setsDone": "{completed}/{total} 세트 완료",
   "workout.galleryPermission": "사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.",
@@ -231,6 +232,10 @@ const ko = {
   "data.notBackupFile": "Pown 백업 파일이 아니에요. 파일을 확인해주세요.",
   "data.restored": "복원되었습니다",
   "data.restoreFailed": "복원 중 오류가 발생했습니다. 파일을 확인해주세요.",
+  "data.seedConfirm": "테스트용 운동 기록 {n}개를 넣을까요?",
+  "data.seedDesc": "* 지금 있는 운동 기록은 모두 대체되며 복구할 수 없어요.",
+  "data.seedAction": "넣기",
+  "data.seedDone": "운동 기록 {n}개를 넣었습니다",
 
   // 계산기
   "calc.kg": "킬로그램/kg",
@@ -273,6 +278,7 @@ const en: Record<TKey, string> = {
   "drawer.empty": "No workout folders yet.",
 
   "workout.lastPlan": "That's the last workout plan.",
+  "workout.backToLatest": "Back to latest",
   "workout.addPlan": "Add workout plan",
   "workout.setsDone": "{completed}/{total} sets done",
   "workout.galleryPermission": "Tap to allow photo library access and view photos.",
@@ -443,6 +449,10 @@ const en: Record<TKey, string> = {
   "data.notBackupFile": "That's not a Pown backup file. Please check the file.",
   "data.restored": "Restored",
   "data.restoreFailed": "Something went wrong while restoring. Please check the file.",
+  "data.seedConfirm": "Load {n} sample workout records?",
+  "data.seedDesc": "* Your current workout records will be replaced and can't be recovered.",
+  "data.seedAction": "Load",
+  "data.seedDone": "Loaded {n} workout records",
 
   "calc.kg": "Kilograms/kg",
   "calc.lb": "Pounds/lb",

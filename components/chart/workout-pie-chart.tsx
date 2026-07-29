@@ -35,9 +35,21 @@ export const WorkoutPieChart = () => {
 
   const chartValue = useMemo(
     () => [
-      { value: listCount.back, color: "#F13C33", title: tBodyPart("back", lang) },
-      { value: listCount.chest, color: "#FFC134", title: tBodyPart("chest", lang) },
-      { value: listCount.shoulder, color: "#3CC42E", title: tBodyPart("shoulder", lang) },
+      {
+        value: listCount.back,
+        color: "#F13C33",
+        title: tBodyPart("back", lang),
+      },
+      {
+        value: listCount.chest,
+        color: "#FFC134",
+        title: tBodyPart("chest", lang),
+      },
+      {
+        value: listCount.shoulder,
+        color: "#3CC42E",
+        title: tBodyPart("shoulder", lang),
+      },
       { value: listCount.leg, color: "#3A76E2", title: tBodyPart("leg", lang) },
       { value: listCount.arm, color: "#9A48C1", title: tBodyPart("arm", lang) },
     ],
@@ -51,9 +63,7 @@ export const WorkoutPieChart = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>
-        {t("chart.partTitle")}
-      </Text>
+      <Text style={{ fontSize: 18 }}>{t("chart.partTitle")}</Text>
       <View style={{ height: 1, backgroundColor: themeColor.divider }} />
       {isEmptyCount ? (
         <ChartEmptyState
@@ -72,7 +82,7 @@ export const WorkoutPieChart = () => {
             // 기본 radius(120)면 도넛만 240pt라 영어 범례가 카드 밖으로 밀린다
             radius={90}
             // 링이 얇아지면 그 위의 "50%" 라벨이 잘린다 — 링 폭 45pt 확보
-            innerRadius={45}
+            innerRadius={35}
             donut
             shadow
             showText
@@ -129,7 +139,6 @@ export const WorkoutPieChart = () => {
     </View>
   );
 };
-
 
 const styles = StyleSheet.create({
   container: {

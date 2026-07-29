@@ -83,11 +83,7 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <HeaderIconButton
-              type="save"
-              onPress={onSubmit}
-              style={{ marginTop: 16 }}
-            />
+            <HeaderIconButton type="save" onPress={onSubmit} />
           ),
         }}
       />

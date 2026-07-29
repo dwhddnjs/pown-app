@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 // component
 import {
   Modal,
@@ -355,7 +361,6 @@ export const YearGrass = () => {
                 top: yearAnchor.top,
                 right: yearAnchor.right,
                 backgroundColor: themeColor.background,
-                borderColor: themeColor.divider,
               },
               yearMenuStyle,
             ]}
@@ -513,7 +518,7 @@ const styles = StyleSheet.create({
     transformOrigin: "top right",
     minWidth: 72,
     paddingVertical: 2,
-    borderWidth: 1,
+
     borderRadius: 8,
   },
   dropdownItem: {

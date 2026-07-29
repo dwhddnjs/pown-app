@@ -89,7 +89,6 @@ export default function Search() {
     >
       <FlashList
         data={searchResult}
-        estimatedItemSize={200}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item[0]}
