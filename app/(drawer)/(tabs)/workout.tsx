@@ -1,10 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ComponentProps,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 // component
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { YearGrass } from "@/components/grass";
 import { Text, View } from "@/components/themed";
-import { StyleSheet, TouchableOpacity, ViewToken } from "react-native";
-import { FlashList } from "@shopify/flash-list";
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+  ViewToken,
+} from "react-native";
+import { FlashList, FlashListRef } from "@shopify/flash-list";
+import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { EmptyList } from "@/components/workout-plan/empty-list";
 // zustand
 import {
@@ -12,11 +26,12 @@ import {
   WorkoutPlanTypes,
 } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
+import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
 // lib
 import { convertChartDate, formatDate, groupByDate } from "@/lib/function";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo
-import { useNavigation, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -45,23 +60,51 @@ type Row =
 
 const GRASS_ROW: Row = { kind: "grass" };
 
-// 1px이라도 보이면 viewable — 잔디가 완전히 지나가야 날짜 타이틀로 바뀐다
-const VIEWABILITY_CONFIG = { itemVisiblePercentThreshold: 0 };
+// 1px이라도 보이면 viewable — 잔디가 완전히 지나가야 날짜 타이틀로 바뀐다.
+// minimumViewTime을 빼면 FlashList가 250ms를 기본으로 넣는데(RN 기본은 0), 그러면
+// 보고가 250ms짜리 타이머로 밀리고 타이머가 도는 시점에 "아직도 보이는" 행만
+// 남기고 걸러낸다 — 빠르게 스크롤하는 동안엔 전부 걸러져서 손을 떼야 날짜가 바뀐다.
+// 0으로 두면 반대로 매 스크롤 프레임마다 O(n²) 필터가 동기로 돌아 프레임 예산을
+// 깎으므로(라이브러리가 명시적으로 경고하는 값), 체감 지연이 없는 선까지만 낮춘다.
+const VIEWABILITY_CONFIG = {
+  itemVisiblePercentThreshold: 0,
+  minimumViewTime: 50,
+};
 
-// 화면 밖으로 미리 그려둘 거리(px) — 한 화면 반쯤. 빠른 플릭이 도달하기 전에
-// 셀이 준비돼 있게 한다. (기본 250은 강한 플릭을 못 따라간다)
-const DRAW_DISTANCE = 1200;
+// 화면 밖으로 미리 그려둘 거리(px) — 한 화면 반쯤. 버퍼는 살아있는 셀 수를 늘려
+// 프레임당 viewability·레이아웃 비용과 메모리를 같이 키우므로, 플릭이 앞지른다고
+// 계속 올릴 값이 아니다. 남는 빈 화면은 셀 하나의 렌더 비용에서 줄인다.
+const DRAW_DISTANCE = 1500;
 
-const getItemType = (item: Row) => item.kind;
+// 재활용 풀을 "구조가 같은 것끼리" 나눈다. 전부 "plan" 하나로 두면 세트 5개짜리
+// 셀을 세트 1개짜리로 재활용할 때 React가 SetListItem 4개(=네이티브 뷰 수십 개)를
+// 언마운트했다 다시 마운트한다. 플릭 중엔 이게 매 프레임 반복돼 렌더가 스크롤을
+// 못 따라간다. 다만 세트 수를 그대로 키로 쓰면 풀이 사용자 데이터만큼 쪼개져
+// 재활용이 아예 안 되므로 버킷으로 묶어 종류 수를 상수로 고정한다.
+const SET_COUNT_BUCKETS = 3;
+const getItemType = (item: Row) =>
+  item.kind === "plan"
+    ? `plan${Math.min(item.plan.setWithCount?.length ?? 0, SET_COUNT_BUCKETS)}`
+    : item.kind;
+
+// 우하단에 세로로 쌓이는 원형 버튼. 크기를 바꾸면 위 버튼의 bottom도 같이
+// 움직여야 해서(안 그러면 간격이 벌어진다) 한곳에서 계산한다.
+const FAB_SIZE = 48;
+const FAB_BOTTOM = 100;
+const FAB_GAP = 8;
 
 export default function TabOneScreen() {
-  const { workoutPlanList } = useWorkoutPlanStore();
+  // 전체 구독이면 세트 완료 토글 같은 무관한 변경에도 이 화면이 통째로 리렌더된다
+  const workoutPlanList = useWorkoutPlanStore((state) => state.workoutPlanList);
   const { date: selectedDate } = useSelectDateStore();
+  const setWorkoutTitle = useWorkoutScrollStore(
+    (state) => state.setWorkoutTitle,
+  );
+  const setScrolled = useWorkoutScrollStore((state) => state.setScrolled);
   const headerHeight = useHeaderHeight();
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
-  const navigation = useNavigation();
   const { open } = useIsModalOpenStore();
 
   const router = useRouter();
@@ -101,47 +144,68 @@ export default function TabOneScreen() {
     return allRows.slice(starts[startDateIndex] ?? 0);
   }, [allRows, starts, startDateIndex]);
 
-  // setOptions는 매번 새 옵션 객체를 만들어 네비게이터 전체를 리렌더한다 —
-  // 값이 실제로 바뀔 때만 통과시킨다
-  const lastTitle = useRef<string | null>(null);
-  const setTitle = useCallback(
-    (title: string) => {
-      if (lastTitle.current === title) return;
-      lastTitle.current = title;
-      navigation.setOptions({ title });
-    },
-    [navigation],
-  );
+  const listRef = useRef<FlashListRef<Row>>(null);
 
-  // onViewableItemsChanged는 리스트 생성 후 교체할 수 없다 — 핸들러 참조는 고정하고
-  // 안에서 쓰는 값만 ref로 최신화한다
-  const latest = useRef({ setTitle, lang });
-  latest.current = { setTitle, lang };
-  const onViewableItemsChanged = useRef(
+  // 맨 위로 버튼은 최상단이 아닐 때만 뜬다. 스크롤 이벤트를 따로 받지 않고 이미
+  // 도는 viewability 결과를 쓴다 — 스크롤 중 JS 스레드에 일을 더 얹지 않는다.
+  // 노출 여부는 화면 상태가 아니라 스토어에 둔다: 화면 상태로 두면 경계를 넘을
+  // 때마다 이 화면 전체가 리렌더돼 타이틀을 스토어로 뺀 이유와 같은 비용이 든다.
+  const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       // 빠른 스크롤 중엔 셀이 잠깐 비어 viewableItems가 빈 배열로 온다 —
       // 여기서 ""로 지우면 헤더가 로고로 되돌아간다. 직전 타이틀을 유지한다.
-      const top = viewableItems[0]?.item as Row | undefined;
+      const top = viewableItems[0];
       if (!top) return;
-      if (top.kind === "grass") {
-        latest.current.setTitle("");
+
+      setScrolled((top.index ?? 0) > 0);
+
+      const row = top.item as Row | undefined;
+      if (!row) return;
+      if (row.kind === "grass") {
+        setWorkoutTitle("");
         return;
       }
-      const [year, month] = top.date.split(".");
-      latest.current.setTitle(
-        convertChartDate(`${year}${month}`, latest.current.lang),
-      );
+      const [year, month] = row.date.split(".");
+      setWorkoutTitle(convertChartDate(`${year}${month}`, lang));
     },
-  ).current;
+    [setScrolled, setWorkoutTitle, lang],
+  );
 
   useEffect(() => {
-    setTitle("");
-  }, [setTitle]);
+    setWorkoutTitle("");
+  }, [setWorkoutTitle]);
 
+  const scrollToTop = useCallback(() => {
+    // scrollToTop/scrollToOffset은 네이티브 scrollTo를 그냥 부른다 — 스크롤 위치만
+    // 튀고 셀은 아직 옛 위치에 있어서 "내용이 사라졌다 다시 나오는" 것처럼 보인다.
+    // scrollToIndex는 렌더 윈도를 목표까지 단계적으로 옮겨 도착 지점을 먼저 그려준다.
+    // 다만 정확히 0에서 멈추지 않으므로(첫 행 오프셋만큼 남는다) 남은 거리는 직접
+    // 스크롤한다 — 이미 그려둔 구간이라 애니메이션을 켜도 빈 화면이 없다.
+    // animated: true를 scrollToIndex에 주면 안 된다: 내부에서 scrollTo를 연달아
+    // 두 번 불러 마지막 애니메이션이 취소된다.
+    listRef.current
+      ?.scrollToIndex({ index: 0, animated: false })
+      .then(() => listRef.current?.scrollToOffset({ offset: 0, animated: true }));
+  }, []);
+
+  // 리마운트하면 리스트가 통째로 사라졌다 다시 그려져 깜빡인다 — 1만 행이면 더 심하다.
+  // 데이터만 최신 기준으로 되돌리면 보고 있던 행 위로 더 최신 기록이 붙고,
+  // 거기서 맨 위까지 스크롤해 "올라가는" 것처럼 보이게 한다.
+  // nonce는 startDateIndex가 이미 0이어도 스크롤이 돌게 하려고 둔다.
+  const [scrollTopNonce, setScrollTopNonce] = useState(0);
   const resetToLatest = useCallback(() => {
     setStartDateIndex(0);
-    setListKey((prev) => prev + 1);
+    setScrollTopNonce((prev) => prev + 1);
   }, []);
+
+  useEffect(() => {
+    if (scrollTopNonce === 0) return;
+    // 앞에 붙은 수천 행은 아직 추정 높이다 — 같은 커밋에서 바로 스크롤하면
+    // 실측 높이가 확정될 때 들어오는 maintainVisibleContentPosition 보정과 싸워
+    // 최상단이 아닌 중간에 멈춘다. 레이아웃이 한 번 돈 뒤에 스크롤한다.
+    const frame = requestAnimationFrame(scrollToTop);
+    return () => cancelAnimationFrame(frame);
+  }, [scrollTopNonce, scrollToTop]);
 
   // 가상화된 리스트는 아직 렌더하지 않은 구간을 스크롤로 건너뛸 수 없다 —
   // 고른 날짜를 리스트의 첫 행으로 만들어 거기서부터 과거를 보여준다.
@@ -152,9 +216,13 @@ export default function TabOneScreen() {
     if (!selectedDate) return;
     const index = datesRef.current.indexOf(selectedDate);
     if (index < 0) return;
+    // 여기만 리마운트를 쓴다 — 데이터가 완전히 다른 구간으로 갈리므로 스크롤
+    // 오프셋을 그대로 두면 엉뚱한 위치에서 시작한다
     setStartDateIndex(index);
     setListKey((prev) => prev + 1);
-  }, [selectedDate]);
+    // 리마운트로 스크롤이 0으로 돌아가지만 viewability는 그다음 프레임에나 온다
+    setScrolled(false);
+  }, [selectedDate, setScrolled]);
 
   // 계획이 추가되면 새 기록은 맨 위에 쌓인다 — 과거를 보던 중이었어도 최신으로 되돌린다
   const planCount = useRef(workoutPlanList.length);
@@ -221,7 +289,6 @@ export default function TabOneScreen() {
     [themeColor, lang],
   );
 
-  // 스크롤 중 타이틀이 바뀔 때마다 setOptions가 이 화면을 리렌더한다 —
   // 리스트에 넘기는 객체/엘리먼트가 매번 새로 만들어지면 그때마다 레이아웃을
   // 다시 잡느라 빠른 플릭 도중 화면이 통째로 비어버린다. 전부 고정해서 넘긴다.
   const listPadding = useMemo(
@@ -234,27 +301,19 @@ export default function TabOneScreen() {
       // 날짜를 골라 과거로 온 상태에서는 위쪽에 더 최신 기록이 없다 —
       // 돌아갈 길을 리스트 맨 위에 둔다
       startDateIndex > 0 ? (
-        <TouchableOpacity
-          onPress={resetToLatest}
-          style={[
-            styles.backToLatest,
-            {
-              backgroundColor: themeColor.itemColor,
-              borderColor: themeColor.tint,
-            },
-          ]}
-        >
-          <MaterialIcons
-            name="arrow-upward"
-            size={16}
-            color={themeColor.tintText}
+        <View style={styles.backToLatest}>
+          {/* 하단 "맨 위로"(⇈)와 겹치지 않게 방향 화살표를 쓰지 않는다 —
+              이 버튼은 스크롤이 아니라 보고 있는 기간을 최신으로 되돌린다 */}
+          <CircleButton
+            onPress={resetToLatest}
+            label={t("workout.backToLatest")}
+            icon="update"
+            iconSize={22}
+            style={styles.circleButtonSmall}
           />
-          <Text style={{ color: themeColor.tintText, fontFamily: "sb-m" }}>
-            {t("workout.backToLatest")}
-          </Text>
-        </TouchableOpacity>
+        </View>
       ) : null,
-    [startDateIndex, resetToLatest, themeColor, t],
+    [startDateIndex, resetToLatest, t],
   );
 
   const listFooter = useMemo(
@@ -271,24 +330,18 @@ export default function TabOneScreen() {
     [themeColor, t],
   );
 
+  const openCalculate = () => router.push("/(modals)/calculate");
+
   if (workoutPlanList.length === 0) {
     return (
       <View style={{ flex: 1, position: "relative" }}>
         <EmptyList />
-        <TouchableOpacity
-          onPress={() => {
-            router.push("/(modals)/calculate");
-          }}
-          style={[
-            styles.calculateButton,
-            {
-              backgroundColor: themeColor.background,
-              borderColor: themeColor.tint,
-            },
-          ]}
-        >
-          <MaterialIcons name="calculate" size={36} color={themeColor.tintText} />
-        </TouchableOpacity>
+        <CircleButton
+          onPress={openCalculate}
+          label={t("workout.openCalculator")}
+          icon="calculate"
+          style={styles.calculateButton}
+        />
       </View>
     );
   }
@@ -306,6 +359,7 @@ export default function TabOneScreen() {
           FlashList는 셀을 재활용해 프롭만 갈아끼우므로 그 비용이 사라진다. */}
       <FlashList
         key={listKey}
+        ref={listRef}
         data={rows}
         // 셀이 재사용되므로 renderItem 참조만으로는 테마·언어 변경이 반영되지 않는다
         extraData={renderItem}
@@ -320,7 +374,6 @@ export default function TabOneScreen() {
         // 종류마다 재활용 풀을 나눈다 — 안 나누면 날짜 헤더 자리에 계획 셀이
         // 들어가면서 잠깐 헤더만 남은 것처럼 보인다
         getItemType={getItemType}
-        // 화면 밖으로 미리 그려둘 거리(px). 재활용이라 넉넉히 잡아도 싸다.
         drawDistance={DRAW_DISTANCE}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={VIEWABILITY_CONFIG}
@@ -330,23 +383,75 @@ export default function TabOneScreen() {
         ListHeaderComponent={listHeader}
         ListFooterComponent={listFooter}
       />
-      <TouchableOpacity
-        onPress={() => {
-          router.push("/(modals)/calculate");
-        }}
-        style={[
-          styles.calculateButton,
-          {
-            backgroundColor: themeColor.background,
-            borderColor: themeColor.tint,
-          },
-        ]}
-      >
-        <MaterialIcons name="calculate" size={36} color={themeColor.tintText} />
-      </TouchableOpacity>
+      <ScrollTopButton onPress={scrollToTop} />
+      <CircleButton
+        onPress={openCalculate}
+        label={t("workout.openCalculator")}
+        icon="calculate"
+        style={styles.calculateButton}
+      />
     </View>
   );
 }
+
+interface CircleButtonProps {
+  onPress: () => void;
+  // 전부 아이콘만 있는 버튼이라 읽어줄 이름을 따로 준다
+  label: string;
+  icon: ComponentProps<typeof MaterialIcons>["name"];
+  iconSize?: number;
+  style?: StyleProp<ViewStyle>;
+}
+
+const CircleButton = ({
+  onPress,
+  label,
+  icon,
+  iconSize = 30,
+  style,
+}: CircleButtonProps) => {
+  const themeColor = useCurrentThemeColor();
+
+  return (
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityLabel={label}
+      style={[
+        styles.circleButton,
+        style,
+        {
+          backgroundColor: themeColor.background,
+          borderColor: themeColor.tint,
+        },
+      ]}
+    >
+      <MaterialIcons name={icon} size={iconSize} color={themeColor.tintText} />
+    </TouchableOpacity>
+  );
+};
+
+// 스크롤 여부 구독을 이 버튼에 가둔다 — 화면 상태로 두면 최상단 경계를 넘나들
+// 때마다 리스트를 든 화면 전체가 리렌더된다
+const ScrollTopButton = ({ onPress }: { onPress: () => void }) => {
+  const scrolled = useWorkoutScrollStore((state) => state.scrolled);
+  const t = useT();
+
+  if (!scrolled) return null;
+
+  return (
+    <Animated.View
+      entering={FadeIn.duration(220)}
+      exiting={FadeOut.duration(160)}
+      style={styles.scrollTopButton}
+    >
+      <CircleButton
+        onPress={onPress}
+        label={t("workout.scrollToTop")}
+        icon="keyboard-double-arrow-up"
+      />
+    </Animated.View>
+  );
+};
 
 const styles = StyleSheet.create({
   grass: {
@@ -385,27 +490,34 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   backToLatest: {
-    flexDirection: "row",
     alignItems: "center",
-    alignSelf: "center",
-    gap: 6,
     marginTop: 24,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-    borderWidth: 1.5,
-    borderRadius: 50,
   },
 
-  calculateButton: {
-    width: 56,
-    height: 56,
+  circleButton: {
+    width: FAB_SIZE,
+    height: FAB_SIZE,
     opacity: 0.8,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
     borderRadius: 50,
+  },
+  // 리스트 안에 들어가는 버튼은 떠 있는 FAB보다 작게
+  circleButtonSmall: {
+    width: 36,
+    height: 36,
+  },
+  calculateButton: {
     position: "absolute",
-    bottom: 100,
+    bottom: FAB_BOTTOM,
+    right: 20,
+    zIndex: 1000,
+  },
+  // 계산기 버튼 바로 위 — fade는 Animated 래퍼가 맡는다
+  scrollTopButton: {
+    position: "absolute",
+    bottom: FAB_BOTTOM + FAB_SIZE + FAB_GAP,
     right: 20,
     zIndex: 1000,
   },

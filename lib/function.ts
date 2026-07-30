@@ -1,6 +1,5 @@
 import { getLanguage, UserInfoTypes } from "@/hooks/use-user-store"
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store"
-import { parsePlanDate } from "@/lib/date"
 import { Lang } from "@/lib/i18n"
 
 type WorkoutTypeCount = Record<
@@ -68,10 +67,10 @@ export const transformWorkoutData = (
   const groupedData: Record<string, Record<string, Set<string>>> = {}
 
   data.forEach((item) => {
-    const date = parsePlanDate(item.createdAt)
-    const year = `${date.getFullYear()}`
-    const month = String(date.getMonth() + 1).padStart(2, "0")
-    const day = String(date.getDate()).padStart(2, "0")
+    // 저장 포맷이 이미 "yyyy.MM.dd"로 0을 채운 문자열이라 쪼개기만 하면 된다.
+    // date-fns parse를 1만 번 부르면 그것만 수백 ms고, 드로어가 리렌더될 때마다 반복된다.
+    const [year, month, day] = item.createdAt.split(" ")[0].split(".")
+    if (!year || !month || !day) return
 
     if (!groupedData[year]) {
       groupedData[year] = {}
@@ -273,11 +272,8 @@ export const removeSameItem = <T extends { createdAt: string }>(
   for (const item of arr) {
     const dateKey = item.createdAt.split(" ")[0]
     const existing = byDate.get(dateKey)
-    if (
-      !existing ||
-      parsePlanDate(item.createdAt).valueOf() >
-        parsePlanDate(existing.createdAt).valueOf()
-    ) {
+    // 고정폭 저장 포맷이라 문자열 비교로 충분하다 ([[sortByCreatedAtDesc]]와 같은 이유)
+    if (!existing || item.createdAt > existing.createdAt) {
       byDate.set(dateKey, item)
     }
   }

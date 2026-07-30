@@ -107,9 +107,7 @@ export default function TabLayout() {
               />
             ),
             tabBarLabel: t("tab.workout"),
-            header: ({ navigation, route, options }) => (
-              <WorkoutTabHeader title={options.title} />
-            ),
+            header: () => <WorkoutTabHeader />,
             headerTransparent: true,
           }}
         />

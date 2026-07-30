@@ -2,7 +2,7 @@ import React from "react"
 // component
 import { StyleSheet, FlatList } from "react-native"
 import { Text, View } from "../themed"
-import { ConditionIcon } from "@/components/add-plan/condition-icon"
+import { ConditionButton } from "@/components/add-plan/condition-icon"
 import { IconTitle } from "../icon-title"
 // color
 // lib
@@ -35,9 +35,7 @@ export const ConditionList = () => {
           horizontal
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
-          renderItem={({ item, index }) => (
-            <ConditionIcon item={item} type="column" />
-          )}
+          renderItem={({ item }) => <ConditionButton item={item} />}
           // estimatedItemSize={65}
         />
       </View>

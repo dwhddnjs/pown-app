@@ -5,7 +5,7 @@ import { Text, View } from "../themed";
 import { NoteText } from "./note-text";
 import { SetListItem } from "./set-list-item";
 // icon
-import { ConditionIcon } from "../add-plan/condition-icon";
+import { ConditionTag } from "../add-plan/condition-icon";
 import { WeightDate } from "./weight-date";
 import Back from "@/assets/images/svg/back_icon.svg";
 import Arm from "@/assets/images/svg/arm_icon.svg";
@@ -155,6 +155,7 @@ interface WorkoutPlanProps {
   index: number;
   totalLength: number;
   hideProgress?: boolean;
+  hideMenu?: boolean;
 }
 
 // 완료 토글 시 전체 리스트가 리렌더되지 않도록 메모 — 참조가 유지된 플랜은 스킵한다
@@ -163,6 +164,7 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
   index,
   totalLength,
   hideProgress,
+  hideMenu,
 }: WorkoutPlanProps) {
   const themeColor = useCurrentThemeColor();
 
@@ -234,6 +236,7 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           weight={item.weight}
           date={item.createdAt as string}
           type={item.type}
+          hideMenu={hideMenu}
         />
         {/* 컨디션 */}
         {item.condition.length > 0 && (
@@ -243,12 +246,8 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
               { backgroundColor: themeColor.itemColor },
             ]}
           >
-            {item.condition.map((item, index) => (
-              <ConditionIcon
-                key={index}
-                item={{ id: index + 1, condition: item }}
-                type="row"
-              />
+            {item.condition.map((condition, index) => (
+              <ConditionTag key={index} condition={condition} />
             ))}
           </View>
         )}
