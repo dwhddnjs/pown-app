@@ -17,13 +17,18 @@ import * as Haptics from "expo-haptics"
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useNavigation, DrawerActions } from "@react-navigation/native"
+// zustand
+import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store"
 // icon
 import PownLogo from "@/assets/images/svg/pown-logo.svg"
 
-const WorkoutTabHeader = ({ title }: { title?: string }) => {
+const WorkoutTabHeader = () => {
   const themeColor = useCurrentThemeColor()
   const { push } = useRouter()
   const navigation = useNavigation()
+  // 스크롤 중 바뀌는 값이라 네비게이션 옵션이 아니라 스토어에서 직접 읽는다 —
+  // 타이틀이 바뀔 때 리렌더되는 건 이 헤더뿐이다
+  const title = useWorkoutScrollStore((state) => state.title)
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>

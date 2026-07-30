@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 // component
 import { Text, View } from "@/components/themed";
 import {
   DrawerContentScrollView,
   DrawerContentComponentProps,
+  useDrawerStatus,
 } from "@react-navigation/drawer";
 import { Drawer } from "expo-router/drawer";
 import Accordion from "react-native-collapsible/Accordion";
@@ -26,10 +27,21 @@ import { MaterialIcons } from "@expo/vector-icons";
 const CustomDrawerContent = (props: DrawerContentComponentProps) => {
   const [activeSections, setActiveSections] = useState<number[]>([]);
   const [multipleSelect, setMultipleSelect] = useState(false);
-  const { workoutPlanList } = useWorkoutPlanStore();
+  // 전체 구독이면 세트 완료 토글 같은 무관한 변경에도 드로어가 통째로 리렌더된다
+  const workoutPlanList = useWorkoutPlanStore((state) => state.workoutPlanList);
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
-  const sortData = transformWorkoutData(workoutPlanList, lang);
+  // 드로어는 닫혀 있어도 항상 마운트돼 있고, 세트 완료 토글은 workoutPlanList
+  // 참조를 매번 새로 만든다 — memo만으로는 그 탭마다 전체 기록을 다시 훑는다.
+  // 닫혀 있는 동안은 마지막 결과를 그대로 쓰고, 열릴 때 한 번만 최신화한다.
+  // (drawerStatus는 여는 액션과 같은 렌더에 "open"이 되므로 빈 화면이 보이지 않는다)
+  const isDrawerOpen = useDrawerStatus() === "open";
+  const lastSortData = useRef<ReturnType<typeof transformWorkoutData>>([]);
+  const sortData = useMemo(() => {
+    if (!isDrawerOpen) return lastSortData.current;
+    lastSortData.current = transformWorkoutData(workoutPlanList, lang);
+    return lastSortData.current;
+  }, [isDrawerOpen, workoutPlanList, lang]);
   const t = useT();
   const navigation = useNavigation();
   const { push } = useRouter();

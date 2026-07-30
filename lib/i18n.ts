@@ -50,6 +50,8 @@ const ko = {
   // 운동계획 목록
   "workout.lastPlan": "마지막 운동계획입니다.",
   "workout.backToLatest": "최신 기록으로",
+  "workout.scrollToTop": "맨 위로",
+  "workout.openCalculator": "중량 계산기 열기",
   "workout.addPlan": "운동계획 추가",
   "workout.setsDone": "{completed}/{total} 세트 완료",
   "workout.galleryPermission": "사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.",
@@ -279,6 +281,8 @@ const en: Record<TKey, string> = {
 
   "workout.lastPlan": "That's the last workout plan.",
   "workout.backToLatest": "Back to latest",
+  "workout.scrollToTop": "Scroll to top",
+  "workout.openCalculator": "Open weight calculator",
   "workout.addPlan": "Add workout plan",
   "workout.setsDone": "{completed}/{total} sets done",
   "workout.galleryPermission": "Tap to allow photo library access and view photos.",
