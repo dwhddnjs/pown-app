@@ -129,7 +129,11 @@ export default function Video() {
   const renderVideo = () => {
     return (
       <SafeAreaView edges={["bottom"]} style={{ flex: 1 }}>
-        <ShortsPlayer uri={uri as string} isActive />
+        {/* 진행바 손잡이(점)의 아래 절반이 플레이어 밖으로 나간다 —
+            나중에 그려지는 하단 바에 덮이지 않게 위로 올린다 */}
+        <View style={{ flex: 1, zIndex: 1, backgroundColor: "transparent" }}>
+          <ShortsPlayer uri={uri as string} isActive />
+        </View>
         <View
           style={[
             {

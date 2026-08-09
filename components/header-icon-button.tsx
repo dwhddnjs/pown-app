@@ -33,7 +33,7 @@ const ICON: Record<
 
 const ICON_SIZE: Record<HeaderIconType, number> = {
   close: 20,
-  back: 24,
+  back: 28,
   down: 24,
   save: 20,
 };

@@ -25,9 +25,13 @@ interface ShortsPlayerProps {
   // 점을 막대 중앙에 놓으면 아래 절반이 ScrollView 밖으로 나가 잘리기 때문에,
   // 리스트 화면에서는 부모가 하단바 위에 겹쳐 그린다.
   progressSV?: SharedValue<number>
+  // 스크롤 중에는 진행바를 숨긴다 — 부모가 스크롤 시작/끝에서 0↔1로 바꾼다.
+  // state로 두면 페이지 전체가 리렌더되므로 shared value로 받는다.
+  barOpacity?: SharedValue<number>
 }
 
 const KNOB = 12
+const BAR_HEIGHT = 3
 
 export const ShortsPlayer = ({
   uri,
@@ -35,6 +39,7 @@ export const ShortsPlayer = ({
   onPressMemo,
   compact,
   progressSV,
+  barOpacity,
 }: ShortsPlayerProps) => {
   const [progress, setProgress] = useState(0)
   // 재생/일시정지 중 "방금 바뀐 상태"를 나타내는 아이콘
@@ -92,6 +97,10 @@ export const ShortsPlayer = ({
   const iconStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
     transform: [{ scale: scale.value }],
+  }))
+
+  const barStyle = useAnimatedStyle(() => ({
+    opacity: barOpacity ? barOpacity.value : 1,
   }))
 
   const onTogglePlay = () => {
@@ -197,8 +206,8 @@ export const ShortsPlayer = ({
           color="white"
         />
       </Pressable>
-      <View
-        style={styles.progressHit}
+      <Animated.View
+        style={[styles.progressHit, barStyle]}
         onLayout={(e) => {
           trackWidthRef.current = e.nativeEvent.layout.width
           setTrackWidth(e.nativeEvent.layout.width)
@@ -232,7 +241,7 @@ export const ShortsPlayer = ({
             ]}
           />
         )}
-      </View>
+      </Animated.View>
     </Pressable>
   )
 }
@@ -277,7 +286,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   progressTrack: {
-    height: 3,
+    height: BAR_HEIGHT,
     backgroundColor: "rgba(255,255,255,0.25)",
   },
   trackActive: {
@@ -288,8 +297,10 @@ const styles = StyleSheet.create({
   },
   knob: {
     position: "absolute",
-    // 막대가 화면 맨 아래라 손잡이는 잘리지 않게 막대 위에 올려 둔다
-    bottom: 0,
+    // 막대 중앙에 맞춘다 — 아래 절반은 플레이어 밖으로 나가므로,
+    // 이 화면(촬영 미리보기)에서는 부모가 플레이어에 zIndex를 줘 하단바 위에 그린다.
+    // 리스트 화면은 ScrollView가 잘라내므로 이 손잡이 대신 부모가 직접 그린다(progressSV).
+    bottom: -(KNOB - BAR_HEIGHT) / 2,
     width: KNOB,
     height: KNOB,
     borderRadius: KNOB / 2,

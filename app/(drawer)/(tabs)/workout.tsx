@@ -87,9 +87,11 @@ const getItemType = (item: Row) =>
     ? `plan${Math.min(item.plan.setWithCount?.length ?? 0, SET_COUNT_BUCKETS)}`
     : item.kind;
 
-// 우하단에 세로로 쌓이는 원형 버튼. 크기를 바꾸면 위 버튼의 bottom도 같이
-// 움직여야 해서(안 그러면 간격이 벌어진다) 한곳에서 계산한다.
-const FAB_SIZE = 48;
+// 떠 있는 원형 버튼. 크기는 "맨 위로"를 가로 중앙에 맞출 때(marginLeft) 쓰므로
+// 한곳에서 계산한다.
+// 숏츠 탭의 촬영 버튼(56)과 크기를 맞춘다
+const FAB_SIZE = 56;
+const FAB_SIZE_SMALL = 36;
 const FAB_BOTTOM = 100;
 const FAB_GAP = 8;
 
@@ -407,7 +409,7 @@ const CircleButton = ({
   onPress,
   label,
   icon,
-  iconSize = 30,
+  iconSize = 34,
   style,
 }: CircleButtonProps) => {
   const themeColor = useCurrentThemeColor();
@@ -434,6 +436,7 @@ const CircleButton = ({
 // 때마다 리스트를 든 화면 전체가 리렌더된다
 const ScrollTopButton = ({ onPress }: { onPress: () => void }) => {
   const scrolled = useWorkoutScrollStore((state) => state.scrolled);
+  const headerHeight = useHeaderHeight();
   const t = useT();
 
   if (!scrolled) return null;
@@ -442,12 +445,14 @@ const ScrollTopButton = ({ onPress }: { onPress: () => void }) => {
     <Animated.View
       entering={FadeIn.duration(220)}
       exiting={FadeOut.duration(160)}
-      style={styles.scrollTopButton}
+      style={[styles.scrollTopButton, { top: headerHeight + FAB_GAP }]}
     >
       <CircleButton
         onPress={onPress}
         label={t("workout.scrollToTop")}
         icon="keyboard-double-arrow-up"
+        iconSize={26}
+        style={[styles.circleButtonSmall, { borderWidth: 0 }]}
       />
     </Animated.View>
   );
@@ -505,8 +510,8 @@ const styles = StyleSheet.create({
   },
   // 리스트 안에 들어가는 버튼은 떠 있는 FAB보다 작게
   circleButtonSmall: {
-    width: 36,
-    height: 36,
+    width: FAB_SIZE_SMALL,
+    height: FAB_SIZE_SMALL,
   },
   calculateButton: {
     position: "absolute",
@@ -514,11 +519,13 @@ const styles = StyleSheet.create({
     right: 20,
     zIndex: 1000,
   },
-  // 계산기 버튼 바로 위 — fade는 Animated 래퍼가 맡는다
+  // 헤더 바로 아래 가로 중앙 — top은 헤더 높이라 런타임에 넣는다.
+  // left:0/right:0으로 펼치면 투명한 띠가 리스트 터치를 먹으므로 버튼 폭만 잡는다.
+  // fade는 Animated 래퍼가 맡는다.
   scrollTopButton: {
     position: "absolute",
-    bottom: FAB_BOTTOM + FAB_SIZE + FAB_GAP,
-    right: 20,
+    left: "50%",
+    marginLeft: -FAB_SIZE_SMALL / 2,
     zIndex: 1000,
   },
   dateHeader: {
