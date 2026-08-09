@@ -58,7 +58,12 @@ export interface InputRefObject {
 const iconButtonData = [
   { id: 1, titleKey: "back", icon: Back, type: "back" as WorkoutTypes },
   { id: 2, titleKey: "chest", icon: Chest, type: "chest" as WorkoutTypes },
-  { id: 3, titleKey: "shoulder", icon: Shoulder, type: "shoulder" as WorkoutTypes },
+  {
+    id: 3,
+    titleKey: "shoulder",
+    icon: Shoulder,
+    type: "shoulder" as WorkoutTypes,
+  },
   { id: 4, titleKey: "leg", icon: Leg, type: "leg" as WorkoutTypes },
   { id: 5, titleKey: "arm", icon: Arm, type: "arm" as WorkoutTypes },
 ];
@@ -227,6 +232,7 @@ export default function AddMultiPlan() {
             gap: 16,
           }}
         >
+          <View style={{ height: 12 }} />
           {/* 날짜 선택 */}
           <View style={styles.dateSection}>
             <Text style={{ fontSize: 24 }}>{t("plan.selectPart")}</Text>
@@ -237,7 +243,11 @@ export default function AddMultiPlan() {
               <Text style={{ color: themeColor.tintText }}>
                 {`📆 ${formatPlanDateTime(date, lang)}`}
               </Text>
-              <Entypo name="select-arrows" size={18} color={themeColor.tintText} />
+              <Entypo
+                name="select-arrows"
+                size={18}
+                color={themeColor.tintText}
+              />
             </TouchableOpacity>
           </View>
 
@@ -306,7 +316,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: 12,
   },
   dateSection: {
     alignItems: "center",
