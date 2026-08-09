@@ -178,6 +178,17 @@ export default function TabLayout() {
               <Ionicons name="person" size={23} color={color} />
             ),
             headerShadowVisible: false,
+            // 다른 탭들과 동일한 blur 헤더. 커스텀 header 대신 배경만 갈아끼우면
+            // 타이틀 중앙 정렬은 기본 헤더가 그대로 맡는다
+            headerTransparent: true,
+            headerStyle: { backgroundColor: "transparent" },
+            headerBackground: () => (
+              <BlurView
+                intensity={80}
+                tint="default"
+                style={StyleSheet.absoluteFill}
+              />
+            ),
           }}
         />
         <Tabs.Screen name="index" redirect />

@@ -9,6 +9,7 @@ import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+import { useHeaderHeight } from "@react-navigation/elements";
 // lib
 import { LANG_LABEL, TKey } from "@/lib/i18n";
 // expo
@@ -30,6 +31,8 @@ export default function My() {
   const language = useLanguage();
   const themeColor = useCurrentThemeColor();
   const t = useT();
+  // 헤더가 투명해 콘텐츠가 그 아래로 지나간다 — 첫 카드가 가리지 않게 밀어준다
+  const headerHeight = useHeaderHeight();
 
   const { push } = useRouter();
 
@@ -61,7 +64,7 @@ export default function My() {
   return (
     <ScrollView
       style={{ backgroundColor: themeColor.background }}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: headerHeight + 24 }]}
       showsVerticalScrollIndicator={false}
     >
       <UserDataCard />
@@ -167,7 +170,6 @@ export default function My() {
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
-    paddingTop: 24,
     paddingBottom: 180,
     gap: 24,
   },
