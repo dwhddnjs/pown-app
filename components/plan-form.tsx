@@ -101,13 +101,19 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
         {/* 도구 선택 */}
         <EquipmentBox />
         {/* 목표중량 */}
-        <TopWeight onFocusScroll={onFocusScroll} currentScrollY={currentScrollY} />
+        <TopWeight
+          onFocusScroll={onFocusScroll}
+          currentScrollY={currentScrollY}
+        />
         {/* 세트와 횟수 */}
         <SetCounter onOpen={onSheetOpen} isSheetOpen={isSetCounterSheetOpen} />
         {/* 컨디션 */}
         <ConditionList />
         {/* 퀵노트 전체 노트 */}
-        <PlanNote onFocusScroll={onFocusScroll} currentScrollY={currentScrollY} />
+        <PlanNote
+          onFocusScroll={onFocusScroll}
+          currentScrollY={currentScrollY}
+        />
         {/* 사진 */}
         <CameraImage />
         <View style={{ height: 250 }} />
@@ -133,6 +139,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: 12,
+    paddingTop: 4,
   },
 });

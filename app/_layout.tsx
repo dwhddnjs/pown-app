@@ -339,13 +339,11 @@ function RootLayoutNav() {
             headerTitle: t("header.search"),
             headerShadowVisible: false,
             gestureEnabled: false,
-            // 네이티브 서치바가 헤더 아래에 붙는다. margin은 헤더 높이를 바꿔 타이틀까지
-            // 밀리므로, 레이아웃에 영향 없는 translateY로 백 버튼만 위로 올려 서치바와 여백을 준다.
             headerLeft: () => (
               <HeaderIconButton
                 type="back"
                 onPress={() => navigation.goBack()}
-                style={{ marginBottom: 8 }}
+                style={{ borderWidth: 0 }}
               />
             ),
           };

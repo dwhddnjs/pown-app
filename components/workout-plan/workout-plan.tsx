@@ -1,6 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 // component
 import { Pressable, StyleSheet, Image } from "react-native";
+import Animated, {
+  Easing,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { Text, View } from "../themed";
 import { NoteText } from "./note-text";
 import { SetListItem } from "./set-list-item";
@@ -22,6 +28,7 @@ import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import { isAppOwnedMedia, resolveMediaUri } from "@/lib/media";
 
 interface ProgressBarProps {
+  planId: number;
   completed: number;
   total: number;
   tintColor: string;
@@ -29,10 +36,12 @@ interface ProgressBarProps {
   textColor: string;
 }
 
-// 예전엔 막대를 Reanimated로 채웠다. 셀 하나마다 shared value와 UI 스레드
-// mapper가 새로 생기는데, 빠른 스크롤에서는 이게 초당 수십 번 만들어졌다 버려진다 —
-// 화면이 비어 보이던 주 원인. 채움 애니메이션을 포기하고 폭만 바로 준다.
+// shared value·mapper가 셀마다 하나씩 생긴다. 예전엔 빠른 스크롤에서 셀이
+// 마운트/언마운트되며 이게 초당 수십 번 만들어졌다 버려져 화면이 비어 보였지만,
+// 지금은 FlashList가 종류별로 셀을 재활용해(getItemType) 프롭만 갈아끼우므로
+// 보이는 셀 수만큼만 한 번 만들어진다 — 채움 애니메이션을 되살릴 수 있다.
 const ProgressBar = ({
+  planId,
   completed,
   total,
   tintColor,
@@ -41,6 +50,25 @@ const ProgressBar = ({
 }: ProgressBarProps) => {
   const t = useT();
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const progress = useSharedValue(pct);
+  const prevPlanId = useRef(planId);
+
+  useEffect(() => {
+    // 재활용된 셀은 이전 계획의 값을 그대로 들고 있다 — 애니메이션하면 스크롤 도중
+    // 남의 퍼센트에서 쓸고 지나간다. 계획이 바뀐 경우엔 즉시 맞춘다.
+    if (prevPlanId.current !== planId) {
+      prevPlanId.current = planId;
+      progress.value = pct;
+      return;
+    }
+    progress.value = withTiming(pct, {
+      duration: 800,
+      easing: Easing.out(Easing.cubic),
+    });
+  }, [pct, planId, progress]);
+
+  const fillStyle = useAnimatedStyle(() => ({ width: `${progress.value}%` }));
 
   return (
     <View style={{ gap: 4, backgroundColor: "transparent" }}>
@@ -72,13 +100,15 @@ const ProgressBar = ({
           overflow: "hidden",
         }}
       >
-        <View
-          style={{
-            width: `${pct}%`,
-            height: "100%",
-            borderRadius: 3,
-            backgroundColor: tintColor,
-          }}
+        <Animated.View
+          style={[
+            {
+              height: "100%",
+              borderRadius: 3,
+              backgroundColor: tintColor,
+            },
+            fillStyle,
+          ]}
         />
       </View>
     </View>
@@ -264,6 +294,7 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           >
             {!hideProgress && (
               <ProgressBar
+                planId={item.id}
                 completed={
                   item.setWithCount.filter((s) => s.progress === "완료").length
                 }

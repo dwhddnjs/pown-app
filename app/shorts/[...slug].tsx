@@ -23,12 +23,12 @@ import Feather from "@expo/vector-icons/Feather";
 import BottomSheet from "@gorhom/bottom-sheet";
 import Animated, {
   runOnJS,
-  scrollTo,
   useAnimatedReaction,
   useAnimatedRef,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
+  withTiming,
 } from "react-native-reanimated";
 import { format } from "date-fns";
 import { formatDate } from "@/lib/function";
@@ -66,13 +66,10 @@ export default function ShortsView() {
   // (닫혀 있으면 컨테이너 높이라서 영상 높이보다 크다 → clamp 되어 원래 높이)
   const sheetTop = useSharedValue(0);
   const fullHeightSV = useSharedValue(0);
-  const positionSV = useSharedValue(initialPage);
   // 재생 중인 영상의 진행률 — 손잡이(점)를 여기서 그린다
   const progressSV = useSharedValue(0);
-
-  useEffect(() => {
-    positionSV.value = position;
-  }, [position, positionSV]);
+  // 스크롤 중에는 진행바·손잡이를 숨긴다
+  const barOpacity = useSharedValue(1);
 
   const pageHeight = useDerivedValue(() =>
     fullHeightSV.value === 0 || sheetTop.value <= 0
@@ -80,14 +77,13 @@ export default function ShortsView() {
       : Math.min(sheetTop.value, fullHeightSV.value),
   );
 
-  const pageStyle = useAnimatedStyle(() => ({
-    width: "100%",
-    height: pageHeight.value,
-  }));
-
-  // 뷰포트도 페이지와 같이 줄여야 offset이 position * pageHeight까지 갈 수 있다
-  // (뷰포트가 그대로면 콘텐츠가 뷰포트보다 짧아져 offset이 0으로 clamp된다)
-  const scrollStyle = useAnimatedStyle(() => ({
+  // 페이지 높이는 절대 변하지 않는다. 예전엔 시트에 맞춰 페이지와 스크롤뷰 높이를
+  // 같이 줄였는데, iOS는 contentSize·bounds가 바뀌는 프레임에 contentOffset을
+  // (contentSize - bounds)로 잘라낸다 — 둘이 같은 프레임에 반영되지 않는 순간
+  // 최대 오프셋이 거의 0이 되어 보고 있던 페이지가 첫 페이지로 잘려버렸다.
+  // (시트가 멈추면 높이가 더 안 바뀌어 UI 스레드 보정도 다시 돌지 않으니 그대로 남는다.)
+  // 이제 줄어드는 건 페이지 "안쪽 영상 영역"뿐이라 스크롤 기하가 흔들리지 않는다.
+  const videoAreaStyle = useAnimatedStyle(() => ({
     height: pageHeight.value,
   }));
 
@@ -119,22 +115,17 @@ export default function ShortsView() {
       Math.max(progressSV.value * screenWidth - KNOB / 2, 0),
       screenWidth - KNOB,
     ),
-    opacity: pageHeight.value > 0 ? 1 : 0,
+    opacity: pageHeight.value > 0 ? barOpacity.value : 0,
   }));
 
-  // 높이가 바뀌는 매 프레임마다 스크롤 위치도 현재 페이지에 맞춘다 (UI 스레드)
-  useDerivedValue(() => {
-    scrollTo(scrollRef, 0, positionSV.value * pageHeight.value, false);
-  });
-
-  // 첫 진입 시 정렬은 JS쪽에서 한 번 더 — UI 스레드 scrollTo는 자식 레이아웃이
-  // 반영되기 전에 돌아 offset이 0으로 clamp될 수 있다
+  // 첫 진입 시 슬러그가 가리키는 페이지로 한 번 맞춘다 — 자식 레이아웃이 잡힌 뒤라야
+  // offset이 0으로 clamp되지 않는다
   useEffect(() => {
     if (!fullHeight) {
       return;
     }
     scrollRef.current?.scrollTo({
-      y: positionSV.value * fullHeight,
+      y: position * fullHeight,
       animated: false,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -146,7 +137,7 @@ export default function ShortsView() {
       style={{ flex: 1, backgroundColor: themeColor.hard }}
     >
       <StatusBar style="light" />
-      {/* 정적 래퍼 — 메모 시트로 스크롤뷰 높이가 애니메이션되는 동안 원래 높이를 잃지 않게 */}
+      {/* 페이지 한 장의 높이를 재는 래퍼 — 시트가 올라와도 이 높이는 변하지 않는다 */}
       <Animated.View
         style={{ flex: 1 }}
         onLayout={(e) => {
@@ -162,10 +153,15 @@ export default function ShortsView() {
           scrollEnabled={!isMemoOpen}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
-          style={[{ backgroundColor: "black" }, scrollStyle]}
+          style={{ flex: 1, backgroundColor: "black" }}
+          // 다른 영상을 보려고 스크롤을 시작하면 진행바·손잡이를 감춘다
+          onScrollBeginDrag={() => {
+            barOpacity.value = withTiming(0, { duration: 120 });
+          }}
           // onScroll을 쓰면 높이가 바뀔 때도 이벤트가 와서 옛 offset ÷ 새 height로
           // 엉뚱한 페이지가 계산된다. 사용자 스와이프가 끝났을 때만 갱신한다.
           onMomentumScrollEnd={(e) => {
+            barOpacity.value = withTiming(1, { duration: 180 });
             if (!fullHeight) {
               return;
             }
@@ -181,15 +177,26 @@ export default function ShortsView() {
         >
           {videos.map((item, index) => {
             return (
-              <Animated.View key={item.id} style={pageStyle}>
-                <ShortsPlayer
-                  uri={item.video}
-                  isActive={index === position}
-                  compact={isMemoOpen}
-                  progressSV={progressSV}
-                  onPressMemo={() => memoRef.current?.snapToIndex(0)}
-                />
-              </Animated.View>
+              <View
+                key={item.id}
+                style={{
+                  width: "100%",
+                  height: fullHeight,
+                  backgroundColor: "transparent",
+                }}
+              >
+                {/* 시트가 덮는 만큼 영상 영역만 줄인다 — 페이지 높이는 그대로다 */}
+                <Animated.View style={videoAreaStyle}>
+                  <ShortsPlayer
+                    uri={item.video}
+                    isActive={index === position}
+                    compact={isMemoOpen}
+                    progressSV={progressSV}
+                    barOpacity={barOpacity}
+                    onPressMemo={() => memoRef.current?.snapToIndex(0)}
+                  />
+                </Animated.View>
+              </View>
             );
           })}
         </Animated.ScrollView>
