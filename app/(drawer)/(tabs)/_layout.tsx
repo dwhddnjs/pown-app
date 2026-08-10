@@ -48,6 +48,12 @@ export default function TabLayout() {
     ],
   }));
 
+  // FAB 오버레이(60% 검정)가 탭바 뒤에 깔리면 blur가 그걸 그대로 빨아들여
+  // 라이트 모드에서 탭바가 어두워지고 어두운 아이콘이 묻힌다 → 열릴 때만 불투명 배경으로 덮는다
+  const tabBarSolidStyle = useAnimatedStyle(() => ({
+    opacity: fabProgress.value,
+  }));
+
   const tabOption = {
     headerStyle: {
       backgroundColor: themColor.background,
@@ -64,11 +70,21 @@ export default function TabLayout() {
       zIndex: 200,
     },
     tabBarBackground: () => (
-      <BlurView
-        intensity={80}
-        tint="systemChromeMaterial"
-        style={StyleSheet.absoluteFill}
-      />
+      <>
+        <BlurView
+          intensity={80}
+          tint="systemChromeMaterial"
+          style={StyleSheet.absoluteFill}
+        />
+        <Animated.View
+          pointerEvents="none"
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: themColor.tabBar },
+            tabBarSolidStyle,
+          ]}
+        />
+      </>
     ),
     tabBarActiveTintColor: themColor.tabIconSelected,
     // 탭바가 반투명 BlurView라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다

@@ -213,7 +213,11 @@ export default function AddMultiPlan() {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <HeaderIconButton type="save" onPress={onSubmitMultiPlan} />
+            <HeaderIconButton
+              type="save"
+              onPress={onSubmitMultiPlan}
+              style={{ marginTop: 8 }}
+            />
           ),
         }}
       />
