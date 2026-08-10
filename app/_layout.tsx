@@ -128,6 +128,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
+              style={{ marginTop: 10 }}
             />
           ),
         })}
@@ -149,6 +150,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
+              style={{ marginTop: 10 }}
             />
           ),
         })}
@@ -170,6 +172,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
+              style={{ marginTop: 10 }}
             />
           ),
         })}
@@ -212,6 +215,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="close"
               onPress={() => navigation.goBack()}
+              style={{ marginTop: 10 }}
             />
           ),
         })}
@@ -230,10 +234,7 @@ function RootLayoutNav() {
           headerShadowVisible: false,
           // 폼 리셋은 화면의 beforeRemove 리스너가, 저장 버튼(headerRight)은 화면 파일이 담당한다
           headerLeft: () => (
-            <HeaderIconButton
-              type="back"
-              onPress={() => navigation.goBack()}
-            />
+            <HeaderIconButton type="back" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -249,10 +250,7 @@ function RootLayoutNav() {
           },
           headerShadowVisible: false,
           headerLeft: () => (
-            <HeaderIconButton
-              type="back"
-              onPress={() => navigation.goBack()}
-            />
+            <HeaderIconButton type="back" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -272,6 +270,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
+              style={{ marginTop: 8 }}
             />
           ),
         })}
@@ -355,10 +354,7 @@ function RootLayoutNav() {
           // headerTitle은 화면에서 보고 있는 달로 설정한다 (workout/calendar.tsx)
           headerShadowVisible: false,
           headerLeft: () => (
-            <HeaderIconButton
-              type="back"
-              onPress={() => navigation.goBack()}
-            />
+            <HeaderIconButton type="back" onPress={() => navigation.goBack()} />
           ),
         })}
       />
@@ -396,10 +392,7 @@ function RootLayoutNav() {
           headerTitle: "",
           headerShown: false,
           headerLeft: () => (
-            <HeaderIconButton
-              type="back"
-              onPress={() => navigation.goBack()}
-            />
+            <HeaderIconButton type="back" onPress={() => navigation.goBack()} />
           ),
         })}
       />

@@ -55,7 +55,7 @@ export const HeaderIconButton = ({
         styles.button,
         isSave
           ? { backgroundColor: themeColor.tint }
-          : { borderWidth: 1, borderColor: themeColor.text },
+          : { borderWidth: 1.2, borderColor: themeColor.text },
         style,
       ]}
     >
