@@ -11,11 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - **`expo-native-ui`** — Expo/RN 화면을 만들거나 스타일링·네이티브 컨트롤·아이콘·애니메이션·미디어·차트를 다룰 때. 세부 레시피는 `references/*.md`.
 - **`verify`** — 런타임 동작이 바뀌는 변경을 iOS 시뮬레이터에서 눈으로 검증할 때. `/verify` 슬래시 명령으로도 실행.
 
-스킬은 일반 가이드다. **충돌 시 아래 "프로젝트 규칙"이 우선한다** (이 앱은 AsyncStorage를 쓰고, Expo Go가 아닌 dev-client를 쓰며, 테마 색상을 인라인 배열로 주입한다 — 스킬의 반대 조언보다 프로젝트 관행을 따를 것).
+스킬은 일반 가이드다. **충돌 시 아래 "프로젝트 규칙"이 우선한다** (이 앱은 MMKV(`react-native-mmkv`)를 쓰고, Expo Go가 아닌 dev-client를 쓰며, 테마 색상을 인라인 배열로 주입한다 — 스킬의 반대 조언보다 프로젝트 관행을 따를 것).
 
 ## 프로젝트
 
-Pown (포운) — 점진적 과부하 운동 계획·기록 앱. **백엔드 없음**: 모든 데이터를 기기 로컬(AsyncStorage)에 저장하는 오프라인 우선 iOS 앱.
+Pown (포운) — 점진적 과부하 운동 계획·기록 앱. **백엔드 없음**: 모든 데이터를 기기 로컬(MMKV)에 저장하는 오프라인 우선 iOS 앱.
 
 ## 명령어
 
@@ -27,6 +27,7 @@ npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-cli
 테스트 러너는 없다 — 검증은 타입 체크 `npx tsc --noEmit`(strict) + 린트 `npm run lint`(eslint-config-expo, `no-console` error). 둘 다 에러 0을 유지할 것. `ios/`·`android/`는 gitignore(CNG). `.npmrc`에 `legacy-peer-deps=true`.
 
 **배포(EAS)**: `eas build --profile production --platform ios` / JS만 바뀌면 `eas update --channel production`. `appVersionSource:"remote"`. `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
+**네이티브 의존성이 바뀐 릴리스는 OTA 금지** — 옛 바이너리에 새 JS가 내려가 실행 즉시 죽는다. 두 버전을 올리고 새로 빌드할 것.
 
 ## 아키텍처
 
@@ -37,7 +38,7 @@ npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-cli
 - **영속** (`persist` + `createJSONStorage(() => storage)`): 실제 저장 데이터. `use-workout-plan-store`(운동 기록), `use-user-store`(신체정보·테마·3대중량), `use-shorts-store`(숏츠).
 - **임시** (`persist` 없는 `create`): 폼·UI 상태. `use-plan-store`(추가/수정 폼), `use-multi-plan-store`(루틴 임시 목록 — 저장 시 workout-plan으로 커밋), `use-note-store`, `use-is-modal-open-store` 등.
 
-**핵심 흐름**: `use-plan-store`(임시 폼)에 입력을 모아 저장 시 `useWorkoutPlanStore.setWorkoutPlan()`으로 영속 리스트에 커밋. `WorkoutPlanTypes`는 `PlanStoreType`을 `Pick`으로 파생 — 한쪽 필드를 바꾸면 다른 쪽도 확인. 모든 영속 스토어는 `@/lib/storage`의 `storage`(AsyncStorage 래퍼)를 통과. 날짜 저장 포맷은 `"yyyy.MM.dd HH:mm:ss"`.
+**핵심 흐름**: `use-plan-store`(임시 폼)에 입력을 모아 저장 시 `useWorkoutPlanStore.setWorkoutPlan()`으로 영속 리스트에 커밋. `WorkoutPlanTypes`는 `PlanStoreType`을 `Pick`으로 파생 — 한쪽 필드를 바꾸면 다른 쪽도 확인. 모든 영속 스토어는 `@/lib/storage`의 `storage`(MMKV 래퍼 — **동기**라 create() 안에서 하이드레이션이 끝난다. 그래서 `onRehydrateStorage`에서 스토어 변수를 참조하면 TDZ로 죽는다; 후처리는 `merge`에서 할 것. MMKV에 값이 없을 때만 구버전 AsyncStorage를 한 번 읽어 옮긴다)를 통과. 날짜 저장 포맷은 `"yyyy.MM.dd HH:mm:ss"`.
 
 ### 라우팅 (Expo Router, typedRoutes)
 

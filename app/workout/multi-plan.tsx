@@ -22,7 +22,8 @@ export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const router = useRouter();
-  const { tempPlans, setMultiPlanMode, resetMultiPlan } = useMultiPlanStore();
+  const { tempPlans, setMultiPlanMode, commitTempPlans, resetMultiPlan } =
+    useMultiPlanStore();
   const { setWorkoutPlan } = useWorkoutPlanStore();
 
   useEffect(() => {
@@ -47,7 +48,9 @@ export default function MultiPlanScreen() {
         id: baseId + idx,
       });
     });
-    resetMultiPlan();
+    // 커밋된 기록이 같은 사진 파일을 가리키므로 먼저 비운다 —
+    // 그래야 화면이 닫히며 도는 resetMultiPlan이 그 사진을 지우지 않는다
+    commitTempPlans();
     router.back();
     toast.success(t("routine.savedCount", { n: tempPlans.length }));
   };

@@ -1,10 +1,11 @@
+import { useEffect, useState } from "react";
 // component
 import {
-  Dimensions,
   FlatList,
   StyleSheet,
   TouchableOpacity,
   Image,
+  useWindowDimensions,
 } from "react-native";
 import { View } from "@/components/themed";
 // expo
@@ -20,14 +21,55 @@ import { resolveMediaUri } from "@/lib/media";
 import Entypo from "@expo/vector-icons/Entypo";
 import { EmptyVideos } from "@/components/shorts/empty-videos";
 
+// 탭바 위로 띄우는 간격 — 운동 탭의 계산기 버튼과 같은 값을 쓴다(workout.tsx)
+const FAB_TAB_GAP = 15;
+
+// 복구도 실패한 썸네일(예: 사진첩에서 지운 구 데이터)은 투명하게 비는 대신
+// 대체 타일로 그린다 — 눌러서 재생·삭제까지 갈 수 있어야 한다.
+// 색은 부모가 넘긴다 — 셀마다 테마를 구독하면 그리드 전체가 같이 리렌더된다.
+const Thumbnail = ({
+  uri,
+  fallbackColor,
+  iconColor,
+}: {
+  uri: string;
+  fallbackColor: string;
+  iconColor: string;
+}) => {
+  const [isFailed, setIsFailed] = useState(false);
+
+  if (isFailed) {
+    return (
+      <View style={[styles.fallback, { backgroundColor: fallbackColor }]}>
+        <Entypo name="video-camera" size={20} color={iconColor} />
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      source={{ uri: resolveMediaUri(uri) }}
+      style={styles.image}
+      onError={() => setIsFailed(true)}
+    />
+  );
+};
+
 export default function TabTwoScreen() {
   const themeColor = useCurrentThemeColor();
-  const screenWidth = Dimensions.get("window").width;
-  const { videos } = useShortsStore();
+  const { width: screenWidth } = useWindowDimensions();
+  const { videos, onRepairVideos } = useShortsStore();
 
   const { push } = useRouter();
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
+
+  // 하이드레이션이 늦으면(구버전 저장소에서 옮겨오는 첫 실행) 첫 렌더의 목록이 비어 있다.
+  // 목록이 바뀔 때마다 불러 두면 데이터가 도착한 뒤에도 한 번은 돈다 — 실제 실행 여부는
+  // 스토어가 판단하므로 여기서 도는 건 대부분 즉시 반환이다.
+  useEffect(() => {
+    onRepairVideos();
+  }, [videos, onRepairVideos]);
 
   return (
     <View style={{ flex: 1, backgroundColor: themeColor.background }}>
@@ -50,9 +92,12 @@ export default function TabTwoScreen() {
               }}
               onPress={() => push(`/shorts/${item.id}`)}
             >
-              <Image
-                source={{ uri: resolveMediaUri(item.thumbnail) }}
-                style={styles.image}
+              {/* 복구로 썸네일이 바뀌면 다시 마운트시켜 실패 상태를 푼다 */}
+              <Thumbnail
+                key={item.thumbnail}
+                uri={item.thumbnail}
+                fallbackColor={themeColor.itemColor}
+                iconColor={themeColor.subText}
               />
             </TouchableOpacity>
           )}
@@ -63,7 +108,8 @@ export default function TabTwoScreen() {
           styles.addVideo,
           {
             borderColor: themeColor.tint,
-            bottom: tabBarHeight + 20,
+            // 기기마다 탭바 높이(+홈 인디케이터)가 달라 고정값을 쓰면 위치가 어긋난다
+            bottom: tabBarHeight + FAB_TAB_GAP,
           },
         ]}
         onPress={() => push("/shorts/video")}
@@ -79,6 +125,12 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 9 / 16,
     resizeMode: "cover",
+  },
+  fallback: {
+    width: "100%",
+    aspectRatio: 9 / 16,
+    justifyContent: "center",
+    alignItems: "center",
   },
   addVideo: {
     width: 56,

@@ -1,6 +1,6 @@
 // 다국어 사전 (ko/en). i18n 라이브러리는 쓰지 않는다 — 언어 2개, 복수형/ICU 불필요.
 //
-// 중요: 저장(AsyncStorage)되는 도메인 값은 항상 한국어가 정본이다.
+// 중요: 저장(MMKV)되는 도메인 값은 항상 한국어가 정본이다.
 // (progress "완료", equipment "바벨", condition "좋음", workout "벤치프레스", workoutList 태그)
 // 아래 t*() 함수들은 렌더 시점에만 라벨을 바꾼다 — 저장값은 절대 바꾸지 않는다.
 
@@ -147,7 +147,7 @@ const ko = {
 
   // 숏츠
   "shorts.title": "내 운동 숏츠",
-  "shorts.empty": "운동 숏츠가 없습니다. \n추가해주세요!",
+  "shorts.addShorts": "운동 숏츠 추가",
   "shorts.added": "숏츠가 추가 되었습니다",
   "shorts.addFailed": "숏츠 저장 중 오류가 발생했습니다.",
   "shorts.removed": "숏츠가 삭제 되었습니다.",
@@ -371,7 +371,7 @@ const en: Record<TKey, string> = {
   "calendar.hint": "Tap a day you trained to see that day's records.",
 
   "shorts.title": "My Workout Shorts",
-  "shorts.empty": "No workout shorts yet. \nAdd one!",
+  "shorts.addShorts": "Add short",
   "shorts.added": "Short added",
   "shorts.addFailed": "Something went wrong while saving the short.",
   "shorts.removed": "Short deleted.",

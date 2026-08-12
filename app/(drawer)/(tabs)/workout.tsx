@@ -35,6 +35,7 @@ import { useRouter } from "expo-router";
 
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -92,7 +93,9 @@ const getItemType = (item: Row) =>
 // 숏츠 탭의 촬영 버튼(56)과 크기를 맞춘다
 const FAB_SIZE = 56;
 const FAB_SIZE_SMALL = 36;
-const FAB_BOTTOM = 100;
+// 탭바 위로 띄우는 간격 — 숏츠 탭의 촬영 버튼과 같은 값을 쓴다(shorts.tsx).
+// 기기마다 탭바 높이(+홈 인디케이터)가 달라 고정값을 쓰면 위치가 어긋난다.
+const FAB_TAB_GAP = 15;
 const FAB_GAP = 8;
 
 export default function TabOneScreen() {
@@ -104,6 +107,7 @@ export default function TabOneScreen() {
   );
   const setScrolled = useWorkoutScrollStore((state) => state.setScrolled);
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
@@ -187,7 +191,9 @@ export default function TabOneScreen() {
     // 두 번 불러 마지막 애니메이션이 취소된다.
     listRef.current
       ?.scrollToIndex({ index: 0, animated: false })
-      .then(() => listRef.current?.scrollToOffset({ offset: 0, animated: true }));
+      .then(() =>
+        listRef.current?.scrollToOffset({ offset: 0, animated: true }),
+      );
   }, []);
 
   // 리마운트하면 리스트가 통째로 사라졌다 다시 그려져 깜빡인다 — 1만 행이면 더 심하다.
@@ -251,10 +257,7 @@ export default function TabOneScreen() {
         return (
           <View style={[styles.row, styles.headerRow]}>
             <View
-              style={[
-                styles.dateHeader,
-                { backgroundColor: themeColor.tint },
-              ]}
+              style={[styles.dateHeader, { backgroundColor: themeColor.tint }]}
             >
               <Text
                 style={[styles.dateText, { color: themeColor.onTint }]}
@@ -342,7 +345,7 @@ export default function TabOneScreen() {
           onPress={openCalculate}
           label={t("workout.openCalculator")}
           icon="calculate"
-          style={styles.calculateButton}
+          style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
         />
       </View>
     );
@@ -390,7 +393,7 @@ export default function TabOneScreen() {
         onPress={openCalculate}
         label={t("workout.openCalculator")}
         icon="calculate"
-        style={styles.calculateButton}
+        style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
       />
     </View>
   );
@@ -515,7 +518,6 @@ const styles = StyleSheet.create({
   },
   calculateButton: {
     position: "absolute",
-    bottom: FAB_BOTTOM,
     right: 20,
     zIndex: 1000,
   },
