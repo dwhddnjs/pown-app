@@ -1,7 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage"
 import { MMKV } from "react-native-mmkv"
 
-const mmkv = new MMKV()
+export const mmkv = new MMKV()
 
 // zustand persist는 동기/비동기 반환을 모두 받는다. MMKV는 동기라 첫 렌더부터
 // 데이터가 채워진 상태로 하이드레이션된다(빈 화면 깜빡임 없음).

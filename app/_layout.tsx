@@ -270,7 +270,7 @@ function RootLayoutNav() {
             <HeaderIconButton
               type="back"
               onPress={() => navigation.goBack()}
-              style={{ marginTop: 8 }}
+              style={{ marginTop: 10 }}
             />
           ),
         })}

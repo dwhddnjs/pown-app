@@ -1,20 +1,20 @@
-import React, { useState } from "react"
+import React, { useState } from "react";
 // component
-import { ScrollView, StyleSheet, TouchableOpacity } from "react-native"
-import { Button } from "@/components/button"
-import { Text, View } from "@/components/themed"
-import { toast } from "sonner-native"
-import { TitleInput } from "@/components/mypage/title-input"
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { Button } from "@/components/button";
+import { Text, View } from "@/components/themed";
+import { toast } from "sonner-native";
+import { TitleInput } from "@/components/mypage/title-input";
 // zustand
-import { useLanguage, useUserStore } from "@/hooks/use-user-store"
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 // hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 // lib
-import { format } from "date-fns"
-import { tWorkout } from "@/lib/i18n"
+import { format } from "date-fns";
+import { tWorkout } from "@/lib/i18n";
 // expo
-import { useRouter } from "expo-router"
+import { useRouter } from "expo-router";
 
 const RANGES: Record<string, [number, number]> = {
   height: [100, 250],
@@ -23,12 +23,12 @@ const RANGES: Record<string, [number, number]> = {
   sq: [1, 500],
   bp: [1, 500],
   dl: [1, 500],
-}
+};
 
 export default function UserInfo() {
-  const { setUserData, userInfo } = useUserStore()
+  const { setUserData, userInfo } = useUserStore();
 
-  const lastestUserInfo = userInfo[userInfo.length - 1]
+  const lastestUserInfo = userInfo[userInfo.length - 1];
 
   const [value, setValue] = useState({
     height: lastestUserInfo?.height ?? "",
@@ -37,23 +37,23 @@ export default function UserInfo() {
     sq: lastestUserInfo?.sq ?? "",
     bp: lastestUserInfo?.bp ?? "",
     dl: lastestUserInfo?.dl ?? "",
-  })
+  });
   const [gender, setGender] = useState<"male" | "female" | null>(
-    lastestUserInfo?.gender ?? null
-  )
+    lastestUserInfo?.gender ?? null,
+  );
 
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
   const lang = useLanguage();
 
-  const { back } = useRouter()
+  const { back } = useRouter();
 
   const onSetValue = (type: string, newValue: string) => {
     setValue({
       ...value,
       [type]: newValue,
-    })
-  }
+    });
+  };
 
   const onSubmitValue = () => {
     if (
@@ -64,29 +64,29 @@ export default function UserInfo() {
       !value.bp ||
       !value.dl
     ) {
-      return toast.error(t("userInfo.required"))
+      return toast.error(t("userInfo.required"));
     }
     // 키 1111cm 같은 값이 그대로 저장돼 차트·요약을 망가뜨리는 걸 막는다
     const outOfRange = Object.entries(RANGES).some(([key, [min, max]]) => {
-      const n = Number(value[key as keyof typeof value])
-      return !Number.isFinite(n) || n < min || n > max
-    })
+      const n = Number(value[key as keyof typeof value]);
+      return !Number.isFinite(n) || n < min || n > max;
+    });
     if (outOfRange) {
-      return toast.error(t("userInfo.outOfRange"))
+      return toast.error(t("userInfo.outOfRange"));
     }
     setUserData({
       ...value,
       gender,
       createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
-    })
-    toast.success(t("userInfo.saved"))
-    back()
-  }
+    });
+    toast.success(t("userInfo.saved"));
+    back();
+  };
 
   const genderOptions = [
     { key: "male", label: t("userInfo.male") },
     { key: "female", label: t("userInfo.female") },
-  ] as const
+  ] as const;
 
   return (
     <View style={{ flex: 1, paddingBottom: 48 }}>
@@ -168,7 +168,7 @@ export default function UserInfo() {
           </Text>
           <View style={styles.inputRow}>
             {genderOptions.map((option) => {
-              const isSelected = gender === option.key
+              const isSelected = gender === option.key;
               return (
                 <TouchableOpacity
                   key={option.key}
@@ -185,23 +185,26 @@ export default function UserInfo() {
                     style={[
                       styles.genderText,
                       {
-                        color: isSelected ? themeColor.tintText : themeColor.subText,
+                        color: isSelected
+                          ? themeColor.tintText
+                          : themeColor.subText,
                       },
                     ]}
                   >
                     {option.label}
                   </Text>
                 </TouchableOpacity>
-              )
+              );
             })}
           </View>
         </View>
+        <View style={{ height: 120 }} />
       </ScrollView>
       <Button type="solid" onPress={onSubmitValue}>
         {t("common.save")}
       </Button>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
@@ -245,4 +248,4 @@ const styles = StyleSheet.create({
   genderText: {
     fontSize: 15,
   },
-})
+});

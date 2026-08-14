@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { View, Text } from "@/components/themed";
+import { View } from "@/components/themed";
 import { StatusBar } from "expo-status-bar";
 import {
   Platform,
@@ -14,9 +14,10 @@ import { useT } from "@/hooks/use-t";
 import { useMultiPlanStore } from "@/hooks/use-multi-plan-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { EmptyRoutine } from "@/components/workout-plan/empty-routine";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { HeaderIconButton } from "@/components/header-icon-button";
+import { requestReviewOnce } from "@/lib/review";
 
 export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
@@ -53,6 +54,12 @@ export default function MultiPlanScreen() {
     commitTempPlans();
     router.back();
     toast.success(t("routine.savedCount", { n: tempPlans.length }));
+    // add-plan과 같은 기준(기록 3개)으로 청한다 — 리뷰 요청은 앱 생애 한 번뿐이라
+    // 첫 저장에서 태워버리면 정작 애착이 생긴 뒤에는 다시 뜨지 않는다.
+    // 커밋이 이미 끝났으니 이번 루틴의 운동들도 개수에 포함된다.
+    if (useWorkoutPlanStore.getState().workoutPlanList.length >= 3) {
+      setTimeout(() => requestReviewOnce().catch(() => {}), 1000);
+    }
   };
 
   return (
@@ -66,21 +73,7 @@ export default function MultiPlanScreen() {
         }}
       />
       {tempPlans.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <MaterialCommunityIcons
-            name="notebook-multiple"
-            size={82}
-            color={themeColor.subText}
-          />
-          <View style={{ gap: 4, alignItems: "center" }}>
-            <Text style={[styles.emptyTitle, { color: themeColor.subText }]}>
-              {t("routine.emptyTitle")}
-            </Text>
-            <Text style={[styles.emptySubtitle, { color: themeColor.subText }]}>
-              {t("routine.emptyDesc")}
-            </Text>
-          </View>
-        </View>
+        <EmptyRoutine onPress={handleAddPlan} />
       ) : (
         <ScrollView
           showsVerticalScrollIndicator={false}
@@ -106,7 +99,6 @@ export default function MultiPlanScreen() {
               />
             ))}
           </View>
-          <View style={{ height: 120 }} />
         </ScrollView>
       )}
 
@@ -133,30 +125,16 @@ export default function MultiPlanScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 20,
-  },
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 10,
-    paddingBottom: 80,
-  },
-  emptyTitle: {
-    fontSize: 18,
-    fontFamily: "sb-m",
-    marginTop: 8,
-  },
-  emptySubtitle: {
-    fontSize: 14,
-    fontFamily: "sb-l",
+    paddingTop: 4,
   },
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 20,
-    paddingTop: 12,
+    paddingTop: 32,
+    // 떠 있는 추가 버튼(bottom: 40)에 마지막 카드가 가리지 않게
+    paddingBottom: 120,
   },
   addButtonContainer: {
     position: "absolute",

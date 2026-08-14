@@ -61,7 +61,8 @@
     "react-native-web": "^0.20.0",
     "react-native-zip-archive": "9.0.0",
     "sonner-native": "^0.15.0",
-    "zustand": "^5.0.0"
+    "zustand": "^5.0.0",
+    "expo-store-review": "~8.1.5"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

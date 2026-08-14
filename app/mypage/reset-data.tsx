@@ -174,7 +174,7 @@ export default function ResetData() {
           onPress={() =>
             setConfirm({
               title: t("data.resetConfirm"),
-              desc: "* 운동 기록·내정보·숏츠가 모두 삭제되며 복구할 수 없어요.",
+              desc: t("data.resetConfirmDesc"),
               action: t("common.deleteAction"),
               actionColor: themeColor.fail,
               onConfirm: onResetAll,
@@ -184,11 +184,7 @@ export default function ResetData() {
       </SettingSection>
       <Pressable style={styles.seedHitArea} onPress={onSeedTap} />
       {confirm && (
-        <Dialog
-          isOpen={!!confirm}
-          onClose={() => setConfirm(null)}
-          modalHeight={300}
-        >
+        <Dialog isOpen={!!confirm} onClose={() => setConfirm(null)}>
           <View
             style={{
               backgroundColor: themeColor.itemColor,
