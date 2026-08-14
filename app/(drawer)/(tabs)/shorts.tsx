@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 // component
 import {
   FlatList,
@@ -71,6 +71,18 @@ export default function TabTwoScreen() {
     onRepairVideos();
   }, [videos, onRepairVideos]);
 
+  // 매 렌더마다 새 객체를 넘기면 그때마다 리스트가 레이아웃을 다시 잡는다
+  // (workout.tsx의 listPadding과 같은 이유)
+  const listStyle = useMemo(
+    () => ({ paddingTop: headerHeight }),
+    [headerHeight],
+  );
+  // 탭바가 absolute라 마지막 줄이 그 아래로 들어간다 — 그만큼 아래를 띄운다
+  const listContentStyle = useMemo(
+    () => ({ paddingBottom: tabBarHeight }),
+    [tabBarHeight],
+  );
+
   return (
     <View style={{ flex: 1, backgroundColor: themeColor.background }}>
       {videos.length === 0 ? (
@@ -81,7 +93,8 @@ export default function TabTwoScreen() {
           numColumns={3}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
-          style={{ paddingTop: headerHeight }}
+          style={listStyle}
+          contentContainerStyle={listContentStyle}
           renderItem={({ item }) => (
             <TouchableOpacity
               style={{
@@ -114,7 +127,7 @@ export default function TabTwoScreen() {
         ]}
         onPress={() => push("/shorts/video")}
       >
-        <Entypo name="video-camera" size={28} color={themeColor.tintText} />
+        <Entypo name="video-camera" size={26} color={themeColor.tintText} />
       </TouchableOpacity>
     </View>
   );
@@ -133,8 +146,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   addVideo: {
-    width: 56,
-    height: 56,
+    width: 50,
+    height: 50,
     borderWidth: 2,
     position: "absolute",
     opacity: 0.8,

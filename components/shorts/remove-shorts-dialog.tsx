@@ -1,4 +1,3 @@
-import { StyleSheet } from "react-native"
 import { useT } from "@/hooks/use-t"
 import React from "react"
 import { Dialog } from "../dialog"
@@ -26,7 +25,7 @@ export const RemoveShortsDialog = ({
   const { videos, setRemoveVideo } = useShortsStore()
 
   return (
-    <Dialog isOpen={open} onClose={setIsOpen} modalHeight={300}>
+    <Dialog isOpen={open} onClose={setIsOpen}>
       <View
         style={{
           backgroundColor: themeColor.itemColor,
@@ -54,7 +53,7 @@ export const RemoveShortsDialog = ({
               fontFamily: "sb-l",
             }}
           >
-            * 삭제하시면 다시 복구 할 수 없어요.
+            {t("shorts.removeDesc")}
           </Text>
         </View>
         <View
@@ -97,5 +96,3 @@ export const RemoveShortsDialog = ({
     </Dialog>
   )
 }
-
-const styles = StyleSheet.create({})

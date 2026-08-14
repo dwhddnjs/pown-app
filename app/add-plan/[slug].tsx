@@ -12,6 +12,7 @@ import { useT } from "@/hooks/use-t";
 import { format } from "date-fns";
 import { toast } from "sonner-native";
 import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
+import { requestReviewOnce } from "@/lib/review";
 
 export default function AddPlan() {
   const { onReset, ...result } = usePlanStore();
@@ -41,6 +42,10 @@ export default function AddPlan() {
         updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
         imageUri,
       });
+      // 기록이 3개는 쌓인 뒤에 리뷰를 청한다 — 화면 전환·토스트가 끝난 뒤 뜨게 지연
+      if (useWorkoutPlanStore.getState().workoutPlanList.length >= 3) {
+        setTimeout(() => requestReviewOnce().catch(() => {}), 1000);
+      }
       onReset();
       navigation.goBack();
       onResetNote();

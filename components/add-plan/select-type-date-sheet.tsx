@@ -9,11 +9,6 @@ import { Button } from "../button";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useEffect, useState } from "react";
 
-interface SelectTypeDateSheetProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
 export const SelectTypeDateSheet = () => {
   const { open, setOpen } = useIsDialogOpenStore();
   const { date, setDate } = usePlanStore();
@@ -34,12 +29,7 @@ export const SelectTypeDateSheet = () => {
   };
 
   return (
-    <Dialog
-      isOpen={open}
-      onClose={() => setOpen(false)}
-      modalHeight={100}
-      hideOverlay
-    >
+    <Dialog isOpen={open} onClose={() => setOpen(false)} hideOverlay>
       <View
         style={[
           styles.title,
@@ -69,7 +59,12 @@ export const SelectTypeDateSheet = () => {
           display="spinner"
           locale="ko"
           value={new Date(selectedDate)}
-          onChange={(e) => setSelectedDate(e.nativeEvent.timestamp)}
+          // dismissed 이벤트에는 timestamp가 없다 — 그대로 넣으면 Invalid Date가
+          // 저장까지 흘러가 format()이 던진다
+          onChange={(e) => {
+            const timestamp = e.nativeEvent.timestamp;
+            if (timestamp) setSelectedDate(timestamp);
+          }}
         />
       </View>
       <Button type="solid" onPress={onSubmitDate}>

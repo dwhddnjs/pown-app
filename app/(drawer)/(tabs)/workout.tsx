@@ -90,8 +90,8 @@ const getItemType = (item: Row) =>
 
 // 떠 있는 원형 버튼. 크기는 "맨 위로"를 가로 중앙에 맞출 때(marginLeft) 쓰므로
 // 한곳에서 계산한다.
-// 숏츠 탭의 촬영 버튼(56)과 크기를 맞춘다
-const FAB_SIZE = 56;
+// 숏츠 탭의 촬영 버튼(shorts.tsx의 addVideo)과 크기를 맞춘다
+const FAB_SIZE = 50;
 const FAB_SIZE_SMALL = 36;
 // 탭바 위로 띄우는 간격 — 숏츠 탭의 촬영 버튼과 같은 값을 쓴다(shorts.tsx).
 // 기기마다 탭바 높이(+홈 인디케이터)가 달라 고정값을 쓰면 위치가 어긋난다.
@@ -345,7 +345,10 @@ export default function TabOneScreen() {
           onPress={openCalculate}
           label={t("workout.openCalculator")}
           icon="calculate"
-          style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
+          style={[
+            styles.calculateButton,
+            { bottom: tabBarHeight + FAB_TAB_GAP },
+          ]}
         />
       </View>
     );
@@ -412,7 +415,7 @@ const CircleButton = ({
   onPress,
   label,
   icon,
-  iconSize = 34,
+  iconSize = 30,
   style,
 }: CircleButtonProps) => {
   const themeColor = useCurrentThemeColor();

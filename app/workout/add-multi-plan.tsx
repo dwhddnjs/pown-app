@@ -320,10 +320,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
+    paddingTop: 4,
   },
   dateSection: {
     alignItems: "center",
-    // paddingVertical: 12,
   },
   dateButton: {
     flexDirection: "row",

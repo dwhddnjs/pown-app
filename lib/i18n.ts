@@ -87,8 +87,6 @@ const ko = {
   "routine.addedToRoutine": "루틴에 운동이 추가되었습니다!",
   "routine.noWorkout": "추가된 운동이 없어요..",
   "routine.savedCount": "{n}개 운동 계획이 추가되었습니다!!",
-  "routine.emptyTitle": "추가된 운동이 없습니다",
-  "routine.emptyDesc": "아래 버튼을 눌러 운동을 추가해보세요",
   "routine.addRoutine": "루틴 추가",
   "routine.addWorkout": "운동 추가",
 
@@ -152,6 +150,7 @@ const ko = {
   "shorts.addFailed": "숏츠 저장 중 오류가 발생했습니다.",
   "shorts.removed": "숏츠가 삭제 되었습니다.",
   "shorts.removeTitle": "정말 숏츠 영상을 삭제 할까요?",
+  "shorts.removeDesc": "* 삭제하시면 다시 복구 할 수 없어요.",
   "shorts.recordFailed": "녹화 중 오류가 발생했습니다.",
   "shorts.retake": "다시 찍기",
   "shorts.useVideo": "비디오 사용",
@@ -228,6 +227,8 @@ const ko = {
   "data.resetSection": "초기화",
   "data.resetAll": "모든 데이터 초기화",
   "data.resetConfirm": "정말 모든 데이터를 삭제할까요?",
+  "data.resetConfirmDesc":
+    "* 운동 기록·내정보·숏츠가 모두 삭제되며 복구할 수 없어요.",
   "data.resetDone": "모든 데이터가 초기화 되었습니다",
   "data.shareUnavailable": "이 기기에서는 파일 공유를 사용할 수 없어요.",
   "data.backupFailed": "백업 파일 저장 중 오류가 발생했습니다.",
@@ -317,8 +318,6 @@ const en: Record<TKey, string> = {
   "routine.addedToRoutine": "Workout added to the routine!",
   "routine.noWorkout": "No workouts added yet.",
   "routine.savedCount": "{n} workout plans added!",
-  "routine.emptyTitle": "No workouts added",
-  "routine.emptyDesc": "Tap the button below to add a workout",
   "routine.addRoutine": "Add Routine",
   "routine.addWorkout": "Add Workout",
 
@@ -376,6 +375,7 @@ const en: Record<TKey, string> = {
   "shorts.addFailed": "Something went wrong while saving the short.",
   "shorts.removed": "Short deleted.",
   "shorts.removeTitle": "Delete this short?",
+  "shorts.removeDesc": "* This cannot be undone.",
   "shorts.recordFailed": "Something went wrong while recording.",
   "shorts.retake": "Retake",
   "shorts.useVideo": "Use Video",
@@ -447,6 +447,8 @@ const en: Record<TKey, string> = {
   "data.resetSection": "Reset",
   "data.resetAll": "Reset all data",
   "data.resetConfirm": "Delete all data for real?",
+  "data.resetConfirmDesc":
+    "* Workout records, profile and shorts will all be deleted. This cannot be undone.",
   "data.resetDone": "All data has been reset",
   "data.shareUnavailable": "File sharing isn't available on this device.",
   "data.backupFailed": "Something went wrong while saving the backup file.",
