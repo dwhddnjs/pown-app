@@ -1,21 +1,21 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet, FlatList } from "react-native"
-import { Text, View } from "../themed"
-import { ConditionButton } from "@/components/add-plan/condition-icon"
-import { IconTitle } from "../icon-title"
+import { StyleSheet, FlatList } from "react-native";
+import { Text, View } from "../themed";
+import { ConditionButton } from "@/components/add-plan/condition-icon";
+import { IconTitle } from "../icon-title";
 // color
 // lib
-import { conditionData } from "@/constants/constants"
+import { conditionData } from "@/constants/constants";
 // icon
-import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import BatteryIcon from "@expo/vector-icons/MaterialCommunityIcons";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 
 export const ConditionList = () => {
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
   return (
     <View style={styles.main}>
       <View style={styles.titleContainer}>
@@ -27,7 +27,9 @@ export const ConditionList = () => {
           />
           <Text style={{ fontSize: 16 }}>{t("plan.condition")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>
+          {t("common.optional")}
+        </Text>
       </View>
       <View style={styles.container}>
         <FlatList
@@ -40,8 +42,8 @@ export const ConditionList = () => {
         />
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   main: {
@@ -65,4 +67,4 @@ const styles = StyleSheet.create({
     paddingRight: 20,
     alignItems: "flex-end",
   },
-})
+});

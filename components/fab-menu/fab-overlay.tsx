@@ -123,7 +123,7 @@ export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
       </View>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {

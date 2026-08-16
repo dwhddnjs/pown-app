@@ -1,11 +1,11 @@
-import { create } from "zustand"
+import { create } from "zustand";
 
 type NoteStoreType = {
-  title: string
-  content: string
-  setValue: (type: "title" | "content", value: string) => void
-  onReset: () => void
-}
+  title: string;
+  content: string;
+  setValue: (type: "title" | "content", value: string) => void;
+  onReset: () => void;
+};
 
 export const useNoteStore = create<NoteStoreType>((set) => ({
   title: "",
@@ -19,4 +19,4 @@ export const useNoteStore = create<NoteStoreType>((set) => ({
       title: "",
       content: "",
     }),
-}))
+}));

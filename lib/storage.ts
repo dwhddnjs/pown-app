@@ -1,7 +1,7 @@
-import AsyncStorage from "@react-native-async-storage/async-storage"
-import { MMKV } from "react-native-mmkv"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { MMKV } from "react-native-mmkv";
 
-export const mmkv = new MMKV()
+export const mmkv = new MMKV();
 
 // zustand persist는 동기/비동기 반환을 모두 받는다. MMKV는 동기라 첫 렌더부터
 // 데이터가 채워진 상태로 하이드레이션된다(빈 화면 깜빡임 없음).
@@ -11,22 +11,22 @@ export const mmkv = new MMKV()
 // 몇 버전 지나 사용자가 전부 넘어오면 폴백과 async-storage 의존성을 지울 것.
 export const storage = {
   getItem: (name: string): string | null | Promise<string | null> => {
-    const data = mmkv.getString(name)
-    if (data !== undefined) return data
+    const data = mmkv.getString(name);
+    if (data !== undefined) return data;
 
     return AsyncStorage.getItem(name)
       .then((legacy) => {
-        if (legacy !== null) mmkv.set(name, legacy)
-        return legacy
+        if (legacy !== null) mmkv.set(name, legacy);
+        return legacy;
       })
-      .catch(() => null)
+      .catch(() => null);
   },
   setItem: (name: string, value: string): void => {
-    mmkv.set(name, value)
+    mmkv.set(name, value);
   },
   removeItem: (name: string): void => {
-    mmkv.delete(name)
+    mmkv.delete(name);
     // 구버전 값도 같이 지운다 — 안 지우면 다음 실행에서 폴백이 되살린다
-    AsyncStorage.removeItem(name).catch(() => {})
+    AsyncStorage.removeItem(name).catch(() => {});
   },
-}
+};

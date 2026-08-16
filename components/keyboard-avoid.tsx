@@ -1,16 +1,16 @@
-import { useEffect, useState } from "react"
-import { KeyboardAvoidingView, NativeModules, Platform } from "react-native"
-const { StatusBarManager } = NativeModules
+import { useEffect, useState } from "react";
+import { KeyboardAvoidingView, NativeModules, Platform } from "react-native";
+const { StatusBarManager } = NativeModules;
 
 export const KeyBoardAvoid = ({ children, aosOffset = 0, ...props }: any) => {
-  const [statusBarHeight, setStatusBarHeight] = useState(0)
+  const [statusBarHeight, setStatusBarHeight] = useState(0);
   useEffect(() => {
     if (Platform.OS === "ios") {
       StatusBarManager?.getHeight((statusBarFrameData: any) => {
-        setStatusBarHeight(statusBarFrameData.height)
-      })
+        setStatusBarHeight(statusBarFrameData.height);
+      });
     }
-  }, [])
+  }, []);
 
   return (
     <KeyboardAvoidingView
@@ -22,5 +22,5 @@ export const KeyBoardAvoid = ({ children, aosOffset = 0, ...props }: any) => {
     >
       {children}
     </KeyboardAvoidingView>
-  )
-}
+  );
+};

@@ -86,93 +86,93 @@ export const BodyChart = () => {
       emptyMessage={t("chart.bodyEmpty")}
     >
       <ChartBody>
-          <LineChart
-            disableScroll
-            areaChart
-            data={edgeLabelData}
-            height={CHART_HEIGHT}
-            width={chartWidth}
-            spacing={pointSpacing}
-            dataPointsColor={themeColor.tint}
-            color={themeColor.tintText}
-            thickness={2}
-            startFillColor={themeColor.pressed}
-            endFillColor={themeColor.itemColor}
-            startOpacity={0.9}
-            endOpacity={0.2}
-            initialSpacing={0}
-            endSpacing={0}
-            noOfSections={noOfSections}
-            maxValue={maxValue}
-            yAxisOffset={yAxisOffset}
-            stepValue={maxValue / noOfSections}
-            // 같은 탭의 막대 차트들과 축·격자 표현을 맞춘다
-            rulesType="dashed"
-            rulesColor={themeColor.divider}
-            yAxisLabelWidth={Y_AXIS_LABEL_WIDTH}
-            yAxisTextStyle={{ color: themeColor.text }}
-            yAxisThickness={1}
-            xAxisColor={themeColor.subText}
-            xAxisThickness={1}
-            yAxisColor={themeColor.subText}
-            xAxisLabelTextStyle={xAxisLabelStyle}
-            pointerConfig={{
-              // pointerStripHeight = 차트 높이 → 세로선이 위→아래 꽉 참 + 라벨 marginTop 0(보임).
-              pointerStripHeight: CHART_HEIGHT,
-              pointerStripColor: themeColor.subText,
-              pointerStripWidth: 1,
-              pointerColor: themeColor.tint,
-              radius: 6,
-              pointerLabelWidth: POINTER_LABEL_WIDTH,
-              activatePointersOnLongPress: true,
-              // autoAdjust는 넓힌 뷰포트 기준으로 잘못 판단(오른쪽 넘침)하므로 끄고 index로 직접 배치.
-              autoAdjustPointerLabelPosition: false,
-              // uptoDataPoint=false + stripHeight=높이 → 선 꽉 참. 라벨 y = shiftPointerLabelY - 37.
-              pointerStripUptoDataPoint: false,
-              shiftPointerLabelY: 45,
-              pointerLabelComponent: (
-                items: { id: number; value: number; date: string }[],
-                _secondaryItems: unknown,
-                index: number,
-              ) => {
-                // 컨테이너는 pointerX-4에 위치하고 세로선은 pointerX+8(≈컨테이너 기준 12)에 그려진다.
-                // 박스의 선쪽 가장자리를 선에서 GAP만큼 떨어뜨려 양 끝 모두 살짝 간격 있게 통일한다.
-                const LINE_X = 12;
-                const GAP = 0;
-                const isFirst = index === 0;
-                const isLast = index === chartData.length - 1;
-                const left = isFirst
-                  ? LINE_X + GAP // 박스는 선 오른쪽, GAP만큼 띄움
-                  : isLast
-                    ? LINE_X - GAP - POINTER_LABEL_WIDTH // 박스는 선 왼쪽, GAP만큼 띄움
-                    : LINE_X - POINTER_LABEL_WIDTH / 2;
-                return (
-                  <View
-                    style={{
-                      position: "absolute",
-                      left,
-                      top: 0,
-                      width: POINTER_LABEL_WIDTH,
-                      borderRadius: 8,
-                      backgroundColor: themeColor.background,
-                      paddingVertical: 6,
-                      paddingHorizontal: 8,
-                      gap: 4,
-                      borderWidth: 1,
-                      borderColor: themeColor.subText,
-                    }}
+        <LineChart
+          disableScroll
+          areaChart
+          data={edgeLabelData}
+          height={CHART_HEIGHT}
+          width={chartWidth}
+          spacing={pointSpacing}
+          dataPointsColor={themeColor.tint}
+          color={themeColor.tintText}
+          thickness={2}
+          startFillColor={themeColor.pressed}
+          endFillColor={themeColor.itemColor}
+          startOpacity={0.9}
+          endOpacity={0.2}
+          initialSpacing={0}
+          endSpacing={0}
+          noOfSections={noOfSections}
+          maxValue={maxValue}
+          yAxisOffset={yAxisOffset}
+          stepValue={maxValue / noOfSections}
+          // 같은 탭의 막대 차트들과 축·격자 표현을 맞춘다
+          rulesType="dashed"
+          rulesColor={themeColor.divider}
+          yAxisLabelWidth={Y_AXIS_LABEL_WIDTH}
+          yAxisTextStyle={{ color: themeColor.text }}
+          yAxisThickness={1}
+          xAxisColor={themeColor.subText}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisLabelTextStyle={xAxisLabelStyle}
+          pointerConfig={{
+            // pointerStripHeight = 차트 높이 → 세로선이 위→아래 꽉 참 + 라벨 marginTop 0(보임).
+            pointerStripHeight: CHART_HEIGHT,
+            pointerStripColor: themeColor.subText,
+            pointerStripWidth: 1,
+            pointerColor: themeColor.tint,
+            radius: 6,
+            pointerLabelWidth: POINTER_LABEL_WIDTH,
+            activatePointersOnLongPress: true,
+            // autoAdjust는 넓힌 뷰포트 기준으로 잘못 판단(오른쪽 넘침)하므로 끄고 index로 직접 배치.
+            autoAdjustPointerLabelPosition: false,
+            // uptoDataPoint=false + stripHeight=높이 → 선 꽉 참. 라벨 y = shiftPointerLabelY - 37.
+            pointerStripUptoDataPoint: false,
+            shiftPointerLabelY: 45,
+            pointerLabelComponent: (
+              items: { id: number; value: number; date: string }[],
+              _secondaryItems: unknown,
+              index: number,
+            ) => {
+              // 컨테이너는 pointerX-4에 위치하고 세로선은 pointerX+8(≈컨테이너 기준 12)에 그려진다.
+              // 박스의 선쪽 가장자리를 선에서 GAP만큼 떨어뜨려 양 끝 모두 살짝 간격 있게 통일한다.
+              const LINE_X = 12;
+              const GAP = 0;
+              const isFirst = index === 0;
+              const isLast = index === chartData.length - 1;
+              const left = isFirst
+                ? LINE_X + GAP // 박스는 선 오른쪽, GAP만큼 띄움
+                : isLast
+                  ? LINE_X - GAP - POINTER_LABEL_WIDTH // 박스는 선 왼쪽, GAP만큼 띄움
+                  : LINE_X - POINTER_LABEL_WIDTH / 2;
+              return (
+                <View
+                  style={{
+                    position: "absolute",
+                    left,
+                    top: 0,
+                    width: POINTER_LABEL_WIDTH,
+                    borderRadius: 8,
+                    backgroundColor: themeColor.background,
+                    paddingVertical: 6,
+                    paddingHorizontal: 8,
+                    gap: 4,
+                    borderWidth: 1,
+                    borderColor: themeColor.subText,
+                  }}
+                >
+                  <Text style={{ fontSize: 10 }}>{items[0].date}</Text>
+                  <Text
+                    style={{ fontWeight: "bold", color: themeColor.tintText }}
                   >
-                    <Text style={{ fontSize: 10 }}>{items[0].date}</Text>
-                    <Text
-                      style={{ fontWeight: "bold", color: themeColor.tintText }}
-                    >
-                      {items[0].value + "kg"}
-                    </Text>
-                  </View>
-                );
-              },
-            }}
-          />
+                    {items[0].value + "kg"}
+                  </Text>
+                </View>
+              );
+            },
+          }}
+        />
       </ChartBody>
     </ChartCard>
   );

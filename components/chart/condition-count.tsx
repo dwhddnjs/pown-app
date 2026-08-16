@@ -37,50 +37,47 @@ export const ConditionCount = () => {
       emptyMessage={t("chart.conditionEmpty")}
     >
       <View
-          style={[
-            styles.iconListContainer,
-            { backgroundColor: themeColor.itemColor },
-          ]}
-        >
-          {conditionData.map((item) => (
+        style={[
+          styles.iconListContainer,
+          { backgroundColor: themeColor.itemColor },
+        ]}
+      >
+        {conditionData.map((item) => (
+          <View
+            style={[styles.iconItem, { backgroundColor: themeColor.itemColor }]}
+            key={item.id}
+          >
+            {/* 아이콘과 같은 크기의 래퍼를 둬야 배지가 글리프 밖 모서리에 붙는다 */}
             <View
               style={[
-                styles.iconItem,
+                styles.iconBox,
                 { backgroundColor: themeColor.itemColor },
               ]}
-              key={item.id}
             >
-              {/* 아이콘과 같은 크기의 래퍼를 둬야 배지가 글리프 밖 모서리에 붙는다 */}
               <View
                 style={[
-                  styles.iconBox,
-                  { backgroundColor: themeColor.itemColor },
+                  styles.numberCount,
+                  {
+                    borderColor: themeColor.tint,
+                    borderWidth: 1.5,
+                    backgroundColor: "transparent",
+                  },
                 ]}
               >
-                <View
-                  style={[
-                    styles.numberCount,
-                    {
-                      borderColor: themeColor.tint,
-                      borderWidth: 1.5,
-                      backgroundColor: "transparent",
-                    },
-                  ]}
-                >
-                  <Text style={{ fontSize: 10 }}>
-                    {(() => {
-                      const key = convertConditionType(item.condition);
-                      return key ? (getCount[key] ?? 0) : 0;
-                    })()}
-                  </Text>
-                </View>
-                {getIcon(item.condition, 44, themeColor.tint)}
+                <Text style={{ fontSize: 10 }}>
+                  {(() => {
+                    const key = convertConditionType(item.condition);
+                    return key ? (getCount[key] ?? 0) : 0;
+                  })()}
+                </Text>
               </View>
-              <Text style={[styles.iconText, { color: themeColor.tintText }]}>
-                {tCondition(item.condition, lang)}
-              </Text>
+              {getIcon(item.condition, 44, themeColor.tint)}
             </View>
-          ))}
+            <Text style={[styles.iconText, { color: themeColor.tintText }]}>
+              {tCondition(item.condition, lang)}
+            </Text>
+          </View>
+        ))}
       </View>
     </ChartCard>
   );

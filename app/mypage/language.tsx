@@ -37,10 +37,14 @@ export default function Language() {
   return (
     <View style={settingsScreenStyles.container}>
       <View style={settingsScreenStyles.textContainer}>
-        <Text style={[settingsScreenStyles.title, { color: themeColor.tintText }]}>
+        <Text
+          style={[settingsScreenStyles.title, { color: themeColor.tintText }]}
+        >
           {t("language.title")}
         </Text>
-        <Text style={[settingsScreenStyles.desc, { color: themeColor.subText }]}>
+        <Text
+          style={[settingsScreenStyles.desc, { color: themeColor.subText }]}
+        >
           {t("language.desc")}
         </Text>
       </View>

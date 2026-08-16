@@ -31,7 +31,11 @@ export const ChartCard = ({
 
   return (
     <View
-      style={[styles.container, { backgroundColor: themeColor.itemColor }, style]}
+      style={[
+        styles.container,
+        { backgroundColor: themeColor.itemColor },
+        style,
+      ]}
     >
       <Text style={styles.title}>{title}</Text>
       {subtitle ? (
@@ -55,9 +59,7 @@ export const ChartBody = ({ children }: { children: React.ReactNode }) => {
   const themeColor = useCurrentThemeColor();
 
   return (
-    <View
-      style={[styles.body, { backgroundColor: themeColor.itemColor }]}
-    >
+    <View style={[styles.body, { backgroundColor: themeColor.itemColor }]}>
       {children}
     </View>
   );

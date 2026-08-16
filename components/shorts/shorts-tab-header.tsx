@@ -1,13 +1,13 @@
-import React from "react"
-import { useT } from "@/hooks/use-t"
+import React from "react";
+import { useT } from "@/hooks/use-t";
 // component
-import { SafeAreaView, StyleSheet, View } from "react-native"
+import { SafeAreaView, StyleSheet, View } from "react-native";
 // expo
-import { BlurView } from "expo-blur"
-import { Text } from "../themed"
+import { BlurView } from "expo-blur";
+import { Text } from "../themed";
 
 const ShortsTabHeader = () => {
-  const t = useT()
+  const t = useT();
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
@@ -17,10 +17,10 @@ const ShortsTabHeader = () => {
         </View>
       </SafeAreaView>
     </BlurView>
-  )
-}
+  );
+};
 
-export default ShortsTabHeader
+export default ShortsTabHeader;
 
 const styles = StyleSheet.create({
   // alignItems:"center"를 주면 SafeAreaView가 콘텐츠 폭으로 쪼그라들어
@@ -38,4 +38,4 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-})
+});

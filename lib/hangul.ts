@@ -20,16 +20,16 @@ const INITIAL_CONSONANTS = [
   "ㅌ",
   "ㅍ",
   "ㅎ",
-]
+];
 
 // 완성형 한글 음절(가~힣)의 코드포인트에서 초성을 뽑는다.
 // 한글이 아니면 첫 글자를 그대로 돌려준다.
 export const getInitialConsonant = (str: string) => {
-  if (!str) return ""
-  const firstChar = str.charCodeAt(0)
-  if (firstChar < 0xac00 || firstChar > 0xd7a3) return str[0]
-  return INITIAL_CONSONANTS[Math.floor((firstChar - 0xac00) / 28 / 21)]
-}
+  if (!str) return "";
+  const firstChar = str.charCodeAt(0);
+  if (firstChar < 0xac00 || firstChar > 0xd7a3) return str[0];
+  return INITIAL_CONSONANTS[Math.floor((firstChar - 0xac00) / 28 / 21)];
+};
 
 export const searchByInitial = (name: string, search: string) =>
-  getInitialConsonant(name) === search
+  getInitialConsonant(name) === search;

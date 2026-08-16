@@ -45,7 +45,9 @@ export const EmptyRoutine = ({ onPress }: { onPress: () => void }) => {
                 index === GHOST_OPACITY.length - 1 && styles.railLineLast,
               ]}
             />
-            <View style={[styles.dot, { backgroundColor: themeColor.subText }]} />
+            <View
+              style={[styles.dot, { backgroundColor: themeColor.subText }]}
+            />
           </View>
           <View style={[styles.slot, { borderColor: themeColor.subText }]} />
         </View>

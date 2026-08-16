@@ -180,7 +180,10 @@ export const CalendarGrid = () => {
                   <Text
                     style={[
                       { fontFamily: "sb-l", color: themeColor.text },
-                      isToday && { fontFamily: "sb-m", color: themeColor.tintText },
+                      isToday && {
+                        fontFamily: "sb-m",
+                        color: themeColor.tintText,
+                      },
                     ]}
                   >
                     {format(item, "d")}

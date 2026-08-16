@@ -1,36 +1,36 @@
-import { useState } from "react"
+import { useState } from "react";
 // component
-import { StyleSheet, TouchableOpacity } from "react-native"
-import { Text, View } from "../themed"
-import { Button } from "../button"
-import { IconTitle } from "../icon-title"
+import { StyleSheet, TouchableOpacity } from "react-native";
+import { Text, View } from "../themed";
+import { Button } from "../button";
+import { IconTitle } from "../icon-title";
 // expo
-import { useRouter } from "expo-router"
-import { Image } from "expo-image"
+import { useRouter } from "expo-router";
+import { Image } from "expo-image";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
-import { usePlanStore } from "@/hooks/use-plan-store"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
+import { usePlanStore } from "@/hooks/use-plan-store";
 // lib
-import { resolveMediaUri } from "@/lib/media"
+import { resolveMediaUri } from "@/lib/media";
 // icon
-import AntDesign from "@expo/vector-icons/AntDesign"
-import { toast } from "sonner-native"
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { toast } from "sonner-native";
 
 // 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
-const IMAGE_GAP = 8
-const LIST_PADDING = 20
+const IMAGE_GAP = 8;
+const LIST_PADDING = 20;
 
 export const CameraImage = () => {
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
-  const router = useRouter()
-  const { imageUri, setRemoveImageUri } = usePlanStore()
-  const [gridWidth, setGridWidth] = useState(0)
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const router = useRouter();
+  const { imageUri, setRemoveImageUri } = usePlanStore();
+  const [gridWidth, setGridWidth] = useState(0);
 
   const onRemoveImageUri = (id: number) => {
-    setRemoveImageUri(id)
-  }
+    setRemoveImageUri(id);
+  };
 
   return (
     <View style={styles.container}>
@@ -39,16 +39,18 @@ export const CameraImage = () => {
           <AntDesign name="camera" size={20} color={themeColor.tintText} />
           <Text style={{ fontSize: 16 }}>{t("plan.photo")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>
+          {t("common.optional")}
+        </Text>
       </View>
       <Button
         type="bordered"
         onPress={() => {
           // 카메라 권한은 카메라 화면이 열릴 때 그 화면에서 직접 요청한다
           if (imageUri.length === 4) {
-            return toast.error(t("plan.photoMax"))
+            return toast.error(t("plan.photoMax"));
           }
-          router.push("/add-plan/camera")
+          router.push("/add-plan/camera");
         }}
       >
         {t("plan.takePhoto")}
@@ -93,8 +95,8 @@ export const CameraImage = () => {
         ))}
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -130,4 +132,4 @@ const styles = StyleSheet.create({
     right: -4,
     top: -4,
   },
-})
+});

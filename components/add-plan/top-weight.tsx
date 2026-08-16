@@ -57,7 +57,11 @@ export const TopWeight = ({
   return (
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
       <IconTitle style={{ gap: 8 }}>
-        <WeightIcon name="weight-kilogram" size={20} color={themeColor.tintText} />
+        <WeightIcon
+          name="weight-kilogram"
+          size={20}
+          color={themeColor.tintText}
+        />
         <Text style={{ fontSize: 16 }}>{t("plan.targetWeight")}</Text>
       </IconTitle>
 

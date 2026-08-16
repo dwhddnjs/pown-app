@@ -98,10 +98,14 @@ export default function UserInfo() {
         contentContainerStyle={styles.content}
       >
         <View style={settingsScreenStyles.textContainer}>
-          <Text style={[settingsScreenStyles.title, { color: themeColor.tintText }]}>
+          <Text
+            style={[settingsScreenStyles.title, { color: themeColor.tintText }]}
+          >
             {t("userInfo.title")}
           </Text>
-          <Text style={[settingsScreenStyles.desc, { color: themeColor.subText }]}>
+          <Text
+            style={[settingsScreenStyles.desc, { color: themeColor.subText }]}
+          >
             {t("userInfo.desc")}
           </Text>
         </View>

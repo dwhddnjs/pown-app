@@ -1,16 +1,16 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet, TextInput } from "react-native"
-import { Text, View } from "../themed"
+import { StyleSheet, TextInput } from "react-native";
+import { Text, View } from "../themed";
 // hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface TitleInputProp {
-  title: string
-  label: string
-  value: string
-  onChangeValue: (type: string, value: string) => void
-  type: string
+  title: string;
+  label: string;
+  value: string;
+  onChangeValue: (type: string, value: string) => void;
+  type: string;
 }
 
 export const TitleInput = ({
@@ -20,13 +20,11 @@ export const TitleInput = ({
   type,
   onChangeValue,
 }: TitleInputProp) => {
-  const themeColor = useCurrentThemeColor()
+  const themeColor = useCurrentThemeColor();
 
   return (
     <View style={styles.itemContainer}>
-      <Text style={[styles.title, { color: themeColor.subText }]}>
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: themeColor.subText }]}>{title}</Text>
       <View
         style={[styles.container, { backgroundColor: themeColor.itemColor }]}
       >
@@ -44,8 +42,8 @@ export const TitleInput = ({
         </Text>
       </View>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   itemContainer: {
@@ -76,4 +74,4 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontFamily: "sb-l",
   },
-})
+});

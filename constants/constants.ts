@@ -1,4 +1,4 @@
-import { WorkoutTypes } from "@/types/workout"
+import { WorkoutTypes } from "@/types/workout";
 
 export const equipmentData: string[] = [
   "바벨",
@@ -7,7 +7,7 @@ export const equipmentData: string[] = [
   "스미스",
   "케이블",
   "맨몸",
-]
+];
 
 export const workoutData: Record<WorkoutTypes, string[]> = {
   back: [
@@ -89,10 +89,10 @@ export const workoutData: Record<WorkoutTypes, string[]> = {
     "리버스리스트컬",
     "컨센트레이션컬",
   ],
-}
+};
 
-export const setData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
-export const setTypeData = ["웜업", "본 세트", "PR", "연습"]
+export const setData = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
+export const setTypeData = ["웜업", "본 세트", "PR", "연습"];
 export const countData = [
   "1 + α",
   "2 + α",
@@ -109,7 +109,7 @@ export const countData = [
   "13 + α",
   "14 + α",
   "15 + α",
-]
+];
 
 export const conditionData = [
   {
@@ -148,4 +148,4 @@ export const conditionData = [
     id: 9,
     condition: "짜증남",
   },
-]
+];

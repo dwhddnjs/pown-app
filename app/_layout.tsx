@@ -196,7 +196,10 @@ function RootLayoutNav() {
         name="add-plan/camera"
         options={fullScreen(t("header.camera"))}
       />
-      <Stack.Screen name="shorts/video" options={fullScreen(t("header.video"))} />
+      <Stack.Screen
+        name="shorts/video"
+        options={fullScreen(t("header.video"))}
+      />
       <Stack.Screen
         name="shorts/[...slug]"
         options={({ navigation }: ScreenOptionsArgs) => ({

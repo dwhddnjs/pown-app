@@ -44,7 +44,10 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
     return lastSortData.current;
   }, [isDrawerOpen, workoutPlanList, lang]);
 
-  const monthCount = sortData.reduce((acc, year) => acc + year.content.length, 0);
+  const monthCount = sortData.reduce(
+    (acc, year) => acc + year.content.length,
+    0,
+  );
   const dayCount = sortData.reduce(
     (acc, year) =>
       acc + year.content.reduce((sum, month) => sum + month.content.length, 0),

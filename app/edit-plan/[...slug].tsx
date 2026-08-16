@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 // component
 import { PlanForm } from "@/components/plan-form";
 // zustand
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore } from "@/hooks/use-plan-store";
 import { WorkoutTypes } from "@/types/workout";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useNoteStore } from "@/hooks/use-note-store";

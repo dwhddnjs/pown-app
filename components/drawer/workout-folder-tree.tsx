@@ -92,7 +92,10 @@ export const WorkoutFolderTree = ({
       touchableComponent={TouchableOpacity}
       expandMultiple={false}
       renderHeader={(year, _, isActive) => (
-        <TreeRow icon={isActive ? "folder-open" : "folder"} title={year.title} />
+        <TreeRow
+          icon={isActive ? "folder-open" : "folder"}
+          title={year.title}
+        />
       )}
       renderContent={(year) => (
         <View
@@ -130,7 +133,9 @@ export const WorkoutFolderTree = ({
                       size={18}
                       color={themeColor.subText}
                     />
-                    <Text style={[styles.rowText, { color: themeColor.subText }]}>
+                    <Text
+                      style={[styles.rowText, { color: themeColor.subText }]}
+                    >
                       {day.title}
                     </Text>
                   </TouchableOpacity>

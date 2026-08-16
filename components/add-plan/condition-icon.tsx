@@ -1,21 +1,21 @@
 //component
-import { StyleSheet, TouchableOpacity } from "react-native"
-import React from "react"
-import { Text, View } from "@/components/themed"
+import { StyleSheet, TouchableOpacity } from "react-native";
+import React from "react";
+import { Text, View } from "@/components/themed";
 // zustand
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useLanguage } from "@/hooks/use-user-store"
-import { tCondition } from "@/lib/i18n"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tCondition } from "@/lib/i18n";
 // icon
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 interface ConditionButtonProps {
   item: {
-    id: number
-    condition: string
-  }
+    id: number;
+    condition: string;
+  };
 }
 
 // 컨디션(저장값은 한국어) → 이모티콘 글리프.
@@ -32,7 +32,7 @@ const CONDITION_ICON: Record<
   신남: "emoticon-lol",
   상쾌함: "emoticon-cool",
   양호함: "emoticon-neutral",
-}
+};
 
 export const getIcon = (value: string, size: number, color: string) => (
   <MaterialCommunityIcons
@@ -40,14 +40,14 @@ export const getIcon = (value: string, size: number, color: string) => (
     size={size}
     color={color}
   />
-)
+);
 
 // 운동 기록 리스트의 셀마다 붙는 읽기 전용 태그 — 계획 작성 폼 스토어와는 무관하다.
 // 예전엔 한 컴포넌트가 두 모양을 다 만들고 골라 반환해서, 리스트의 태그까지
 // usePlanStore 전체를 구독하고 쓰지도 않는 column JSX를 매번 만들었다.
 export const ConditionTag = ({ condition }: { condition: string }) => {
-  const themeColor = useCurrentThemeColor()
-  const lang = useLanguage()
+  const themeColor = useCurrentThemeColor();
+  const lang = useLanguage();
 
   return (
     <View
@@ -64,22 +64,22 @@ export const ConditionTag = ({ condition }: { condition: string }) => {
         {tCondition(condition, lang)}
       </Text>
     </View>
-  )
-}
+  );
+};
 
 export const ConditionButton = ({ item }: ConditionButtonProps) => {
-  const { condition, setCondition, setFilterCondition } = usePlanStore()
-  const themeColor = useCurrentThemeColor()
-  const lang = useLanguage()
-  const isSelected = condition.includes(item.condition)
+  const { condition, setCondition, setFilterCondition } = usePlanStore();
+  const themeColor = useCurrentThemeColor();
+  const lang = useLanguage();
+  const isSelected = condition.includes(item.condition);
 
   const onPressCondition = () => {
     if (isSelected) {
-      setFilterCondition(item.condition)
-      return
+      setFilterCondition(item.condition);
+      return;
     }
-    setCondition(item.condition)
-  }
+    setCondition(item.condition);
+  };
 
   return (
     <TouchableOpacity
@@ -95,7 +95,7 @@ export const ConditionButton = ({ item }: ConditionButtonProps) => {
       {getIcon(
         item.condition,
         26,
-        isSelected ? themeColor.onTint : themeColor.tintText
+        isSelected ? themeColor.onTint : themeColor.tintText,
       )}
       <Text
         style={[
@@ -107,8 +107,8 @@ export const ConditionButton = ({ item }: ConditionButtonProps) => {
         {tCondition(item.condition, lang)}
       </Text>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   icon: {
@@ -145,4 +145,4 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 8,
   },
-})
+});

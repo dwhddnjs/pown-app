@@ -128,9 +128,7 @@ export default function Search() {
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={[styles.emptyText, { color: themeColor.subText }]}>
-              {!inputValue
-                ? t("search.hint")
-                : t("search.noResult")}
+              {!inputValue ? t("search.hint") : t("search.noResult")}
             </Text>
           </View>
         }

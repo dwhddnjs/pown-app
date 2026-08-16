@@ -9,7 +9,10 @@ import { useLanguage } from "@/hooks/use-user-store";
 import { tBodyPart } from "@/lib/i18n";
 import { useT } from "@/hooks/use-t";
 // lib
-import { convertChartValuesToPercentage, sortWorkoutPlanList } from "@/lib/stats";
+import {
+  convertChartValuesToPercentage,
+  sortWorkoutPlanList,
+} from "@/lib/stats";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { ChartCard } from "./chart-card";
@@ -65,68 +68,68 @@ export const WorkoutPieChart = () => {
       emptyMessage={t("chart.partEmpty")}
     >
       <View
-          style={[
-            styles.itemContainer,
-            { backgroundColor: themeColor.itemColor },
-          ]}
+        style={[
+          styles.itemContainer,
+          { backgroundColor: themeColor.itemColor },
+        ]}
+      >
+        <PieChart
+          data={percentageData}
+          // 기본 radius(120)면 도넛만 240pt라 영어 범례가 카드 밖으로 밀린다
+          radius={90}
+          // 링이 얇아지면 그 위의 "50%" 라벨이 잘린다 — 링 폭 45pt 확보
+          innerRadius={35}
+          donut
+          shadow
+          showText
+          showValuesAsLabels
+          textColor={themeColor.text}
+          fontWeight="bold"
+          textBackgroundRadius={26}
+          backgroundColor={themeColor.itemColor}
+        />
+        <View
+          style={{
+            backgroundColor: themeColor.itemColor,
+            justifyContent: "center",
+            flexShrink: 1,
+            gap: 6,
+          }}
         >
-          <PieChart
-            data={percentageData}
-            // 기본 radius(120)면 도넛만 240pt라 영어 범례가 카드 밖으로 밀린다
-            radius={90}
-            // 링이 얇아지면 그 위의 "50%" 라벨이 잘린다 — 링 폭 45pt 확보
-            innerRadius={35}
-            donut
-            shadow
-            showText
-            showValuesAsLabels
-            textColor={themeColor.text}
-            fontWeight="bold"
-            textBackgroundRadius={26}
-            backgroundColor={themeColor.itemColor}
-          />
-          <View
-            style={{
-              backgroundColor: themeColor.itemColor,
-              justifyContent: "center",
-              flexShrink: 1,
-              gap: 6,
-            }}
-          >
-            {(
-              percentageData as {
-                value: number;
-                color: string;
-                title: string;
-                text: string;
-              }[]
-            )
-              // 0%인 부위는 범례에서 제외 — 라이트 테마에서 컬러 텍스트 대비가 낮아 색은 견본으로만 표시
-              .filter((item) => item.value > 0)
-              .map((item) => (
+          {(
+            percentageData as {
+              value: number;
+              color: string;
+              title: string;
+              text: string;
+            }[]
+          )
+            // 0%인 부위는 범례에서 제외 — 라이트 테마에서 컬러 텍스트 대비가 낮아 색은 견본으로만 표시
+            .filter((item) => item.value > 0)
+            .map((item) => (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  gap: 6,
+                  backgroundColor: themeColor.itemColor,
+                }}
+                key={item.title}
+              >
                 <View
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 6,
-                    backgroundColor: themeColor.itemColor,
+                    width: 10,
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: item.color,
                   }}
-                  key={item.title}
-                >
-                  <View
-                    style={{
-                      width: 10,
-                      height: 10,
-                      borderRadius: 5,
-                      backgroundColor: item.color,
-                    }}
-                  />
-                  <Text style={{ fontSize: 12 }}>
-                    {item.title} {item.text}
-                  </Text>
-                </View>
-              ))}
-          </View>
+                />
+                <Text style={{ fontSize: 12 }}>
+                  {item.title} {item.text}
+                </Text>
+              </View>
+            ))}
+        </View>
       </View>
     </ChartCard>
   );

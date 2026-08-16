@@ -80,47 +80,45 @@ export const EquipmentChart = () => {
       style={styles.card}
     >
       <ChartBody>
-          <BarChart
-            barWidth={24}
-            noOfSections={NO_OF_SECTIONS}
-            maxValue={maxValue}
-            barBorderRadius={4}
-            frontColor={themeColor.subText}
-            disableScroll
-            data={barData1}
-            shiftY={10}
-            sideWidth={15}
-            yAxisThickness={1}
-            xAxisThickness={1}
-            yAxisColor={themeColor.subText}
-            xAxisColor={themeColor.subText}
-            rulesColor={themeColor.subText}
-            barInnerComponent={(item) => (
-              <Text
-                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
-              >
-                {item?.value}
-              </Text>
-            )}
-            // 영어 기구명은 기본 라벨 폭(barWidth=24)에서 "Bar…"로 잘리고,
-            // 넓히면 옆 라벨과 겹친다 → 영어일 때만 기울여 전체를 보여준다.
-            // 한국어는 원래 다 들어가므로 그대로 둔다.
-            labelWidth={lang === "en" ? 60 : undefined}
-            rotateLabel={lang === "en"}
-            xAxisLabelsHeight={lang === "en" ? 44 : undefined}
-            xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
-            xAxisLabelTextStyle={{
-              color: themeColor.text,
-              fontWeight: "bold",
-              fontSize: lang === "en" ? 9 : undefined,
-              fontFamily: "sb-l",
-            }}
-            yAxisTextStyle={{
-              color: themeColor.text,
-              fontWeight: "bold",
-              fontFamily: "sb-l",
-            }}
-          />
+        <BarChart
+          barWidth={24}
+          noOfSections={NO_OF_SECTIONS}
+          maxValue={maxValue}
+          barBorderRadius={4}
+          frontColor={themeColor.subText}
+          disableScroll
+          data={barData1}
+          shiftY={10}
+          sideWidth={15}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
+          barInnerComponent={(item) => (
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
+          )}
+          // 영어 기구명은 기본 라벨 폭(barWidth=24)에서 "Bar…"로 잘리고,
+          // 넓히면 옆 라벨과 겹친다 → 영어일 때만 기울여 전체를 보여준다.
+          // 한국어는 원래 다 들어가므로 그대로 둔다.
+          labelWidth={lang === "en" ? 60 : undefined}
+          rotateLabel={lang === "en"}
+          xAxisLabelsHeight={lang === "en" ? 44 : undefined}
+          xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
+          xAxisLabelTextStyle={{
+            color: themeColor.text,
+            fontWeight: "bold",
+            fontSize: lang === "en" ? 9 : undefined,
+            fontFamily: "sb-l",
+          }}
+          yAxisTextStyle={{
+            color: themeColor.text,
+            fontWeight: "bold",
+            fontFamily: "sb-l",
+          }}
+        />
       </ChartBody>
     </ChartCard>
   );

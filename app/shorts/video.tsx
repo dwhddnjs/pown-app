@@ -234,9 +234,7 @@ export default function Video() {
     return (
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.cancelText}>
-            {t("shorts.permission")}
-          </Text>
+          <Text style={styles.cancelText}>{t("shorts.permission")}</Text>
           <Pressable
             onPress={() =>
               !cameraPermission?.granted

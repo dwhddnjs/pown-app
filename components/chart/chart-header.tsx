@@ -28,7 +28,11 @@ export const ChartHeader = () => {
             style={[styles.button, { paddingLeft: 12 }]}
             onPress={() => setDate("prev")}
           >
-            <AntDesign name="leftcircleo" size={28} color={themeColor.tintText} />
+            <AntDesign
+              name="leftcircleo"
+              size={28}
+              color={themeColor.tintText}
+            />
           </TouchableOpacity>
           <Text style={[styles.title, { color: themeColor.text }]}>
             {convertChartDate(date, lang)}
@@ -41,7 +45,11 @@ export const ChartHeader = () => {
             disabled={isCurrentMonth}
             onPress={() => setDate("next")}
           >
-            <AntDesign name="rightcircleo" size={28} color={themeColor.tintText} />
+            <AntDesign
+              name="rightcircleo"
+              size={28}
+              color={themeColor.tintText}
+            />
           </TouchableOpacity>
         </View>
       </SafeAreaView>

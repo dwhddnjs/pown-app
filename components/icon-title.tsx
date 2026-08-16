@@ -1,15 +1,15 @@
-import { StyleSheet } from "react-native"
-import React from "react"
-import { View } from "./themed"
+import { StyleSheet } from "react-native";
+import React from "react";
+import { View } from "./themed";
 
 interface IconTitleProps {
-  children: React.ReactNode
-  style?: any
+  children: React.ReactNode;
+  style?: any;
 }
 
 export const IconTitle = ({ children, style }: IconTitleProps) => {
-  return <View style={[styles.container, style && style]}>{children}</View>
-}
+  return <View style={[styles.container, style && style]}>{children}</View>;
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -17,4 +17,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 10,
   },
-})
+});

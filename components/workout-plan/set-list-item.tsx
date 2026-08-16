@@ -56,32 +56,32 @@ export const SetListItem = React.memo(function SetListItem({
         <View
           style={[styles.setCounter, { backgroundColor: themeColor.itemColor }]}
         >
-        <View
-          style={[
-            styles.setCounterContainer,
-            { backgroundColor: themeColor.itemColor },
-          ]}
-        >
-          <Text style={[styles.setType, { color: themeColor.tintText }]}>
-            {tSetType(item.set, lang)}
-          </Text>
-          <Text style={[styles.count, { color: themeColor.text }]}>
-            {t("common.reps", { n: item.count })}
-          </Text>
-        </View>
-        {!hideProgress && (
-          <Text
+          <View
             style={[
-              styles.progressText,
-              { color: themeColor.subText },
-              item.progress === "완료" && {
-                color: themeColor.tintText,
-              },
+              styles.setCounterContainer,
+              { backgroundColor: themeColor.itemColor },
             ]}
           >
-            {tProgress(item.progress, lang)}
-          </Text>
-        )}
+            <Text style={[styles.setType, { color: themeColor.tintText }]}>
+              {tSetType(item.set, lang)}
+            </Text>
+            <Text style={[styles.count, { color: themeColor.text }]}>
+              {t("common.reps", { n: item.count })}
+            </Text>
+          </View>
+          {!hideProgress && (
+            <Text
+              style={[
+                styles.progressText,
+                { color: themeColor.subText },
+                item.progress === "완료" && {
+                  color: themeColor.tintText,
+                },
+              ]}
+            >
+              {tProgress(item.progress, lang)}
+            </Text>
+          )}
         </View>
       </View>
       {!hideProgress && (

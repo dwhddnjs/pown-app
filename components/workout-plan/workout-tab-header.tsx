@@ -1,4 +1,4 @@
-import React from "react"
+import React from "react";
 // component
 import {
   SafeAreaView,
@@ -6,29 +6,29 @@ import {
   Text,
   TouchableOpacity,
   View,
-} from "react-native"
-import Animated, { FadeInDown } from "react-native-reanimated"
-import { DrawerToggleButton } from "@react-navigation/drawer"
+} from "react-native";
+import Animated, { FadeInDown } from "react-native-reanimated";
+import { DrawerToggleButton } from "@react-navigation/drawer";
 // expo
-import { BlurView } from "expo-blur"
-import { useRouter } from "expo-router"
-import FontAwesome from "@expo/vector-icons/FontAwesome"
-import * as Haptics from "expo-haptics"
+import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import * as Haptics from "expo-haptics";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useNavigation, DrawerActions } from "@react-navigation/native"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useNavigation, DrawerActions } from "@react-navigation/native";
 // zustand
-import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store"
+import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
 // icon
-import PownLogo from "@/assets/images/svg/pown-logo.svg"
+import PownLogo from "@/assets/images/svg/pown-logo.svg";
 
 const WorkoutTabHeader = () => {
-  const themeColor = useCurrentThemeColor()
-  const { push } = useRouter()
-  const navigation = useNavigation()
+  const themeColor = useCurrentThemeColor();
+  const { push } = useRouter();
+  const navigation = useNavigation();
   // 스크롤 중 바뀌는 값이라 네비게이션 옵션이 아니라 스토어에서 직접 읽는다 —
   // 타이틀이 바뀔 때 리렌더되는 건 이 헤더뿐이다
-  const title = useWorkoutScrollStore((state) => state.title)
+  const title = useWorkoutScrollStore((state) => state.title);
 
   return (
     <BlurView intensity={80} tint="default" style={styles.blur}>
@@ -37,8 +37,8 @@ const WorkoutTabHeader = () => {
           <View style={styles.side}>
             <TouchableOpacity
               onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light)
-                navigation.dispatch(DrawerActions.toggleDrawer())
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                navigation.dispatch(DrawerActions.toggleDrawer());
               }}
             >
               <View pointerEvents="none">
@@ -84,10 +84,10 @@ const WorkoutTabHeader = () => {
         </View>
       </SafeAreaView>
     </BlurView>
-  )
-}
+  );
+};
 
-export default WorkoutTabHeader
+export default WorkoutTabHeader;
 
 const styles = StyleSheet.create({
   blur: {
@@ -109,4 +109,4 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-})
+});

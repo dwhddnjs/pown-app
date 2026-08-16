@@ -1,27 +1,27 @@
-import React, { useRef } from "react"
+import React, { useRef } from "react";
 // component
-import { StyleSheet, TextInput } from "react-native"
-import { Text, View } from "../themed"
-import { IconTitle } from "../icon-title"
+import { StyleSheet, TextInput } from "react-native";
+import { Text, View } from "../themed";
+import { IconTitle } from "../icon-title";
 // icon
-import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import { Link } from "expo-router"
+import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons";
+import { Link } from "expo-router";
 // zustand
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 
 interface PlanNoteProps {
-  onFocusScroll: (positionY: number) => void
-  currentScrollY: number
+  onFocusScroll: (positionY: number) => void;
+  currentScrollY: number;
 }
 
 export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
-  const { title, content, setPlanValue } = usePlanStore()
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
-  const inputRef = useRef<TextInput>(null)
+  const { title, content, setPlanValue } = usePlanStore();
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const inputRef = useRef<TextInput>(null);
 
   return (
     <View style={styles.main}>
@@ -48,9 +48,9 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
           ref={inputRef}
           onFocus={() => {
             inputRef.current?.measure((x, y, w, h, px, py) => {
-              const targetPosition = (currentScrollY + py) / 2
-              onFocusScroll(targetPosition)
-            })
+              const targetPosition = (currentScrollY + py) / 2;
+              onFocusScroll(targetPosition);
+            });
           }}
           style={[
             styles.input,
@@ -66,8 +66,8 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
         />
       )}
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   main: {
@@ -95,4 +95,4 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     marginHorizontal: 20,
   },
-})
+});

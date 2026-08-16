@@ -78,33 +78,31 @@ export const SbdChart = () => {
       emptyMessage={t("chart.sbdEmpty")}
     >
       <ChartBody>
-          <BarChart
-            data={data}
-            barWidth={28}
-            disableScroll
-            barBorderRadius={4}
-            yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
-            maxValue={maxValue}
-            noOfSections={NO_OF_SECTIONS}
-            labelWidth={65}
-            yAxisThickness={1}
-            xAxisThickness={1}
-            yAxisColor={themeColor.subText}
-            xAxisColor={themeColor.subText}
-            rulesColor={themeColor.subText}
-            barInnerComponent={(item) => (
-              <Text
-                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
-              >
-                {item?.value}
-              </Text>
-            )}
-            xAxisLabelTextStyle={{
-              color: themeColor.text,
-              textAlign: "center",
-              fontFamily: "sb-l",
-            }}
-          />
+        <BarChart
+          data={data}
+          barWidth={28}
+          disableScroll
+          barBorderRadius={4}
+          yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
+          maxValue={maxValue}
+          noOfSections={NO_OF_SECTIONS}
+          labelWidth={65}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
+          barInnerComponent={(item) => (
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
+          )}
+          xAxisLabelTextStyle={{
+            color: themeColor.text,
+            textAlign: "center",
+            fontFamily: "sb-l",
+          }}
+        />
       </ChartBody>
     </ChartCard>
   );

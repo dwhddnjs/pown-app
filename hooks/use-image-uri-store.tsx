@@ -1,10 +1,10 @@
-import { create } from "zustand"
+import { create } from "zustand";
 
 type ImageUriStoreType = {
-  uri: string
-  setImageUri: (uri: string) => void
-  onResetImageUri: () => void
-}
+  uri: string;
+  setImageUri: (uri: string) => void;
+  onResetImageUri: () => void;
+};
 
 export const useImageUriStore = create<ImageUriStoreType>((set) => ({
   uri: "",
@@ -16,4 +16,4 @@ export const useImageUriStore = create<ImageUriStoreType>((set) => ({
     set({
       uri: "",
     }),
-}))
+}));

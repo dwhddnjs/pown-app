@@ -1,22 +1,21 @@
-import React from "react"
+import React from "react";
 // component
-import { Pressable, StyleSheet } from "react-native"
-import { View } from "../themed"
-import { Image } from "expo-image"
+import { Pressable, StyleSheet } from "react-native";
+import { View } from "../themed";
+import { Image } from "expo-image";
 // hook
-import { useImageUriStore } from "@/hooks/use-image-uri-store"
+import { useImageUriStore } from "@/hooks/use-image-uri-store";
 
 export const ImageModal = () => {
-  const { uri, onResetImageUri } = useImageUriStore()
+  const { uri, onResetImageUri } = useImageUriStore();
   return (
     <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
       <View style={styles.imageContainer}>
         <Image source={{ uri }} contentFit="contain" style={{ flex: 1 }} />
       </View>
     </Pressable>
-  )
-}
-
+  );
+};
 
 const styles = StyleSheet.create({
   overlay: {
@@ -35,4 +34,4 @@ const styles = StyleSheet.create({
     paddingVertical: 100,
     paddingHorizontal: 12,
   },
-})
+});

@@ -91,7 +91,9 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                 >
                   <View style={styles.itemInfo}>
                     <NumberBallIcon>{index + 1}</NumberBallIcon>
-                    <Text style={[styles.itemType, { color: themeColor.tintText }]}>
+                    <Text
+                      style={[styles.itemType, { color: themeColor.tintText }]}
+                    >
                       {tSetType(item.set, lang)}
                     </Text>
                     <Text

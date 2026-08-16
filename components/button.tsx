@@ -3,21 +3,21 @@ import {
   StyleSheet,
   TouchableOpacity,
   TouchableOpacityProps,
-} from "react-native"
-import { Text } from "./themed"
+} from "react-native";
+import { Text } from "./themed";
 // hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface ButtonProps extends TouchableOpacityProps {
-  children: React.ReactNode
-  type: "solid" | "bordered" | "icon"
+  children: React.ReactNode;
+  type: "solid" | "bordered" | "icon";
   style?: {
-    [key: string]: number | string
-  }
+    [key: string]: number | string;
+  };
 }
 
 export const Button = ({ type, children, style, ...props }: ButtonProps) => {
-  const themeColor = useCurrentThemeColor()
+  const themeColor = useCurrentThemeColor();
 
   return (
     <TouchableOpacity
@@ -52,8 +52,8 @@ export const Button = ({ type, children, style, ...props }: ButtonProps) => {
         </Text>
       )}
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 // 색은 테마 훅에서 인라인으로 얹으므로 스타일 자체는 렌더마다 새로 만들 이유가 없다
 const styles = StyleSheet.create({
@@ -85,4 +85,4 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     borderRadius: 12,
   },
-})
+});

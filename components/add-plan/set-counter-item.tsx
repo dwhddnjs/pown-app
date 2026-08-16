@@ -1,7 +1,7 @@
 import { Text, View } from "../themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { usePlanStore } from "@/hooks/use-plan-store"
+import { usePlanStore } from "@/hooks/use-plan-store";
 import { SetWithCountType } from "@/types/workout";
 import { NumberBallIcon } from "../number-ball-icon";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -43,9 +43,9 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
           <Text style={[styles.type, { color: themeColor.tintText }]}>
             {tSetType(item.set, lang)}
           </Text>
-          <Text
-            style={[styles.typeText, { color: themeColor.tintText }]}
-          >{t("common.reps", { n: item.count })}</Text>
+          <Text style={[styles.typeText, { color: themeColor.tintText }]}>
+            {t("common.reps", { n: item.count })}
+          </Text>
         </View>
         <View
           style={[

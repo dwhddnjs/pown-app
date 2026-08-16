@@ -1,20 +1,20 @@
-import React from "react"
+import React from "react";
 //components
-import { StyleSheet, TouchableOpacity } from "react-native"
+import { StyleSheet, TouchableOpacity } from "react-native";
 // color
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 // icon
-import { FontAwesome } from "@expo/vector-icons"
-import { Text, View } from "../themed"
+import { FontAwesome } from "@expo/vector-icons";
+import { Text, View } from "../themed";
 
 interface TitleSearchHeaderProps {
-  onPress: () => void
+  onPress: () => void;
 }
 
 export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
 
   return (
     <View style={styles.header}>
@@ -23,8 +23,8 @@ export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
         <FontAwesome name="search" size={20} color={themeColor.text} />
       </TouchableOpacity>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   header: {
@@ -39,4 +39,4 @@ const styles = StyleSheet.create({
     flexShrink: 1,
     fontSize: 24,
   },
-})
+});

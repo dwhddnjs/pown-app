@@ -1,35 +1,35 @@
-import React from "react"
+import React from "react";
 // component
-import { StyleSheet, TouchableOpacity, View } from "react-native"
-import { Text } from "../themed"
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { Text } from "../themed";
 // zustand
-import { useLanguage, useUserStore } from "@/hooks/use-user-store"
-import { useT } from "@/hooks/use-t"
-import { tWorkout } from "@/lib/i18n"
+import { useLanguage, useUserStore } from "@/hooks/use-user-store";
+import { useT } from "@/hooks/use-t";
+import { tWorkout } from "@/lib/i18n";
 // hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // expo
-import { useRouter } from "expo-router"
+import { useRouter } from "expo-router";
 // icon
-import AntDesign from "@expo/vector-icons/AntDesign"
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 export const UserDataCard = () => {
-  const { userInfo } = useUserStore()
-  const currentUserInfo = userInfo[userInfo.length - 1]
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
-  const lang = useLanguage()
-  const { push } = useRouter()
+  const { userInfo } = useUserStore();
+  const currentUserInfo = userInfo[userInfo.length - 1];
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
+  const { push } = useRouter();
 
   const bigThree = [
     { id: 1, title: tWorkout("스쿼트", lang), weight: currentUserInfo?.sq },
     { id: 2, title: tWorkout("벤치프레스", lang), weight: currentUserInfo?.bp },
     { id: 3, title: tWorkout("데드리프트", lang), weight: currentUserInfo?.dl },
-  ]
+  ];
   const total = bigThree.reduce(
     (acc, item) => acc + (Number(item.weight) || 0),
-    0
-  )
+    0,
+  );
 
   const bodyInfo = [
     {
@@ -45,7 +45,9 @@ export const UserDataCard = () => {
     {
       id: 3,
       title: t("userInfo.age"),
-      value: currentUserInfo?.age ? t("userInfo.ageValue", { n: currentUserInfo.age }) : "-",
+      value: currentUserInfo?.age
+        ? t("userInfo.ageValue", { n: currentUserInfo.age })
+        : "-",
     },
     {
       id: 4,
@@ -54,10 +56,10 @@ export const UserDataCard = () => {
         currentUserInfo?.gender === "male"
           ? t("userInfo.male")
           : currentUserInfo?.gender === "female"
-          ? t("userInfo.female")
-          : "-",
+            ? t("userInfo.female")
+            : "-",
     },
-  ]
+  ];
 
   if (!currentUserInfo) {
     return (
@@ -72,14 +74,16 @@ export const UserDataCard = () => {
             {t("userInfo.emptyDesc")}
           </Text>
           <View style={styles.emptyLink}>
-            <Text style={[styles.emptyLinkText, { color: themeColor.tintText }]}>
+            <Text
+              style={[styles.emptyLinkText, { color: themeColor.tintText }]}
+            >
               {t("userInfo.goWrite")}
             </Text>
             <AntDesign name="right" size={12} color={themeColor.tintText} />
           </View>
         </View>
       </TouchableOpacity>
-    )
+    );
   }
 
   return (
@@ -148,8 +152,8 @@ export const UserDataCard = () => {
         ))}
       </View>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -252,4 +256,4 @@ const styles = StyleSheet.create({
   emptyLinkText: {
     fontSize: 14,
   },
-})
+});

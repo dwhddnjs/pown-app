@@ -1,6 +1,11 @@
 import { ComponentProps } from "react";
 // component
-import { StyleProp, StyleSheet, TouchableOpacity, ViewStyle } from "react-native";
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+} from "react-native";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // icon
@@ -62,12 +67,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 50,
   },
-});
-
-// 리스트 안에 들어가는 버튼은 떠 있는 FAB보다 작게
-export const circleButtonSmall = StyleSheet.create({
+  // 리스트 안에 들어가는 버튼은 떠 있는 FAB보다 작게
   small: {
     width: FAB_SIZE_SMALL,
     height: FAB_SIZE_SMALL,
   },
-}).small;
+});
+
+export const circleButtonSmall = styles.small;

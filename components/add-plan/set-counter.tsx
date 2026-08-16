@@ -27,7 +27,9 @@ export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
           <Octicons name="number" size={20} color={themeColor.tintText} />
           <Text style={{ fontSize: 16 }}>{t("plan.setAndReps")}</Text>
         </IconTitle>
-        <Text style={[styles.subText, { color: themeColor.tintText }]}>{t("common.optional")}</Text>
+        <Text style={[styles.subText, { color: themeColor.tintText }]}>
+          {t("common.optional")}
+        </Text>
       </View>
       <Button
         type="bordered"
