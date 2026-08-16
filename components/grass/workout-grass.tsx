@@ -1,26 +1,23 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // component
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  useWindowDimensions,
-  View as RNView,
-} from "react-native";
+import { ScrollView, StyleSheet, View as RNView } from "react-native";
 import { Text, View } from "@/components/themed";
+import {
+  CELL,
+  cellColor,
+  COL,
+  GAP,
+  GrassCell,
+  MONTH_LABEL_H,
+  MONTH_LABEL_LINE,
+  SelectedCell,
+} from "./grass-cell";
+import { GrassTooltip, TOOLTIP_BOX } from "./grass-tooltip";
+import { YearSelect } from "./year-select";
 // zustand
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { usePopover } from "@/hooks/use-popover";
 import { useT } from "@/hooks/use-t";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
@@ -36,24 +33,8 @@ import {
   startOfYear,
 } from "date-fns";
 import { enUS, ko } from "date-fns/locale";
-import Animated from "react-native-reanimated";
-import { ThemeColorType } from "@/constants/Colors";
 import { Lang } from "@/lib/i18n";
-// icon
-import AntDesign from "@expo/vector-icons/AntDesign";
 
-// 깃허브 잔디와 같은 5단계 — 0(없음)은 empty 배경이라 여기 없고, 1~4단계만.
-// 하루 4개 이상은 모두 최고 단계.
-const LEVEL_OPACITY = [0.3, 0.5, 0.75, 1] as const;
-
-// 열=주, 행=요일 (깃허브와 동일). 메인이 아닌 보조 카드라 셀은 작게 잡고 가로 스크롤.
-const CELL = 10;
-const GAP = 3;
-const COL = CELL + GAP;
-// 월 라벨 줄의 높이 = 라벨 line box(11) + 그리드와 띄우는 여백(4).
-// 라벨은 이 영역 안에 absolute로 얹히므로 이 값이 곧 그리드의 paddingTop이다.
-const MONTH_LABEL_H = 15;
-const MONTH_LABEL_LINE = 11;
 // 요일 축과 그리드 사이 간격 (라벨을 오른쪽 정렬해 ko/en 모두 같은 간격이 되게)
 const AXIS_GAP = 6;
 
@@ -64,110 +45,7 @@ const WEEKDAY_LABEL: Record<Lang, string[]> = {
 
 const dayKey = (date: Date) => format(date, "yyyy.MM.dd");
 
-const yearLabel = (year: string, lang: Lang) =>
-  lang === "ko" ? `${year}년` : year;
-
-const levelOf = (count: number) => (count > 4 ? 4 : count);
-
-const cellColor = (count: number, themeColor: ThemeColorType) =>
-  count === 0
-    ? { backgroundColor: themeColor.empty }
-    : {
-        backgroundColor: themeColor.tint,
-        opacity: LEVEL_OPACITY[levelOf(count) - 1],
-      };
-
-// left는 툴팁 상자의 x — 셀 중앙에 걸치되 가로 스크롤 뷰포트 밖으로 나가면 잘리므로
-// 탭 시점에 뷰포트 안으로 가둬서 담아둔다.
-type SelectedCell = {
-  key: string;
-  count: number;
-  x: number;
-  y: number;
-  left: number;
-};
-
-type GrassCellProps = {
-  dateKey: string;
-  count: number;
-  themeColor: ThemeColorType;
-  // 해당 연도 밖의 날짜와 미래는 자리만 차지하고 그리지 않는다 (깃허브와 동일)
-  hidden: boolean;
-  onPress: (cell: Omit<SelectedCell, "left">) => void;
-  x: number;
-  y: number;
-};
-
-// 셀이 371개라 memo가 없으면 툴팁을 한 번 열고 닫을 때마다 전부 리렌더된다
-const GrassCell = React.memo(
-  ({ dateKey, count, themeColor, hidden, onPress, x, y }: GrassCellProps) => {
-    if (hidden) {
-      return <RNView style={styles.cell} />;
-    }
-
-    return (
-      <TouchableOpacity
-        activeOpacity={0.6}
-        // 10pt 셀은 손가락으로 겨냥하기 어렵다 — 탭 영역만 사방 4pt 넓힌다.
-        // 이웃과 겹치는 만큼 가장자리는 옆 날짜가 잡힐 수 있지만 아예 안 눌리는 편보다 낫다.
-        hitSlop={4}
-        onPress={() => onPress({ key: dateKey, count, x, y })}
-        style={styles.cell}
-      >
-        {/* 단계 불투명도는 안쪽에 준다 — 터치 피드백(activeOpacity)은 절대값이라
-            바깥에 같이 주면 옅은 셀이 눌렀을 때 오히려 밝아진다 */}
-        <RNView style={[styles.cellFill, cellColor(count, themeColor)]} />
-      </TouchableOpacity>
-    );
-  },
-);
-GrassCell.displayName = "GrassCell";
-
-// 셀 좌표를 알고 있으므로 measure 없이 절대 배치한다.
-// 폭을 재지 않고 가운데 정렬하려고 고정폭 상자를 셀 중앙에 걸쳐 놓고 그 안에서 center 정렬.
-const TOOLTIP_BOX = 160;
-// 툴팁 상자 높이(패딩 3*2 + 줄 높이) + 셀과의 간격
-const TOOLTIP_OFFSET = 26;
-
-type TooltipProps = {
-  cell: SelectedCell;
-  themeColor: ThemeColorType;
-  lang: Lang;
-  t: ReturnType<typeof useT>;
-};
-
-const GrassTooltip = ({ cell, themeColor, lang, t }: TooltipProps) => {
-  const date = parse(cell.key, "yyyy.MM.dd", new Date());
-  // 위로 띄웠을 때 월 라벨 줄을 덮지 않는 행만 위로 (일·월요일은 아래로)
-  const above = cell.y - TOOLTIP_OFFSET >= MONTH_LABEL_H;
-
-  return (
-    <RNView
-      pointerEvents="none"
-      style={[
-        styles.tooltipWrap,
-        {
-          left: cell.left,
-          top: above ? cell.y - TOOLTIP_OFFSET : cell.y + CELL + 6,
-        },
-      ]}
-    >
-      <RNView style={[styles.tooltip, { backgroundColor: themeColor.tint }]}>
-        <Text style={[styles.tooltipText, { color: themeColor.onTint }]}>
-          {`${format(date, lang === "ko" ? "M월 d일" : "MMM d", {
-            locale: lang === "ko" ? ko : enUS,
-          })} · ${
-            cell.count === 0
-              ? t("grass.none")
-              : t("grass.plans", { n: cell.count })
-          }`}
-        </Text>
-      </RNView>
-    </RNView>
-  );
-};
-
-/** 운동계획 화면 최상단 — 연도별 잔디 (연도가 여러 해면 탭으로 전환) */
+/** 운동계획 화면 최상단 — 연도별 잔디 (연도가 여러 해면 드롭다운으로 전환) */
 export const YearGrass = () => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
@@ -185,6 +63,7 @@ export const YearGrass = () => {
 
   // 스크롤 위치는 툴팁을 가둘 때만 필요하다 — state로 두면 셀 수백 개가 매 프레임 리렌더된다
   const scrollX = useRef(0);
+  const [viewWidth, setViewWidth] = useState(0);
 
   // "yyyy.MM.dd" → 그 날 작성한 운동계획 수
   const counts = useMemo(() => {
@@ -206,31 +85,6 @@ export const YearGrass = () => {
   }, [workoutPlanList, thisYear]);
 
   const [year, setYear] = useState(thisYear);
-  const [viewWidth, setViewWidth] = useState(0);
-  const {
-    visible: yearMenuVisible,
-    open: openYearMenu,
-    close: closeYearMenu,
-    style: yearMenuStyle,
-  } = usePopover();
-  // 드롭다운은 Modal 안에 있어서 버튼 좌표를 재서 붙인다
-  const { width: windowWidth } = useWindowDimensions();
-  const yearButtonRef = useRef<RNView>(null);
-  const [yearAnchor, setYearAnchor] = useState<{
-    top: number;
-    right: number;
-  } | null>(null);
-
-  const onPressYear = () => {
-    if (yearMenuVisible) {
-      closeYearMenu();
-      return;
-    }
-    yearButtonRef.current?.measureInWindow((x, y, width, height) => {
-      setYearAnchor({ top: y + height + 4, right: windowWidth - (x + width) });
-      openYearMenu();
-    });
-  };
 
   // 셀에 필요한 값(키·좌표·숨김)은 여기서 한 번만 만든다 — 렌더마다 371번 format 하지 않도록.
   // counts는 여기 들어오지 않아야 기록이 바뀌어도 날짜 계산을 다시 하지 않는다.
@@ -290,7 +144,6 @@ export const YearGrass = () => {
   // memo된 셀에 넘기므로 참조가 유지돼야 한다
   const onPressCell = useCallback(
     (cell: Omit<SelectedCell, "left">) => {
-      closeYearMenu();
       setSelected((prev) =>
         prev?.key === cell.key
           ? null
@@ -307,7 +160,7 @@ export const YearGrass = () => {
             },
       );
     },
-    [viewWidth, closeYearMenu],
+    [viewWidth],
   );
 
   // 올해는 마지막 열(오늘)이 오른쪽 끝에 오도록, 지난 해는 1월부터 보여준다
@@ -326,80 +179,12 @@ export const YearGrass = () => {
         <Text style={[styles.total, { color: themeColor.tintText }]}>
           {t("grass.count", { n: total })}
         </Text>
-        <TouchableOpacity
-          ref={yearButtonRef}
-          style={[styles.yearButton, { borderColor: themeColor.tint }]}
-          onPress={onPressYear}
-        >
-          <Text style={[styles.yearButtonText, { color: themeColor.tintText }]}>
-            {yearLabel(year, lang)}
-          </Text>
-          <AntDesign
-            name={yearMenuVisible ? "up" : "down"}
-            size={10}
-            color={themeColor.tintText}
-          />
-        </TouchableOpacity>
+        <YearSelect years={years} year={year} lang={lang} onChange={setYear} />
       </RNView>
-      {/* 카드 밖을 눌러도 닫히도록 Modal로 띄운다 — 카드와 같은 itemColor면
-          구분이 안 돼 background를 쓴다 */}
-      <Modal
-        visible={yearMenuVisible}
-        transparent
-        animationType="none"
-        statusBarTranslucent
-        navigationBarTranslucent
-        onRequestClose={closeYearMenu}
-      >
-        <Pressable style={StyleSheet.absoluteFill} onPress={closeYearMenu} />
-        {yearAnchor && (
-          <Animated.View
-            // 버튼에서 아래로 펼쳐졌다가 다시 접히는 느낌
-            style={[
-              styles.dropdown,
-              {
-                top: yearAnchor.top,
-                right: yearAnchor.right,
-                backgroundColor: themeColor.background,
-              },
-              yearMenuStyle,
-            ]}
-          >
-            {years.map((item) => (
-              <TouchableOpacity
-                key={item}
-                style={styles.dropdownItem}
-                onPress={() => {
-                  setYear(item);
-                  closeYearMenu();
-                }}
-              >
-                <Text
-                  style={[
-                    styles.yearButtonText,
-                    {
-                      color:
-                        item === year ? themeColor.tintText : themeColor.text,
-                    },
-                  ]}
-                >
-                  {yearLabel(item, lang)}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </Animated.View>
-        )}
-      </Modal>
       <RNView style={{ height: 1, backgroundColor: themeColor.divider }} />
 
       <RNView style={{ flexDirection: "row" }}>
-        <RNView
-          style={{
-            marginRight: AXIS_GAP,
-            paddingTop: MONTH_LABEL_H,
-            gap: GAP,
-          }}
-        >
+        <RNView style={styles.axis}>
           {WEEKDAY_LABEL[lang].map((label, index) => (
             <Text
               key={index}
@@ -497,41 +282,10 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     fontSize: 13,
   },
-  yearButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-    borderWidth: 1.5,
-    borderRadius: 50,
-  },
-  yearButtonText: {
-    fontFamily: "sb-l",
-    fontSize: 12,
-    // sb 폰트는 ascender 여백이 커서 lineHeight를 안 주면 글자가 박스 위쪽에 붙는다
-    lineHeight: 16,
-  },
-  dropdown: {
-    position: "absolute",
-    // 버튼(위쪽 모서리)에서 펼쳐지도록
-    transformOrigin: "top right",
-    minWidth: 72,
-    paddingVertical: 2,
-
-    borderRadius: 8,
-  },
-  dropdownItem: {
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-  },
-  cell: {
-    width: CELL,
-    height: CELL,
-  },
-  cellFill: {
-    flex: 1,
-    borderRadius: 2,
+  axis: {
+    marginRight: AXIS_GAP,
+    paddingTop: MONTH_LABEL_H,
+    gap: GAP,
   },
   axisText: {
     fontFamily: "sb-l",
@@ -561,20 +315,5 @@ const styles = StyleSheet.create({
   legendText: {
     fontFamily: "sb-l",
     fontSize: 10,
-  },
-  tooltipWrap: {
-    position: "absolute",
-    width: TOOLTIP_BOX,
-    alignItems: "center",
-    zIndex: 10,
-  },
-  tooltip: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-  },
-  tooltipText: {
-    fontFamily: "sb-l",
-    fontSize: 11,
   },
 });

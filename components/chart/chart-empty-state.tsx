@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Text, View } from "../themed";
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
-import { ThemeColorType } from "@/constants/Colors";
+import { ThemeColorType } from "@/constants/colors";
 
 interface ChartEmptyStateProps {
   message: string;

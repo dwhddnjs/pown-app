@@ -21,9 +21,7 @@ import { toast } from "sonner-native"
 const IMAGE_GAP = 8
 const LIST_PADDING = 20
 
-interface CameraImageProps {}
-
-export const CameraImage = ({}: CameraImageProps) => {
+export const CameraImage = () => {
   const themeColor = useCurrentThemeColor()
   const t = useT()
   const router = useRouter()

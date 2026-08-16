@@ -1,5 +1,6 @@
 //component
 import { StyleSheet, TouchableOpacity } from "react-native"
+import React from "react"
 import { Text, View } from "@/components/themed"
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store"
@@ -8,15 +9,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color"
 import { useLanguage } from "@/hooks/use-user-store"
 import { tCondition } from "@/lib/i18n"
 // icon
-import GoodIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import TiredIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import AngryIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import SickIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import SadIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import LolIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import NeutralIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import AnoyIcon from "@expo/vector-icons/MaterialCommunityIcons"
-import CoolIcon from "@expo/vector-icons/MaterialCommunityIcons"
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons"
 
 interface ConditionButtonProps {
   item: {
@@ -25,39 +18,29 @@ interface ConditionButtonProps {
   }
 }
 
-export const getIcon = (value: string, size: number, color: string) => {
-  let result
-  switch (value) {
-    case "좋음":
-      result = <GoodIcon name="emoticon" size={size} color={color} />
-      break
-    case "피곤함":
-      result = <TiredIcon name="emoticon-dead" size={size} color={color} />
-      break
-    case "화남":
-      result = <AngryIcon name="emoticon-angry" size={size} color={color} />
-      break
-    case "아픔":
-      result = <SickIcon name="emoticon-sick" size={size} color={color} />
-      break
-    case "슬픔":
-      result = <SadIcon name="emoticon-cry" size={size} color={color} />
-      break
-    case "신남":
-      result = <LolIcon name="emoticon-lol" size={size} color={color} />
-      break
-    case "상쾌함":
-      result = <CoolIcon name="emoticon-cool" size={size} color={color} />
-      break
-    case "양호함":
-      result = <NeutralIcon name="emoticon-neutral" size={size} color={color} />
-      break
-    default:
-      result = <AnoyIcon name="emoticon-sad" size={size} color={color} />
-      break
-  }
-  return result
+// 컨디션(저장값은 한국어) → 이모티콘 글리프.
+// 모르는 값은 예전 switch의 default와 같이 짜증남 아이콘으로 떨어진다.
+const CONDITION_ICON: Record<
+  string,
+  React.ComponentProps<typeof MaterialCommunityIcons>["name"]
+> = {
+  좋음: "emoticon",
+  피곤함: "emoticon-dead",
+  화남: "emoticon-angry",
+  아픔: "emoticon-sick",
+  슬픔: "emoticon-cry",
+  신남: "emoticon-lol",
+  상쾌함: "emoticon-cool",
+  양호함: "emoticon-neutral",
 }
+
+export const getIcon = (value: string, size: number, color: string) => (
+  <MaterialCommunityIcons
+    name={CONDITION_ICON[value] ?? "emoticon-sad"}
+    size={size}
+    color={color}
+  />
+)
 
 // 운동 기록 리스트의 셀마다 붙는 읽기 전용 태그 — 계획 작성 폼 스토어와는 무관하다.
 // 예전엔 한 컴포넌트가 두 모양을 다 만들고 골라 반환해서, 리스트의 태그까지

@@ -31,7 +31,6 @@ export const TopWeight = ({
   const t = useT();
 
   const BUTTON_WIDTH = 42;
-  const PADDING = 4;
   const translateX = useSharedValue(weightType === "kg" ? 0 : BUTTON_WIDTH);
 
   useEffect(() => {

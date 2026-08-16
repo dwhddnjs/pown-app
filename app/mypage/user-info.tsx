@@ -12,7 +12,9 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
 import { format } from "date-fns";
+import { PLAN_DATE_FORMAT } from "@/lib/date";
 import { tWorkout } from "@/lib/i18n";
+import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
 // expo
 import { useRouter } from "expo-router";
 
@@ -77,7 +79,7 @@ export default function UserInfo() {
     setUserData({
       ...value,
       gender,
-      createdAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+      createdAt: format(new Date(), PLAN_DATE_FORMAT),
     });
     toast.success(t("userInfo.saved"));
     back();
@@ -95,11 +97,11 @@ export default function UserInfo() {
         style={{ backgroundColor: themeColor.background }}
         contentContainerStyle={styles.content}
       >
-        <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: themeColor.tintText }]}>
+        <View style={settingsScreenStyles.textContainer}>
+          <Text style={[settingsScreenStyles.title, { color: themeColor.tintText }]}>
             {t("userInfo.title")}
           </Text>
-          <Text style={[styles.desc, { color: themeColor.subText }]}>
+          <Text style={[settingsScreenStyles.desc, { color: themeColor.subText }]}>
             {t("userInfo.desc")}
           </Text>
         </View>
@@ -213,17 +215,6 @@ const styles = StyleSheet.create({
     paddingTop: 24,
     paddingBottom: 24,
     paddingHorizontal: 20,
-  },
-  textContainer: {
-    gap: 8,
-  },
-  title: {
-    fontSize: 18,
-  },
-  desc: {
-    fontFamily: "sb-l",
-    fontSize: 13,
-    lineHeight: 19,
   },
   section: {
     gap: 10,

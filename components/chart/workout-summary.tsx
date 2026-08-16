@@ -4,11 +4,11 @@ import { Text, View } from "../themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
-import { sortWorkoutPlanList } from "@/lib/function";
+import { sortWorkoutPlanList } from "@/lib/stats";
 import { useLanguage } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
 import { tBodyPart } from "@/lib/i18n";
-import { ChartEmptyState } from "./chart-empty-state";
+import { ChartCard } from "./chart-card";
 // expo
 import { useRouter } from "expo-router";
 // icon
@@ -55,18 +55,13 @@ export const WorkoutSummary = () => {
   ).size;
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>
-        {t("chart.monthlySummary")}
-      </Text>
-      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-      {totalWorkouts === 0 ? (
-        <ChartEmptyState
-          message={t("chart.emptyMonth")}
-          themeColor={themeColor}
-        />
-      ) : (
-        <>
+    <ChartCard
+      title={t("chart.monthlySummary")}
+      isEmpty={totalWorkouts === 0}
+      emptyMessage={t("chart.emptyMonth")}
+      style={styles.card}
+    >
+      <>
           <View
             style={[styles.grid, { backgroundColor: themeColor.itemColor }]}
           >
@@ -159,23 +154,18 @@ export const WorkoutSummary = () => {
               {t("chart.openCalendar")}
             </Text>
             <AntDesign name="right" size={15} color={themeColor.subText} />
-          </TouchableOpacity>
-        </>
-      )}
-    </View>
+        </TouchableOpacity>
+      </>
+    </ChartCard>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 12,
-    paddingTop: 20,
+  card: {
     // 마지막 줄(달력 링크)은 자체 padding + 글자 line box의 디센더 여유분이 더 붙어
-    // 그대로 20을 주면 아래가 8pt 더 떠 보인다. 시각적 여백을 위와 맞춘 값.
+    // 카드 기본값 20을 그대로 두면 아래가 8pt 더 떠 보인다. 시각적 여백을 위와 맞춘 값.
     paddingBottom: 12,
-    borderRadius: 12,
     marginTop: 24,
-    gap: 12,
   },
   grid: {
     flexDirection: "row",

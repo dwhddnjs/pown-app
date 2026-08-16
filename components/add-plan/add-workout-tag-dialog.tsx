@@ -8,7 +8,7 @@ import { Button } from "../button"
 import { StyleSheet } from "react-native"
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store"
 import { useUserStore } from "@/hooks/use-user-store"
-import { WorkoutTypes } from "@/hooks/use-plan-store"
+import { WorkoutTypes } from "@/types/workout"
 import { toast } from "sonner-native"
 
 interface AddWorkoutTagDialogProp {
@@ -24,7 +24,7 @@ export const AddWorkoutTagDialog = ({
   // 이 다이얼로그는 네이티브 Modal이라 sonner 토스트가 뒤에 가려 안 보인다 —
   // 창을 연 채로 알려야 하는 오류는 안에서 직접 그린다
   const [error, setError] = useState("")
-  const { workoutList, setAddWorkoutTag, setRemoveWorkoutTag } = useUserStore()
+  const { workoutList, setAddWorkoutTag } = useUserStore()
   const { isOpen, setOpen } = useWorkoutTagDialogStore()
 
   const onAddWorkoutTag = () => {

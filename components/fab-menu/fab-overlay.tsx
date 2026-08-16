@@ -3,7 +3,6 @@ import { useT } from "@/hooks/use-t";
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { View, Text } from "@/components/themed";
 import { router } from "expo-router";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Animated, {
   useSharedValue,

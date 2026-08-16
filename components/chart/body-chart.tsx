@@ -1,6 +1,6 @@
 import React from "react";
 // component
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { useWindowDimensions } from "react-native";
 import { Text, View } from "../themed";
 import { LineChart } from "react-native-gifted-charts";
 // hook
@@ -9,8 +9,8 @@ import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
 import { useChartStore } from "@/hooks/use-chart-store";
 // lib
-import { getMonthlyBodyData } from "@/lib/function";
-import { ChartEmptyState } from "./chart-empty-state";
+import { getMonthlyBodyData } from "@/lib/stats";
+import { ChartBody, ChartCard } from "./chart-card";
 
 const POINTER_LABEL_WIDTH = 90;
 // 차트 높이를 고정해야 세로선을 정확히 꽉 채울 수 있다(pointerStripHeight = 높이).
@@ -80,24 +80,12 @@ export const BodyChart = () => {
   const noOfSections = 5;
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>{t("chart.bodyTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-      {isEmptyData ? (
-        <ChartEmptyState
-          message={t("chart.bodyEmpty")}
-          themeColor={themeColor}
-        />
-      ) : (
-        <View
-          style={{
-            // gifted-charts가 그리는 축·격자선 실폭은 width prop보다 20pt쯤 넓다.
-            // 계산으로 맞추지 말고 카드 안쪽 폭에서 잘라낸다(equipment-chart와 동일).
-            overflow: "hidden",
-            backgroundColor: themeColor.itemColor,
-            paddingVertical: 4,
-          }}
-        >
+    <ChartCard
+      title={t("chart.bodyTitle")}
+      isEmpty={isEmptyData}
+      emptyMessage={t("chart.bodyEmpty")}
+    >
+      <ChartBody>
           <LineChart
             disableScroll
             areaChart
@@ -185,17 +173,7 @@ export const BodyChart = () => {
               },
             }}
           />
-        </View>
-      )}
-    </View>
+      </ChartBody>
+    </ChartCard>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    gap: 12,
-  },
-});

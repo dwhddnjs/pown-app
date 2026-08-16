@@ -1,3 +1,5 @@
+import { WorkoutTypes } from "@/types/workout"
+
 export const equipmentData: string[] = [
   "바벨",
   "덤벨",
@@ -7,10 +9,7 @@ export const equipmentData: string[] = [
   "맨몸",
 ]
 
-export const workoutData: Record<
-  "back" | "chest" | "shoulder" | "leg" | "arm",
-  string[]
-> = {
+export const workoutData: Record<WorkoutTypes, string[]> = {
   back: [
     "데드리프트",
     "로우",

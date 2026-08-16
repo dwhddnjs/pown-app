@@ -2,7 +2,7 @@ import { tt } from "@/hooks/use-t"
 import * as FileSystem from "expo-file-system"
 import * as MediaLibrary from "expo-media-library"
 import { toast } from "sonner-native"
-import { ImageUriType } from "@/hooks/use-plan-store"
+import { ImageUriType } from "@/types/workout"
 
 export const MEDIA_DIR = "media/"
 

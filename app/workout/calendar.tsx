@@ -7,7 +7,7 @@ import { useChartStore } from "@/hooks/use-chart-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { convertChartDate } from "@/lib/function";
+import { convertChartDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { useNavigation } from "expo-router";

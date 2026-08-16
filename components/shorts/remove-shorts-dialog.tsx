@@ -1,12 +1,14 @@
-import { useT } from "@/hooks/use-t"
 import React from "react"
-import { Dialog } from "../dialog"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { Button } from "../button"
-import { useRouter } from "expo-router"
-import { useShortsStore } from "@/hooks/use-shorts-store"
-import { Text, View } from "../themed"
+// component
+import { ConfirmDialog } from "../confirm-dialog"
 import { toast } from "sonner-native"
+// zustand
+import { useShortsStore } from "@/hooks/use-shorts-store"
+// hook
+import useCurrentThemeColor from "@/hooks/use-current-theme-color"
+import { useT } from "@/hooks/use-t"
+// expo
+import { useRouter } from "expo-router"
 
 interface RemoveShortsDialogProps {
   open: boolean
@@ -24,75 +26,23 @@ export const RemoveShortsDialog = ({
   const { back } = useRouter()
   const { videos, setRemoveVideo } = useShortsStore()
 
+  const onRemoveVideo = () => {
+    const video = videos[position]
+    if (!video) return
+    setRemoveVideo(video.id)
+    toast.success(t("shorts.removed"))
+    back()
+  }
+
   return (
-    <Dialog isOpen={open} onClose={setIsOpen}>
-      <View
-        style={{
-          backgroundColor: themeColor.itemColor,
-          paddingHorizontal: 20,
-          gap: 24,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: themeColor.itemColor,
-            gap: 4,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-            }}
-          >
-            {t("shorts.removeTitle")}
-          </Text>
-          <Text
-            style={{
-              fontSize: 14,
-              color: themeColor.subText,
-              fontFamily: "sb-l",
-            }}
-          >
-            {t("shorts.removeDesc")}
-          </Text>
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            backgroundColor: themeColor.itemColor,
-            gap: 12,
-          }}
-        >
-          <Button
-            type="solid"
-            style={{
-              flex: 1,
-              marginHorizontal: 0,
-              backgroundColor: themeColor.subText,
-            }}
-            onPress={setIsOpen}
-          >
-            {t("common.cancel")}
-          </Button>
-          <Button
-            type="solid"
-            style={{
-              flex: 1,
-              marginHorizontal: 0,
-              backgroundColor: themeColor.fail,
-            }}
-            onPress={() => {
-              const video = videos[position]
-              if (!video) return
-              setRemoveVideo(video.id)
-              toast.success(t("shorts.removed"))
-              back()
-            }}
-          >
-            {t("common.deleteAction")}
-          </Button>
-        </View>
-      </View>
-    </Dialog>
+    <ConfirmDialog
+      isOpen={open}
+      onClose={setIsOpen}
+      title={t("shorts.removeTitle")}
+      desc={t("shorts.removeDesc")}
+      actionLabel={t("common.deleteAction")}
+      actionColor={themeColor.fail}
+      onConfirm={onRemoveVideo}
+    />
   )
 }

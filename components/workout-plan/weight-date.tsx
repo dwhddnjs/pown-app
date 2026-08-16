@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // zustand
 import { usePlanMenuStore } from "@/hooks/use-plan-menu-store";
 // lib
-import { formatTime } from "@/lib/function";
+import { formatTime } from "@/lib/date";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo

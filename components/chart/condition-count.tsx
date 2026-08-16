@@ -11,11 +11,11 @@ import { useT } from "@/hooks/use-t";
 import { conditionData } from "@/constants/constants";
 // lib
 import { getIcon } from "../add-plan/condition-icon";
-import { convertConditionType, getConditionCount } from "@/lib/function";
+import { convertConditionType, getConditionCount } from "@/lib/stats";
 // hook
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
-import { ChartEmptyState } from "./chart-empty-state";
+import { ChartCard } from "./chart-card";
 
 export const ConditionCount = () => {
   const themeColor = useCurrentThemeColor();
@@ -31,16 +31,12 @@ export const ConditionCount = () => {
     ) === 0;
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>{t("chart.conditionTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-      {isEmptyCount ? (
-        <ChartEmptyState
-          message={t("chart.conditionEmpty")}
-          themeColor={themeColor}
-        />
-      ) : (
-        <View
+    <ChartCard
+      title={t("chart.conditionTitle")}
+      isEmpty={isEmptyCount}
+      emptyMessage={t("chart.conditionEmpty")}
+    >
+      <View
           style={[
             styles.iconListContainer,
             { backgroundColor: themeColor.itemColor },
@@ -85,19 +81,12 @@ export const ConditionCount = () => {
               </Text>
             </View>
           ))}
-        </View>
-      )}
-    </View>
+      </View>
+    </ChartCard>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 12,
-    paddingVertical: 20,
-    borderRadius: 12,
-    gap: 12,
-  },
   iconListContainer: {
     flexDirection: "row",
     rowGap: 12,

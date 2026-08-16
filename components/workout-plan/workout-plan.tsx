@@ -13,13 +13,10 @@ import { SetListItem } from "./set-list-item";
 // icon
 import { ConditionTag } from "../add-plan/condition-icon";
 import { WeightDate } from "./weight-date";
-import Back from "@/assets/images/svg/back_icon.svg";
-import Arm from "@/assets/images/svg/arm_icon.svg";
-import Chest from "@/assets/images/svg/chest_icon.svg";
-import Leg from "@/assets/images/svg/leg_icon.svg";
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
+import { BODY_PART_ICON } from "@/constants/body-part";
 // zustand
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
+import { WorkoutTypes } from "@/types/workout";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // expo
@@ -197,29 +194,9 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
   hideMenu,
 }: WorkoutPlanProps) {
   const themeColor = useCurrentThemeColor();
-
-  const getWorkoutIcon = (type: string) => {
-    let result;
-    switch (type) {
-      case "chest":
-        result = <Chest />;
-        break;
-      case "back":
-        result = <Back />;
-        break;
-      case "leg":
-        result = <Leg />;
-        break;
-      case "arm":
-        result = <Arm />;
-        break;
-      default:
-        result = <Shoulder />;
-        break;
-    }
-
-    return result;
-  };
+  // 저장된 type이 아는 부위가 아니면 예전 switch의 default와 같이 shoulder로 떨어진다
+  const WorkoutIcon =
+    BODY_PART_ICON[item.type as WorkoutTypes] ?? BODY_PART_ICON.shoulder;
 
   return (
     <View
@@ -238,7 +215,7 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           },
         ]}
       >
-        {getWorkoutIcon(item.type)}
+        <WorkoutIcon />
         {index !== totalLength - 1 && (
           <View
             style={{

@@ -11,7 +11,7 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 // lib
-import { formatDate, groupByDate, setColor } from "@/lib/function";
+import { formatDate, groupByDate } from "@/lib/date";
 // expo
 import { useNavigation } from "expo-router";
 
@@ -82,10 +82,7 @@ export default function Search() {
 
   return (
     <View
-      style={[
-        styles.container,
-        setColor(themeColor.background, "backgroundColor"),
-      ]}
+      style={[styles.container, { backgroundColor: themeColor.background }]}
     >
       <FlashList
         data={searchResult}

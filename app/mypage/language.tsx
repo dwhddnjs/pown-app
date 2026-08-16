@@ -10,6 +10,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
 import { Lang, LANG_LABEL } from "@/lib/i18n";
+import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
 // expo
 import { useRouter } from "expo-router";
 // icon
@@ -34,12 +35,12 @@ export default function Language() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: themeColor.tintText }]}>
+    <View style={settingsScreenStyles.container}>
+      <View style={settingsScreenStyles.textContainer}>
+        <Text style={[settingsScreenStyles.title, { color: themeColor.tintText }]}>
           {t("language.title")}
         </Text>
-        <Text style={[styles.desc, { color: themeColor.subText }]}>
+        <Text style={[settingsScreenStyles.desc, { color: themeColor.subText }]}>
           {t("language.desc")}
         </Text>
       </View>
@@ -63,23 +64,6 @@ export default function Language() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    gap: 24,
-  },
-  textContainer: {
-    gap: 8,
-  },
-  title: {
-    fontSize: 18,
-  },
-  desc: {
-    fontFamily: "sb-l",
-    fontSize: 13,
-    lineHeight: 19,
-  },
   flag: {
     fontSize: 18,
   },

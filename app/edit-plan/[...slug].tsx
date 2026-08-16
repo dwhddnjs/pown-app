@@ -2,7 +2,8 @@ import React, { useEffect } from "react";
 // component
 import { PlanForm } from "@/components/plan-form";
 // zustand
-import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
+import { usePlanStore } from "@/hooks/use-plan-store"
+import { WorkoutTypes } from "@/types/workout";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useNoteStore } from "@/hooks/use-note-store";
 // expo
@@ -12,6 +13,7 @@ import { useT } from "@/hooks/use-t";
 import { format } from "date-fns";
 import { toast } from "sonner-native";
 import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
+import { PLAN_DATE_FORMAT } from "@/lib/date";
 
 export default function EditPlan() {
   const { workoutPlanList, setEditPlan } = useWorkoutPlanStore();
@@ -48,7 +50,7 @@ export default function EditPlan() {
         title: result.title,
         setWithCount: result.setWithCount,
         createdAt: getWorkoutPlan.createdAt,
-        updatedAt: format(new Date(), "yyyy.MM.dd HH:mm:ss"),
+        updatedAt: format(new Date(), PLAN_DATE_FORMAT),
         imageUri,
       });
       onReset();

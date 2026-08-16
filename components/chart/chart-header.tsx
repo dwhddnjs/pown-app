@@ -7,7 +7,7 @@ import { BlurView } from "expo-blur";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useChartStore } from "@/hooks/use-chart-store";
-import { convertChartDate } from "@/lib/function";
+import { convertChartDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { format } from "date-fns";

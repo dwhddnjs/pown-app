@@ -9,13 +9,10 @@ import { useLanguage } from "@/hooks/use-user-store";
 import { tBodyPart } from "@/lib/i18n";
 import { useT } from "@/hooks/use-t";
 // lib
-import {
-  convertChartValuesToPercentage,
-  sortWorkoutPlanList,
-} from "@/lib/function";
+import { convertChartValuesToPercentage, sortWorkoutPlanList } from "@/lib/stats";
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
-import { ChartEmptyState } from "./chart-empty-state";
+import { ChartCard } from "./chart-card";
 
 export const WorkoutPieChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -62,16 +59,12 @@ export const WorkoutPieChart = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>{t("chart.partTitle")}</Text>
-      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-      {isEmptyCount ? (
-        <ChartEmptyState
-          message={t("chart.partEmpty")}
-          themeColor={themeColor}
-        />
-      ) : (
-        <View
+    <ChartCard
+      title={t("chart.partTitle")}
+      isEmpty={isEmptyCount}
+      emptyMessage={t("chart.partEmpty")}
+    >
+      <View
           style={[
             styles.itemContainer,
             { backgroundColor: themeColor.itemColor },
@@ -134,19 +127,12 @@ export const WorkoutPieChart = () => {
                 </View>
               ))}
           </View>
-        </View>
-      )}
-    </View>
+      </View>
+    </ChartCard>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 12,
-    paddingVertical: 20,
-    borderRadius: 12,
-    gap: 12,
-  },
   itemContainer: {
     flexDirection: "row",
     paddingVertical: 4,

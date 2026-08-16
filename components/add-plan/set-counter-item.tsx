@@ -1,7 +1,8 @@
 import { Text, View } from "../themed";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { StyleSheet, TouchableOpacity } from "react-native";
-import { SetWithCountType, usePlanStore } from "@/hooks/use-plan-store";
+import { usePlanStore } from "@/hooks/use-plan-store"
+import { SetWithCountType } from "@/types/workout";
 import { NumberBallIcon } from "../number-ball-icon";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useLanguage } from "@/hooks/use-user-store";
@@ -14,8 +15,7 @@ interface SetCounterItemProps {
 }
 
 export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
-  const { setFilterSetWithCount, setSetWithCount, setWithCount } =
-    usePlanStore();
+  const { setFilterSetWithCount, setSetWithCount } = usePlanStore();
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();

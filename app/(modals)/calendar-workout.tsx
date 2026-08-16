@@ -8,7 +8,7 @@ import { useLocalSearchParams } from "expo-router";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { formatDate, groupByDate } from "@/lib/function";
+import { formatDate, groupByDate } from "@/lib/date";
 import {
   useWorkoutPlanStore,
   WorkoutPlanTypes,
