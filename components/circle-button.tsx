@@ -13,11 +13,12 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 // 떠 있는 원형 아이콘 버튼. 크기는 "맨 위로" 버튼을 가로 중앙에 맞출 때(marginLeft)도
 // 쓰므로 한곳에서 계산한다.
-// 숏츠 탭의 촬영 버튼(shorts.tsx의 addVideo)과 크기를 맞춘다.
+// 숏츠 탭의 촬영 버튼(shorts.tsx의 addVideo)은 배경과 아이콘이 달라 이 컴포넌트를
+// 쓰지는 않지만, 크기와 탭바 간격은 여기서 가져다 쓴다 — 두 버튼이 같이 움직여야 한다.
 export const FAB_SIZE = 50;
 export const FAB_SIZE_SMALL = 36;
-// 탭바 위로 띄우는 간격 — 숏츠 탭의 촬영 버튼과 같은 값을 쓴다(shorts.tsx).
-// 기기마다 탭바 높이(+홈 인디케이터)가 달라 고정값을 쓰면 위치가 어긋난다.
+// 탭바 위로 띄우는 간격. 기기마다 탭바 높이(+홈 인디케이터)가 달라
+// 고정값을 쓰면 위치가 어긋난다.
 export const FAB_TAB_GAP = 15;
 export const FAB_GAP = 8;
 

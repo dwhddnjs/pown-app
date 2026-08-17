@@ -1,7 +1,6 @@
 import React from "react";
 // component
 import { Pressable, StyleSheet } from "react-native";
-import { View } from "../themed";
 import { Image } from "expo-image";
 // hook
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
@@ -10,28 +9,23 @@ export const ImageModal = () => {
   const { uri, onResetImageUri } = useImageUriStore();
   return (
     <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri }} contentFit="contain" style={{ flex: 1 }} />
-      </View>
+      <Image source={{ uri }} contentFit="contain" style={styles.image} />
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   overlay: {
-    flex: 1,
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+    ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(0, 0, 0, 0.8)",
-    position: "absolute",
+    alignItems: "center",
     justifyContent: "center",
-  },
-  imageContainer: {
-    flex: 1,
-    backgroundColor: "transparent",
-    paddingVertical: 100,
     paddingHorizontal: 12,
+  },
+  image: {
+    // 화면 중앙 기준으로 상하 대칭. flex:1 + padding으로 채우면 헤더·탭바 높이가
+    // 섞여 들어와 미묘하게 위로 치우친다.
+    width: "100%",
+    height: "80%",
   },
 });

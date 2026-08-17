@@ -21,10 +21,10 @@ import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
 import { tBodyPart } from "@/lib/i18n";
 // type
 import { WorkoutTypes } from "@/types/workout";
-// icon
-import { BODY_PART_ITEMS } from "@/constants/body-part";
 // expo
 import { useNavigation } from "expo-router";
+// icon
+import { BODY_PART_ITEMS } from "@/constants/body-part";
 
 export default function AddMultiPlan() {
   const { onReset, ...result } = usePlanStore();

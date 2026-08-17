@@ -3,6 +3,7 @@ import { useLayoutEffect, useState } from "react";
 import { StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
 import { FlashList } from "@shopify/flash-list";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -11,7 +12,7 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 // lib
-import { formatDate, groupByDate } from "@/lib/date";
+import { groupByDate } from "@/lib/date";
 // expo
 import { useNavigation } from "expo-router";
 
@@ -94,19 +95,11 @@ export default function Search() {
         renderItem={({ item }) => {
           return (
             <View style={styles.list}>
-              <View
-                style={[
-                  styles.planContainer,
-                  {
-                    backgroundColor: themeColor.tint,
-                  },
-                ]}
-              >
-                <Text
-                  style={[styles.dateText, { color: themeColor.onTint }]}
-                >{`🗓️  ${formatDate(item[0], lang)}`}</Text>
-              </View>
-
+              <PlanDateHeader
+                date={item[0]}
+                themeColor={themeColor}
+                lang={lang}
+              />
               <View
                 style={[
                   styles.workoutList,
@@ -170,19 +163,5 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 20,
     paddingVertical: 24,
-  },
-  planContainer: {
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    fontFamily: "sb-l",
   },
 });

@@ -22,19 +22,22 @@ export const flatHeader = (background: string) => ({
   headerShadowVisible: false,
 });
 
+// headerLeft는 컴포넌트가 아니라 렌더 콜백이다 — 내비게이션이 함수로 직접 호출한다.
+// 그래서 이름도 render*로 둔다: 컴포넌트처럼 대문자로 두면 언젠가 <X />로 마운트하게 되고,
+// 그러면 options가 평가될 때마다 새 타입이 되어 헤더 버튼이 통째로 다시 마운트된다.
 export const headerBackButton = (
   type: "close" | "back" | "down",
   navigation: NavigationLike,
   style?: StyleProp<ViewStyle>,
 ) => {
-  const Button = () => (
+  const renderBackButton = () => (
     <HeaderIconButton
       type={type}
       onPress={() => navigation.goBack()}
       style={style}
     />
   );
-  return Button;
+  return renderBackButton;
 };
 
 // 아래에서 위로 올라오는 모달 — 타이틀 없이 닫기 버튼만.

@@ -8,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { View } from "@/components/themed";
+import { FAB_SIZE, FAB_TAB_GAP } from "@/components/circle-button";
 // expo
 import { useRouter } from "expo-router";
 // hooks
@@ -20,9 +21,6 @@ import { resolveMediaUri } from "@/lib/media";
 // icons
 import Entypo from "@expo/vector-icons/Entypo";
 import { EmptyVideos } from "@/components/shorts/empty-videos";
-
-// 탭바 위로 띄우는 간격 — 운동 탭의 계산기 버튼과 같은 값을 쓴다(workout.tsx)
-const FAB_TAB_GAP = 15;
 
 // 복구도 실패한 썸네일(예: 사진첩에서 지운 구 데이터)은 투명하게 비는 대신
 // 대체 타일로 그린다 — 눌러서 재생·삭제까지 갈 수 있어야 한다.
@@ -145,9 +143,11 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  // 운동 탭의 떠 있는 버튼과 크기·위치만 맞춘다 — 배경이 투명하고 아이콘이 달라
+  // CircleButton을 그대로 쓰지는 않는다 (@/components/circle-button)
   addVideo: {
-    width: 50,
-    height: 50,
+    width: FAB_SIZE,
+    height: FAB_SIZE,
     borderWidth: 2,
     position: "absolute",
     opacity: 0.8,

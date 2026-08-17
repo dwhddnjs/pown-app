@@ -1,4 +1,5 @@
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
+// lib은 스토어를 값으로 가져오지 않는다 — lib/date.ts의 주석 참고
+import type { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import { PLAN_DATE_FORMAT } from "@/lib/date";
 import seedWorkoutPlans from "@/assets/seed-workout-plans.json";
 import { format } from "date-fns";

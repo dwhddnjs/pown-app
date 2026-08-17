@@ -1,14 +1,19 @@
-import { View, Text } from "@/components/themed";
-import { StatusBar } from "expo-status-bar";
+// component
 import { Platform, StyleSheet } from "react-native";
-import { BODY_PART_ITEMS } from "@/constants/body-part";
+import { View, Text } from "@/components/themed";
 import { IconTitleButton } from "@/components/icon-title-button";
-import { useRouter } from "expo-router";
-import { useLanguage } from "@/hooks/use-user-store";
-import { tBodyPart } from "@/lib/i18n";
-import { useT } from "@/hooks/use-t";
 import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
+// hook
+import { useLanguage } from "@/hooks/use-user-store";
+import { useT } from "@/hooks/use-t";
+// lib
+import { tBodyPart } from "@/lib/i18n";
+// expo
+import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
+// icon
+import { BODY_PART_ITEMS } from "@/constants/body-part";
 
 export default function ModalScreen() {
   const t = useT();

@@ -1,5 +1,6 @@
 import { getLanguage, UserInfoTypes } from "@/hooks/use-user-store";
-import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
+// lib은 스토어를 값으로 가져오지 않는다 — lib/date.ts의 주석 참고
+import type { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 import { removeSameItem } from "@/lib/date";
 import { Lang } from "@/lib/i18n";
 import { WorkoutTypes } from "@/types/workout";
@@ -8,18 +9,19 @@ import { WorkoutTypes } from "@/types/workout";
 // 아래 매핑들의 키도 한국어다 — 표시 라벨과 헷갈리지 말 것.
 
 // 미리 0으로 채운 카운터에 항목을 세어 담는다.
-// 매핑에 없는 값(구 데이터·오타)은 조용히 무시한다.
-const countBy = <K extends string>(
+// 키를 뽑아내는 건 호출부가 정한다 — 중간 배열을 만들지 않으려고 값 목록이 아니라
+// 항목 목록을 그대로 받는다. 매핑에 없는 값(구 데이터·오타)은 undefined라 조용히 무시된다.
+const countBy = <K extends string, T>(
   keys: readonly K[],
-  values: string[],
-  map: Record<string, K>,
+  items: readonly T[],
+  toKey: (item: T) => K | undefined,
 ): Record<K, number> => {
   const result = Object.fromEntries(keys.map((key) => [key, 0])) as Record<
     K,
     number
   >;
-  for (const value of values) {
-    const key = map[value];
+  for (const item of items) {
+    const key = toKey(item);
     if (key) result[key] += 1;
   }
   return result;
@@ -39,15 +41,16 @@ const WORKOUT_COUNT_KEYS = [
   "shoulder",
 ] as const satisfies readonly WorkoutTypes[];
 
+// 저장된 type이 곧 키다 — 자기 자신으로 매핑. 아는 부위인지 걸러내는 역할도 겸하므로
+// (모르는 값은 undefined) 모듈 로드 때 한 번만 만들어 둔다 — 차트 세 개가 렌더마다 부른다.
+const WORKOUT_KEY: Record<string, WorkoutTypes> = Object.fromEntries(
+  WORKOUT_COUNT_KEYS.map((type) => [type, type]),
+);
+
 export const sortWorkoutPlanList = (
   list: WorkoutPlanTypes[],
 ): WorkoutTypeCount =>
-  countBy(
-    WORKOUT_COUNT_KEYS,
-    list.map((item) => item.type),
-    // 저장된 type이 곧 키다 — 자기 자신으로 매핑
-    Object.fromEntries(WORKOUT_COUNT_KEYS.map((type) => [type, type])),
-  );
+  countBy(WORKOUT_COUNT_KEYS, list, (item) => WORKOUT_KEY[item.type]);
 
 // ── 컨디션별 개수 ──────────────────────────────────────────────
 const CONDITION_KEYS = [
@@ -82,8 +85,9 @@ export const convertConditionType = (type: string): ConditionKey | undefined =>
 export const getConditionCount = (workoutPlanList: WorkoutPlanTypes[]) =>
   countBy(
     CONDITION_KEYS,
+    // 계획 하나에 컨디션이 여러 개라 여기서만 평탄화가 필요하다
     workoutPlanList.flatMap((item) => item.condition),
-    CONDITION_MAP,
+    (condition) => CONDITION_MAP[condition],
   );
 
 // ── 기구별 개수 ────────────────────────────────────────────────
@@ -106,11 +110,7 @@ const EQUIPMENT_MAP: Record<string, (typeof EQUIPMENT_KEYS)[number]> = {
 };
 
 export const getEquipmentCount = (data: WorkoutPlanTypes[]) =>
-  countBy(
-    EQUIPMENT_KEYS,
-    data.map((item) => item.equipment),
-    EQUIPMENT_MAP,
-  );
+  countBy(EQUIPMENT_KEYS, data, (item) => EQUIPMENT_MAP[item.equipment]);
 
 // ── 차트 값 변환 ───────────────────────────────────────────────
 export const convertChartValuesToPercentage = (

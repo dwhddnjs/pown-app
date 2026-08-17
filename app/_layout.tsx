@@ -9,6 +9,7 @@ import { Appearance, useColorScheme } from "react-native";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toaster } from "sonner-native";
 import { PlanMenu } from "@/components/workout-plan/plan-menu";
+import { ImageModal } from "@/components/workout-plan/image-modal";
 import {
   flatHeader,
   fullScreen,
@@ -30,6 +31,7 @@ import {
 } from "react-native-reanimated";
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
+import { useImageUriStore } from "@/hooks/use-image-uri-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -61,6 +63,7 @@ export default function RootLayout() {
   });
   const colorScheme = useColorScheme();
   const { theme } = useUserStore();
+  const imageUri = useImageUriStore((state) => state.uri);
 
   useEffect(() => {
     if (loaded) {
@@ -88,6 +91,8 @@ export default function RootLayout() {
           <RootLayoutNav />
         </BottomSheetModalProvider>
         <PlanMenu />
+        {/* 탭 레이아웃 안에 두면 그 위로 push되는 화면(검색·루틴)에서는 가려진다 */}
+        {imageUri && <ImageModal />}
         <Toaster />
       </GestureHandlerRootView>
     </ThemeProvider>
@@ -179,7 +184,9 @@ function RootLayoutNav() {
           headerTitle: t("header.search"),
           headerShadowVisible: false,
           gestureEnabled: false,
-          headerLeft: headerBackButton("back", navigation, { borderWidth: 0 }),
+          headerLeft: headerBackButton("back", navigation, {
+            borderWidth: 0,
+          }),
         })}
       />
       <Stack.Screen

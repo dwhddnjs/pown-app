@@ -1,14 +1,15 @@
 import React from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "@/components/themed";
+import { View } from "@/components/themed";
 import { WorkoutPlan } from "./workout-plan";
+import { PlanDateHeader } from "./plan-date-header";
 import { YearGrass } from "@/components/grass";
+// hook
+import { Row } from "@/hooks/use-plan-rows";
 // lib
-import { formatDate } from "@/lib/date";
 import { ThemeColorType } from "@/constants/colors";
 import { Lang } from "@/lib/i18n";
-import { Row } from "@/hooks/use-plan-rows";
 
 // 운동 탭 리스트의 행 3종(잔디 / 날짜 헤더 / 계획 카드).
 // 색과 언어는 prop으로 받는다 — 셀이 재사용되므로 renderItem이 이 값들을 의존성으로
@@ -30,13 +31,7 @@ export const DateHeaderRow = ({
   lang: Lang;
 }) => (
   <View style={[styles.row, styles.headerRow]}>
-    <View style={[styles.dateHeader, { backgroundColor: themeColor.tint }]}>
-      <Text
-        style={[styles.dateText, { color: themeColor.onTint }]}
-      >{`🗓️  ${formatDate(date, lang)}`}</Text>
-      {/* 점은 배경을 뚫은 구멍처럼 보여야 하므로 onTint가 아니라 background */}
-      <View style={[styles.dot, { backgroundColor: themeColor.background }]} />
-    </View>
+    <PlanDateHeader date={date} themeColor={themeColor} lang={lang} />
   </View>
 );
 
@@ -94,25 +89,5 @@ const styles = StyleSheet.create({
   // 그룹 사이 간격 — 날짜 헤더의 paddingTop 24와 합쳐 예전 paddingVertical: 24와 같다
   groupBottomSpace: {
     paddingBottom: 24,
-  },
-  dateHeader: {
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    fontFamily: "sb-l",
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 50,
-    marginTop: 4,
   },
 });

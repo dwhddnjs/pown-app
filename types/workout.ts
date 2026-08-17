@@ -19,11 +19,6 @@ export type ImageUriType = {
   imageUri?: string;
 };
 
-export type ConditionTypes = {
-  id: number;
-  condition: string;
-};
-
 // progress 값은 저장된 데이터에 그대로 들어 있다 — 문자열을 바꾸면 기존 기록이 깨진다
 export type SetWithCountType = {
   id: number;

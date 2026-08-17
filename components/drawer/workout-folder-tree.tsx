@@ -18,27 +18,40 @@ interface WorkoutFolderTreeProps {
   onSelectDate: (date: string) => void;
 }
 
-// 폴더 한 줄 (연도·월 헤더와 날짜 파일이 같은 모양을 쓴다)
+// 폴더 한 줄 (연도·월 헤더와 날짜 파일이 같은 모양을 쓴다).
+// 연/월 헤더는 바깥 Accordion이 눌러주므로 onPress 없이, 날짜만 직접 누른다.
 const TreeRow = ({
   icon,
   title,
+  onPress,
 }: {
   icon: React.ComponentProps<typeof FontAwesome>["name"];
   title: string;
+  onPress?: () => void;
 }) => {
   const themeColor = useCurrentThemeColor();
-
-  return (
-    <View style={[styles.row, { backgroundColor: themeColor.background }]}>
-      <FontAwesome
-        name={icon}
-        size={icon === "file-text" ? 18 : 20}
-        color={themeColor.subText}
-      />
+  const style = [styles.row, { backgroundColor: themeColor.background }];
+  const content = (
+    <>
+      <View style={{ width: 20 }}>
+        <FontAwesome
+          name={icon}
+          size={icon === "file-text" ? 18 : 20}
+          color={themeColor.subText}
+        />
+      </View>
       <Text style={[styles.rowText, { color: themeColor.subText }]}>
         {title}
       </Text>
-    </View>
+    </>
+  );
+
+  return onPress ? (
+    <TouchableOpacity style={style} onPress={onPress}>
+      {content}
+    </TouchableOpacity>
+  ) : (
+    <View style={style}>{content}</View>
   );
 };
 
@@ -120,25 +133,12 @@ export const WorkoutFolderTree = ({
                 ]}
               >
                 {month.content.map((day) => (
-                  <TouchableOpacity
+                  <TreeRow
                     key={day.value}
-                    style={[
-                      styles.row,
-                      { backgroundColor: themeColor.background },
-                    ]}
+                    icon="file-text"
+                    title={day.title}
                     onPress={() => onPressDay(day.value)}
-                  >
-                    <FontAwesome
-                      name="file-text"
-                      size={18}
-                      color={themeColor.subText}
-                    />
-                    <Text
-                      style={[styles.rowText, { color: themeColor.subText }]}
-                    >
-                      {day.title}
-                    </Text>
-                  </TouchableOpacity>
+                  />
                 ))}
               </View>
             )}
@@ -157,7 +157,7 @@ export const WorkoutFolderTree = ({
 
 const styles = StyleSheet.create({
   row: {
-    gap: 10,
+    gap: 8,
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 8,
@@ -167,8 +167,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   content: {
-    paddingLeft: 36,
-    paddingVertical: 6,
-    gap: 8,
+    paddingLeft: 28,
+
+    // paddingVertical: 6,
+    paddingBottom: 4,
+    gap: 6,
   },
 });

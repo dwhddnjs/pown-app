@@ -14,9 +14,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
-import { useImageUriStore } from "@/hooks/use-image-uri-store";
 import * as Haptics from "expo-haptics";
-import { ImageModal } from "@/components/workout-plan/image-modal";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { FabOverlay } from "@/components/fab-menu/fab-overlay";
@@ -31,7 +29,6 @@ import Animated, {
 export default function TabLayout() {
   const t = useT();
   const themColor = useCurrentThemeColor();
-  const { uri } = useImageUriStore();
   const [fabOpen, setFabOpen] = useState(false);
   const fabProgress = useSharedValue(0);
 
@@ -209,7 +206,6 @@ export default function TabLayout() {
         />
         <Tabs.Screen name="index" redirect />
       </Tabs>
-      {uri && <ImageModal />}
       <FabOverlay isOpen={fabOpen} onClose={() => setFabOpen(false)} />
     </View>
   );

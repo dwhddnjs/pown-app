@@ -88,15 +88,19 @@ export const PlanForm = ({
     scrollRef.current?.scrollTo({ y: positionY, animated: true });
   };
 
+  // 리스너는 navigation이 바뀔 때만 다시 걸고, 부를 함수는 항상 최신 것을 쓴다.
+  // onLeave는 prop이라 참조가 고정이라는 보장이 없다 — 의존성에서 빼고 직접 잡으면
+  // 첫 렌더의 클로저에 갇혀 화면을 떠날 때 엉뚱한 것을 정리하게 된다.
+  const cleanupRef = useRef({ onReset, onLeave });
+  cleanupRef.current = { onReset, onLeave };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = navigation.addListener("beforeRemove", () => {
-        onReset();
-        onLeave?.();
+        cleanupRef.current.onReset();
+        cleanupRef.current.onLeave?.();
       });
       return unsubscribe;
-      // onReset/onLeave는 zustand 액션이라 참조가 고정이다
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [navigation]),
   );
 

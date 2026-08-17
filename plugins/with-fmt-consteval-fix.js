@@ -26,7 +26,10 @@ module.exports = (config) =>
       if (src.includes("POWN_FMT_CONSTEVAL_PATCH")) return cfg;
       fs.writeFileSync(
         podfile,
-        src.replace("  post_install do |installer|", "  post_install do |installer|\n" + SNIPPET)
+        src.replace(
+          "  post_install do |installer|",
+          "  post_install do |installer|\n" + SNIPPET,
+        ),
       );
       return cfg;
     },

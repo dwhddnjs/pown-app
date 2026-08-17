@@ -100,7 +100,7 @@ const ko = {
   "tag.added": "운동이 추가되었습니다.",
   "tag.removed": "운동이 삭제 되었습니다.",
   "tag.removeTitle": "정말 선택된 운동을 삭제 할까요?",
-  "tag.removeDesc": "* 삭제하셔도 나중에 다시 추가 할 수 있어요.",
+  "tag.removeDesc": "* 뭐 삭제하셔도 나중에 다시 추가 할 수 있어요.",
   "tag.selectToRemove": "삭제하실 운동을 선택해주세요.",
 
   // 검색

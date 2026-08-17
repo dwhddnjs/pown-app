@@ -108,6 +108,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
           contentContainerStyle={{ paddingTop: 12 }}
         >
           <WorkoutFolderTree data={sortData} onSelectDate={onSelectDate} />
+          <View style={{ height: 120 }} />
         </DrawerContentScrollView>
       )}
     </View>
