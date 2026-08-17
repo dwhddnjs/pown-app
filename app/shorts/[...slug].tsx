@@ -31,7 +31,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { format } from "date-fns";
-import { formatDate } from "@/lib/function";
+import { formatDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
 import { StatusBar } from "expo-status-bar";

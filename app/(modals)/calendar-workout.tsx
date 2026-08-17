@@ -3,12 +3,13 @@ import { View, Text } from "@/components/themed";
 import { useT } from "@/hooks/use-t";
 import { StyleSheet, FlatList } from "react-native";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
 // expo
 import { useLocalSearchParams } from "expo-router";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
-import { formatDate, groupByDate } from "@/lib/function";
+import { groupByDate } from "@/lib/date";
 import {
   useWorkoutPlanStore,
   WorkoutPlanTypes,
@@ -37,26 +38,7 @@ export default function CalendarWorkout() {
         renderItem={({ item }) => {
           return (
             <View style={styles.list}>
-              <View
-                style={[
-                  styles.planContainer,
-                  {
-                    backgroundColor: themeColor.tint,
-                  },
-                ]}
-              >
-                <Text
-                  style={[styles.dateText, { color: themeColor.background }]}
-                >{`🗓️  ${formatDate(item[0])}`}</Text>
-                <View
-                  style={[
-                    styles.dot,
-                    {
-                      backgroundColor: themeColor.background,
-                    },
-                  ]}
-                />
-              </View>
+              <PlanDateHeader date={item[0]} themeColor={themeColor} />
               <View
                 style={[
                   styles.workoutList,
@@ -96,25 +78,5 @@ const styles = StyleSheet.create({
   list: {
     paddingHorizontal: 12,
     paddingTop: 18,
-  },
-  planContainer: {
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    fontFamily: "sb-l",
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 50,
-    marginTop: 4,
   },
 });

@@ -1,11 +1,11 @@
-import { Text, StyleSheet, TouchableOpacity, useColorScheme } from "react-native"
-import React from "react"
-import Colors from "@/constants/Colors"
+import { Text, StyleSheet, TouchableOpacity } from "react-native";
+import React from "react";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 
 interface IconTitleButtonProps {
-  Icon: any
-  title: string
-  onClick: () => void
+  Icon: any;
+  title: string;
+  onClick: () => void;
 }
 
 export const IconTitleButton = ({
@@ -13,18 +13,14 @@ export const IconTitleButton = ({
   title,
   onClick,
 }: IconTitleButtonProps) => {
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrentThemeColor();
   return (
     <TouchableOpacity style={styles.container} onPress={onClick}>
       <Icon width={60} height={60} />
-      <Text
-        style={[styles.title, { color: Colors[colorScheme ?? "light"].text }]}
-      >
-        {title}
-      </Text>
+      <Text style={[styles.title, { color: themeColor.text }]}>{title}</Text>
     </TouchableOpacity>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -36,4 +32,4 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     fontSize: 12,
   },
-})
+});

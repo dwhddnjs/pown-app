@@ -31,7 +31,6 @@ export const TopWeight = ({
   const t = useT();
 
   const BUTTON_WIDTH = 42;
-  const PADDING = 4;
   const translateX = useSharedValue(weightType === "kg" ? 0 : BUTTON_WIDTH);
 
   useEffect(() => {
@@ -58,7 +57,11 @@ export const TopWeight = ({
   return (
     <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
       <IconTitle style={{ gap: 8 }}>
-        <WeightIcon name="weight-kilogram" size={20} color={themeColor.tintText} />
+        <WeightIcon
+          name="weight-kilogram"
+          size={20}
+          color={themeColor.tintText}
+        />
         <Text style={{ fontSize: 16 }}>{t("plan.targetWeight")}</Text>
       </IconTitle>
 

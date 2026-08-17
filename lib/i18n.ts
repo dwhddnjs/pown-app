@@ -4,12 +4,12 @@
 // (progress "완료", equipment "바벨", condition "좋음", workout "벤치프레스", workoutList 태그)
 // 아래 t*() 함수들은 렌더 시점에만 라벨을 바꾼다 — 저장값은 절대 바꾸지 않는다.
 
-export type Lang = "ko" | "en"
+export type Lang = "ko" | "en";
 
 export const LANG_LABEL: Record<Lang, string> = {
   ko: "한국어",
   en: "English",
-}
+};
 
 const ko = {
   // 공통
@@ -54,7 +54,8 @@ const ko = {
   "workout.openCalculator": "중량 계산기 열기",
   "workout.addPlan": "운동계획 추가",
   "workout.setsDone": "{completed}/{total} 세트 완료",
-  "workout.galleryPermission": "사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.",
+  "workout.galleryPermission":
+    "사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.",
   "workout.target": "목표 • {weight}kg",
   "workout.deleted": "운동계획이 삭제 되었습니다!",
   "workout.history": "운동 히스토리",
@@ -99,6 +100,7 @@ const ko = {
   "tag.added": "운동이 추가되었습니다.",
   "tag.removed": "운동이 삭제 되었습니다.",
   "tag.removeTitle": "정말 선택된 운동을 삭제 할까요?",
+  "tag.removeDesc": "* 뭐 삭제하셔도 나중에 다시 추가 할 수 있어요.",
   "tag.selectToRemove": "삭제하실 운동을 선택해주세요.",
 
   // 검색
@@ -160,7 +162,8 @@ const ko = {
   "camera.retake": "다시 찍기",
   "camera.usePhoto": "사진 사용",
   "camera.permission": "사진을 찍으려면 카메라 접근 권한이 필요해요.",
-  "camera.libraryPermission": "사진 보관함 권한이 없어 사진첩에는 저장되지 않아요.",
+  "camera.libraryPermission":
+    "사진 보관함 권한이 없어 사진첩에는 저장되지 않아요.",
 
   // 마이페이지
   "my.general": "일반",
@@ -243,9 +246,9 @@ const ko = {
   // 계산기
   "calc.kg": "킬로그램/kg",
   "calc.lb": "파운드/lb",
-} as const
+} as const;
 
-export type TKey = keyof typeof ko
+export type TKey = keyof typeof ko;
 
 const en: Record<TKey, string> = {
   "common.cancel": "Cancel",
@@ -286,7 +289,8 @@ const en: Record<TKey, string> = {
   "workout.openCalculator": "Open weight calculator",
   "workout.addPlan": "Add workout plan",
   "workout.setsDone": "{completed}/{total} sets done",
-  "workout.galleryPermission": "Tap to allow photo library access and view photos.",
+  "workout.galleryPermission":
+    "Tap to allow photo library access and view photos.",
   "workout.target": "Target • {weight}kg",
   "workout.deleted": "Workout plan deleted!",
   "workout.history": "Workout History",
@@ -329,6 +333,7 @@ const en: Record<TKey, string> = {
   "tag.added": "Workout added.",
   "tag.removed": "Workout deleted.",
   "tag.removeTitle": "Delete the selected workout?",
+  "tag.removeDesc": "* You can add it back later.",
   "tag.selectToRemove": "Select a workout to delete.",
 
   "search.cancel": "Cancel",
@@ -379,7 +384,8 @@ const en: Record<TKey, string> = {
   "shorts.recordFailed": "Something went wrong while recording.",
   "shorts.retake": "Retake",
   "shorts.useVideo": "Use Video",
-  "shorts.permission": "Camera and microphone access is required to record shorts.",
+  "shorts.permission":
+    "Camera and microphone access is required to record shorts.",
 
   "camera.retake": "Retake",
   "camera.usePhoto": "Use Photo",
@@ -454,31 +460,30 @@ const en: Record<TKey, string> = {
   "data.backupFailed": "Something went wrong while saving the backup file.",
   "data.notBackupFile": "That's not a Pown backup file. Please check the file.",
   "data.restored": "Restored",
-  "data.restoreFailed": "Something went wrong while restoring. Please check the file.",
+  "data.restoreFailed":
+    "Something went wrong while restoring. Please check the file.",
   "data.seedConfirm": "Load {n} sample workout records?",
-  "data.seedDesc": "* Your current workout records will be replaced and can't be recovered.",
+  "data.seedDesc":
+    "* Your current workout records will be replaced and can't be recovered.",
   "data.seedAction": "Load",
   "data.seedDone": "Loaded {n} workout records",
 
   "calc.kg": "Kilograms/kg",
   "calc.lb": "Pounds/lb",
-}
+};
 
-export const translations: Record<Lang, Record<TKey, string>> = { ko, en }
+export const translations: Record<Lang, Record<TKey, string>> = { ko, en };
 
 export const interpolate = (
   text: string,
   vars?: Record<string, string | number>,
-) =>
-  vars
-    ? text.replace(/\{(\w+)\}/g, (m, k) => String(vars[k] ?? m))
-    : text
+) => (vars ? text.replace(/\{(\w+)\}/g, (m, k) => String(vars[k] ?? m)) : text);
 
 export const translate = (
   lang: Lang,
   key: TKey,
   vars?: Record<string, string | number>,
-) => interpolate(translations[lang][key] ?? key, vars)
+) => interpolate(translations[lang][key] ?? key, vars);
 
 // ---------------------------------------------------------------------------
 // 도메인 값 사전 — 저장값(한국어)을 키로 받아 표시 라벨을 돌려준다.
@@ -492,7 +497,7 @@ const EQUIPMENT_EN: Record<string, string> = {
   스미스: "Smith",
   케이블: "Cable",
   맨몸: "Bodyweight",
-}
+};
 
 // 기구 선택 탭은 한 줄 6칸 고정 폭이라 풀네임이 안 들어간다 — 거기서만 쓰는 축약형
 const EQUIPMENT_SHORT_EN: Record<string, string> = {
@@ -502,7 +507,7 @@ const EQUIPMENT_SHORT_EN: Record<string, string> = {
   스미스: "Smith",
   케이블: "Cable",
   맨몸: "Body",
-}
+};
 
 const CONDITION_EN: Record<string, string> = {
   좋음: "Good",
@@ -516,19 +521,19 @@ const CONDITION_EN: Record<string, string> = {
   짜증남: "Annoyed",
   // 현재 conditionData에는 없지만 기존 기록에 남아 있는 값
   가벼움: "Light",
-}
+};
 
 const PROGRESS_EN: Record<string, string> = {
   진행중: "In progress",
   완료: "Done",
-}
+};
 
 const SET_TYPE_EN: Record<string, string> = {
   웜업: "Warm-up",
   "본 세트": "Working",
   PR: "PR",
   연습: "Practice",
-}
+};
 
 const BODY_PART: Record<Lang, Record<string, string>> = {
   ko: { back: "등", chest: "가슴", shoulder: "어깨", leg: "하체", arm: "팔" },
@@ -539,7 +544,7 @@ const BODY_PART: Record<Lang, Record<string, string>> = {
     leg: "Legs",
     arm: "Arms",
   },
-}
+};
 
 const WORKOUT_EN: Record<string, string> = {
   // back
@@ -623,19 +628,19 @@ const WORKOUT_EN: Record<string, string> = {
   바벨컬: "Barbell Curl",
   덤벨컬: "Dumbbell Curl",
   케이블컬: "Cable Curl",
-}
+};
 
 const lookup =
   (dict: Record<string, string>) =>
   (value: string, lang: Lang): string =>
-    lang === "ko" ? value : (dict[value] ?? value)
+    lang === "ko" ? value : (dict[value] ?? value);
 
-export const tWorkout = lookup(WORKOUT_EN)
-export const tEquipment = lookup(EQUIPMENT_EN)
-export const tEquipmentShort = lookup(EQUIPMENT_SHORT_EN)
-export const tCondition = lookup(CONDITION_EN)
-export const tProgress = lookup(PROGRESS_EN)
-export const tSetType = lookup(SET_TYPE_EN)
+export const tWorkout = lookup(WORKOUT_EN);
+export const tEquipment = lookup(EQUIPMENT_EN);
+export const tEquipmentShort = lookup(EQUIPMENT_SHORT_EN);
+export const tCondition = lookup(CONDITION_EN);
+export const tProgress = lookup(PROGRESS_EN);
+export const tSetType = lookup(SET_TYPE_EN);
 
 export const tBodyPart = (type: string, lang: Lang): string =>
-  BODY_PART[lang][type] ?? type
+  BODY_PART[lang][type] ?? type;

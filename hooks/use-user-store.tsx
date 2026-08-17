@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getLocales } from "expo-localization";
 import type { Lang } from "@/lib/i18n";
+import { WorkoutTypes } from "@/types/workout";
 
 export type UserInfoTypes = {
   height: string | null;
@@ -18,7 +19,7 @@ export type UserInfoTypes = {
 
 export type UserTypes = {
   userInfo: UserInfoTypes[];
-  workoutList: Record<"back" | "chest" | "shoulder" | "leg" | "arm", string[]>;
+  workoutList: Record<WorkoutTypes, string[]>;
   theme: "light" | "dark" | "system";
   // null = 미선택 → 기기 언어를 따라간다 (useLanguage)
   language: Lang | null;
@@ -31,23 +32,12 @@ export type UserTypes = {
       | "setAddWorkoutTag"
       | "setRemoveWorkoutTag"
     >,
-    value:
-      | string
-      | boolean
-      | UserInfoTypes[]
-      | UserTypes["workoutList"]
-      | Lang,
+    value: string | boolean | UserInfoTypes[] | UserTypes["workoutList"] | Lang,
   ) => void;
   setUserData: (value: UserInfoTypes) => void;
   onReset: () => void;
-  setAddWorkoutTag: (
-    type: "back" | "chest" | "shoulder" | "leg" | "arm",
-    tag: string,
-  ) => void;
-  setRemoveWorkoutTag: (
-    type: "back" | "chest" | "shoulder" | "leg" | "arm",
-    tag: string,
-  ) => void;
+  setAddWorkoutTag: (type: WorkoutTypes, tag: string) => void;
+  setRemoveWorkoutTag: (type: WorkoutTypes, tag: string) => void;
 };
 
 export const useUserStore = create<UserTypes>()(
@@ -99,8 +89,7 @@ export const useUserStore = create<UserTypes>()(
 );
 
 // 기기 언어는 앱 실행 중 바뀌지 않는다 — 렌더마다 네이티브를 읽지 않도록 한 번만 계산
-const DEVICE_LANG: Lang =
-  getLocales()[0]?.languageCode === "ko" ? "ko" : "en";
+const DEVICE_LANG: Lang = getLocales()[0]?.languageCode === "ko" ? "ko" : "en";
 
 // 명시 선택이 없으면 기기 언어. 훅 밖(lib의 토스트 등)에서는 getLanguage() 사용.
 export const useLanguage = (): Lang =>

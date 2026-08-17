@@ -5,68 +5,62 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from "react-native"
-import React, {
-  forwardRef,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react"
-import BottomSheet from "@gorhom/bottom-sheet"
-import useCurrentThemeColor from "@/hooks/use-current-theme-color"
-import { useT } from "@/hooks/use-t"
-import { FontAwesome } from "@expo/vector-icons"
-import { searchByInitial } from "@/lib/function"
-import { usePlanStore } from "@/hooks/use-plan-store"
-import { useLanguage } from "@/hooks/use-user-store"
-import { tWorkout } from "@/lib/i18n"
+} from "react-native";
+import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
+import BottomSheet from "@gorhom/bottom-sheet";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
+import { FontAwesome } from "@expo/vector-icons";
+import { searchByInitial } from "@/lib/hangul";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { useLanguage } from "@/hooks/use-user-store";
+import { tWorkout } from "@/lib/i18n";
 
 interface SearchWorkoutTagSheetProps {
-  onClose: () => void
-  workoutList: string[]
-  isOpen: boolean
+  onClose: () => void;
+  workoutList: string[];
+  isOpen: boolean;
 }
 
 export const SearchWorkoutTagSheet = forwardRef<
   BottomSheet,
   SearchWorkoutTagSheetProps
 >(({ onClose, workoutList, isOpen }, ref) => {
-  const themeColor = useCurrentThemeColor()
-  const t = useT()
-  const lang = useLanguage()
-  const { workout, setPlanValue } = usePlanStore()
-  const [inputValue, setInputValue] = useState("")
-  const inputRef = useRef<TextInput | null>(null)
+  const themeColor = useCurrentThemeColor();
+  const t = useT();
+  const lang = useLanguage();
+  const { workout, setPlanValue } = usePlanStore();
+  const [inputValue, setInputValue] = useState("");
+  const inputRef = useRef<TextInput | null>(null);
 
-  const snapPoints = useMemo(() => ["80%"], [])
+  const snapPoints = useMemo(() => ["80%"], []);
   const filterWorkoutTag = workoutList?.filter((tag) => {
-    const searchLower = inputValue.toLowerCase().trim()
-    const nameLower = tag.toLowerCase().trim()
+    const searchLower = inputValue.toLowerCase().trim();
+    const nameLower = tag.toLowerCase().trim();
 
     if (inputValue.length === 1 && /[ㄱ-ㅎ]/.test(inputValue)) {
-      return searchByInitial(tag, inputValue)
+      return searchByInitial(tag, inputValue);
     }
     // 저장값(한국어)과 표시 라벨 양쪽으로 매칭 — 영어로 입력해도 찾히게
     return (
       nameLower.includes(searchLower) ||
       tWorkout(tag, lang).toLowerCase().includes(searchLower)
-    )
-  })
+    );
+  });
 
   const onPressWorkout = (item: string) => {
     if (workout === item) {
-      setPlanValue("workout", "")
-      return
+      setPlanValue("workout", "");
+      return;
     }
-    setPlanValue("workout", item)
-  }
+    setPlanValue("workout", item);
+  };
 
   useEffect(() => {
     if (inputRef?.current && isOpen) {
-      inputRef.current.focus()
+      inputRef.current.focus();
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   return (
     <BottomSheet
@@ -147,10 +141,10 @@ export const SearchWorkoutTagSheet = forwardRef<
         </ScrollView>
       </View>
     </BottomSheet>
-  )
-})
+  );
+});
 
-SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet"
+SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet";
 
 const styles = StyleSheet.create({
   container: {
@@ -190,4 +184,4 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderRadius: 50,
   },
-})
+});

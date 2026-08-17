@@ -1,85 +1,39 @@
+// component
+import { Platform, StyleSheet } from "react-native";
 import { View, Text } from "@/components/themed";
-import { StatusBar } from "expo-status-bar";
-import { Platform, StyleSheet, TouchableOpacity } from "react-native";
-import Arm from "@/assets/images/svg/arm_icon.svg";
-import Back from "@/assets/images/svg/back_icon.svg";
-import Chest from "@/assets/images/svg/chest_icon.svg";
-import Leg from "@/assets/images/svg/leg_icon.svg";
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
 import { IconTitleButton } from "@/components/icon-title-button";
-import { useRouter } from "expo-router";
-import { formatPlanDateTime } from "@/lib/date";
-import { useLanguage } from "@/hooks/use-user-store";
-import { tBodyPart } from "@/lib/i18n";
-import Entypo from "@expo/vector-icons/Entypo";
-import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useT } from "@/hooks/use-t";
+import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
-import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
-import { usePlanStore } from "@/hooks/use-plan-store";
+// hook
+import { useLanguage } from "@/hooks/use-user-store";
+import { useT } from "@/hooks/use-t";
+// lib
+import { tBodyPart } from "@/lib/i18n";
+// expo
+import { StatusBar } from "expo-status-bar";
+import { useRouter } from "expo-router";
+// icon
+import { BODY_PART_ITEMS } from "@/constants/body-part";
 
 export default function ModalScreen() {
-  const themeColor = useCurrentThemeColor();
   const t = useT();
   const lang = useLanguage();
-  const { open, setOpen } = useIsDialogOpenStore();
-  const { date } = usePlanStore();
 
-  const iconButtonData = [
-    {
-      id: 1,
-      title: tBodyPart("back", lang),
-      icon: Back,
-      type: "back",
-    },
-    {
-      id: 2,
-      title: tBodyPart("chest", lang),
-      icon: Chest,
-      type: "chest",
-    },
-    {
-      id: 3,
-      title: tBodyPart("shoulder", lang),
-      icon: Shoulder,
-      type: "shoulder",
-    },
-    {
-      id: 4,
-      title: tBodyPart("leg", lang),
-      icon: Leg,
-      type: "leg",
-    },
-    {
-      id: 5,
-      title: tBodyPart("arm", lang),
-      icon: Arm,
-      type: "arm",
-    },
-  ];
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <View style={styles.titleDate}>
         <Text style={styles.title}>{t("plan.selectPart")}</Text>
-        <TouchableOpacity
-          style={styles.dateButton}
-          onPress={() => setOpen(true)}
-        >
-          <Text style={[styles.date, { color: themeColor.tintText }]}>
-            {`📆 ${formatPlanDateTime(date, lang)}`}
-          </Text>
-          <Entypo name="select-arrows" size={18} color={themeColor.tintText} />
-        </TouchableOpacity>
+        <PlanDateButton textStyle={styles.date} />
       </View>
 
       <View style={styles.iconContainer}>
-        {iconButtonData.map((item) => (
+        {BODY_PART_ITEMS.map((item) => (
           <IconTitleButton
-            key={item.id}
+            key={item.type}
             Icon={item.icon}
-            title={item.title}
+            title={tBodyPart(item.type, lang)}
             onClick={() => {
               router.dismiss();
               setTimeout(() => {
@@ -122,11 +76,5 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 14,
     fontFamily: "sb-l",
-  },
-  dateButton: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "flex-end",
-    gap: 4,
   },
 });

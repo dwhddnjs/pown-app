@@ -5,7 +5,7 @@ import { Text, View } from "@/components/themed";
 // zustand
 import { useChartStore } from "@/hooks/use-chart-store";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
-import { WorkoutTypes } from "@/hooks/use-plan-store";
+import { WorkoutTypes } from "@/types/workout";
 import { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -22,7 +22,7 @@ import {
   isSameMonth,
   startOfDay,
 } from "date-fns";
-import { removeSameItem } from "@/lib/function";
+import { removeSameItem } from "@/lib/date";
 import { enUS, ko } from "date-fns/locale";
 import { useLanguage } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
@@ -30,11 +30,7 @@ import { Lang } from "@/lib/i18n";
 // expo
 import { useRouter } from "expo-router";
 // icon
-import Arm from "@/assets/images/svg/arm_icon.svg";
-import Back from "@/assets/images/svg/back_icon.svg";
-import Chest from "@/assets/images/svg/chest_icon.svg";
-import Leg from "@/assets/images/svg/leg_icon.svg";
-import Shoulder from "@/assets/images/svg/shoulder_icon.svg";
+import { BODY_PART_ICON } from "@/constants/body-part";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const WEEKDAYS: Record<Lang, string[]> = {
@@ -67,15 +63,8 @@ export const CalendarGrid = () => {
   );
 
   const getDayIcon = (isBeforeToday: boolean, findItem?: WorkoutPlanTypes) => {
-    const icons = {
-      chest: Chest,
-      back: Back,
-      shoulder: Shoulder,
-      leg: Leg,
-      arm: Arm,
-    };
     const WorkoutIcon = findItem
-      ? icons[findItem.type as WorkoutTypes]
+      ? BODY_PART_ICON[findItem.type as WorkoutTypes]
       : undefined;
 
     if (WorkoutIcon) {
@@ -191,7 +180,10 @@ export const CalendarGrid = () => {
                   <Text
                     style={[
                       { fontFamily: "sb-l", color: themeColor.text },
-                      isToday && { fontFamily: "sb-m", color: themeColor.tintText },
+                      isToday && {
+                        fontFamily: "sb-m",
+                        color: themeColor.tintText,
+                      },
                     ]}
                   >
                     {format(item, "d")}

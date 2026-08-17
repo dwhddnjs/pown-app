@@ -1,0 +1,13 @@
+node_modules
+ios
+android
+.expo
+dist
+assets
+package-lock.json
+
+# 문서는 사람이 쓴 표·줄바꿈을 그대로 둔다 — prettier가 표를 다시 정렬하면
+# 한글 글자폭을 반칸으로 계산해 오히려 어긋나고, 내용 없는 diff만 커진다.
+Readme.md
+docs
+.agents

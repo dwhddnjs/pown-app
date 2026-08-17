@@ -145,9 +145,7 @@ const Camera = () => {
     return (
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.cancelText}>
-            {t("camera.permission")}
-          </Text>
+          <Text style={styles.cancelText}>{t("camera.permission")}</Text>
           <Pressable onPress={requestPermission}>
             <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}

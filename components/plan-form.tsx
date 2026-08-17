@@ -1,6 +1,12 @@
 import React, { useCallback, useRef, useState } from "react";
 // component
-import { Keyboard, ScrollView, StyleSheet } from "react-native";
+import {
+  Keyboard,
+  ScrollView,
+  StyleProp,
+  StyleSheet,
+  ViewStyle,
+} from "react-native";
 import { View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { KeyBoardAvoid } from "@/components/keyboard-avoid";
@@ -18,22 +24,38 @@ import { RemoveWorkoutTagDialog } from "@/components/add-plan/remove-workout-tag
 import { SetCounterSheet } from "@/components/set-counter-sheet";
 import { HeaderIconButton } from "@/components/header-icon-button";
 // zustand
-import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
+import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+// type
+import { WorkoutTypes } from "@/types/workout";
 // expo
 import { Stack, useFocusEffect, useNavigation } from "expo-router";
 
 interface PlanFormProps {
   workoutType: WorkoutTypes;
   onSubmit: () => void;
+  // 폼 본문 위에 얹는 영역 (루틴 추가 화면의 날짜·부위 선택). 없으면 기본 여백만.
+  header?: React.ReactNode;
+  // 폼과 함께 마운트할 시트·다이얼로그 (루틴 추가 화면의 날짜 선택 시트)
+  extraSheets?: React.ReactNode;
+  // 화면을 떠날 때 폼 리셋과 함께 정리할 것 (루틴 편집 중인 항목 등)
+  onLeave?: () => void;
+  saveButtonStyle?: StyleProp<ViewStyle>;
 }
 
-// 운동 계획 생성(add-plan)·수정(edit-plan)이 공유하는 폼 본문.
+// 운동 계획 생성(add-plan)·수정(edit-plan)·루틴 추가(add-multi-plan)가 공유하는 폼 본문.
 // 화면별 차이(slug 파싱, 데이터 프리필, 커밋 로직)는 각 라우트가 담당하고
 // 여기서는 폼 UI·시트·태그 다이얼로그·임시 폼 리셋만 책임진다.
-export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
+export const PlanForm = ({
+  workoutType,
+  onSubmit,
+  header,
+  extraSheets,
+  onLeave,
+  saveButtonStyle,
+}: PlanFormProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const workoutTagRef = useRef<BottomSheetModal>(null);
   const scrollRef = useRef<ScrollView>(null);
@@ -66,10 +88,17 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
     scrollRef.current?.scrollTo({ y: positionY, animated: true });
   };
 
+  // 리스너는 navigation이 바뀔 때만 다시 걸고, 부를 함수는 항상 최신 것을 쓴다.
+  // onLeave는 prop이라 참조가 고정이라는 보장이 없다 — 의존성에서 빼고 직접 잡으면
+  // 첫 렌더의 클로저에 갇혀 화면을 떠날 때 엉뚱한 것을 정리하게 된다.
+  const cleanupRef = useRef({ onReset, onLeave });
+  cleanupRef.current = { onReset, onLeave };
+
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = navigation.addListener("beforeRemove", () => {
-        onReset();
+        cleanupRef.current.onReset();
+        cleanupRef.current.onLeave?.();
       });
       return unsubscribe;
     }, [navigation]),
@@ -83,7 +112,11 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
       <Stack.Screen
         options={{
           headerRight: () => (
-            <HeaderIconButton type="save" onPress={onSubmit} />
+            <HeaderIconButton
+              type="save"
+              onPress={onSubmit}
+              style={saveButtonStyle}
+            />
           ),
         }}
       />
@@ -94,7 +127,7 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
         showsHorizontalScrollIndicator={false}
         style={{ flex: 1 }}
       >
-        <View style={{ height: 24 }} />
+        {header ?? <View style={{ height: 24 }} />}
         <TitleSearchHeader onPress={onWorkoutTagSheetOpen} />
         {/* 운동 태그 */}
         <WorkoutTags workoutList={workoutListData} />
@@ -131,6 +164,7 @@ export const PlanForm = ({ workoutType, onSubmit }: PlanFormProps) => {
       />
       <AddWorkoutTagDialog workoutType={workoutType} />
       <RemoveWorkoutTagDialog workoutType={workoutType} />
+      {extraSheets}
     </KeyBoardAvoid>
   );
 };

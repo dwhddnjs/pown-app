@@ -1,65 +1,45 @@
-import {
-  ComponentProps,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // component
-import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
-import { YearGrass } from "@/components/grass";
+import { StyleSheet, ViewToken } from "react-native";
 import { Text, View } from "@/components/themed";
-import {
-  StyleProp,
-  StyleSheet,
-  TouchableOpacity,
-  ViewStyle,
-  ViewToken,
-} from "react-native";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
-import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { EmptyList } from "@/components/workout-plan/empty-list";
-// zustand
 import {
-  useWorkoutPlanStore,
-  WorkoutPlanTypes,
-} from "@/hooks/use-workout-plan-store";
+  DateHeaderRow,
+  GrassRow,
+  PlanRow,
+} from "@/components/workout-plan/plan-list-row";
+import { ScrollTopButton } from "@/components/workout-plan/scroll-top-button";
+import {
+  CircleButton,
+  circleButtonSmall,
+  FAB_TAB_GAP,
+} from "@/components/circle-button";
+// zustand
+import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
-// lib
-import { convertChartDate, formatDate, groupByDate } from "@/lib/function";
+import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
+// hooks
+import {
+  getRowKey,
+  getRowType,
+  GRASS_ROW,
+  Row,
+  usePlanRows,
+} from "@/hooks/use-plan-rows";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
 import { useLanguage } from "@/hooks/use-user-store";
+// lib
+import { convertChartDate } from "@/lib/date";
 // expo
 import { useRouter } from "expo-router";
-
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-// hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { useT } from "@/hooks/use-t";
 // icon
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
-
-// 날짜 그룹을 통째로 한 행에 넣으면 행 하나가 화면 몇 개 높이가 되어 가상화가
-// 무의미해진다 — 빠른 플릭으로 창을 벗어나면 그 거대한 행들을 처음부터 다시
-// 그리는 동안 화면이 비어 보인다. 그래서 운동 하나가 한 행이다.
-// 잔디도 행으로 두면 헤더 타이틀을 "맨 위에 걸친 행" 하나로만 판정할 수 있다.
-type Row =
-  | { kind: "grass" }
-  | { kind: "header"; date: string }
-  | {
-      kind: "plan";
-      date: string;
-      plan: WorkoutPlanTypes;
-      index: number;
-      total: number;
-    };
-
-const GRASS_ROW: Row = { kind: "grass" };
 
 // 1px이라도 보이면 viewable — 잔디가 완전히 지나가야 날짜 타이틀로 바뀐다.
 // minimumViewTime을 빼면 FlashList가 250ms를 기본으로 넣는데(RN 기본은 0), 그러면
@@ -76,27 +56,6 @@ const VIEWABILITY_CONFIG = {
 // 프레임당 viewability·레이아웃 비용과 메모리를 같이 키우므로, 플릭이 앞지른다고
 // 계속 올릴 값이 아니다. 남는 빈 화면은 셀 하나의 렌더 비용에서 줄인다.
 const DRAW_DISTANCE = 1500;
-
-// 재활용 풀을 "구조가 같은 것끼리" 나눈다. 전부 "plan" 하나로 두면 세트 5개짜리
-// 셀을 세트 1개짜리로 재활용할 때 React가 SetListItem 4개(=네이티브 뷰 수십 개)를
-// 언마운트했다 다시 마운트한다. 플릭 중엔 이게 매 프레임 반복돼 렌더가 스크롤을
-// 못 따라간다. 다만 세트 수를 그대로 키로 쓰면 풀이 사용자 데이터만큼 쪼개져
-// 재활용이 아예 안 되므로 버킷으로 묶어 종류 수를 상수로 고정한다.
-const SET_COUNT_BUCKETS = 3;
-const getItemType = (item: Row) =>
-  item.kind === "plan"
-    ? `plan${Math.min(item.plan.setWithCount?.length ?? 0, SET_COUNT_BUCKETS)}`
-    : item.kind;
-
-// 떠 있는 원형 버튼. 크기는 "맨 위로"를 가로 중앙에 맞출 때(marginLeft) 쓰므로
-// 한곳에서 계산한다.
-// 숏츠 탭의 촬영 버튼(shorts.tsx의 addVideo)과 크기를 맞춘다
-const FAB_SIZE = 50;
-const FAB_SIZE_SMALL = 36;
-// 탭바 위로 띄우는 간격 — 숏츠 탭의 촬영 버튼과 같은 값을 쓴다(shorts.tsx).
-// 기기마다 탭바 높이(+홈 인디케이터)가 달라 고정값을 쓰면 위치가 어긋난다.
-const FAB_TAB_GAP = 15;
-const FAB_GAP = 8;
 
 export default function TabOneScreen() {
   // 전체 구독이면 세트 완료 토글 같은 무관한 변경에도 이 화면이 통째로 리렌더된다
@@ -115,29 +74,7 @@ export default function TabOneScreen() {
 
   const router = useRouter();
 
-  // 전체를 한 번만 펼쳐둔다 — 화면에 그리는 양은 가상화가 알아서 줄이므로
-  // 스크롤 도중 데이터를 덧붙일(=리렌더할) 이유가 없다.
-  // dates/starts는 날짜 단위(점프)를 행 인덱스로 옮기는 색인이다.
-  const { allRows, dates, starts } = useMemo(() => {
-    const allRows: Row[] = [];
-    const dates: string[] = [];
-    const starts: number[] = [];
-    Object.entries(groupByDate(workoutPlanList)).forEach(([date, plans]) => {
-      dates.push(date);
-      starts.push(allRows.length);
-      allRows.push({ kind: "header", date });
-      plans.forEach((plan, index) =>
-        allRows.push({
-          kind: "plan",
-          date,
-          plan,
-          index,
-          total: plans.length,
-        }),
-      );
-    });
-    return { allRows, dates, starts };
-  }, [workoutPlanList]);
+  const { allRows, dates, starts } = usePlanRows(workoutPlanList);
 
   // 리스트의 시작 날짜. 기본은 최신(0), 날짜를 고르면 그 날짜부터 과거로.
   const [startDateIndex, setStartDateIndex] = useState(0);
@@ -245,51 +182,13 @@ export default function TabOneScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Row }) => {
-      if (item.kind === "grass") {
-        return (
-          <View style={styles.grass}>
-            <YearGrass />
-          </View>
-        );
-      }
-
+      if (item.kind === "grass") return <GrassRow />;
       if (item.kind === "header") {
         return (
-          <View style={[styles.row, styles.headerRow]}>
-            <View
-              style={[styles.dateHeader, { backgroundColor: themeColor.tint }]}
-            >
-              <Text
-                style={[styles.dateText, { color: themeColor.onTint }]}
-              >{`🗓️  ${formatDate(item.date, lang)}`}</Text>
-              {/* 점은 배경을 뚫은 구멍처럼 보여야 하므로 onTint가 아니라 background */}
-              <View
-                style={[styles.dot, { backgroundColor: themeColor.background }]}
-              />
-            </View>
-          </View>
+          <DateHeaderRow date={item.date} themeColor={themeColor} lang={lang} />
         );
       }
-
-      // 한 그룹의 첫/마지막 행이 카드의 위아래를 맡는다 (예전엔 그룹 컨테이너가 했다)
-      const isLast = item.index === item.total - 1;
-      return (
-        <View style={[styles.row, isLast && styles.groupBottomSpace]}>
-          <View
-            style={[
-              { backgroundColor: themeColor.itemColor },
-              item.index === 0 && styles.groupTop,
-              isLast && styles.groupBottom,
-            ]}
-          >
-            <WorkoutPlan
-              item={item.plan}
-              index={item.index}
-              totalLength={item.total}
-            />
-          </View>
-        </View>
-      );
+      return <PlanRow item={item} themeColor={themeColor} />;
     },
     [themeColor, lang],
   );
@@ -314,7 +213,7 @@ export default function TabOneScreen() {
             label={t("workout.backToLatest")}
             icon="update"
             iconSize={22}
-            style={styles.circleButtonSmall}
+            style={circleButtonSmall}
           />
         </View>
       ) : null,
@@ -337,19 +236,20 @@ export default function TabOneScreen() {
 
   const openCalculate = () => router.push("/(modals)/calculate");
 
+  const calculateButton = (
+    <CircleButton
+      onPress={openCalculate}
+      label={t("workout.openCalculator")}
+      icon="calculate"
+      style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
+    />
+  );
+
   if (workoutPlanList.length === 0) {
     return (
       <View style={{ flex: 1, position: "relative" }}>
         <EmptyList />
-        <CircleButton
-          onPress={openCalculate}
-          label={t("workout.openCalculator")}
-          icon="calculate"
-          style={[
-            styles.calculateButton,
-            { bottom: tabBarHeight + FAB_TAB_GAP },
-          ]}
-        />
+        {calculateButton}
       </View>
     );
   }
@@ -372,16 +272,10 @@ export default function TabOneScreen() {
         // 셀이 재사용되므로 renderItem 참조만으로는 테마·언어 변경이 반영되지 않는다
         extraData={renderItem}
         renderItem={renderItem}
-        keyExtractor={(item) =>
-          item.kind === "grass"
-            ? "grass"
-            : item.kind === "header"
-              ? `h${item.date}`
-              : `p${item.plan.id}`
-        }
+        keyExtractor={getRowKey}
         // 종류마다 재활용 풀을 나눈다 — 안 나누면 날짜 헤더 자리에 계획 셀이
         // 들어가면서 잠깐 헤더만 남은 것처럼 보인다
-        getItemType={getItemType}
+        getItemType={getRowType}
         drawDistance={DRAW_DISTANCE}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={VIEWABILITY_CONFIG}
@@ -392,84 +286,12 @@ export default function TabOneScreen() {
         ListFooterComponent={listFooter}
       />
       <ScrollTopButton onPress={scrollToTop} />
-      <CircleButton
-        onPress={openCalculate}
-        label={t("workout.openCalculator")}
-        icon="calculate"
-        style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
-      />
+      {calculateButton}
     </View>
   );
 }
 
-interface CircleButtonProps {
-  onPress: () => void;
-  // 전부 아이콘만 있는 버튼이라 읽어줄 이름을 따로 준다
-  label: string;
-  icon: ComponentProps<typeof MaterialIcons>["name"];
-  iconSize?: number;
-  style?: StyleProp<ViewStyle>;
-}
-
-const CircleButton = ({
-  onPress,
-  label,
-  icon,
-  iconSize = 30,
-  style,
-}: CircleButtonProps) => {
-  const themeColor = useCurrentThemeColor();
-
-  return (
-    <TouchableOpacity
-      onPress={onPress}
-      accessibilityLabel={label}
-      style={[
-        styles.circleButton,
-        style,
-        {
-          backgroundColor: themeColor.background,
-          borderColor: themeColor.tint,
-        },
-      ]}
-    >
-      <MaterialIcons name={icon} size={iconSize} color={themeColor.tintText} />
-    </TouchableOpacity>
-  );
-};
-
-// 스크롤 여부 구독을 이 버튼에 가둔다 — 화면 상태로 두면 최상단 경계를 넘나들
-// 때마다 리스트를 든 화면 전체가 리렌더된다
-const ScrollTopButton = ({ onPress }: { onPress: () => void }) => {
-  const scrolled = useWorkoutScrollStore((state) => state.scrolled);
-  const headerHeight = useHeaderHeight();
-  const t = useT();
-
-  if (!scrolled) return null;
-
-  return (
-    <Animated.View
-      entering={FadeIn.duration(220)}
-      exiting={FadeOut.duration(160)}
-      style={[styles.scrollTopButton, { top: headerHeight + FAB_GAP }]}
-    >
-      <CircleButton
-        onPress={onPress}
-        label={t("workout.scrollToTop")}
-        icon="keyboard-double-arrow-up"
-        iconSize={26}
-        style={[styles.circleButtonSmall, { borderWidth: 0 }]}
-      />
-    </Animated.View>
-  );
-};
-
 const styles = StyleSheet.create({
-  grass: {
-    // 아래 행과 같은 좌우 여백. 날짜 헤더가 paddingTop 24를 가지므로 위만 준다.
-    paddingHorizontal: 20,
-    paddingTop: 24,
-  },
   footer: {
     height: 240,
     alignItems: "center",
@@ -480,77 +302,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  row: {
-    paddingHorizontal: 20,
-  },
-  // 그룹 사이 간격은 셀 루트의 padding으로 준다 — margin은 셀 프레임 밖이라
-  // 가상화 리스트가 재는 행 높이에서 빠질 수 있다
-  headerRow: {
-    paddingTop: 24,
-  },
-  groupTop: {
-    paddingTop: 2,
-  },
-  groupBottom: {
-    borderBottomRightRadius: 12,
-    borderBottomLeftRadius: 12,
-    overflow: "hidden",
-  },
-  // 그룹 사이 간격 — 날짜 헤더의 paddingTop 24와 합쳐 예전 paddingVertical: 24와 같다
-  groupBottomSpace: {
-    paddingBottom: 24,
-  },
   backToLatest: {
     alignItems: "center",
     marginTop: 24,
-  },
-
-  circleButton: {
-    width: FAB_SIZE,
-    height: FAB_SIZE,
-    opacity: 0.8,
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 2,
-    borderRadius: 50,
-  },
-  // 리스트 안에 들어가는 버튼은 떠 있는 FAB보다 작게
-  circleButtonSmall: {
-    width: FAB_SIZE_SMALL,
-    height: FAB_SIZE_SMALL,
   },
   calculateButton: {
     position: "absolute",
     right: 20,
     zIndex: 1000,
-  },
-  // 헤더 바로 아래 가로 중앙 — top은 헤더 높이라 런타임에 넣는다.
-  // left:0/right:0으로 펼치면 투명한 띠가 리스트 터치를 먹으므로 버튼 폭만 잡는다.
-  // fade는 Animated 래퍼가 맡는다.
-  scrollTopButton: {
-    position: "absolute",
-    left: "50%",
-    marginLeft: -FAB_SIZE_SMALL / 2,
-    zIndex: 1000,
-  },
-  dateHeader: {
-    borderTopRightRadius: 12,
-    borderTopLeftRadius: 12,
-    paddingTop: 2,
-    paddingBottom: 4,
-    paddingHorizontal: 12,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  dateText: {
-    fontSize: 14,
-    fontFamily: "sb-l",
-  },
-  dot: {
-    width: 12,
-    height: 12,
-    borderRadius: 50,
-    marginTop: 4,
   },
 });

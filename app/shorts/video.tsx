@@ -82,7 +82,7 @@ export default function Video() {
       setIsRecording(true);
       const data = await ref.current.recordAsync();
       setUri(data?.uri as string);
-    } catch (error) {
+    } catch {
       toast.error(t("shorts.recordFailed"));
     } finally {
       isRecordingRef.current = false;
@@ -121,7 +121,7 @@ export default function Video() {
       }
       router.back();
       toast.success(t("shorts.added"));
-    } catch (error) {
+    } catch {
       toast.error(t("shorts.addFailed"));
     }
   };
@@ -234,9 +234,7 @@ export default function Video() {
     return (
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.cancelText}>
-            {t("shorts.permission")}
-          </Text>
+          <Text style={styles.cancelText}>{t("shorts.permission")}</Text>
           <Pressable
             onPress={() =>
               !cameraPermission?.granted

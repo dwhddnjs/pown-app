@@ -2,7 +2,7 @@ import { Pressable, StyleSheet } from "react-native";
 import React from "react";
 import { Text, View } from "../themed";
 import { NumberBallIcon } from "../number-ball-icon";
-import { SetWithCountType } from "@/hooks/use-plan-store";
+import { SetWithCountType } from "@/types/workout";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import CheckCircle from "@expo/vector-icons/AntDesign";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -56,32 +56,32 @@ export const SetListItem = React.memo(function SetListItem({
         <View
           style={[styles.setCounter, { backgroundColor: themeColor.itemColor }]}
         >
-        <View
-          style={[
-            styles.setCounterContainer,
-            { backgroundColor: themeColor.itemColor },
-          ]}
-        >
-          <Text style={[styles.setType, { color: themeColor.tintText }]}>
-            {tSetType(item.set, lang)}
-          </Text>
-          <Text style={[styles.count, { color: themeColor.text }]}>
-            {t("common.reps", { n: item.count })}
-          </Text>
-        </View>
-        {!hideProgress && (
-          <Text
+          <View
             style={[
-              styles.progressText,
-              { color: themeColor.subText },
-              item.progress === "완료" && {
-                color: themeColor.tintText,
-              },
+              styles.setCounterContainer,
+              { backgroundColor: themeColor.itemColor },
             ]}
           >
-            {tProgress(item.progress, lang)}
-          </Text>
-        )}
+            <Text style={[styles.setType, { color: themeColor.tintText }]}>
+              {tSetType(item.set, lang)}
+            </Text>
+            <Text style={[styles.count, { color: themeColor.text }]}>
+              {t("common.reps", { n: item.count })}
+            </Text>
+          </View>
+          {!hideProgress && (
+            <Text
+              style={[
+                styles.progressText,
+                { color: themeColor.subText },
+                item.progress === "완료" && {
+                  color: themeColor.tintText,
+                },
+              ]}
+            >
+              {tProgress(item.progress, lang)}
+            </Text>
+          )}
         </View>
       </View>
       {!hideProgress && (

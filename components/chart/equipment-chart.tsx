@@ -1,17 +1,17 @@
 import React, { useMemo } from "react";
 // component
 import { StyleSheet } from "react-native";
-import { Text, View } from "../themed";
+import { Text } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tEquipment } from "@/lib/i18n";
 import { useT } from "@/hooks/use-t";
-import { getEquipmentCount } from "@/lib/function";
+import { getEquipmentCount } from "@/lib/stats";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
-import { ChartEmptyState } from "./chart-empty-state";
+import { ChartBody, ChartCard } from "./chart-card";
 
 export const EquipmentChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -73,81 +73,60 @@ export const EquipmentChart = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>{t("chart.equipmentTitle")}</Text>
-      <View
-        style={{
-          height: 1,
-          backgroundColor: themeColor.divider,
-        }}
-      />
-      {isEmptyCount ? (
-        <ChartEmptyState
-          message={t("chart.equipmentEmpty")}
-          themeColor={themeColor}
-        />
-      ) : (
-        <View
-          style={{
-            overflow: "hidden",
-            backgroundColor: themeColor.itemColor,
-            paddingVertical: 4,
+    <ChartCard
+      title={t("chart.equipmentTitle")}
+      isEmpty={isEmptyCount}
+      emptyMessage={t("chart.equipmentEmpty")}
+      style={styles.card}
+    >
+      <ChartBody>
+        <BarChart
+          barWidth={24}
+          noOfSections={NO_OF_SECTIONS}
+          maxValue={maxValue}
+          barBorderRadius={4}
+          frontColor={themeColor.subText}
+          disableScroll
+          data={barData1}
+          shiftY={10}
+          sideWidth={15}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
+          barInnerComponent={(item) => (
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
+          )}
+          // 영어 기구명은 기본 라벨 폭(barWidth=24)에서 "Bar…"로 잘리고,
+          // 넓히면 옆 라벨과 겹친다 → 영어일 때만 기울여 전체를 보여준다.
+          // 한국어는 원래 다 들어가므로 그대로 둔다.
+          labelWidth={lang === "en" ? 60 : undefined}
+          rotateLabel={lang === "en"}
+          xAxisLabelsHeight={lang === "en" ? 44 : undefined}
+          xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
+          xAxisLabelTextStyle={{
+            color: themeColor.text,
+            fontWeight: "bold",
+            fontSize: lang === "en" ? 9 : undefined,
+            fontFamily: "sb-l",
           }}
-        >
-          <BarChart
-            barWidth={24}
-            noOfSections={NO_OF_SECTIONS}
-            maxValue={maxValue}
-            barBorderRadius={4}
-            frontColor={themeColor.subText}
-            disableScroll
-            data={barData1}
-            shiftY={10}
-            sideWidth={15}
-            yAxisThickness={1}
-            xAxisThickness={1}
-            yAxisColor={themeColor.subText}
-            xAxisColor={themeColor.subText}
-            rulesColor={themeColor.subText}
-            barInnerComponent={(item) => (
-              <Text
-                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
-              >
-                {item?.value}
-              </Text>
-            )}
-            // 영어 기구명은 기본 라벨 폭(barWidth=24)에서 "Bar…"로 잘리고,
-            // 넓히면 옆 라벨과 겹친다 → 영어일 때만 기울여 전체를 보여준다.
-            // 한국어는 원래 다 들어가므로 그대로 둔다.
-            labelWidth={lang === "en" ? 60 : undefined}
-            rotateLabel={lang === "en"}
-            xAxisLabelsHeight={lang === "en" ? 44 : undefined}
-            xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
-            xAxisLabelTextStyle={{
-              color: themeColor.text,
-              fontWeight: "bold",
-              fontSize: lang === "en" ? 9 : undefined,
-              fontFamily: "sb-l",
-            }}
-            yAxisTextStyle={{
-              color: themeColor.text,
-              fontWeight: "bold",
-              fontFamily: "sb-l",
-            }}
-          />
-        </View>
-      )}
-    </View>
+          yAxisTextStyle={{
+            color: themeColor.text,
+            fontWeight: "bold",
+            fontFamily: "sb-l",
+          }}
+        />
+      </ChartBody>
+    </ChartCard>
   );
 };
 
-
 const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    gap: 12,
+  // 막대 차트가 카드 모서리를 넘어 그려지지 않도록 카드에서도 한 번 자른다
+  card: {
     overflow: "hidden",
   },
 });

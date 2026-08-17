@@ -2,7 +2,8 @@ import React from "react";
 // component
 import { PlanForm } from "@/components/plan-form";
 // zustand
-import { usePlanStore, WorkoutTypes } from "@/hooks/use-plan-store";
+import { usePlanStore } from "@/hooks/use-plan-store";
+import { WorkoutTypes } from "@/types/workout";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useNoteStore } from "@/hooks/use-note-store";
 // expo
@@ -12,6 +13,7 @@ import { useT } from "@/hooks/use-t";
 import { format } from "date-fns";
 import { toast } from "sonner-native";
 import { convertWeightToKg, saveImagesToLibrary } from "@/lib/media";
+import { PLAN_DATE_FORMAT } from "@/lib/date";
 import { requestReviewOnce } from "@/lib/review";
 
 export default function AddPlan() {
@@ -38,8 +40,8 @@ export default function AddPlan() {
         content: result.content,
         title: result.title,
         setWithCount: result.setWithCount,
-        createdAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
-        updatedAt: format(result.date, "yyyy.MM.dd HH:mm:ss"),
+        createdAt: format(result.date, PLAN_DATE_FORMAT),
+        updatedAt: format(result.date, PLAN_DATE_FORMAT),
         imageUri,
       });
       // 기록이 3개는 쌓인 뒤에 리뷰를 청한다 — 화면 전환·토스트가 끝난 뒤 뜨게 지연
@@ -56,6 +58,9 @@ export default function AddPlan() {
   };
 
   return (
-    <PlanForm workoutType={slug as WorkoutTypes} onSubmit={onSubmitWorkoutPlan} />
+    <PlanForm
+      workoutType={slug as WorkoutTypes}
+      onSubmit={onSubmitWorkoutPlan}
+    />
   );
 }

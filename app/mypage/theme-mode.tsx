@@ -1,5 +1,5 @@
 // component
-import { Appearance, StyleSheet } from "react-native";
+import { Appearance } from "react-native";
 import { Text, View } from "@/components/themed";
 import { SettingSection } from "@/components/mypage/setting-section";
 import { SettingItem } from "@/components/mypage/setting-item";
@@ -8,6 +8,7 @@ import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
 // expo
 import { useRouter } from "expo-router";
 // icon
@@ -38,12 +39,16 @@ export default function ThemeMode() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.textContainer}>
-        <Text style={[styles.title, { color: themeColor.tintText }]}>
+    <View style={settingsScreenStyles.container}>
+      <View style={settingsScreenStyles.textContainer}>
+        <Text
+          style={[settingsScreenStyles.title, { color: themeColor.tintText }]}
+        >
           {t("theme.title")}
         </Text>
-        <Text style={[styles.desc, { color: themeColor.subText }]}>
+        <Text
+          style={[settingsScreenStyles.desc, { color: themeColor.subText }]}
+        >
           {t("theme.desc")}
         </Text>
       </View>
@@ -71,23 +76,3 @@ export default function ThemeMode() {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 24,
-    paddingHorizontal: 20,
-    gap: 24,
-  },
-  textContainer: {
-    gap: 8,
-  },
-  title: {
-    fontSize: 18,
-  },
-  desc: {
-    fontFamily: "sb-l",
-    fontSize: 13,
-    lineHeight: 19,
-  },
-});

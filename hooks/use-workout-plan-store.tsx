@@ -34,10 +34,15 @@ export const useWorkoutPlanStore = create<WorkoutPlanStoreTypes>()(
       workoutPlanList: [],
       setWorkoutPlan: (value) =>
         set((prev) => ({
-          workoutPlanList: sortByCreatedAtDesc([value, ...prev.workoutPlanList]),
+          workoutPlanList: sortByCreatedAtDesc([
+            value,
+            ...prev.workoutPlanList,
+          ]),
         })),
       onResetPlanList: () => {
-        get().workoutPlanList.forEach((plan) => removePlanImages(plan.imageUri));
+        get().workoutPlanList.forEach((plan) =>
+          removePlanImages(plan.imageUri),
+        );
         set({
           workoutPlanList: [],
         });

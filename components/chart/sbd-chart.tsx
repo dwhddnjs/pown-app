@@ -1,7 +1,6 @@
 import React from "react";
 // component
-import { StyleSheet } from "react-native";
-import { Text, View } from "../themed";
+import { Text } from "../themed";
 import { BarChart } from "react-native-gifted-charts";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -10,7 +9,7 @@ import { tWorkout } from "@/lib/i18n";
 import { useT } from "@/hooks/use-t";
 import { useMonthlyPlanData } from "@/hooks/use-monthly-plan-data";
 import { useChartStore } from "@/hooks/use-chart-store";
-import { ChartEmptyState } from "./chart-empty-state";
+import { ChartBody, ChartCard } from "./chart-card";
 
 export const SbdChart = () => {
   const { userInfo } = useUserStore();
@@ -71,73 +70,40 @@ export const SbdChart = () => {
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <Text style={{ fontSize: 18 }}>{t("chart.sbdTitle")}</Text>
-      {/* 범례 설명은 차트가 그려질 때만 의미가 있다 */}
-      {firstWeight && (
-        <Text
-          style={{
-            fontSize: 12,
+    <ChartCard
+      title={t("chart.sbdTitle")}
+      // 범례 설명은 차트가 그려질 때만 의미가 있다
+      subtitle={firstWeight ? t("chart.sbdLegend") : undefined}
+      isEmpty={!firstWeight}
+      emptyMessage={t("chart.sbdEmpty")}
+    >
+      <ChartBody>
+        <BarChart
+          data={data}
+          barWidth={28}
+          disableScroll
+          barBorderRadius={4}
+          yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
+          maxValue={maxValue}
+          noOfSections={NO_OF_SECTIONS}
+          labelWidth={65}
+          yAxisThickness={1}
+          xAxisThickness={1}
+          yAxisColor={themeColor.subText}
+          xAxisColor={themeColor.subText}
+          rulesColor={themeColor.subText}
+          barInnerComponent={(item) => (
+            <Text style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}>
+              {item?.value}
+            </Text>
+          )}
+          xAxisLabelTextStyle={{
+            color: themeColor.text,
+            textAlign: "center",
             fontFamily: "sb-l",
-            color: themeColor.subText,
           }}
-        >
-          {t("chart.sbdLegend")}
-        </Text>
-      )}
-      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-      {!firstWeight ? (
-        <ChartEmptyState
-          message={t("chart.sbdEmpty")}
-          themeColor={themeColor}
         />
-      ) : (
-        <View
-          style={{
-            overflow: "hidden",
-            backgroundColor: themeColor.itemColor,
-            paddingVertical: 4,
-          }}
-        >
-          <BarChart
-            data={data}
-            barWidth={28}
-            disableScroll
-            barBorderRadius={4}
-            yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
-            maxValue={maxValue}
-            noOfSections={NO_OF_SECTIONS}
-            labelWidth={65}
-            yAxisThickness={1}
-            xAxisThickness={1}
-            yAxisColor={themeColor.subText}
-            xAxisColor={themeColor.subText}
-            rulesColor={themeColor.subText}
-            barInnerComponent={(item) => (
-              <Text
-                style={{ textAlign: "center", fontSize: 10, paddingTop: 2 }}
-              >
-                {item?.value}
-              </Text>
-            )}
-            xAxisLabelTextStyle={{
-              color: themeColor.text,
-              textAlign: "center",
-              fontFamily: "sb-l",
-            }}
-          />
-        </View>
-      )}
-    </View>
+      </ChartBody>
+    </ChartCard>
   );
 };
-
-
-const styles = StyleSheet.create({
-  container: {
-    paddingVertical: 20,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    gap: 12,
-  },
-});

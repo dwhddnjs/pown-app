@@ -1,8 +1,8 @@
-export { WorkoutCount } from "./workout-count"
-export { WorkoutPieChart } from "./workout-pie-chart"
-export { ConditionCount } from "./condition-count"
-export { EquipmentChart } from "./equipment-chart"
-export { SbdChart } from "./sbd-chart"
-export { BodyChart } from "./body-chart"
-export { ChartHeader } from "./chart-header"
-export { WorkoutSummary } from "./workout-summary"
+export { WorkoutCount } from "./workout-count";
+export { WorkoutPieChart } from "./workout-pie-chart";
+export { ConditionCount } from "./condition-count";
+export { EquipmentChart } from "./equipment-chart";
+export { SbdChart } from "./sbd-chart";
+export { BodyChart } from "./body-chart";
+export { ChartHeader } from "./chart-header";
+export { WorkoutSummary } from "./workout-summary";

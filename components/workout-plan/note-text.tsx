@@ -1,27 +1,22 @@
-import { StyleSheet, useColorScheme } from "react-native"
-import React from "react"
-import Colors from "@/constants/Colors"
-import { Text, View } from "../themed"
+import { StyleSheet } from "react-native";
+import React from "react";
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { Text, View } from "../themed";
 
 interface NoteTextProps {
-  title?: string
-  content: string
+  title?: string;
+  content: string;
 }
 
 export const NoteText = ({ title, content }: NoteTextProps) => {
-  const colorScheme = useColorScheme()
+  const themeColor = useCurrentThemeColor();
   return (
-    <View
-      style={[
-        styles.container,
-        { backgroundColor: Colors[colorScheme ?? "light"].itemColor },
-      ]}
-    >
+    <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       {title && <Text style={styles.title}>{title}</Text>}
       <Text style={styles.content}>{content}</Text>
     </View>
-  )
-}
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -34,4 +29,4 @@ const styles = StyleSheet.create({
     fontFamily: "sb-l",
     fontSize: 12,
   },
-})
+});

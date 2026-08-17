@@ -64,7 +64,10 @@ export default function My() {
   return (
     <ScrollView
       style={{ backgroundColor: themeColor.background }}
-      contentContainerStyle={[styles.content, { paddingTop: headerHeight + 24 }]}
+      contentContainerStyle={[
+        styles.content,
+        { paddingTop: headerHeight + 24 },
+      ]}
       showsVerticalScrollIndicator={false}
     >
       <UserDataCard />

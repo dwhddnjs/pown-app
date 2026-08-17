@@ -1,11 +1,11 @@
-import { create } from "zustand"
+import { create } from "zustand";
 
 type WorkoutTagDialogStoreTypes = {
-  isOpen: boolean
-  setOpen: (value: boolean) => void
-  isRemoveOpen: boolean
-  setIsRemoveOpen: (value: boolean) => void
-}
+  isOpen: boolean;
+  setOpen: (value: boolean) => void;
+  isRemoveOpen: boolean;
+  setIsRemoveOpen: (value: boolean) => void;
+};
 
 export const useWorkoutTagDialogStore = create<WorkoutTagDialogStoreTypes>(
   (set) => ({
@@ -19,5 +19,5 @@ export const useWorkoutTagDialogStore = create<WorkoutTagDialogStoreTypes>(
       set({
         isRemoveOpen: value,
       }),
-  })
-)
+  }),
+);

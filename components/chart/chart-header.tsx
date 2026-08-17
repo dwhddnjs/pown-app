@@ -7,7 +7,7 @@ import { BlurView } from "expo-blur";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useChartStore } from "@/hooks/use-chart-store";
-import { convertChartDate } from "@/lib/function";
+import { convertChartDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { format } from "date-fns";
@@ -28,7 +28,11 @@ export const ChartHeader = () => {
             style={[styles.button, { paddingLeft: 12 }]}
             onPress={() => setDate("prev")}
           >
-            <AntDesign name="leftcircleo" size={28} color={themeColor.tintText} />
+            <AntDesign
+              name="leftcircleo"
+              size={28}
+              color={themeColor.tintText}
+            />
           </TouchableOpacity>
           <Text style={[styles.title, { color: themeColor.text }]}>
             {convertChartDate(date, lang)}
@@ -41,7 +45,11 @@ export const ChartHeader = () => {
             disabled={isCurrentMonth}
             onPress={() => setDate("next")}
           >
-            <AntDesign name="rightcircleo" size={28} color={themeColor.tintText} />
+            <AntDesign
+              name="rightcircleo"
+              size={28}
+              color={themeColor.tintText}
+            />
           </TouchableOpacity>
         </View>
       </SafeAreaView>
