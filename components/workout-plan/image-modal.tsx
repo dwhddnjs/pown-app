@@ -1,16 +1,27 @@
 import React from "react";
 // component
-import { Pressable, StyleSheet } from "react-native";
+import { Modal, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
 // hook
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 
+// 네이티브 Modal로 띄운다 — 그냥 절대배치 View로 두면 presentation:"modal" 화면
+// (달력 히스토리·노트)이 별도 네이티브 컨트롤러라 그 아래 깔려 안 보인다.
 export const ImageModal = () => {
   const { uri, onResetImageUri } = useImageUriStore();
   return (
-    <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
-      <Image source={{ uri }} contentFit="contain" style={styles.image} />
-    </Pressable>
+    <Modal
+      visible
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={onResetImageUri}
+    >
+      <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
+        <Image source={{ uri }} contentFit="contain" style={styles.image} />
+      </Pressable>
+    </Modal>
   );
 };
 

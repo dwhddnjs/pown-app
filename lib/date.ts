@@ -34,10 +34,11 @@ const stripZero = (value: string) => {
   return Number.isNaN(num) ? value : String(num);
 };
 
-// 계획 추가 화면 상단의 날짜·시각 표시
+// 계획 추가 화면 상단의 날짜·시각 표시.
+// 시·분은 고정폭(HH:mm) 그대로 둔다 — 자릿수가 흔들리면 가운데 정렬한 날짜 버튼 폭이 같이 흔들린다.
 export const formatPlanDateTime = (date: Date, lang: Lang) =>
   lang === "ko"
-    ? format(date, "yyyy년 M월 d일 H시 m분", { locale: ko })
+    ? format(date, "yyyy년 M월 d일 HH시 mm분", { locale: ko })
     : format(date, "MMM d, yyyy HH:mm", { locale: enUS });
 
 // PLAN_DATE_FORMAT은 전부 0으로 채운 고정폭이라(yyyy.MM.dd HH:mm:ss) 문자열

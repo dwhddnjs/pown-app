@@ -8,7 +8,8 @@ import { ThemeColorType } from "@/constants/colors";
 import { Lang } from "@/lib/i18n";
 
 // 기록 목록 카드의 날짜 헤더. 운동 탭·검색·달력 히스토리가 같은 걸 쓴다 —
-// 세 군데에 복사해 두니 검색 화면만 점이 빠진 채로 남아 있었다.
+// 세 군데에 복사해 두니 검색 화면만 점이 빠지고, 달력 히스토리만 글자색이
+// background(라이트에서 밝은 회색)로 갈라져 있었다. 셋 다 onTint로 통일한다.
 // 색·언어는 prop으로 받는다 (재활용되는 셀에서 renderItem 의존성이 되어야 한다)
 export const PlanDateHeader = ({
   date,

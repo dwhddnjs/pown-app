@@ -61,83 +61,81 @@ export const WorkoutSummary = () => {
       emptyMessage={t("chart.emptyMonth")}
       style={styles.card}
     >
-      <>
-        <View style={[styles.grid, { backgroundColor: themeColor.itemColor }]}>
-          <View
-            style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-          >
-            <Text style={[styles.statValue, { color: themeColor.tintText }]}>
-              {totalWorkouts}
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColor.subText }]}>
-              {t("chart.totalWorkout")}
-            </Text>
-          </View>
-          <View
-            style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-          >
-            <Text style={[styles.statValue, { color: themeColor.tintText }]}>
-              {t("common.days", { n: uniqueDays })}
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColor.subText }]}>
-              {t("chart.workoutDays")}
-            </Text>
-          </View>
-          <View
-            style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-          >
-            <Text style={[styles.statValue, { color: themeColor.tintText }]}>
-              {avgSets}
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColor.subText }]}>
-              {t("chart.avgSets")}
-            </Text>
-          </View>
-          <View
-            style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
-          >
-            <Text style={[styles.statValue, { color: themeColor.tintText }]}>
-              {completionRate}%
-            </Text>
-            <Text style={[styles.statLabel, { color: themeColor.subText }]}>
-              {t("chart.completionRate")}
-            </Text>
-          </View>
-        </View>
-        {mostTrained.count > 0 && (
-          <View
-            style={[
-              styles.mostTrained,
-              { backgroundColor: themeColor.itemColor },
-            ]}
-          >
-            <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
-              {t("chart.mostTrained")}
-            </Text>
-            <Text style={{ color: themeColor.tintText, fontSize: 16 }}>
-              {tBodyPart(mostTrained.type, lang)} (
-              {t("common.count", { n: mostTrained.count })})
-            </Text>
-          </View>
-        )}
-        <View style={{ height: 1, backgroundColor: themeColor.divider }} />
-        {/* 캘린더는 "날짜 → 그날 기록" 탐색 도구라 상시 노출 대신 여기서 연다.
-              기록이 없는 달엔 빈 달력만 열리므로 링크도 감춘다. */}
-        {/* SettingItem과 같은 평평한 row — 아이콘/텍스트를 중첩 View로 묶으면 정렬이 틀어진다 */}
-        <TouchableOpacity
-          style={styles.calendarLink}
-          onPress={() => push("/workout/calendar")}
-          activeOpacity={0.6}
+      <View style={[styles.grid, { backgroundColor: themeColor.itemColor }]}>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
         >
-          <MaterialCommunityIcons
-            name="calendar-month-outline"
-            size={20}
-            color={themeColor.tintText}
-          />
-          <Text style={styles.calendarLinkText}>{t("chart.openCalendar")}</Text>
-          <AntDesign name="right" size={15} color={themeColor.subText} />
-        </TouchableOpacity>
-      </>
+          <Text style={[styles.statValue, { color: themeColor.tintText }]}>
+            {totalWorkouts}
+          </Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+            {t("chart.totalWorkout")}
+          </Text>
+        </View>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
+          <Text style={[styles.statValue, { color: themeColor.tintText }]}>
+            {t("common.days", { n: uniqueDays })}
+          </Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+            {t("chart.workoutDays")}
+          </Text>
+        </View>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
+          <Text style={[styles.statValue, { color: themeColor.tintText }]}>
+            {avgSets}
+          </Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+            {t("chart.avgSets")}
+          </Text>
+        </View>
+        <View
+          style={[styles.gridItem, { backgroundColor: themeColor.itemColor }]}
+        >
+          <Text style={[styles.statValue, { color: themeColor.tintText }]}>
+            {completionRate}%
+          </Text>
+          <Text style={[styles.statLabel, { color: themeColor.subText }]}>
+            {t("chart.completionRate")}
+          </Text>
+        </View>
+      </View>
+      {mostTrained.count > 0 && (
+        <View
+          style={[
+            styles.mostTrained,
+            { backgroundColor: themeColor.itemColor },
+          ]}
+        >
+          <Text style={{ fontFamily: "sb-l", color: themeColor.text }}>
+            {t("chart.mostTrained")}
+          </Text>
+          <Text style={{ color: themeColor.tintText, fontSize: 16 }}>
+            {tBodyPart(mostTrained.type, lang)} (
+            {t("common.count", { n: mostTrained.count })})
+          </Text>
+        </View>
+      )}
+      <View style={{ height: 1, backgroundColor: themeColor.divider }} />
+      {/* 캘린더는 "날짜 → 그날 기록" 탐색 도구라 상시 노출 대신 여기서 연다.
+              기록이 없는 달엔 빈 달력만 열리므로 링크도 감춘다. */}
+      {/* SettingItem과 같은 평평한 row — 아이콘/텍스트를 중첩 View로 묶으면 정렬이 틀어진다 */}
+      <TouchableOpacity
+        style={styles.calendarLink}
+        onPress={() => push("/workout/calendar")}
+        activeOpacity={0.6}
+      >
+        <MaterialCommunityIcons
+          name="calendar-month-outline"
+          size={20}
+          color={themeColor.tintText}
+        />
+        <Text style={styles.calendarLinkText}>{t("chart.openCalendar")}</Text>
+        <AntDesign name="right" size={15} color={themeColor.subText} />
+      </TouchableOpacity>
     </ChartCard>
   );
 };

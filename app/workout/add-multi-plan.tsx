@@ -98,8 +98,7 @@ export default function AddMultiPlan() {
       } else {
         addTempPlan(planObj);
       }
-      onReset();
-      clearEditingPlan();
+      // 폼 리셋과 editingPlan 정리는 PlanForm의 beforeRemove가 맡는다 — goBack이 발화시킨다
       navigation.goBack();
       onResetNote();
       return toast.success(
