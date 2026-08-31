@@ -1,7 +1,8 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 // component
 import {
   Keyboard,
+  Pressable,
   ScrollView,
   StyleProp,
   StyleSheet,
@@ -26,6 +27,7 @@ import { HeaderIconButton } from "@/components/header-icon-button";
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
+import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // type
@@ -61,11 +63,15 @@ export const PlanForm = ({
   const scrollRef = useRef<ScrollView>(null);
   const { onReset } = usePlanStore();
   const { workoutList } = useUserStore();
+  const { isEditMode, setEditMode } = useWorkoutTagDialogStore();
   const navigation = useNavigation();
   const themeColor = useCurrentThemeColor();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
   const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const [currentScrollY, setCurrentScrollY] = useState(0);
+  // 태그 블록의 위치·높이와 보이는 영역의 높이 — 수정모드에 들어갈 때 얼마나 올릴지 계산한다
+  const tagsRect = useRef({ y: 0, height: 0 });
+  const viewportHeight = useRef(0);
 
   const workoutListData = workoutList[workoutType];
 
@@ -88,21 +94,43 @@ export const PlanForm = ({
     scrollRef.current?.scrollTo({ y: positionY, animated: true });
   };
 
+  // 태그를 끌어 옮기는 동안 스크롤이 같이 움직이면 안 된다. 잠그기 전에 태그 줄이 전부
+  // 보이도록 "모자란 만큼만" 올린다 — 무조건 태그 위치로 올리면 바로 위 제목이 밀려 나간다.
+  useEffect(() => {
+    if (!isEditMode) return;
+    const { y, height } = tagsRect.current;
+    // 아래쪽 줄이 잘리는 만큼만. 그래도 태그 블록 위쪽을 넘어가지는 않는다.
+    const needed = y + height - viewportHeight.current;
+    scrollRef.current?.scrollTo({
+      y: Math.max(0, Math.min(y, needed)),
+      animated: true,
+    });
+  }, [isEditMode]);
+
   // 리스너는 navigation이 바뀔 때만 다시 걸고, 부를 함수는 항상 최신 것을 쓴다.
   // onLeave는 prop이라 참조가 고정이라는 보장이 없다 — 의존성에서 빼고 직접 잡으면
   // 첫 렌더의 클로저에 갇혀 화면을 떠날 때 엉뚱한 것을 정리하게 된다.
-  const cleanupRef = useRef({ onReset, onLeave });
-  cleanupRef.current = { onReset, onLeave };
+  const cleanupRef = useRef({ onReset, onLeave, setEditMode });
+  cleanupRef.current = { onReset, onLeave, setEditMode };
 
   useFocusEffect(
     useCallback(() => {
       const unsubscribe = navigation.addListener("beforeRemove", () => {
         cleanupRef.current.onReset();
+        cleanupRef.current.setEditMode(false);
         cleanupRef.current.onLeave?.();
       });
       return unsubscribe;
     }, [navigation]),
   );
+
+  // 수정모드에서는 태그 바깥 어디를 눌러도 모드가 풀린다 (아이폰 홈 화면 편집과 같은 규칙).
+  // box-only가 있어야 안쪽 버튼이 터치를 먼저 가져가지 않는다.
+  const outsideTapProps = {
+    onPress: () => setEditMode(false),
+    disabled: !isEditMode,
+    pointerEvents: (isEditMode ? "box-only" : "auto") as "box-only" | "auto",
+  };
 
   return (
     <KeyBoardAvoid
@@ -122,34 +150,55 @@ export const PlanForm = ({
       />
       <ScrollView
         ref={scrollRef}
+        onLayout={(e) => {
+          viewportHeight.current = e.nativeEvent.layout.height;
+        }}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
+        scrollEnabled={!isEditMode}
         style={{ flex: 1 }}
       >
-        {header ?? <View style={{ height: 24 }} />}
-        <TitleSearchHeader onPress={onWorkoutTagSheetOpen} />
+        <Pressable {...outsideTapProps}>
+          {header ?? <View style={{ height: 24 }} />}
+          <TitleSearchHeader onPress={onWorkoutTagSheetOpen} />
+        </Pressable>
         {/* 운동 태그 */}
-        <WorkoutTags workoutList={workoutListData} />
-        {/* 도구 선택 */}
-        <EquipmentBox />
-        {/* 목표중량 */}
-        <TopWeight
-          onFocusScroll={onFocusScroll}
-          currentScrollY={currentScrollY}
-        />
-        {/* 세트와 횟수 */}
-        <SetCounter onOpen={onSheetOpen} isSheetOpen={isSetCounterSheetOpen} />
-        {/* 컨디션 */}
-        <ConditionList />
-        {/* 퀵노트 전체 노트 */}
-        <PlanNote
-          onFocusScroll={onFocusScroll}
-          currentScrollY={currentScrollY}
-        />
-        {/* 사진 */}
-        <CameraImage />
-        <View style={{ height: 250 }} />
+        <View
+          onLayout={(e) => {
+            const { y, height } = e.nativeEvent.layout;
+            tagsRect.current = { y, height };
+          }}
+        >
+          <WorkoutTags
+            workoutList={workoutListData}
+            workoutType={workoutType}
+          />
+        </View>
+        <Pressable {...outsideTapProps}>
+          {/* 도구 선택 */}
+          <EquipmentBox />
+          {/* 목표중량 */}
+          <TopWeight
+            onFocusScroll={onFocusScroll}
+            currentScrollY={currentScrollY}
+          />
+          {/* 세트와 횟수 */}
+          <SetCounter
+            onOpen={onSheetOpen}
+            isSheetOpen={isSetCounterSheetOpen}
+          />
+          {/* 컨디션 */}
+          <ConditionList />
+          {/* 퀵노트 전체 노트 */}
+          <PlanNote
+            onFocusScroll={onFocusScroll}
+            currentScrollY={currentScrollY}
+          />
+          {/* 사진 */}
+          <CameraImage />
+          <View style={{ height: 160 }} />
+        </Pressable>
       </ScrollView>
       <SetCounterSheet
         ref={bottomSheetModalRef}

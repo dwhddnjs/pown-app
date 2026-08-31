@@ -46,6 +46,8 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
       ) : (
         <TextInput
           ref={inputRef}
+          autoCorrect={false}
+          spellCheck={false}
           onFocus={() => {
             inputRef.current?.measure((x, y, w, h, px, py) => {
               const targetPosition = (currentScrollY + py) / 2;
@@ -71,7 +73,7 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
 
 const styles = StyleSheet.create({
   main: {
-    paddingVertical: 12,
+    paddingVertical: 16,
   },
   container: {
     flexDirection: "row",

@@ -28,11 +28,17 @@ export const AddWorkoutTagDialog = ({
   const { isOpen, setOpen } = useWorkoutTagDialogStore();
 
   const onAddWorkoutTag = () => {
-    if (workoutList[workoutType].includes(inputValue)) {
+    // 공백만 넣고 추가하면 이름 없는 태그가 생긴다
+    const name = inputValue.trim();
+    if (!name) {
+      setError(t("tag.emptyName"));
+      return;
+    }
+    if (workoutList[workoutType].includes(name)) {
       setError(t("tag.exists"));
       return;
     }
-    setAddWorkoutTag(workoutType, inputValue);
+    setAddWorkoutTag(workoutType, name);
     setOpen(false);
     setInputValue("");
     setError("");

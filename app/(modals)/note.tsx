@@ -50,6 +50,8 @@ export default function Note() {
       />
       <TextInput
         value={title}
+        autoCorrect={false}
+        spellCheck={false}
         placeholder={t("plan.titlePlaceholder")}
         style={[
           styles.titleInput,
@@ -63,6 +65,8 @@ export default function Note() {
       />
       <TextInput
         value={content}
+        autoCorrect={false}
+        spellCheck={false}
         multiline={true}
         numberOfLines={10}
         style={[

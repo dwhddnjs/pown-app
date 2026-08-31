@@ -47,7 +47,7 @@ export const ConditionList = () => {
 
 const styles = StyleSheet.create({
   main: {
-    paddingVertical: 12,
+    paddingVertical: 16,
     gap: 10,
   },
 

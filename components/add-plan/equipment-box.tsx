@@ -68,7 +68,7 @@ export const EquipmentBox = () => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    paddingVertical: 16,
     gap: 10,
     flex: 1,
     paddingHorizontal: 20,

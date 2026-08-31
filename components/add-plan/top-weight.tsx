@@ -55,7 +55,7 @@ export const TopWeight = ({
   };
 
   return (
-    <View style={{ paddingVertical: 12, gap: 10, paddingHorizontal: 20 }}>
+    <View style={styles.main}>
       <IconTitle style={{ gap: 8 }}>
         <WeightIcon
           name="weight-kilogram"
@@ -125,6 +125,12 @@ export const TopWeight = ({
 };
 
 const styles = StyleSheet.create({
+  main: {
+    paddingVertical: 16,
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+
   container: {
     flexDirection: "row",
     borderWidth: 2,
