@@ -52,7 +52,7 @@ export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
 
 const styles = StyleSheet.create({
   container: {
-    paddingVertical: 12,
+    paddingVertical: 16,
     gap: 10,
   },
 

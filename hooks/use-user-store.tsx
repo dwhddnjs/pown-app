@@ -31,6 +31,7 @@ export type UserTypes = {
       | "onReset"
       | "setAddWorkoutTag"
       | "setRemoveWorkoutTag"
+      | "setReorderWorkoutTag"
     >,
     value: string | boolean | UserInfoTypes[] | UserTypes["workoutList"] | Lang,
   ) => void;
@@ -38,6 +39,7 @@ export type UserTypes = {
   onReset: () => void;
   setAddWorkoutTag: (type: WorkoutTypes, tag: string) => void;
   setRemoveWorkoutTag: (type: WorkoutTypes, tag: string) => void;
+  setReorderWorkoutTag: (type: WorkoutTypes, list: string[]) => void;
 };
 
 export const useUserStore = create<UserTypes>()(
@@ -78,6 +80,16 @@ export const useUserStore = create<UserTypes>()(
           workoutList: {
             ...prev.workoutList,
             [type]: prev.workoutList[type].filter((item) => item !== tag),
+          },
+        })),
+      // 드래그로 바뀐 태그 순서. setUser로 workoutList 전체를 스냅샷으로 덮어쓰면
+      // 그 사이 다른 부위에 생긴 변경이 조용히 되돌아간다 — prev 기반으로만 쓴다.
+      setReorderWorkoutTag: (type, list) =>
+        set((prev) => ({
+          ...prev,
+          workoutList: {
+            ...prev.workoutList,
+            [type]: list,
           },
         })),
     }),

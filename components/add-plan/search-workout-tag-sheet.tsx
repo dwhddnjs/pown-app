@@ -1,5 +1,4 @@
 import {
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -7,7 +6,7 @@ import {
   View,
 } from "react-native";
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
-import BottomSheet from "@gorhom/bottom-sheet";
+import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { FontAwesome } from "@expo/vector-icons";
@@ -15,6 +14,7 @@ import { searchByInitial } from "@/lib/hangul";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tWorkout } from "@/lib/i18n";
+import { tagChipStyles } from "./workout-tag";
 
 interface SearchWorkoutTagSheetProps {
   onClose: () => void;
@@ -76,7 +76,7 @@ export const SearchWorkoutTagSheet = forwardRef<
         backgroundColor: themeColor.subText,
       }}
     >
-      <View style={{ paddingTop: 12, gap: 12 }}>
+      <View style={styles.sheet}>
         <View
           style={[
             styles.searchIconContainer,
@@ -97,13 +97,15 @@ export const SearchWorkoutTagSheet = forwardRef<
           </View>
           <TextInput
             ref={inputRef}
+            autoCorrect={false}
+            spellCheck={false}
             placeholder={t("tag.searchPlaceholder")}
             style={{ color: themeColor.text }}
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}
           />
         </View>
-        <ScrollView
+        <BottomSheetScrollView
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.container}
@@ -112,7 +114,7 @@ export const SearchWorkoutTagSheet = forwardRef<
             <TouchableOpacity
               key={item}
               style={[
-                styles.tag,
+                tagChipStyles.tag,
                 { borderColor: themeColor.tint },
                 item === workout && {
                   backgroundColor: themeColor.tint,
@@ -122,10 +124,11 @@ export const SearchWorkoutTagSheet = forwardRef<
             >
               <Text
                 style={[
-                  styles.title,
+                  tagChipStyles.title,
                   { color: themeColor.tintText },
+                  // tint로 채운 면 위 글자는 onTint (다크에서 text는 대비가 2:1도 안 된다)
                   item === workout && {
-                    color: themeColor.text,
+                    color: themeColor.onTint,
                   },
                 ]}
               >
@@ -138,7 +141,7 @@ export const SearchWorkoutTagSheet = forwardRef<
               {t("tag.notFound")}
             </Text>
           )}
-        </ScrollView>
+        </BottomSheetScrollView>
       </View>
     </BottomSheet>
   );
@@ -147,25 +150,23 @@ export const SearchWorkoutTagSheet = forwardRef<
 SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet";
 
 const styles = StyleSheet.create({
+  // 목록이 시트의 남은 높이를 다 먹어야 스크롤이 생긴다.
+  // flex:1이 없으면 내용 높이 그대로 자라서 시트 밖으로 잘려 나간다.
+  sheet: {
+    flex: 1,
+    paddingTop: 12,
+    gap: 12,
+  },
   container: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "center",
     alignItems: "center",
     gap: 8,
-    paddingVertical: 12,
+    paddingTop: 12,
+    // 마지막 줄이 시트 바닥에 붙지 않게
+    paddingBottom: 40,
     paddingHorizontal: 12,
-  },
-  tag: {
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    borderWidth: 2,
-
-    borderRadius: 50,
-  },
-  title: {
-    fontFamily: "sb-l",
-    fontSize: 14,
   },
   searchIconContainer: {
     flexDirection: "row",
