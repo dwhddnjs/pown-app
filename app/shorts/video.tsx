@@ -2,6 +2,22 @@ import { useEffect, useRef, useState } from "react";
 // component
 import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
+import { ShortsPlayer } from "@/components/shorts/shorts-player";
+import { PressScale } from "@/components/press-scale";
+import { SafeAreaView } from "react-native-safe-area-context";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
+import { toast } from "sonner-native";
+// zustand
+import { useShortsStore } from "@/hooks/use-shorts-store";
+// hook
+import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useT } from "@/hooks/use-t";
+// lib
+import { persistMediaLocally } from "@/lib/media";
 //expo
 import {
   CameraType,
@@ -10,23 +26,10 @@ import {
   useMicrophonePermissions,
 } from "expo-camera";
 import { useRouter } from "expo-router";
-import { useT } from "@/hooks/use-t";
-import { ShortsPlayer } from "@/components/shorts/shorts-player";
+import * as VideoThumbnails from "expo-video-thumbnails";
+import { StatusBar } from "expo-status-bar";
 // icon
 import { FontAwesome6 } from "@expo/vector-icons";
-// hook
-import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withTiming,
-} from "react-native-reanimated";
-import { useShortsStore } from "@/hooks/use-shorts-store";
-import * as VideoThumbnails from "expo-video-thumbnails";
-import { toast } from "sonner-native";
-import { persistMediaLocally } from "@/lib/media";
-import { StatusBar } from "expo-status-bar";
 
 export default function Video() {
   const ref = useRef<CameraView>(null);
@@ -117,8 +120,9 @@ export default function Video() {
           ),
           createdAt: new Date().toISOString(),
         });
-        setUri(null);
       }
+      // uri를 비우지 않는다 — active={!uri}라서 화면이 닫히는 애니메이션 내내
+      // 카메라 세션이 마이크까지 물고 다시 켜진다. 어차피 곧 언마운트된다.
       router.back();
       toast.success(t("shorts.added"));
     } catch {
@@ -134,37 +138,12 @@ export default function Video() {
         <View style={{ flex: 1, zIndex: 1, backgroundColor: "transparent" }}>
           <ShortsPlayer uri={uri as string} isActive />
         </View>
-        <View
-          style={[
-            {
-              height: 60,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 24,
-              backgroundColor: themeColor.hard,
-            },
-          ]}
-        >
-          <Pressable style={{ paddingTop: 18 }} onPress={() => setUri(null)}>
-            <Text
-              style={{
-                fontSize: 16,
-              }}
-            >
-              {t("shorts.retake")}
-            </Text>
+        <View style={[styles.previewBar, { backgroundColor: themeColor.hard }]}>
+          <Pressable style={styles.previewAction} onPress={() => setUri(null)}>
+            <Text style={styles.previewActionText}>{t("shorts.retake")}</Text>
           </Pressable>
-          <Pressable
-            style={{ paddingTop: 18 }}
-            onPress={() => selectImageUri()}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-              }}
-            >
-              {t("shorts.useVideo")}
-            </Text>
+          <Pressable style={styles.previewAction} onPress={selectImageUri}>
+            <Text style={styles.previewActionText}>{t("shorts.useVideo")}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
@@ -177,6 +156,8 @@ export default function Video() {
         <CameraView
           ref={ref}
           facing={facing}
+          // 미리보기 중에도 뷰는 살려두고 세션만 끈다 — 아래 렌더 주석 참고
+          active={!uri}
           style={StyleSheet.absoluteFill}
           mode="video"
           mute={false}
@@ -184,14 +165,14 @@ export default function Video() {
           responsiveOrientationWhenOrientationLocked
         />
         <View style={styles.shutterContainer}>
-          <Pressable
+          <PressScale
             onPress={() => router.back()}
             style={{ paddingVertical: 24 }}
             accessibilityRole="button"
             accessibilityLabel={t("common.cancel")}
           >
             <FontAwesome6 name="xmark" size={28} color="white" />
-          </Pressable>
+          </PressScale>
 
           <Pressable
             onPress={() => {
@@ -222,9 +203,9 @@ export default function Video() {
               </View>
             )}
           </Pressable>
-          <Pressable onPress={toggleFacing} style={{ paddingVertical: 24 }}>
+          <PressScale onPress={toggleFacing} style={{ paddingVertical: 24 }}>
             <FontAwesome6 name="rotate-left" size={24} color="white" />
-          </Pressable>
+          </PressScale>
         </View>
       </View>
     );
@@ -257,7 +238,23 @@ export default function Video() {
   return (
     <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
       <StatusBar style="light" />
-      {uri ? renderVideo() : renderCamera()}
+      {/* 미리보기를 카메라 위에 덮는다. 갈아끼우면 CameraView가 언마운트되면서
+          AVCaptureSession(마이크 입력 포함)을 매번 새로 세우는데, 이전 세션 정리는
+          비동기라 촬영↔다시찍기를 반복하면 세션이 겹쳐 네이티브에서 죽는다.
+          뷰가 계속 살아 있으니 isCameraReady도 그대로 true로 둔다 — active 토글은
+          onCameraReady를 다시 쏘지 않으므로(expo-camera CameraView.swift) 여기서
+          false로 되돌리면 셔터가 영영 잠긴다. */}
+      {renderCamera()}
+      {uri ? (
+        <View
+          style={[
+            StyleSheet.absoluteFill,
+            { backgroundColor: themeColor.hard },
+          ]}
+        >
+          {renderVideo()}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -291,6 +288,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "white",
     fontFamily: "sb-m",
+  },
+  previewBar: {
+    height: 60,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 24,
+  },
+  previewAction: {
+    paddingTop: 18,
+  },
+  previewActionText: {
+    fontSize: 16,
   },
   permissionContainer: {
     flex: 1,

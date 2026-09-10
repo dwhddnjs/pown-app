@@ -59,7 +59,9 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
       });
     };
 
-    const snapPoints = useMemo(() => ["50%"], []);
+    // 시트 높이 = 핸들 + 픽커(216) + 제목 + 추가 버튼 + 하단 여백.
+    // "50%"로 두면 기기에 따라 픽커와 버튼 사이가 100pt 가까이 빈다.
+    const snapPoints = useMemo(() => [370], []);
     const onSheetChange = useCallback(
       (index: number) => {
         const open = index >= 0;

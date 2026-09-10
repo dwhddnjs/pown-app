@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/themed";
 import { PlanForm } from "@/components/plan-form";
+import { headerButtonLiftModal } from "@/components/navigation/screen-options";
 import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
 import { toast } from "sonner-native";
@@ -112,7 +113,6 @@ export default function AddMultiPlan() {
   // 날짜와 부위 선택 — 이 화면에만 있는 폼 머리말
   const header = (
     <View style={styles.header}>
-      <View style={{ height: 12 }} />
       <View style={styles.dateSection}>
         <Text style={{ fontSize: 24 }}>{t("plan.selectPart")}</Text>
         <PlanDateButton />
@@ -151,13 +151,14 @@ export default function AddMultiPlan() {
       header={header}
       extraSheets={<SelectTypeDateSheet />}
       onLeave={clearEditingPlan}
-      saveButtonStyle={{ marginTop: 8 }}
+      saveButtonStyle={headerButtonLiftModal}
     />
   );
 }
 
 const styles = StyleSheet.create({
   header: {
+    // 폼 기본 머리말 여백과 같은 값 — PlanForm이 header 없을 때 주는 24pt
     paddingTop: 12,
     paddingBottom: 24,
     gap: 16,

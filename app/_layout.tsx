@@ -12,6 +12,7 @@ import { PlanMenu } from "@/components/workout-plan/plan-menu";
 import { ImageModal } from "@/components/workout-plan/image-modal";
 import {
   flatHeader,
+  headerButtonLiftModal,
   fullScreen,
   headerBackButton,
   modalScreen,
@@ -105,7 +106,6 @@ function RootLayoutNav() {
   const background = themeColor.background;
 
   const modal = modalScreen(background);
-  const planForm = planFormScreen(background);
 
   return (
     <Stack
@@ -129,24 +129,19 @@ function RootLayoutNav() {
 
       {/* 계획 작성·수정 — 저장 버튼은 각 화면이 headerRight로 붙인다.
           폼 리셋은 화면의 beforeRemove 리스너가 담당한다. */}
-      <Stack.Screen
-        name="add-plan/[slug]"
-        options={({ navigation }: ScreenOptionsArgs) => {
-          const options = planForm({ navigation });
-          return {
-            ...options,
-            headerStyle: { ...options.headerStyle, borderWidth: 2 },
-          };
-        }}
-      />
-      <Stack.Screen name="edit-plan/[...slug]" options={planForm} />
+      <Stack.Screen name="add-plan/[slug]" options={planFormScreen} />
+      <Stack.Screen name="edit-plan/[...slug]" options={planFormScreen} />
+      {/* 루틴에 넣을 계획을 고르는 모달 — 헤더는 계획 폼과 같은 blur */}
       <Stack.Screen
         name="workout/add-multi-plan"
         options={({ navigation }: ScreenOptionsArgs) => ({
+          ...planFormScreen({ navigation }),
           presentation: "modal" as const,
-          headerTitle: "",
-          ...flatHeader(background),
-          headerLeft: headerBackButton("back", navigation, { marginTop: 10 }),
+          headerLeft: headerBackButton(
+            "close",
+            navigation,
+            headerButtonLiftModal,
+          ),
         })}
       />
       <Stack.Screen

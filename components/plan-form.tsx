@@ -24,6 +24,7 @@ import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialo
 import { RemoveWorkoutTagDialog } from "@/components/add-plan/remove-workout-tag-dialog";
 import { SetCounterSheet } from "@/components/set-counter-sheet";
 import { HeaderIconButton } from "@/components/header-icon-button";
+import { headerButtonLift } from "@/components/navigation/screen-options";
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
@@ -34,6 +35,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { WorkoutTypes } from "@/types/workout";
 // expo
 import { Stack, useFocusEffect, useNavigation } from "expo-router";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 interface PlanFormProps {
   workoutType: WorkoutTypes;
@@ -44,6 +46,7 @@ interface PlanFormProps {
   extraSheets?: React.ReactNode;
   // 화면을 떠날 때 폼 리셋과 함께 정리할 것 (루틴 편집 중인 항목 등)
   onLeave?: () => void;
+  // 저장 버튼의 헤더 내 위치 보정 — 모달 화면은 네비바 높이가 달라 값이 다르다
   saveButtonStyle?: StyleProp<ViewStyle>;
 }
 
@@ -56,7 +59,7 @@ export const PlanForm = ({
   header,
   extraSheets,
   onLeave,
-  saveButtonStyle,
+  saveButtonStyle = headerButtonLift,
 }: PlanFormProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const workoutTagRef = useRef<BottomSheetModal>(null);
@@ -66,6 +69,9 @@ export const PlanForm = ({
   const { isEditMode, setEditMode } = useWorkoutTagDialogStore();
   const navigation = useNavigation();
   const themeColor = useCurrentThemeColor();
+  // 헤더가 투명(blur)이라 ScrollView가 그 뒤까지 깔린다 — 실제 헤더 높이를 직접 받아
+  // 위쪽 여백으로 준다. 모달(add-multi-plan)은 네비바가 더 높은데 이 값이 알아서 다르다.
+  const headerHeight = useHeaderHeight();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
   const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const [currentScrollY, setCurrentScrollY] = useState(0);
@@ -100,12 +106,14 @@ export const PlanForm = ({
     if (!isEditMode) return;
     const { y, height } = tagsRect.current;
     // 아래쪽 줄이 잘리는 만큼만. 그래도 태그 블록 위쪽을 넘어가지는 않는다.
+    // y는 paddingTop(헤더 높이)을 포함한 값이라, 태그 상단을 헤더 "아래"에 붙이려면
+    // 그만큼 빼야 한다 — 안 빼면 투명 헤더 뒤로 태그 첫 줄이 숨는다.
     const needed = y + height - viewportHeight.current;
     scrollRef.current?.scrollTo({
-      y: Math.max(0, Math.min(y, needed)),
+      y: Math.max(0, Math.min(y - headerHeight, needed)),
       animated: true,
     });
-  }, [isEditMode]);
+  }, [isEditMode, headerHeight]);
 
   // 리스너는 navigation이 바뀔 때만 다시 걸고, 부를 함수는 항상 최신 것을 쓴다.
   // onLeave는 prop이라 참조가 고정이라는 보장이 없다 — 의존성에서 빼고 직접 잡으면
@@ -157,6 +165,11 @@ export const PlanForm = ({
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         scrollEnabled={!isEditMode}
+        // 투명 blur 헤더 아래로 내용을 내린다. contentInset이 아니라 padding이어야 한다 —
+        // inset을 쓰면 contentOffset.y의 0이 "맨 위"가 아니게 되고, 여기서 넘기는
+        // currentScrollY로 위치를 재는 입력창들(TopWeight·PlanNote)과 아래 수정모드
+        // 스크롤 계산이 전부 헤더 높이만큼 어긋난다.
+        contentContainerStyle={{ paddingTop: headerHeight }}
         style={{ flex: 1 }}
       >
         <Pressable {...outsideTapProps}>

@@ -164,6 +164,7 @@ const ko = {
   "camera.retake": "다시 찍기",
   "camera.usePhoto": "사진 사용",
   "camera.permission": "사진을 찍으려면 카메라 접근 권한이 필요해요.",
+  "camera.captureFailed": "사진 촬영 중 오류가 발생했습니다.",
   "camera.libraryPermission":
     "사진 보관함 권한이 없어 사진첩에는 저장되지 않아요.",
 
@@ -394,6 +395,7 @@ const en: Record<TKey, string> = {
   "camera.retake": "Retake",
   "camera.usePhoto": "Use Photo",
   "camera.permission": "Camera access is required to take photos.",
+  "camera.captureFailed": "Something went wrong while taking the photo.",
   "camera.libraryPermission":
     "Without photo library access, photos won't be saved to your library.",
 
