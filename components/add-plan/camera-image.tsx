@@ -15,6 +15,7 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 import { resolveMediaUri } from "@/lib/media";
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { toast } from "sonner-native";
 
 // 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
@@ -83,11 +84,18 @@ export const CameraImage = () => {
             />
             <TouchableOpacity
               onPress={() => onRemoveImageUri(item.id)}
-              style={styles.closeButton}
+              style={[
+                styles.closeButton,
+                {
+                  borderColor: themeColor.pressed,
+                  backgroundColor: themeColor.background,
+                },
+              ]}
             >
-              <AntDesign
-                name="closecircle"
-                size={24}
+              {/* AntDesign close는 획이 가늘다 — 같은 X를 더 두껍게 그리는 아이콘 */}
+              <MaterialCommunityIcons
+                name="close-thick"
+                size={14}
                 color={themeColor.pressed}
               />
             </TouchableOpacity>
@@ -127,9 +135,16 @@ const styles = StyleSheet.create({
     borderCurve: "continuous",
     borderWidth: 1,
   },
+  // 사진 위에 얹히므로 안을 배경색으로 채운다 — 투명하면 밝은 사진에서 X가 묻힌다
   closeButton: {
     position: "absolute",
     right: -4,
     top: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 1.4,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
