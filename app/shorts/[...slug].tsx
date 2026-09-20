@@ -1,8 +1,9 @@
 import { ShortsPlayer } from "@/components/shorts/shorts-player";
 import { ShortsMemoSheet } from "@/components/shorts/shorts-memo-sheet";
 import { Text, View } from "@/components/themed";
-import { useShortsStore } from "@/hooks/use-shorts-store";
+import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useIsFocused } from "@react-navigation/native";
 import React, {
   useCallback,
   useEffect,
@@ -34,7 +35,23 @@ import { format } from "date-fns";
 import { formatDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
+import { ConfirmDialog } from "@/components/confirm-dialog";
+import { ScanOverlay } from "@/components/shorts/scan-overlay";
+import { useT } from "@/hooks/use-t";
+import {
+  classifyWorkout,
+  extractFrames,
+  generateReport,
+  getLastAiFailure,
+} from "@/lib/ai-report";
+import { showRewardedAd } from "@/lib/ads";
+import { toast } from "sonner-native";
 import { StatusBar } from "expo-status-bar";
+
+// 분석 중인 영상 id. 컴포넌트 state로 두면 화면을 나갔다 다시 들어올 때 초기화돼
+// 같은 영상을 두 번 분석한다(쿼터 2회 + 광고 2회 + 리포트 덮어쓰기).
+// use-shorts-store의 hasRepaired와 같은 이유로 모듈 스코프에 둔다.
+const analyzingIds = new Set<number>();
 
 const KNOB = 12;
 const BAR_HEIGHT = 3;
@@ -42,12 +59,15 @@ const BAR_HEIGHT = 3;
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>();
 
-  const { videos } = useShortsStore();
+  const { videos, aiConsent, setReport, setAiConsent } = useShortsStore();
   // 아이패드는 회전하므로 모듈 로드 시점 폭을 고정하면 안 된다
   const { width: screenWidth } = useWindowDimensions();
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
-  const { back } = useRouter();
+  const { back, push } = useRouter();
+  // 리포트를 열면 이 화면은 뒤에 남아 있어 영상이 계속 돌고 소리까지 난다
+  const isFocused = useIsFocused();
+  const t = useT();
   const initialPage = useMemo(() => {
     const index = videos.findIndex((v) => v.id === parseInt(slug?.[0]));
     return index >= 0 ? index : 0;
@@ -57,6 +77,14 @@ export default function ShortsView() {
   const [position, setPosition] = useState(initialPage);
   const [isOpen, setIsOpen] = useState(false);
   const [isMemoOpen, setIsMemoOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  // 동의 다이얼로그에서 "분석하기"를 누르면 이어서 돌릴 대상
+  const [pending, setPending] = useState<{
+    id: number;
+    durationMs: number;
+  } | null>(null);
+  // 분석 도중 화면을 떠났으면 리포트는 저장하되 화면을 띄우지는 않는다
+  const isMountedRef = useRef(true);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const memoRef = useRef<BottomSheet>(null);
 
@@ -107,6 +135,80 @@ export default function ShortsView() {
     },
   );
 
+  useEffect(
+    () => () => {
+      isMountedRef.current = false;
+    },
+    [],
+  );
+
+  // 개발 빌드에서는 실패 원인(HTTP 429 / timeout / network …)을 토스트에 붙인다.
+  // no-console 규칙 때문에 로그가 없어 원인을 두 번이나 추측으로 좁혔다.
+  const failMessage = useCallback(
+    () =>
+      __DEV__ ? `${t("ai.failed")} [${getLastAiFailure()}]` : t("ai.failed"),
+    [t],
+  );
+
+  const runAnalyze = useCallback(
+    async (video: ShortsVideoTypes, durationMs: number) => {
+      analyzingIds.add(video.id);
+      setIsAnalyzing(true);
+      try {
+        const frames = await extractFrames(video.video, durationMs);
+        const isWorkout = await classifyWorkout(frames);
+        if (isWorkout === null) {
+          return toast.error(failMessage());
+        }
+        if (!isWorkout) {
+          return toast.error(t("ai.notWorkout"));
+        }
+        // 리포트를 쓰는 동안 광고를 보여주고 둘을 같이 기다린다.
+        // 광고가 먼저 끝나면 스캔 화면이 잠깐 더 돌 뿐이다.
+        const [report] = await Promise.all([
+          generateReport(frames),
+          showRewardedAd(),
+        ]);
+        if (!report) {
+          return toast.error(failMessage());
+        }
+        setReport(video.id, report);
+        if (isMountedRef.current) {
+          push(`/shorts/report/${video.id}`);
+        }
+      } finally {
+        analyzingIds.delete(video.id);
+        setIsAnalyzing(false);
+      }
+    },
+    [push, setReport, t, failMessage],
+  );
+
+  // 리포트는 영상당 한 번만 만든다 — 이미 있으면 같은 버튼이 "보기"가 된다
+  const onAnalyze = useCallback(
+    (videoId: number, durationMs: number) => {
+      // position은 onMomentumScrollEnd에서만 갱신된다 — 페이지 전환 애니메이션 중에는
+      // 버튼을 누른 영상과 videos[position]이 서로 다른 항목을 가리킨다
+      const video = videos.find((item) => item.id === videoId);
+      if (!video || analyzingIds.has(videoId)) {
+        return;
+      }
+      // E. duration을 못 읽은 채 진행하면 앞 4초만 샘플링한 리포트가 영구 저장된다
+      // (영상당 1회 정책이라 다시 만들 수 없다) — 실패로 끊는 편이 낫다
+      if (durationMs <= 0 && !video.report) {
+        return toast.error(failMessage());
+      }
+      if (video.report) {
+        return push(`/shorts/report/${video.id}`);
+      }
+      if (!aiConsent) {
+        return setPending({ id: video.id, durationMs });
+      }
+      runAnalyze(video, durationMs);
+    },
+    [videos, aiConsent, push, runAnalyze, failMessage],
+  );
+
   // 진행바 손잡이는 스크롤뷰 밖에서 그린다 —
   // 막대 중앙에 맞추면 아래 절반이 스크롤뷰 밖이라 안에서는 잘린다
   const knobStyle = useAnimatedStyle(() => ({
@@ -150,7 +252,7 @@ export default function ShortsView() {
           ref={scrollRef}
           pagingEnabled
           horizontal={false}
-          scrollEnabled={!isMemoOpen}
+          scrollEnabled={!isMemoOpen && !isAnalyzing}
           showsVerticalScrollIndicator={false}
           showsHorizontalScrollIndicator={false}
           style={{ flex: 1, backgroundColor: "black" }}
@@ -189,17 +291,24 @@ export default function ShortsView() {
                 <Animated.View style={videoAreaStyle}>
                   <ShortsPlayer
                     uri={item.video}
-                    isActive={index === position}
+                    isActive={index === position && isFocused}
                     compact={isMemoOpen}
                     progressSV={progressSV}
                     barOpacity={barOpacity}
                     onPressMemo={() => memoRef.current?.snapToIndex(0)}
+                    onPressAnalyze={(durationMs) =>
+                      onAnalyze(item.id, durationMs)
+                    }
+                    hasReport={!!item.report}
                   />
                 </Animated.View>
               </View>
             );
           })}
         </Animated.ScrollView>
+        {isAnalyzing && (
+          <ScanOverlay label={t("ai.scanning")} longLabel={t("ai.writing")} />
+        )}
       </Animated.View>
       <View
         style={[
@@ -220,11 +329,37 @@ export default function ShortsView() {
         </Text>
         <TouchableOpacity
           style={{ paddingRight: 16 }}
+          disabled={isAnalyzing}
           onPress={() => setIsOpen(true)}
         >
-          <Feather name="trash" size={24} color={themeColor.text} />
+          {/* 분석 중 삭제하면 진행 중인 프레임 추출 밑에서 파일이 사라진다 */}
+          <Feather
+            name="trash"
+            size={24}
+            color={isAnalyzing ? themeColor.subText : themeColor.text}
+          />
         </TouchableOpacity>
       </View>
+      <ConfirmDialog
+        isOpen={!!pending}
+        onClose={() => setPending(null)}
+        title={t("ai.consentTitle")}
+        desc={t("ai.consentDesc")}
+        actionLabel={t("ai.consentAction")}
+        actionColor={themeColor.tint}
+        onConfirm={() => {
+          const target = pending;
+          setPending(null);
+          if (!target) {
+            return;
+          }
+          setAiConsent();
+          const video = videos.find((item) => item.id === target.id);
+          if (video) {
+            runAnalyze(video, target.durationMs);
+          }
+        }}
+      />
       <RemoveShortsDialog
         open={isOpen}
         setIsOpen={() => setIsOpen(false)}

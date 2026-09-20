@@ -210,6 +210,14 @@ function RootLayoutNav() {
           headerLeft: headerBackButton("back", navigation),
         })}
       />
+      {/* AI 자세 리포트 — 모달 헤더에 제목만 얹는다 */}
+      <Stack.Screen
+        name="shorts/report/[id]"
+        options={({ navigation }: ScreenOptionsArgs) => ({
+          ...modal({ navigation }),
+          headerTitle: t("ai.reportTitle"),
+        })}
+      />
     </Stack>
   );
 }
