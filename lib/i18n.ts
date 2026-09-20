@@ -160,6 +160,28 @@ const ko = {
   "shorts.useVideo": "비디오 사용",
   "shorts.permission": "숏츠를 촬영하려면 카메라·마이크 접근 권한이 필요해요.",
 
+  // AI 자세 분석 (리포트 "본문"은 AI가 언어에 맞춰 생성한다 — 여기엔 껍데기만 있다)
+  "ai.analyze": "AI 자세 분석",
+  "ai.scanning": "AI가 자세를 분석하고 있어요",
+  "ai.writing": "리포트를 쓰고 있어요 · 최대 2분까지 걸려요",
+  "ai.notWorkout": "운동 영상이 아니에요. 운동하는 장면으로 다시 찍어주세요.",
+  "ai.failed": "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
+  "ai.consentTitle": "AI 자세 분석을 시작할까요?",
+  "ai.consentDesc":
+    "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면 몇 장이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
+  "ai.consentAction": "광고 보고 분석하기",
+  "ai.reportTitle": "AI 자세 리포트",
+  "ai.score": "자세 점수",
+  "ai.risk": "부상 위험",
+  "ai.good": "잘한 점",
+  "ai.bad": "아쉬운 점",
+  "ai.improve": "개선할 점",
+  "ai.checkpoints": "관절별 체크포인트",
+  "ai.drills": "교정 드릴",
+  "ai.camera": "촬영 각도 피드백",
+  "ai.disclaimer":
+    "* AI가 영상에서 뽑은 장면으로 쓴 코칭 피드백이에요. 의학적 진단이나 조언이 아니에요.",
+
   // 카메라
   "camera.retake": "다시 찍기",
   "camera.usePhoto": "사진 사용",
@@ -391,6 +413,28 @@ const en: Record<TKey, string> = {
   "shorts.useVideo": "Use Video",
   "shorts.permission":
     "Camera and microphone access is required to record shorts.",
+
+  "ai.analyze": "AI form analysis",
+  "ai.scanning": "Analyzing your form…",
+  "ai.writing": "Writing your report · this can take up to 2 minutes",
+  "ai.notWorkout":
+    "This isn't a workout video. Record yourself training and try again.",
+  "ai.failed": "Analysis failed. Please try again in a moment.",
+  "ai.consentTitle": "Start AI form analysis?",
+  "ai.consentDesc":
+    "* Watch one ad to get your report.\n* A few frames from this video are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
+  "ai.consentAction": "Watch ad & analyze",
+  "ai.reportTitle": "AI Form Report",
+  "ai.score": "Form score",
+  "ai.risk": "Injury risk",
+  "ai.good": "Done well",
+  "ai.bad": "Needs work",
+  "ai.improve": "How to improve",
+  "ai.checkpoints": "Joint checkpoints",
+  "ai.drills": "Corrective drills",
+  "ai.camera": "Camera angle",
+  "ai.disclaimer":
+    "* Coaching feedback written by AI from frames of your video. Not a medical diagnosis or advice.",
 
   "camera.retake": "Retake",
   "camera.usePhoto": "Use Photo",

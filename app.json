@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "3.1.1",
-    "runtimeVersion": "3.1.1",
+    "version": "3.2.0",
+    "runtimeVersion": "3.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-dark.png",
     "scheme": "myapp",
@@ -82,7 +82,20 @@
         }
       ],
       "expo-localization",
-      "./plugins/with-fmt-consteval-fix"
+      "./plugins/with-fmt-consteval-fix",
+      [
+        "react-native-google-mobile-ads",
+        {
+          "iosAppId": "ca-app-pub-6495300075044721~8940153144",
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713"
+        }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "관련성 높은 광고를 보여주기 위해 사용됩니다. 허용하지 않아도 모든 기능을 그대로 쓸 수 있어요."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

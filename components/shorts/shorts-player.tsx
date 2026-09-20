@@ -19,6 +19,13 @@ interface ShortsPlayerProps {
   uri: string;
   isActive?: boolean;
   onPressMemo?: () => void;
+  // AI 분석 버튼. duration은 프레임 뽑을 시점을 정하는 데 쓰는데 플레이어가 이미
+  // 들고 있어서 여기서 같이 올려준다 (부모가 따로 구하면 인스턴스가 하나 더 생긴다).
+  onPressAnalyze?: (durationMs: number) => void;
+  // 아이콘만 있는 버튼이라 VoiceOver에 읽힐 이름이 필요하다
+  analyzeLabel?: string;
+  // 이미 리포트가 있으면 "다시 분석"이 아니라 "리포트 보기"다
+  hasReport?: boolean;
   // 메모 시트로 영상 영역이 줄었을 때 — 잘라내지 않고 전체가 보이게 한다
   compact?: boolean;
   // 주면 진행률을 여기에도 흘려보내고 손잡이(점)는 그리지 않는다.
@@ -37,6 +44,9 @@ export const ShortsPlayer = ({
   uri,
   isActive,
   onPressMemo,
+  onPressAnalyze,
+  analyzeLabel,
+  hasReport,
   compact,
   progressSV,
   barOpacity,
@@ -192,6 +202,22 @@ export const ShortsPlayer = ({
           <Feather name="edit-2" size={22} color="white" />
         </Pressable>
       )}
+      {onPressAnalyze && (
+        <Pressable
+          style={styles.analyzeButton}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={analyzeLabel}
+          onPress={() => onPressAnalyze((player.duration || 0) * 1000)}
+        >
+          {/* 다른 오버레이 버튼과 같은 모양을 유지하고 아이콘만 바꾼다 */}
+          <Feather
+            name={hasReport ? "file-text" : "activity"}
+            size={22}
+            color="white"
+          />
+        </Pressable>
+      )}
       <Pressable
         style={styles.muteButton}
         hitSlop={12}
@@ -257,10 +283,20 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  // 세 버튼은 52pt 간격 — 박스가 38pt라 14pt씩 뜬다.
+  // 48pt는 붙어 보이고 60pt는 흩어져 보였다.
   memoButton: {
     position: "absolute",
     right: 16,
-    bottom: 72,
+    bottom: 76,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  analyzeButton: {
+    position: "absolute",
+    right: 16,
+    bottom: 128,
     padding: 8,
     borderRadius: 20,
     backgroundColor: "rgba(0,0,0,0.35)",

@@ -6,9 +6,30 @@ import {
   resolveMediaUri,
 } from "@/lib/media";
 import { storage } from "@/lib/storage";
+import { WorkoutTypes } from "@/types/workout";
 import * as VideoThumbnails from "expo-video-thumbnails";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+
+// AI 자세 분석 리포트. 영상당 한 번만 만들고 다시 만들지 않는다.
+// 영상 아이템 "안"에 넣어 두는 게 핵심 — setRemoveVideo의 filter가 영상을 지울 때
+// 리포트도 같이 사라진다. 별도 맵으로 빼면 지울 때마다 정리 코드가 따라붙는다.
+export type ShortsReportTypes = {
+  workout: string;
+  bodyPart: WorkoutTypes;
+  // 0~100. 종목이 다르면 서로 비교할 수 있는 수치가 아니다 — 추이 차트로 쓰지 말 것
+  score: number;
+  // 부상 위험이 보일 때만. 없으면 배너를 그리지 않는다
+  risk?: string;
+  checkpoints: { joint: string; status: "good" | "caution"; note: string }[];
+  good: string[];
+  bad: string[];
+  improve: string[];
+  drills: string[];
+  // 프레임만으로 판단이 안 되는 각도였을 때의 재촬영 안내
+  camera?: string;
+  createdAt: string;
+};
 
 export type ShortsVideoTypes = {
   id: number;
@@ -17,6 +38,7 @@ export type ShortsVideoTypes = {
   createdAt: string;
   title?: string;
   content?: string;
+  report?: ShortsReportTypes;
 };
 
 // 파일 검사는 목록당 한 번이면 된다. 목록이 통째로 바뀌면(복원·초기화) 다시 검사한다.
@@ -28,7 +50,11 @@ const REPAIR_BATCH = 8;
 
 type ShortsStoreTypes = {
   videos: ShortsVideoTypes[];
+  // 영상 프레임이 외부 AI로 나가도 되는지 — 첫 분석 전에 한 번만 묻는다
+  aiConsent: boolean;
   setAddVideo: (video: ShortsVideoTypes) => void;
+  setReport: (videoId: number, report: ShortsReportTypes) => void;
+  setAiConsent: () => void;
   setMemo: (videoId: number, memo: { title: string; content: string }) => void;
   setRemoveVideo: (videoId: number) => void;
   onSetVideos: (videos: ShortsVideoTypes[]) => void;
@@ -40,6 +66,8 @@ export const useShortsStore = create<ShortsStoreTypes>()(
   persist(
     (set, get) => ({
       videos: [],
+      aiConsent: false,
+      setAiConsent: () => set({ aiConsent: true }),
       setAddVideo: (video) =>
         set((prev) => ({
           ...prev,
@@ -51,6 +79,15 @@ export const useShortsStore = create<ShortsStoreTypes>()(
           if (index === -1) return prev;
           const videos = [...prev.videos];
           videos[index] = { ...videos[index], ...memo };
+          return { ...prev, videos };
+        }),
+      // 분석 중에 영상이 지워졌을 수 있다 — 못 찾으면 조용히 버린다
+      setReport: (videoId, report) =>
+        set((prev) => {
+          const index = prev.videos.findIndex((item) => item.id === videoId);
+          if (index === -1) return prev;
+          const videos = [...prev.videos];
+          videos[index] = { ...videos[index], report };
           return { ...prev, videos };
         }),
       setRemoveVideo: (videoId) => {
