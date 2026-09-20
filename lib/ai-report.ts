@@ -21,6 +21,11 @@ import * as VideoThumbnails from "expo-video-thumbnails";
 const MODEL = "gemini-3.5-flash-lite";
 // 키가 털려 쿼터가 소진되면 여기만 프록시 URL로 바꾼다 (앱 코드는 그대로).
 const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent`;
+// Google AI Studio에서 발급하되 결제 계정이 연결되지 않은 프로젝트에 만든다 —
+// 그래야 키가 털려도 과금이 구조적으로 불가능하다(최악이 일일 쿼터 소진).
+// EAS에는 대시보드 Environment variables에 같은 이름으로 등록하고 visibility는
+// 반드시 sensitive로 둔다. secret으로 두면 eas update가 값을 못 읽어 빈 키가 박힌
+// 번들이 에러 없이 조용히 배포된다.
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 
 // ponytail: 이 헤더는 현재 아무것도 막지 못한다. 2026-09부터 Gemini 키는 서비스
