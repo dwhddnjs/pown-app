@@ -166,10 +166,28 @@ const ko = {
   "ai.writing": "리포트를 쓰고 있어요 · 최대 2분까지 걸려요",
   "ai.notWorkout": "운동 영상이 아니에요. 운동하는 장면으로 다시 찍어주세요.",
   "ai.failed": "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
-  "ai.consentTitle": "AI 자세 분석을 시작할까요?",
+  "ai.guideTitle": "정확한 분석을 위한 촬영 가이드",
+  "ai.guideLead":
+    "AI는 영상에서 뽑은 장면 몇 장만 봐요. 아래 네 가지만 지키면 피드백이 훨씬 정확해져요.",
+  "ai.guideAngle": "몸 옆쪽 45°에서",
+  "ai.guideAngleDesc":
+    "정면이나 뒤에서 찍으면 무릎·허리가 가려져서 각도를 읽을 수 없어요.",
+  "ai.guideFrame": "머리부터 발까지 한 화면에",
+  "ai.guideFrameDesc":
+    "폰을 무릎 높이에 세워두고 세 걸음쯤 떨어지면 전신이 들어와요.",
+  "ai.guideReps": "2~3회 반복, 10~20초면 충분",
+  "ai.guideRepsDesc":
+    "길게 찍어도 장면 몇 장만 보내요. 짧고 또렷할수록 정확해요.",
+  "ai.guideLight": "밝은 곳에서 혼자 나오게",
+  "ai.guideLightDesc": "어둡거나 다른 사람이 겹치면 자세를 잘못 읽어요.",
+  "ai.guideGotIt": "알겠어요",
+  "ai.checkTitle": "촬영 가이드대로 찍으셨나요?",
+  "ai.checkWarn":
+    "조건에 맞지 않으면 분석 정확도가 크게 떨어져요. 리포트는 영상당 한 번만 만들 수 있어 다시 받을 수 없어요.",
+  "ai.guideOpen": "촬영 가이드",
   "ai.consentDesc":
     "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면 몇 장이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
-  "ai.consentAction": "광고 보고 분석하기",
+  "ai.consentAction": "분석하기",
   "ai.reportTitle": "AI 자세 리포트",
   "ai.score": "자세 점수",
   "ai.risk": "부상 위험",
@@ -420,10 +438,29 @@ const en: Record<TKey, string> = {
   "ai.notWorkout":
     "This isn't a workout video. Record yourself training and try again.",
   "ai.failed": "Analysis failed. Please try again in a moment.",
-  "ai.consentTitle": "Start AI form analysis?",
+  "ai.guideTitle": "How to film for an accurate analysis",
+  "ai.guideLead":
+    "The AI only sees a few frames pulled from your video. Get these four right and the feedback gets much sharper.",
+  "ai.guideAngle": "Film from 45° to your side",
+  "ai.guideAngleDesc":
+    "Straight on from the front or behind hides your knees and back, so the angles can't be read.",
+  "ai.guideFrame": "Head to feet in frame",
+  "ai.guideFrameDesc":
+    "Stand your phone at knee height and step back about three paces to fit your whole body.",
+  "ai.guideReps": "2-3 reps, 10-20 seconds",
+  "ai.guideRepsDesc":
+    "Only a few frames get sent no matter how long you film. Short and clear is more accurate.",
+  "ai.guideLight": "Good light, just you in shot",
+  "ai.guideLightDesc":
+    "Dim light or other people in frame make your form easy to misread.",
+  "ai.guideGotIt": "Got it",
+  "ai.checkTitle": "Did you film it the way the guide says?",
+  "ai.checkWarn":
+    "If the clip does not meet these, the analysis gets much less accurate. A report is made only once per video, so you cannot redo it.",
+  "ai.guideOpen": "Filming guide",
   "ai.consentDesc":
     "* Watch one ad to get your report.\n* A few frames from this video are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
-  "ai.consentAction": "Watch ad & analyze",
+  "ai.consentAction": "Analyze",
   "ai.reportTitle": "AI Form Report",
   "ai.score": "Form score",
   "ai.risk": "Injury risk",

@@ -21,6 +21,8 @@ import { resolveMediaUri } from "@/lib/media";
 // icons
 import Entypo from "@expo/vector-icons/Entypo";
 import { EmptyVideos } from "@/components/shorts/empty-videos";
+import { AiGuideSheet } from "@/components/shorts/ai-guide-sheet";
+import { shortsGuideRef } from "@/components/shorts/shorts-tab-header";
 
 // 복구도 실패한 썸네일(예: 사진첩에서 지운 구 데이터)은 투명하게 비는 대신
 // 대체 타일로 그린다 — 눌러서 재생·삭제까지 갈 수 있어야 한다.
@@ -127,6 +129,8 @@ export default function TabTwoScreen() {
       >
         <Entypo name="video-camera" size={26} color={themeColor.tintText} />
       </TouchableOpacity>
+      {/* 여는 버튼은 헤더에 있다 — 헤더 안에 두면 헤더 높이에 잘린다 */}
+      <AiGuideSheet ref={shortsGuideRef} />
     </View>
   );
 }

@@ -36,6 +36,7 @@ import { formatDate } from "@/lib/date";
 import { useLanguage } from "@/hooks/use-user-store";
 import { RemoveShortsDialog } from "@/components/shorts/remove-shorts-dialog";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { GUIDE_KEYS } from "@/components/shorts/ai-guide-sheet";
 import { ScanOverlay } from "@/components/shorts/scan-overlay";
 import { useT } from "@/hooks/use-t";
 import {
@@ -59,7 +60,7 @@ const BAR_HEIGHT = 3;
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>();
 
-  const { videos, aiConsent, setReport, setAiConsent } = useShortsStore();
+  const { videos, setReport, setAiConsent } = useShortsStore();
   // 아이패드는 회전하므로 모듈 로드 시점 폭을 고정하면 안 된다
   const { width: screenWidth } = useWindowDimensions();
   const themeColor = useCurrentThemeColor();
@@ -78,7 +79,7 @@ export default function ShortsView() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  // 동의 다이얼로그에서 "분석하기"를 누르면 이어서 돌릴 대상
+  // 확인 다이얼로그에서 "분석하기"를 누르면 이어서 돌릴 대상
   const [pending, setPending] = useState<{
     id: number;
     durationMs: number;
@@ -201,12 +202,44 @@ export default function ShortsView() {
       if (video.report) {
         return push(`/shorts/report/${video.id}`);
       }
-      if (!aiConsent) {
-        return setPending({ id: video.id, durationMs });
-      }
-      runAnalyze(video, durationMs);
+      // 찍고 나서야 각도를 바꿀 수 없으니, 가이드를 다시 보여주는 대신
+      // 조건을 지켰는지 확인만 받는다 (촬영 가이드는 촬영 화면·숏츠 탭에 있다)
+      setPending({ id: video.id, durationMs });
     },
-    [videos, aiConsent, push, runAnalyze, failMessage],
+    [videos, push, failMessage],
+  );
+
+  // 조건은 이 다이얼로그에서 제일 중요한 내용이라 설명 문단에 섞지 않고 박스로 띄운다.
+  // 문구는 가이드 시트와 같은 키를 돌려 쓴다 — 따로 적으면 서로 어긋난다.
+  const checkList = useMemo(
+    () => (
+      <View
+        style={[styles.checkBox, { backgroundColor: themeColor.background }]}
+      >
+        {GUIDE_KEYS.map((key) => (
+          <View key={key} style={styles.checkRow}>
+            <View
+              style={[styles.checkDot, { backgroundColor: themeColor.tint }]}
+            />
+            <Text style={styles.checkText}>{t(`ai.guide${key}`)}</Text>
+          </View>
+        ))}
+        {/* 경고색(#F13C33)은 양 테마에서 대비가 4:1이 안 된다(AA 미달) —
+            읽기보다 눈에 띄는 쪽을 택한 의도된 선택이다 */}
+        <View style={styles.warnRow}>
+          <Feather
+            name="alert-triangle"
+            size={14}
+            color={themeColor.fail}
+            style={styles.warnIcon}
+          />
+          <Text style={[styles.warnText, { color: themeColor.fail }]}>
+            {t("ai.checkWarn")}
+          </Text>
+        </View>
+      </View>
+    ),
+    [t, themeColor.background, themeColor.tint, themeColor.fail],
   );
 
   // 진행바 손잡이는 스크롤뷰 밖에서 그린다 —
@@ -299,6 +332,7 @@ export default function ShortsView() {
                     onPressAnalyze={(durationMs) =>
                       onAnalyze(item.id, durationMs)
                     }
+                    analyzeLabel={t("ai.analyze")}
                     hasReport={!!item.report}
                   />
                 </Animated.View>
@@ -343,8 +377,13 @@ export default function ShortsView() {
       <ConfirmDialog
         isOpen={!!pending}
         onClose={() => setPending(null)}
-        title={t("ai.consentTitle")}
-        desc={t("ai.consentDesc")}
+        title={t("ai.checkTitle")}
+        content={checkList}
+        footer={
+          <Text style={[styles.consentText, { color: themeColor.subText }]}>
+            {t("ai.consentDesc")}
+          </Text>
+        }
         actionLabel={t("ai.consentAction")}
         actionColor={themeColor.tint}
         onConfirm={() => {
@@ -380,6 +419,49 @@ export default function ShortsView() {
 }
 
 const styles = StyleSheet.create({
+  checkBox: {
+    borderRadius: 12,
+    padding: 14,
+    gap: 10,
+  },
+  checkRow: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  checkDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+  },
+  // sb-m + 기본 텍스트색 — 회색 sb-l인 설명과 확실히 갈린다
+  checkText: {
+    flex: 1,
+    fontSize: 14,
+  },
+  warnRow: {
+    backgroundColor: "transparent",
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
+  // 첫 줄 글자 높이 한가운데에 맞춘다
+  warnIcon: {
+    marginTop: 2,
+  },
+  warnText: {
+    flex: 1,
+    fontFamily: "sb-l",
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  // 가이드 시트의 같은 고지와 크기를 맞춘다
+  consentText: {
+    fontFamily: "sb-l",
+    fontSize: 12,
+    lineHeight: 18,
+  },
   knob: {
     position: "absolute",
     width: KNOB,
