@@ -3,8 +3,13 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { ShortsPlayer } from "@/components/shorts/shorts-player";
+import { AiGuideSheet } from "@/components/shorts/ai-guide-sheet";
 import { PressScale } from "@/components/press-scale";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -48,6 +53,11 @@ export default function Video() {
   // 카메라·마이크 권한은 녹화 화면에 진입한 이 시점에 요청한다
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [micPermission, requestMicPermission] = useMicrophonePermissions();
+  // 촬영 가이드는 분석 화면과 같은 시트를 읽기 전용으로 연다 — 각도를 바꿀 수
+  // 있는 건 아직 찍지 않은 지금뿐이다
+  const guideRef = useRef<BottomSheetModal>(null);
+  // 이 화면엔 상단 SafeAreaView가 없다 — 가이드 버튼만 직접 인셋을 받는다
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     if (
@@ -255,6 +265,19 @@ export default function Video() {
           {renderVideo()}
         </View>
       ) : null}
+      {/* 촬영 전이든 미리보기 중이든 항상 닿을 수 있게 오버레이 뒤에 그린다 */}
+      <PressScale
+        // 아이콘이 아니라 글자가 든 알약이라 기본 배율(1.25)은 과하다
+        scaleTo={1.05}
+        onPress={() => guideRef.current?.present()}
+        style={[styles.guideButton, { top: insets.top + 8 }]}
+        accessibilityRole="button"
+        accessibilityLabel={t("ai.guideOpen")}
+      >
+        <FontAwesome6 name="circle-info" size={14} color="white" />
+        <Text style={styles.guideText}>{t("ai.guideOpen")}</Text>
+      </PressScale>
+      <AiGuideSheet ref={guideRef} />
     </View>
   );
 }
@@ -262,6 +285,21 @@ export default function Video() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  guideButton: {
+    position: "absolute",
+    right: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.35)",
+  },
+  guideText: {
+    fontSize: 13,
+    color: "white",
   },
   shutterContainer: {
     position: "absolute",

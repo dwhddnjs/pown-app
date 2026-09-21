@@ -12,11 +12,18 @@ interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  desc: string;
+  // 글자 크기까지 직접 잡아야 하면 desc 대신 content로 그린다
+  desc?: string;
   // 실행 버튼의 문구와 색 (삭제는 fail, 그 외는 tint)
   actionLabel: string;
   actionColor: string;
   onConfirm: () => void;
+  // 설명만으로는 묻히는 내용을 호출부가 직접 그려 넣는 자리
+  // (예: AI 분석 전 촬영 조건 박스). 제목과 설명 사이에 들어간다.
+  content?: React.ReactNode;
+  // 버튼 바로 위에 붙는 자리. 누르기 직전에 읽어야 하는 고지(광고·데이터 전송)를
+  // 본문이 아니라 버튼과 한 덩어리로 묶는다.
+  footer?: React.ReactNode;
 }
 
 // "제목 / 설명 / 취소·실행" 두 버튼짜리 확인창. 데이터 초기화·운동 태그 삭제·숏츠
@@ -29,6 +36,8 @@ export const ConfirmDialog = ({
   actionLabel,
   actionColor,
   onConfirm,
+  content,
+  footer,
 }: ConfirmDialogProps) => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
@@ -36,31 +45,46 @@ export const ConfirmDialog = ({
   return (
     <Dialog isOpen={isOpen} onClose={onClose}>
       <View
-        style={[styles.container, { backgroundColor: themeColor.itemColor }]}
+        style={[
+          styles.container,
+          // 박스가 들어가면 박스 자체가 이미 면으로 갈라줘서 24는 너무 벌어진다
+          content ? styles.tightContainer : null,
+          { backgroundColor: themeColor.itemColor },
+        ]}
       >
         <View style={[styles.text, { backgroundColor: themeColor.itemColor }]}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={[styles.desc, { color: themeColor.subText }]}>
-            {desc}
-          </Text>
+          {desc ? (
+            <Text style={[styles.desc, { color: themeColor.subText }]}>
+              {desc}
+            </Text>
+          ) : null}
         </View>
+        {/* 제목/설명 묶음(gap 4) 안에 두면 제목에만 바짝 붙는다 —
+            컨테이너 직계로 올려 위아래 간격을 같게 둔다 */}
+        {content}
         <View
-          style={[styles.buttons, { backgroundColor: themeColor.itemColor }]}
+          style={[styles.actions, { backgroundColor: themeColor.itemColor }]}
         >
-          <Button
-            type="solid"
-            style={{ ...styles.button, backgroundColor: themeColor.subText }}
-            onPress={onClose}
+          {footer}
+          <View
+            style={[styles.buttons, { backgroundColor: themeColor.itemColor }]}
           >
-            {t("common.cancel")}
-          </Button>
-          <Button
-            type="solid"
-            style={{ ...styles.button, backgroundColor: actionColor }}
-            onPress={onConfirm}
-          >
-            {actionLabel}
-          </Button>
+            <Button
+              type="solid"
+              style={{ ...styles.button, backgroundColor: themeColor.subText }}
+              onPress={onClose}
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="solid"
+              style={{ ...styles.button, backgroundColor: actionColor }}
+              onPress={onConfirm}
+            >
+              {actionLabel}
+            </Button>
+          </View>
         </View>
       </View>
     </Dialog>
@@ -72,6 +96,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 24,
   },
+  tightContainer: {
+    gap: 12,
+  },
   text: {
     gap: 4,
   },
@@ -81,6 +108,9 @@ const styles = StyleSheet.create({
   desc: {
     fontSize: 14,
     fontFamily: "sb-l",
+  },
+  actions: {
+    gap: 12,
   },
   buttons: {
     flexDirection: "row",
