@@ -1,6 +1,6 @@
 import React from "react";
 // component
-import { StyleSheet } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import { Text, View } from "./themed";
 import { Dialog } from "./dialog";
 import { Button } from "./button";
@@ -52,17 +52,28 @@ export const ConfirmDialog = ({
           { backgroundColor: themeColor.itemColor },
         ]}
       >
-        <View style={[styles.text, { backgroundColor: themeColor.itemColor }]}>
-          <Text style={styles.title}>{title}</Text>
-          {desc ? (
-            <Text style={[styles.desc, { color: themeColor.subText }]}>
-              {desc}
-            </Text>
-          ) : null}
-        </View>
-        {/* 제목/설명 묶음(gap 4) 안에 두면 제목에만 바짝 붙는다 —
-            컨테이너 직계로 올려 위아래 간격을 같게 둔다 */}
-        {content}
+        {/* 제목·설명·본문만 스크롤에 넣는다. 버튼과 그 위 고지(광고·데이터 전송)는
+            눌리기 직전에 반드시 보여야 하므로 아래에 고정한다. 내용이 짧으면
+            스크롤이 생기지 않아 지금까지와 똑같이 보인다. */}
+        <ScrollView
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View
+            style={[styles.text, { backgroundColor: themeColor.itemColor }]}
+          >
+            <Text style={styles.title}>{title}</Text>
+            {desc ? (
+              <Text style={[styles.desc, { color: themeColor.subText }]}>
+                {desc}
+              </Text>
+            ) : null}
+          </View>
+          {/* 제목/설명 묶음(gap 4) 안에 두면 제목에만 바짝 붙는다 —
+              컨테이너 직계로 올려 위아래 간격을 같게 둔다 */}
+          {content}
+        </ScrollView>
         <View
           style={[styles.actions, { backgroundColor: themeColor.itemColor }]}
         >
@@ -97,6 +108,16 @@ const styles = StyleSheet.create({
     gap: 24,
   },
   tightContainer: {
+    gap: 12,
+  },
+  // flexGrow:0 + flexShrink:1 — 내용이 짧으면 딱 그 높이로 하고, 천장(85%)에 닿으면
+  // 버튼을 밀어내는 대신 자기가 줄어들며 스크롤이 된다
+  scroll: {
+    flexGrow: 0,
+    flexShrink: 1,
+  },
+  // 컨테이너의 gap이 스크롤 밖으로 빠졌으니 안쪽에서 같은 간격을 만든다
+  scrollContent: {
     gap: 12,
   },
   text: {

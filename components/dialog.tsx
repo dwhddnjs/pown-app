@@ -125,8 +125,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  // maxHeight가 없으면 내용 높이 그대로 자란다 — 촬영 조건처럼 문구가 긴 다이얼로그가
+  // 작은 기기에서 화면 밖으로 넘치면 실행 버튼에 닿을 수가 없다. 여기서 천장을 두고,
+  // 넘치는 분량은 ConfirmDialog가 스크롤로 넘긴다(짧은 창은 그대로다).
   content: {
     width: "90%",
+    maxHeight: "85%",
     borderRadius: 16,
     paddingBottom: 20,
   },

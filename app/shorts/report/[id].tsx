@@ -165,6 +165,14 @@ export default function ShortsReportScreen() {
           </RNView>
         )}
 
+        {/* 빅4에서만 온다 — 관절별 관찰을 다 읽은 다음에 오는 결론이라 여기에 둔다.
+            옛 리포트엔 이 필드가 없어서 Section이 알아서 통째로 빠진다 */}
+        <Section
+          title={t("ai.heavy")}
+          color={themeColor.tintText}
+          items={report.heavy ?? []}
+        />
+
         <Section
           title={t("ai.drills")}
           color={themeColor.tintText}
