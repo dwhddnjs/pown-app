@@ -40,10 +40,10 @@ import { GUIDE_KEYS } from "@/components/shorts/ai-guide-sheet";
 import { ScanOverlay } from "@/components/shorts/scan-overlay";
 import { useT } from "@/hooks/use-t";
 import {
-  classifyWorkout,
   extractFrames,
   generateReport,
   getLastAiFailure,
+  identifyWorkout,
 } from "@/lib/ai-report";
 import { showRewardedAd } from "@/lib/ads";
 import { toast } from "sonner-native";
@@ -157,17 +157,23 @@ export default function ShortsView() {
       setIsAnalyzing(true);
       try {
         const frames = await extractFrames(video.video, durationMs);
-        const isWorkout = await classifyWorkout(frames);
-        if (isWorkout === null) {
+        const identified = await identifyWorkout(frames);
+        if (identified.status === "failed") {
           return toast.error(failMessage());
         }
-        if (!isWorkout) {
+        if (identified.status === "notWorkout") {
           return toast.error(t("ai.notWorkout"));
+        }
+        // 종목을 확정하지 못했으면 여기서 끊는다. 광고를 띄우기 전이고 setReport도
+        // 부르지 않으므로 영상당 한 번뿐인 리포트 기회가 그대로 남는다 — 엉뚱한 종목의
+        // 자세 교정이 영구 저장되는 것보다 다시 찍어달라고 하는 편이 낫다.
+        if (identified.status === "unknown") {
+          return toast.error(t("ai.unknownWorkout"));
         }
         // 리포트를 쓰는 동안 광고를 보여주고 둘을 같이 기다린다.
         // 광고가 먼저 끝나면 스캔 화면이 잠깐 더 돌 뿐이다.
         const [report] = await Promise.all([
-          generateReport(frames),
+          generateReport(frames, identified.exercise),
           showRewardedAd(),
         ]);
         if (!report) {
@@ -177,6 +183,11 @@ export default function ShortsView() {
         if (isMountedRef.current) {
           push(`/shorts/report/${video.id}`);
         }
+      } catch {
+        // Gemini 호출은 스스로 삼키지만 setReport(MMKV 쓰기)·push는 던질 수 있다.
+        // 여기서 안 잡으면 finally가 스캔 화면만 걷어내서, 광고까지 본 사용자가
+        // 아무 안내 없이 영상으로 돌아온다(프로덕션은 조용한 unhandled rejection).
+        toast.error(failMessage());
       } finally {
         analyzingIds.delete(video.id);
         setIsAnalyzing(false);
@@ -427,13 +438,15 @@ const styles = StyleSheet.create({
   checkRow: {
     backgroundColor: "transparent",
     flexDirection: "row",
-    alignItems: "center",
     gap: 10,
   },
+  // 첫 줄 글자 높이 한가운데에 맞춘다 — alignItems: center로 두면 조건이 두 줄로
+  // 접히는 순간 점이 문단 중앙으로 내려간다
   checkDot: {
     width: 5,
     height: 5,
     borderRadius: 2.5,
+    marginTop: 7,
   },
   // sb-m + 기본 텍스트색 — 회색 sb-l인 설명과 확실히 갈린다
   checkText: {

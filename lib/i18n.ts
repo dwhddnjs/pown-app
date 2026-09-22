@@ -165,28 +165,35 @@ const ko = {
   "ai.scanning": "AI가 자세를 분석하고 있어요",
   "ai.writing": "리포트를 쓰고 있어요 · 최대 2분까지 걸려요",
   "ai.notWorkout": "운동 영상이 아니에요. 운동하는 장면으로 다시 찍어주세요.",
+  // 종목을 확정 못 했을 때. 리포트를 만들지 않았으므로 1회 기회는 남아 있다 —
+  // "실패"가 아니라 "다시 찍으면 된다"로 읽히게 쓴다.
+  "ai.unknownWorkout":
+    "어떤 운동인지 못 알아봤어요. 몸 옆쪽 45°에서 전신이 다 나오게 다시 찍어주세요.",
   "ai.failed": "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
   "ai.guideTitle": "정확한 분석을 위한 촬영 가이드",
   "ai.guideLead":
     "AI는 영상에서 뽑은 장면 몇 장만 봐요. 아래 네 가지만 지키면 피드백이 훨씬 정확해져요.",
-  "ai.guideAngle": "몸 옆쪽 45°에서",
+  // 제목은 그 자체로 "지켰는지 확인할 수 있는 조건"이어야 한다 —
+  // 분석 전 확인 다이얼로그는 설명 없이 이 제목만 보여준다(app/shorts/[...slug].tsx).
+  "ai.guideAngle": "정면 말고, 몸 옆쪽 45°에서 비스듬히",
   "ai.guideAngleDesc":
-    "정면이나 뒤에서 찍으면 무릎·허리가 가려져서 각도를 읽을 수 없어요.",
-  "ai.guideFrame": "머리부터 발까지 한 화면에",
+    "정면이나 뒤에서는 무릎이 얼마나 접혔는지, 허리가 말렸는지가 몸에 가려 안 보여요. 완전한 옆면(90°)보다 45°가 나아요 — 허리 각도와 무릎 방향을 한 번에 볼 수 있거든요.",
+  "ai.guideFrame": "머리끝부터 발끝까지 한 화면에",
   "ai.guideFrameDesc":
-    "폰을 무릎 높이에 세워두고 세 걸음쯤 떨어지면 전신이 들어와요.",
-  "ai.guideReps": "2~3회 반복, 10~20초면 충분",
+    "발이 잘리면 무게중심을, 머리가 잘리면 상체 각도를 못 읽어요. 폰을 무릎 높이에 세로로 세우고 세 걸음쯤 떨어지면 전신이 들어와요. 바벨을 쓴다면 원판 끝까지 들어오게 해주세요.",
+  "ai.guideReps": "같은 동작 2~3회, 10~20초로 짧게",
   "ai.guideRepsDesc":
-    "길게 찍어도 장면 몇 장만 보내요. 짧고 또렷할수록 정확해요.",
-  "ai.guideLight": "밝은 곳에서 혼자 나오게",
-  "ai.guideLightDesc": "어둡거나 다른 사람이 겹치면 자세를 잘못 읽어요.",
+    "길게 찍어도 AI가 보는 장면 수는 똑같아요 — 영상이 길수록 장면 사이가 벌어져서 놓치는 구간만 생겨요. 자세를 잡는 순간부터 마지막 반복을 끝낼 때까지만 담아주세요.",
+  "ai.guideLight": "밝은 곳에서, 화면에 나 혼자만",
+  "ai.guideLightDesc":
+    "어두우면 관절 위치가 뭉개지고, 뒤로 다른 사람이 지나가면 그 사람 자세를 같이 읽어요. 옷은 몸선이 보이는 게 좋아요 — 헐렁한 옷은 허리가 말렸는지를 가려요.",
   "ai.guideGotIt": "알겠어요",
   "ai.checkTitle": "촬영 가이드대로 찍으셨나요?",
   "ai.checkWarn":
     "조건에 맞지 않으면 분석 정확도가 크게 떨어져요. 리포트는 영상당 한 번만 만들 수 있어 다시 받을 수 없어요.",
   "ai.guideOpen": "촬영 가이드",
   "ai.consentDesc":
-    "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면 몇 장이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
+    "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면 몇 장과 최근 기록한 운동 종목 이름이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
   "ai.consentAction": "분석하기",
   "ai.reportTitle": "AI 자세 리포트",
   "ai.score": "자세 점수",
@@ -195,6 +202,8 @@ const ko = {
   "ai.bad": "아쉬운 점",
   "ai.improve": "개선할 점",
   "ai.checkpoints": "관절별 체크포인트",
+  // 파워리프팅 빅4 리포트에만 나오는 카드
+  "ai.heavy": "중량을 올리려면",
   "ai.drills": "교정 드릴",
   "ai.camera": "촬영 각도 피드백",
   "ai.disclaimer":
@@ -437,29 +446,31 @@ const en: Record<TKey, string> = {
   "ai.writing": "Writing your report · this can take up to 2 minutes",
   "ai.notWorkout":
     "This isn't a workout video. Record yourself training and try again.",
+  "ai.unknownWorkout":
+    "Couldn't tell which exercise this is. Film again from 45° to your side with your whole body in frame.",
   "ai.failed": "Analysis failed. Please try again in a moment.",
   "ai.guideTitle": "How to film for an accurate analysis",
   "ai.guideLead":
     "The AI only sees a few frames pulled from your video. Get these four right and the feedback gets much sharper.",
-  "ai.guideAngle": "Film from 45° to your side",
+  "ai.guideAngle": "Film from 45° to your side, not straight on",
   "ai.guideAngleDesc":
-    "Straight on from the front or behind hides your knees and back, so the angles can't be read.",
-  "ai.guideFrame": "Head to feet in frame",
+    "From the front or behind, your body hides how far the knees bend and whether the back is rounding. 45° beats a full side-on (90°) view — you can see back angle and knee direction at once.",
+  "ai.guideFrame": "Everything from head to feet in frame",
   "ai.guideFrameDesc":
-    "Stand your phone at knee height and step back about three paces to fit your whole body.",
-  "ai.guideReps": "2-3 reps, 10-20 seconds",
+    "Cut off the feet and the balance point is gone; cut off the head and so is the torso angle. Stand your phone upright at knee height and step back about three paces. With a barbell, get the plates in shot too.",
+  "ai.guideReps": "Same movement 2-3 times, 10-20 seconds",
   "ai.guideRepsDesc":
-    "Only a few frames get sent no matter how long you film. Short and clear is more accurate.",
-  "ai.guideLight": "Good light, just you in shot",
+    "The AI sees the same number of frames however long you film — a longer clip only spreads them further apart and misses more. Film from the moment you set up to the end of the last rep.",
+  "ai.guideLight": "Good light, and only you in shot",
   "ai.guideLightDesc":
-    "Dim light or other people in frame make your form easy to misread.",
+    "Dim light blurs where the joints are, and someone walking behind you gets read as part of your form. Fitted clothing helps — baggy layers hide whether your back is rounding.",
   "ai.guideGotIt": "Got it",
   "ai.checkTitle": "Did you film it the way the guide says?",
   "ai.checkWarn":
     "If the clip does not meet these, the analysis gets much less accurate. A report is made only once per video, so you cannot redo it.",
   "ai.guideOpen": "Filming guide",
   "ai.consentDesc":
-    "* Watch one ad to get your report.\n* A few frames from this video are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
+    "* Watch one ad to get your report.\n* A few frames from this video, plus the names of exercises you logged recently, are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
   "ai.consentAction": "Analyze",
   "ai.reportTitle": "AI Form Report",
   "ai.score": "Form score",
@@ -468,6 +479,7 @@ const en: Record<TKey, string> = {
   "ai.bad": "Needs work",
   "ai.improve": "How to improve",
   "ai.checkpoints": "Joint checkpoints",
+  "ai.heavy": "To add weight",
   "ai.drills": "Corrective drills",
   "ai.camera": "Camera angle",
   "ai.disclaimer":

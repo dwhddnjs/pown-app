@@ -26,6 +26,10 @@ export type ShortsReportTypes = {
   bad: string[];
   improve: string[];
   drills: string[];
+  // 파워리프팅 빅4에서만 온다(constants/exercise.ts의 cues가 있는 종목) —
+  // 지금 자세로 중량을 올리면 어디부터 무너지는지. 이 필드 전에 저장된 리포트도
+  // 그대로 열려야 하므로 optional이다
+  heavy?: string[];
   // 프레임만으로 판단이 안 되는 각도였을 때의 재촬영 안내
   camera?: string;
   createdAt: string;
