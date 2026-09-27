@@ -307,6 +307,12 @@ const ko = {
   // 계산기
   "calc.kg": "킬로그램/kg",
   "calc.lb": "파운드/lb",
+
+  // 업데이트 안내
+  "update.title": "새 버전이 나왔어요 (v{version})",
+  "update.desc": "업데이트하고 새 기능과 개선 사항을 만나보세요.",
+  "update.later": "나중에",
+  "update.action": "업데이트",
 } as const;
 
 export type TKey = keyof typeof ko;
@@ -583,6 +589,12 @@ const en: Record<TKey, string> = {
 
   "calc.kg": "Kilograms/kg",
   "calc.lb": "Pounds/lb",
+
+  // 업데이트 안내
+  "update.title": "New version available (v{version})",
+  "update.desc": "Update to get the latest features and fixes.",
+  "update.later": "Later",
+  "update.action": "Update",
 };
 
 export const translations: Record<Lang, Record<TKey, string>> = { ko, en };
