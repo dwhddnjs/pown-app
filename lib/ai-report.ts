@@ -2,14 +2,15 @@
 //
 // 이 앱 최초의 네트워크 코드다. 백엔드가 없으므로 기기에서 Gemini를 직접 부른다.
 //
-// ponytail: 영상을 통째로 올리지 않고 프레임 14장만 뽑아 보낸다. Gemini File API를
-// 쓰면 템포·바 속도까지 진짜로 보지만 50MB+ 리줌 업로드와 처리 상태 폴링이 붙는다.
-// 템포 피드백이 실제로 필요해지면 그때 File API로 올린다.
+// ponytail: 영상을 통째로 올리지 않고 정지 프레임만 뽑아 보낸다 — 판별은 영상 전체를
+// 훑은 최대 20장, 리포트는 판별이 짚은 반복 구간의 14장(lib/ai-identify.ts). Gemini
+// File API를 쓰면 템포·바 속도까지 진짜로 보지만 50MB+ 리줌 업로드와 처리 상태 폴링이
+// 붙는다. 템포 피드백이 실제로 필요해지면 그때 File API로 올린다.
 //
-// 호출은 두 번이다. 먼저 identifyWorkout이 "운동 영상인가 + 무슨 종목인가"를 정하고,
-// 그 다음 generateReport가 그 종목의 자세만 평가한다. 종목을 리포트와 같은 호출에서
-// 자유 문자열로 뽑던 예전 방식은 푸쉬업을 버피로, 프론트레이즈를 사레레로 읽고는
-// 리포트 전체를 틀린 종목에 맞춰 써 버렸다.
+// 호출은 두 번이다. 먼저 identifyWorkout이 "운동 영상인가 + 무슨 종목인가 + 어디서
+// 드는가"를 정하고, 그 다음 generateReport가 그 구간에서 그 종목의 자세만 평가한다.
+// 종목을 리포트와 같은 호출에서 자유 문자열로 뽑던 예전 방식은 푸쉬업을 버피로,
+// 프론트레이즈를 사레레로 읽고는 리포트 전체를 틀린 종목에 맞춰 써 버렸다.
 import { EXERCISES, ExerciseTypes } from "@/constants/exercise";
 import { ShortsReportTypes } from "@/hooks/use-shorts-store";
 import { getLanguage, useUserStore } from "@/hooks/use-user-store";
@@ -18,8 +19,10 @@ import {
   IDENTIFY_SCHEMA,
   IdentifyResult,
   Part,
+  RepsRange,
+  focusTimes,
   identifyInstruction,
-  pickIdentifyFrames,
+  scanTimes,
   toIdentifyResult,
 } from "@/lib/ai-identify";
 import { resolveMediaUri } from "@/lib/media";
@@ -50,9 +53,6 @@ const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
 // 헤더는 구글이 제한을 고칠 때를 대비해 남겨 둔다 (무시되므로 무해).
 const BUNDLE_ID = "com.anonymous.workout-app";
 
-const FRAME_COUNT = 14;
-// 한 세트를 넘어가는 길이는 잘라낸다 — 프레임 간격만 벌어지고 얻는 게 없다
-const MAX_SPAN_MS = 60_000;
 // flash-lite는 14프레임 리포트가 실측 3초다(사고 토큰이 없다). 60초면 충분한 여유고,
 // 재시도까지 합친 최악이 약 2분이라 ai.writing의 "최대 2분" 문구와 맞는다.
 // 예전 flash(50~95초)에 맞춰 180초를 두면 최악 9분이 되어 문구가 거짓말이 된다.
@@ -78,46 +78,29 @@ const retryDelayMs = (body: string, attempt: number) => {
   return Math.min(wait, MAX_RETRY_MS);
 };
 
-// __DEV__ 전용 진단. no-console 규칙 때문에 로그를 못 남겨 실패 원인을 두 번이나
-// 추측으로 좁혔다 — 개발 빌드에서는 토스트에 붙여 바로 보이게 한다.
+// 마지막 실패 원인. no-console 규칙 때문에 로그를 못 남겨 실패 원인을 두 번이나
+// 추측으로 좁혔다 — 개발 빌드에서는 토스트에 붙여 바로 보이게 한다. 프로덕션에서는
+// 하루 한도 소진만 따로 안내한다(isDailyQuotaHit). 호출마다 비우므로 옛 원인이 남지 않는다.
 let lastFailure = "";
 export const getLastAiFailure = () => lastFailure;
-
-// 앞뒤는 폰을 세우고 걸어오는 장면, 끝내고 돌아가 끄는 장면이다. 이게 섞이면 푸쉬업
-// 영상이 "서기 → 바닥 → 서기"가 되어 그대로 버피의 동작 패턴으로 읽힌다. 판별 호출은
-// 진작 앞뒤를 잘라내고 있었는데(그래서 판별은 맞았다) 리포트 호출만 전 구간을 받아
-// 종목을 통째로 틀렸다. 이제 한 곳에서 자른다.
-//
-// 다만 잘라내는 건 "걸어와서 자세 잡는 시간"이고 그건 영상 길이에 비례하지 않는다 —
-// 몇 초다. 비율로만 자르면 1분짜리 영상에서 앞뒤 10초씩이 날아가 세트 한가운데를
-// 자르고, 빅4 브리프가 보라고 한 셋업(데드의 바닥 출발)과 락아웃이 통째로 사라진다.
-// 상한을 두면 짧은 영상은 지금과 똑같이 자르고 긴 영상만 살아난다.
-const TRIM_RATIO = 0.175;
-const TRIM_MAX_MS = 3000;
-
-// 프레임을 뽑을 시점(ms). 앞뒤 준비 구간을 뺀 나머지에서 고르게 뽑는다.
-// duration을 못 읽었으면(0) 4초짜리로 가정한다 — 멈추는 것보단 낫다.
-export const frameTimes = (durationMs: number, count = FRAME_COUNT) => {
-  const span = Math.min(durationMs > 0 ? durationMs : 4000, MAX_SPAN_MS);
-  const trim = Math.min(span * TRIM_RATIO, TRIM_MAX_MS);
-  const step = (span - trim * 2) / Math.max(count - 1, 1);
-  return Array.from({ length: count }, (_, i) => Math.round(trim + step * i));
-};
+export const isDailyQuotaHit = () => lastFailure === "daily quota";
 
 // __DEV__ 전용. 모델에게 실제로 보낸 프레임을 디스크에 남긴다 — 이게 없으면 프롬프트를
 // 고칠 때마다 빌드→촬영→광고→리포트 1회 제한에 막혀 정확도가 나아졌는지 알 수 없다.
 // 시뮬레이터에서는 맥의 일반 폴더다:
 //   xcrun simctl get_app_container booted com.anonymous.workout-app data
-// 그 Documents/ai-frames/<영상파일명>/ 을 scripts/ai-eval.mjs에 그대로 물린다.
-const devFrameDir = async (storedVideoUri: string) => {
+// 그 Documents/ai-frames/<영상파일명>/ (판별이 본 훑기 프레임)을 scripts/ai-eval.mjs에
+// 그대로 물린다. Documents/ai-focus/<영상파일명>/ 은 리포트가 본 구간이다 — 구간이
+// 실제 동작에 떨어졌는지 눈으로 확인하는 용도다(ai-eval 입력이 아니다).
+const devFrameDir = async (storedVideoUri: string, root: string) => {
   const name =
     storedVideoUri
       .split("/")
       .pop()
       ?.replace(/\.\w+$/, "") || "clip";
-  const dir = `${FileSystem.documentDirectory}ai-frames/${name}/`;
+  const dir = `${FileSystem.documentDirectory}${root}/${name}/`;
   // 매번 비우고 시작한다. copyAsync는 대상이 이미 있으면 실패하고(lib/media.ts),
-  // TRIM을 바꾸면 파일명(=시점 ms)도 바뀌어서, 안 비우면 예전 구간 프레임이 섞인
+  // 뽑는 시점을 바꾸면 파일명(=시점 ms)도 바뀌어서, 안 비우면 예전 구간 프레임이 섞인
   // 폴더를 평가하게 된다 — 측정하려고 만든 것이 측정을 망친다.
   await FileSystem.deleteAsync(dir, { idempotent: true });
   await FileSystem.makeDirectoryAsync(dir, { intermediates: true });
@@ -125,19 +108,19 @@ const devFrameDir = async (storedVideoUri: string) => {
 };
 
 // 프레임마다 "t=1.2s" 텍스트를 앞에 붙인다 — 정지 이미지 나열로는 사라지는
-// 시간축을 모델이 최소한 순서로는 읽을 수 있게 한다.
-export const extractFrames = async (
+// 시간축을 모델이 최소한 순서로는 읽을 수 있게 한다. 판별 호출은 이 라벨로 반복 구간을 짚는다.
+const extractFrames = async (
   storedVideoUri: string,
-  durationMs: number,
-  count = FRAME_COUNT,
+  times: number[],
+  dumpRoot: string,
 ): Promise<Part[]> => {
   const source = resolveMediaUri(storedVideoUri);
   const parts: Part[] = [];
   const dumpDir = __DEV__
-    ? await devFrameDir(storedVideoUri).catch(() => "")
+    ? await devFrameDir(storedVideoUri, dumpRoot).catch(() => "")
     : "";
 
-  for (const time of frameTimes(durationMs, count)) {
+  for (const time of times) {
     try {
       const { uri } = await VideoThumbnails.getThumbnailAsync(source, {
         time,
@@ -153,7 +136,7 @@ export const extractFrames = async (
           to: `${dumpDir}${String(time).padStart(6, "0")}.jpg`,
         }).catch(() => {});
       }
-      // 캐시에 쌓아두면 분석할 때마다 14장씩 늘어난다
+      // 캐시에 쌓아두면 분석할 때마다 수십 장씩 늘어난다
       FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {});
       parts.push({ text: `t=${(time / 1000).toFixed(1)}s` });
       parts.push({ inlineData: { mimeType: "image/jpeg", data } });
@@ -170,6 +153,7 @@ const callGemini = async (
   responseSchema: object,
   temperature: number,
 ): Promise<any | null> => {
+  lastFailure = "";
   if (!API_KEY || parts.length === 0) {
     lastFailure = !API_KEY ? "no api key" : "no frames";
     return null;
@@ -228,10 +212,13 @@ const callOnce = async (
     });
     if (!response.ok) {
       const body = await response.text().catch(() => "");
-      lastFailure = `HTTP ${response.status}`;
+      // 하루 한도(quotaId에 PerDay)는 태평양 자정(한국 16~17시)에야 풀린다 — 15초 뒤
+      // 재시도는 사용자만 붙잡아 두고 또 429를 맞는다. 분당 한도만 재시도할 가치가 있다
+      const isDailyQuota = response.status === 429 && body.includes("PerDay");
+      lastFailure = isDailyQuota ? "daily quota" : `HTTP ${response.status}`;
       return {
         result: null,
-        retryable: RETRY_STATUS.includes(response.status),
+        retryable: !isDailyQuota && RETRY_STATUS.includes(response.status),
         body,
       };
     }
@@ -283,16 +270,18 @@ const recentExercises = () => {
   return [...names];
 };
 
-// 판별과 종목 인식을 한 호출로 합쳤다. 광고는 이 뒤에 붙으므로, 여기서 기권하면
-// 사용자는 광고도 안 보고 영상당 1회뿐인 리포트 기회도 잃지 않는다.
+// 판별과 종목 인식을 한 호출로 합쳤다(반복 구간도 여기서 짚는다 — 호출을 늘리면 무료
+// 쿼터가 그만큼 준다). 광고는 이 뒤에 붙으므로, 여기서 기권하면 사용자는 광고도 안 보고
+// 영상당 1회뿐인 리포트 기회도 잃지 않는다.
 // 종목 판별은 창작이 아니다 — 같은 프레임이면 같은 답이 나와야 하므로 temperature 0.
 export const identifyWorkout = async (
-  frames: Part[],
+  storedVideoUri: string,
+  durationMs: number,
 ): Promise<IdentifyResult> =>
   toIdentifyResult(
     await callGemini(
       identifyInstruction(recentExercises()),
-      pickIdentifyFrames(frames),
+      await extractFrames(storedVideoUri, scanTimes(durationMs), "ai-frames"),
       IDENTIFY_SCHEMA,
       0,
     ),
@@ -395,7 +384,9 @@ Only report what you can actually see in these frames. Do not read this list bac
 
   return `${role}
 
-You receive still frames sampled in order from one video of a single person training. Each frame is preceded by its timestamp.
+You receive still frames sampled in order from one video of a single person training, taken densely from the part of the clip where the reps happen (the walking around and setting up has mostly been cut away). Each frame is preceded by its timestamp.
+
+The clip may hold a single heavy rep, such as a 1RM attempt, instead of a set. Then coach that one rep — which position gave way first and what to fix before the next attempt — and do not ask them to film more reps.
 
 The exercise has already been identified: **${exercise.en}**. Coach THIS movement — do not re-identify it, do not name a different one, and do not print the exercise name anywhere in your answer (the app shows it already). If the frames genuinely do not look like ${exercise.en}, say that in "camera" instead of silently grading something else.${brief}
 
@@ -443,12 +434,18 @@ const toStringList = (value: unknown): string[] =>
 // ponytail: 그래도 종목이 자주 틀리면 다음 단계는 identifyWorkout을 3회 병렬로 돌려
 // 다수결을 내는 것이다(분석당 호출 4회 = 무료 125회/일). 싼 수정의 효과를 먼저 재고.
 export const generateReport = async (
-  frames: Part[],
+  storedVideoUri: string,
+  durationMs: number,
   exercise: ExerciseTypes,
+  reps?: RepsRange,
 ): Promise<ShortsReportTypes | null> => {
   const raw = await callGemini(
     systemInstruction(exercise),
-    frames,
+    await extractFrames(
+      storedVideoUri,
+      focusTimes(durationMs, reps),
+      "ai-focus",
+    ),
     REPORT_SCHEMA,
     0.4,
   );

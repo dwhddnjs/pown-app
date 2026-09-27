@@ -26,7 +26,7 @@ npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-cli
 
 테스트 러너는 없다 — 검증은 타입 체크 `npx tsc --noEmit`(strict) + 린트 `npm run lint`(eslint-config-expo, `no-console` error). 둘 다 에러 0을 유지할 것. 포맷은 prettier(`npm run format`, 설정은 `.prettierrc`: 세미콜론 + trailing comma all) — 커밋 전에 돌린다. `ios/`·`android/`는 gitignore(CNG). `.npmrc`에 `legacy-peer-deps=true`.
 
-**배포(EAS)**: `eas build --profile production --platform ios` / JS만 바뀌면 `eas update --channel production`. `appVersionSource:"remote"`. `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
+**배포(EAS)**: `eas build --profile production --platform ios` / JS만 바뀌면 `eas update --channel production --environment production`. **`--environment`를 빼면** EAS에 등록한 `EXPO_PUBLIC_GEMINI_API_KEY`가 번들에 안 들어가(로컬엔 `.env`가 없고, SDK 55 미만이라 CLI가 묻지도 않는다) AI 분석이 전부 실패하는 업데이트가 에러 없이 나간다. `appVersionSource:"remote"`. `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
 **네이티브 의존성이 바뀐 릴리스는 OTA 금지** — 옛 바이너리에 새 JS가 내려가 실행 즉시 죽는다. 두 버전을 올리고 새로 빌드할 것.
 
 ## 아키텍처

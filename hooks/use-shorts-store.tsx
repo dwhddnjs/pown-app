@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   isAppOwnedMedia,
   isMediaMissing,
@@ -45,6 +46,9 @@ export type ShortsVideoTypes = {
   report?: ShortsReportTypes;
 };
 
+// 그리드 정렬. 저장 배열은 촬영 순서 그대로 두고 보여줄 때만 정렬한다(useSortedVideos)
+export type ShortsSortTypes = "latest" | "oldest";
+
 // 파일 검사는 목록당 한 번이면 된다. 목록이 통째로 바뀌면(복원·초기화) 다시 검사한다.
 // 상태로 두면 persist가 같이 저장해 다음 실행에서 영영 안 돌게 된다.
 let hasRepaired = false;
@@ -56,6 +60,8 @@ type ShortsStoreTypes = {
   videos: ShortsVideoTypes[];
   // 영상 프레임이 외부 AI로 나가도 되는지 — 첫 분석 전에 한 번만 묻는다
   aiConsent: boolean;
+  sort: ShortsSortTypes;
+  setSort: (sort: ShortsSortTypes) => void;
   setAddVideo: (video: ShortsVideoTypes) => void;
   setReport: (videoId: number, report: ShortsReportTypes) => void;
   setAiConsent: () => void;
@@ -71,6 +77,8 @@ export const useShortsStore = create<ShortsStoreTypes>()(
     (set, get) => ({
       videos: [],
       aiConsent: false,
+      sort: "latest",
+      setSort: (sort) => set({ sort }),
       setAiConsent: () => set({ aiConsent: true }),
       setAddVideo: (video) =>
         set((prev) => ({
@@ -131,9 +139,10 @@ export const useShortsStore = create<ShortsStoreTypes>()(
           }
           if (await isMediaMissing(video.thumbnail)) {
             try {
+              // 화질은 저장 경로(app/shorts/video.tsx)와 맞춘다
               const { uri } = await VideoThumbnails.getThumbnailAsync(
                 resolveMediaUri(video.video),
-                { time: 0 },
+                { time: 0, quality: 0.7 },
               );
               return {
                 ...video,
@@ -185,3 +194,17 @@ export const useShortsStore = create<ShortsStoreTypes>()(
     },
   ),
 );
+
+// 그리드와 뷰어가 같은 순서를 봐야 뷰어의 위아래 넘김이 그리드 순서를 따른다.
+// id가 촬영 시각(Date.now())이라 그대로 정렬 키로 쓴다 — 저장 배열·백업 형식은 그대로
+export const useSortedVideos = () => {
+  const videos = useShortsStore((state) => state.videos);
+  const sort = useShortsStore((state) => state.sort);
+  return useMemo(
+    () =>
+      [...videos].sort((a, b) =>
+        sort === "latest" ? b.id - a.id : a.id - b.id,
+      ),
+    [videos, sort],
+  );
+};

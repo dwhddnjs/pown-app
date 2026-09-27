@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 // component
 import {
   FlatList,
@@ -15,7 +15,11 @@ import { useRouter } from "expo-router";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { useShortsStore } from "@/hooks/use-shorts-store";
+import {
+  ShortsVideoTypes,
+  useShortsStore,
+  useSortedVideos,
+} from "@/hooks/use-shorts-store";
 // lib
 import { resolveMediaUri } from "@/lib/media";
 // icons
@@ -58,7 +62,10 @@ const Thumbnail = ({
 export default function TabTwoScreen() {
   const themeColor = useCurrentThemeColor();
   const { width: screenWidth } = useWindowDimensions();
-  const { videos, onRepairVideos } = useShortsStore();
+  const videos = useSortedVideos();
+  const sort = useShortsStore((state) => state.sort);
+  const onRepairVideos = useShortsStore((state) => state.onRepairVideos);
+  const listRef = useRef<FlatList<ShortsVideoTypes>>(null);
 
   const { push } = useRouter();
   const headerHeight = useHeaderHeight();
@@ -70,6 +77,11 @@ export default function TabTwoScreen() {
   useEffect(() => {
     onRepairVideos();
   }, [videos, onRepairVideos]);
+
+  // 정렬을 바꾸면 새 순서의 맨 앞(가장 최신/오래된 영상)부터 보여준다
+  useEffect(() => {
+    listRef.current?.scrollToOffset({ offset: 0, animated: false });
+  }, [sort]);
 
   // 매 렌더마다 새 객체를 넘기면 그때마다 리스트가 레이아웃을 다시 잡는다
   // (workout.tsx의 listPadding과 같은 이유)
@@ -89,6 +101,7 @@ export default function TabTwoScreen() {
         <EmptyVideos />
       ) : (
         <FlatList
+          ref={listRef}
           data={videos}
           numColumns={3}
           showsVerticalScrollIndicator={false}

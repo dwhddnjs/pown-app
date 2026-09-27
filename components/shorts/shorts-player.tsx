@@ -40,6 +40,11 @@ interface ShortsPlayerProps {
 const KNOB = 12;
 const BAR_HEIGHT = 3;
 
+// 음소거는 영상마다가 아니라 앱 전체에서 따라간다 — 헬스장에서 한 번 껐는데 넘길
+// 때마다 다시 소리가 나면 안 된다. 플레이어가 영상마다 새로 생기므로 모듈 스코프에 둔다
+// (분석 중 id를 [...slug].tsx가 모듈 스코프에 두는 것과 같은 이유).
+let isMutedGlobal = false;
+
 export const ShortsPlayer = ({
   uri,
   isActive,
@@ -56,6 +61,8 @@ export const ShortsPlayer = ({
   const [icon, setIcon] = useState<"play" | "pause">("play");
   const [trackWidth, setTrackWidth] = useState(0);
   const [isSeeking, setIsSeeking] = useState(false);
+  // 가로로 찍은 영상을 cover로 채우면 세로 화면에서 좌우 70% 가까이 잘려 몸이 안 보인다
+  const [isLandscape, setIsLandscape] = useState(false);
   // PanResponder 콜백은 생성 시점 값을 캡처하므로 최신 값을 ref로 읽는다
   const seekingRef = useRef(false);
   const trackWidthRef = useRef(0);
@@ -67,6 +74,7 @@ export const ShortsPlayer = ({
 
   const player = useVideoPlayer(resolveMediaUri(uri), (player) => {
     player.loop = true;
+    player.muted = isMutedGlobal;
     // 기본값 0이면 timeUpdate 이벤트가 오지 않는다
     player.timeUpdateEventInterval = 0.25;
   });
@@ -91,6 +99,8 @@ export const ShortsPlayer = ({
 
   useEffect(() => {
     if (isActive) {
+      // 미리 떠 있던 이웃 플레이어는 그 사이 바뀐 음소거를 모른다
+      player.muted = isMutedGlobal;
       player.play();
       opacity.value = 0;
       // 페이지가 바뀐 직후 첫 timeUpdate 전까지 부모 손잡이가 옛 위치에 남지 않게
@@ -101,6 +111,10 @@ export const ShortsPlayer = ({
       }
     } else {
       player.pause();
+      // 다시 돌아오면 처음부터 — 숏츠 앱들의 관행이고, 자세 영상은 처음부터 다시 봐야
+      // 한다. 넘어갈 때 미리 되감아 두면 돌아오는 스와이프 중에도 첫 장면이 보인다.
+      player.currentTime = 0;
+      setProgress(0);
     }
   }, [isActive, player, opacity, progressSV]);
 
@@ -180,11 +194,21 @@ export const ShortsPlayer = ({
     <Pressable style={{ width: "100%", flex: 1 }} onPress={onTogglePlay}>
       <VideoView
         style={StyleSheet.absoluteFill}
-        contentFit={compact ? "contain" : "cover"}
+        contentFit={compact || isLandscape ? "contain" : "cover"}
         player={player}
         nativeControls={false}
         // 일시정지 시 우하단에 뜨는 iOS Live Text(텍스트 복사) 버튼 비활성화
         allowsVideoFrameAnalysis={false}
+        // 방향은 영상 크기(videoTrack.size)로 못 본다 — 회전 전 원본 크기라 세로 영상도
+        // 가로로 나온다. 썸네일 생성은 회전을 적용하므로 아주 작게 한 장 뽑아 본다
+        onFirstFrameRender={() => {
+          player
+            .generateThumbnailsAsync(0, { maxWidth: 32, maxHeight: 32 })
+            .then(([frame]) =>
+              setIsLandscape(!!frame && frame.width > frame.height),
+            )
+            .catch(() => {});
+        }}
       />
       <View style={styles.playOverlay} pointerEvents="none">
         <Animated.View style={[styles.playBadge, iconStyle]}>
@@ -221,7 +245,10 @@ export const ShortsPlayer = ({
       <Pressable
         style={styles.muteButton}
         hitSlop={12}
-        onPress={() => (player.muted = !player.muted)}
+        onPress={() => {
+          isMutedGlobal = !player.muted;
+          player.muted = isMutedGlobal;
+        }}
       >
         <Feather
           name={muted ? "volume-x" : "volume-2"}

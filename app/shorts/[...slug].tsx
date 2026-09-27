@@ -1,7 +1,11 @@
 import { ShortsPlayer } from "@/components/shorts/shorts-player";
 import { ShortsMemoSheet } from "@/components/shorts/shorts-memo-sheet";
 import { Text, View } from "@/components/themed";
-import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store";
+import {
+  ShortsVideoTypes,
+  useShortsStore,
+  useSortedVideos,
+} from "@/hooks/use-shorts-store";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useIsFocused } from "@react-navigation/native";
 import React, {
@@ -40,10 +44,10 @@ import { GUIDE_KEYS } from "@/components/shorts/ai-guide-sheet";
 import { ScanOverlay } from "@/components/shorts/scan-overlay";
 import { useT } from "@/hooks/use-t";
 import {
-  extractFrames,
   generateReport,
   getLastAiFailure,
   identifyWorkout,
+  isDailyQuotaHit,
 } from "@/lib/ai-report";
 import { showRewardedAd } from "@/lib/ads";
 import { toast } from "sonner-native";
@@ -60,7 +64,8 @@ const BAR_HEIGHT = 3;
 export default function ShortsView() {
   const { slug } = useLocalSearchParams<any>();
 
-  const { videos, setReport, setAiConsent } = useShortsStore();
+  const videos = useSortedVideos();
+  const { setReport, setAiConsent } = useShortsStore();
   // 아이패드는 회전하므로 모듈 로드 시점 폭을 고정하면 안 된다
   const { width: screenWidth } = useWindowDimensions();
   const themeColor = useCurrentThemeColor();
@@ -76,6 +81,11 @@ export default function ShortsView() {
   }, []);
 
   const [position, setPosition] = useState(initialPage);
+  // 플레이어를 띄울 범위의 중심. position(재생할 영상)은 스와이프가 완전히 멈춰야
+  // 바뀌는데, 연달아 넘기면 iOS가 앞 감속을 끊어 onMomentumScrollEnd가 오지 않는다 —
+  // 그러면 두 장 뒤 영상이 안 떠 있는 채로 들어와 검은 화면이 보였다. 스크롤 위치를
+  // 따라가며 미리 띄운다
+  const [near, setNear] = useState(initialPage);
   const [isOpen, setIsOpen] = useState(false);
   const [isMemoOpen, setIsMemoOpen] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -145,19 +155,20 @@ export default function ShortsView() {
 
   // 개발 빌드에서는 실패 원인(HTTP 429 / timeout / network …)을 토스트에 붙인다.
   // no-console 규칙 때문에 로그가 없어 원인을 두 번이나 추측으로 좁혔다.
-  const failMessage = useCallback(
-    () =>
-      __DEV__ ? `${t("ai.failed")} [${getLastAiFailure()}]` : t("ai.failed"),
-    [t],
-  );
+  // 하루 한도 소진은 몇 시간 뒤에야 풀린다 — "잠시 후"라고 하면 계속 다시 누른다
+  const failMessage = useCallback(() => {
+    if (isDailyQuotaHit()) return t("ai.dailyLimit");
+    return __DEV__
+      ? `${t("ai.failed")} [${getLastAiFailure()}]`
+      : t("ai.failed");
+  }, [t]);
 
   const runAnalyze = useCallback(
     async (video: ShortsVideoTypes, durationMs: number) => {
       analyzingIds.add(video.id);
       setIsAnalyzing(true);
       try {
-        const frames = await extractFrames(video.video, durationMs);
-        const identified = await identifyWorkout(frames);
+        const identified = await identifyWorkout(video.video, durationMs);
         if (identified.status === "failed") {
           return toast.error(failMessage());
         }
@@ -170,10 +181,15 @@ export default function ShortsView() {
         if (identified.status === "unknown") {
           return toast.error(t("ai.unknownWorkout"));
         }
-        // 리포트를 쓰는 동안 광고를 보여주고 둘을 같이 기다린다.
-        // 광고가 먼저 끝나면 스캔 화면이 잠깐 더 돌 뿐이다.
+        // 리포트를 쓰는 동안 광고를 보여주고 둘을 같이 기다린다(반복 구간 프레임
+        // 추출도 광고 뒤에서 같이 돈다). 광고가 먼저 끝나면 스캔 화면이 잠깐 더 돌 뿐이다.
         const [report] = await Promise.all([
-          generateReport(frames, identified.exercise),
+          generateReport(
+            video.video,
+            durationMs,
+            identified.exercise,
+            identified.reps,
+          ),
           showRewardedAd(),
         ]);
         if (!report) {
@@ -205,8 +221,8 @@ export default function ShortsView() {
       if (!video || analyzingIds.has(videoId)) {
         return;
       }
-      // E. duration을 못 읽은 채 진행하면 앞 4초만 샘플링한 리포트가 영구 저장된다
-      // (영상당 1회 정책이라 다시 만들 수 없다) — 실패로 끊는 편이 낫다
+      // E. duration을 못 읽으면 프레임을 뽑을 시점을 못 정해 첫 장면만 반복해 본 리포트가
+      // 영구 저장된다(영상당 1회 정책이라 다시 만들 수 없다) — 실패로 끊는 편이 낫다
       if (durationMs <= 0 && !video.report) {
         return toast.error(failMessage());
       }
@@ -304,8 +320,16 @@ export default function ShortsView() {
           onScrollBeginDrag={() => {
             barOpacity.value = withTiming(0, { duration: 120 });
           }}
-          // onScroll을 쓰면 높이가 바뀔 때도 이벤트가 와서 옛 offset ÷ 새 height로
-          // 엉뚱한 페이지가 계산된다. 사용자 스와이프가 끝났을 때만 갱신한다.
+          // 미리 띄울 범위만 스크롤을 따라간다(같은 값이면 리렌더 없음). 설사 순간적으로
+          // 틀려도 "어느 걸 미리 띄우냐"만 바뀌고 재생 대상(position)은 안 흔들린다
+          scrollEventThrottle={50}
+          onScroll={(e) => {
+            if (fullHeight) {
+              setNear(Math.round(e.nativeEvent.contentOffset.y / fullHeight));
+            }
+          }}
+          // 재생 대상은 사용자 스와이프가 끝났을 때만 바꾼다 — 스크롤 도중에 바꾸면
+          // 넘기는 중인 영상들이 켜졌다 꺼졌다 한다
           onMomentumScrollEnd={(e) => {
             barOpacity.value = withTiming(1, { duration: 180 });
             if (!fullHeight) {
@@ -331,22 +355,28 @@ export default function ShortsView() {
                   backgroundColor: "transparent",
                 }}
               >
-                {/* 시트가 덮는 만큼 영상 영역만 줄인다 — 페이지 높이는 그대로다 */}
-                <Animated.View style={videoAreaStyle}>
-                  <ShortsPlayer
-                    uri={item.video}
-                    isActive={index === position && isFocused}
-                    compact={isMemoOpen}
-                    progressSV={progressSV}
-                    barOpacity={barOpacity}
-                    onPressMemo={() => memoRef.current?.snapToIndex(0)}
-                    onPressAnalyze={(durationMs) =>
-                      onAnalyze(item.id, durationMs)
-                    }
-                    analyzeLabel={t("ai.analyze")}
-                    hasReport={!!item.report}
-                  />
-                </Animated.View>
+                {/* 플레이어는 지금 화면에 가장 가까운 영상과 바로 위아래 한 장씩만 띄운다.
+                    전부 띄우면 저장된 숏츠 수만큼 AVPlayer가 영상을 올려둔 채 대기해서
+                    메모리와 디코더가 바닥난다.
+                    시트가 덮는 만큼 영상 영역만 줄인다 — 페이지 높이는 그대로다 */}
+                {Math.abs(index - near) <= 1 && (
+                  <Animated.View style={videoAreaStyle}>
+                    <ShortsPlayer
+                      uri={item.video}
+                      // 분석 중엔 멈춘다 — 이어서 뜨는 리워드 광고와 소리가 겹친다
+                      isActive={index === position && isFocused && !isAnalyzing}
+                      compact={isMemoOpen}
+                      progressSV={progressSV}
+                      barOpacity={barOpacity}
+                      onPressMemo={() => memoRef.current?.snapToIndex(0)}
+                      onPressAnalyze={(durationMs) =>
+                        onAnalyze(item.id, durationMs)
+                      }
+                      analyzeLabel={t("ai.analyze")}
+                      hasReport={!!item.report}
+                    />
+                  </Animated.View>
+                )}
               </View>
             );
           })}
@@ -413,7 +443,7 @@ export default function ShortsView() {
       <RemoveShortsDialog
         open={isOpen}
         setIsOpen={() => setIsOpen(false)}
-        position={position}
+        videoId={videos[position]?.id}
       />
       <ShortsMemoSheet
         ref={memoRef}
