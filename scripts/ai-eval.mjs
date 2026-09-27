@@ -8,6 +8,7 @@
 //   1) 개발 빌드로 문제의 영상들을 분석한다 (__DEV__면 프레임이 디스크에 남는다)
 //   2) xcrun simctl get_app_container booted com.anonymous.workout-app data
 //      → <그 경로>/Documents/ai-frames/ 아래 영상별 폴더가 생겨 있다
+//      (옆의 ai-focus/는 리포트가 본 반복 구간이다 — 구간이 맞게 잡혔는지 눈으로 볼 때 쓴다)
 //   3) 폴더 이름을 정답으로 바꾼다 (enum key / 한글명 / 영문명 아무거나: push_up, 푸쉬업 …)
 //      운동이 아닌 영상을 섞고 싶으면 폴더 이름을 notWorkout으로 둔다
 //   4) node --env-file=.env scripts/ai-eval.mjs <그 ai-frames 경로>
@@ -139,7 +140,8 @@ const main = async () => {
 
   for (const [index, item] of cases.entries()) {
     const expected = toKey(EXERCISES, item.label);
-    const parts = mod.pickIdentifyFrames(framesFromDir(item.dir));
+    // 폴더에 남은 건 판별이 실제로 본 훑기 프레임 전부다 — 그대로 보낸다
+    const parts = framesFromDir(item.dir);
     const raw = await callGemini(model, key, parts, mod);
     const verdict = mod.toIdentifyResult(raw);
     const got =
@@ -194,9 +196,11 @@ const print = (row) => {
   // 호출실패(!)는 오답(X)과 다르게 찍는다 — 표에서도 구분돼야 의미가 있다
   const mark = row.failed ? "!" : row.hit ? "O" : row.abstain ? "-" : "X";
   const pad = (v, n) => String(v).padEnd(n);
+  // 짚은 반복 구간(초) — 프레임 파일명(ms)과 대조해 실제 동작 구간인지 본다
+  const reps = row.raw ? `${row.raw.repsFrom}–${row.raw.repsTo}s` : "";
   console.log(
     `${mark} ${pad(row.expected, 24)}→ ${pad(row.got, 24)}` +
-      `${pad(row.raw?.confidence ?? "", 8)}${pad(row.raw?.bodyOrientation ?? "", 12)}${row.raw?.armPath ?? ""}`,
+      `${pad(row.raw?.confidence ?? "", 8)}${pad(reps, 14)}${pad(row.raw?.bodyOrientation ?? "", 12)}${row.raw?.armPath ?? ""}`,
   );
 };
 

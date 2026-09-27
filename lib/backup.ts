@@ -36,6 +36,11 @@ type Manifest = {
 const rmrf = (uri: string) =>
   FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {});
 
+// 숏츠 영상까지 담으면 복사·압축에 수십 초가 걸린다. 그새 다시 누르면 두 번째 호출이
+// 같은 스테이징 폴더를 지워서, 첫 번째가 사진·영상이 빠진 백업을 에러 없이 공유한다 —
+// 백엔드가 없어 사용자는 그 파일 하나를 믿고 기기를 바꾼다. 백업·복원 통틀어 한 번에 하나.
+let isBusy = false;
+
 // 미디어를 스테이징 media/ 로 복사하고 아카이브 내 상대경로를 돌려준다.
 // 사진첩 참조(ph://)나 이미 사라진 파일은 담을 게 없어 스킵(undefined).
 const bundleMedia = async (stagingMediaDir: string, stored?: string) => {
@@ -56,8 +61,12 @@ const bundleMedia = async (stagingMediaDir: string, stored?: string) => {
 };
 
 export const createBackup = async () => {
+  if (isBusy) return false;
+  isBusy = true;
   const staging = `${FileSystem.cacheDirectory}pown-backup/`;
   const archive = `${FileSystem.cacheDirectory}${BACKUP_NAME}`;
+  // 표시가 없으면 멈춘 줄 알고 다시 누른다. 기본 duration(4초)이면 도중에 사라진다
+  const loading = toast.loading(tt("data.backingUp"), { duration: Infinity });
 
   try {
     if (!(await isAvailableAsync())) {
@@ -118,13 +127,18 @@ export const createBackup = async () => {
     );
 
     await zip(toPath(staging), toPath(archive));
+    // 공유 시트가 떠 있는 내내 로딩이 남아 있지 않게 먼저 걷는다
+    toast.dismiss(loading);
     await shareAsync(archive, { mimeType: "application/zip" });
     return true;
   } catch {
     toast.error(tt("data.backupFailed"));
     return false;
   } finally {
+    toast.dismiss(loading);
+    // 정리가 끝난 뒤에 푼다 — 먼저 풀면 다음 백업이 만든 스테이징을 이 rmrf가 지운다
     await rmrf(staging);
+    isBusy = false;
   }
 };
 
@@ -137,12 +151,17 @@ const isValidManifest = (value: any): value is Manifest =>
   Array.isArray(value.stores.shorts?.videos);
 
 export const restoreBackup = async () => {
+  if (isBusy) return false;
+  isBusy = true;
   const extracted = `${FileSystem.cacheDirectory}pown-restore/`;
+  let loading: string | number | undefined;
 
   try {
     const result = await DocumentPicker.getDocumentAsync({ type: "*/*" });
     const picked = result.assets?.[0]?.uri;
     if (!picked) return false;
+    // 파일을 고른 뒤부터가 오래 걸린다(압축 해제·영상 복사)
+    loading = toast.loading(tt("data.restoring"), { duration: Infinity });
 
     await rmrf(extracted);
     await FileSystem.makeDirectoryAsync(extracted, { intermediates: true });
@@ -191,6 +210,8 @@ export const restoreBackup = async () => {
     toast.error(tt("data.restoreFailed"));
     return false;
   } finally {
+    if (loading !== undefined) toast.dismiss(loading);
     await rmrf(extracted);
+    isBusy = false;
   }
 };

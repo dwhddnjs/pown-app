@@ -10,6 +10,7 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toaster } from "sonner-native";
 import { PlanMenu } from "@/components/workout-plan/plan-menu";
 import { ImageModal } from "@/components/workout-plan/image-modal";
+import { UpdateDialog } from "@/components/update-dialog";
 import {
   flatHeader,
   headerButtonLiftModal,
@@ -92,6 +93,7 @@ export default function RootLayout() {
           <RootLayoutNav />
         </BottomSheetModalProvider>
         <PlanMenu />
+        <UpdateDialog />
         {/* 탭 레이아웃 안에 두면 그 위로 push되는 화면(검색·루틴)에서는 가려진다 */}
         {imageUri && <ImageModal />}
         <Toaster />

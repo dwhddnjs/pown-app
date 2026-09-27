@@ -148,7 +148,9 @@ const ko = {
   "calendar.hint": "운동한 날짜를 눌러서, 그날의 운동 기록을 확인해보세요.",
 
   // 숏츠
-  "shorts.title": "내 운동 숏츠",
+  "shorts.sort": "정렬",
+  "shorts.sortLatest": "최신순",
+  "shorts.sortOldest": "오래된순",
   "shorts.addShorts": "운동 숏츠 추가",
   "shorts.added": "숏츠가 추가 되었습니다",
   "shorts.addFailed": "숏츠 저장 중 오류가 발생했습니다.",
@@ -158,7 +160,8 @@ const ko = {
   "shorts.recordFailed": "녹화 중 오류가 발생했습니다.",
   "shorts.retake": "다시 찍기",
   "shorts.useVideo": "비디오 사용",
-  "shorts.permission": "숏츠를 촬영하려면 카메라·마이크 접근 권한이 필요해요.",
+  // 마이크는 선택이라(거부하면 무음 녹화) 카메라만 요구한다 — app/shorts/video.tsx
+  "shorts.permission": "숏츠를 촬영하려면 카메라 접근 권한이 필요해요.",
 
   // AI 자세 분석 (리포트 "본문"은 AI가 언어에 맞춰 생성한다 — 여기엔 껍데기만 있다)
   "ai.analyze": "AI 자세 분석",
@@ -170,6 +173,10 @@ const ko = {
   "ai.unknownWorkout":
     "어떤 운동인지 못 알아봤어요. 몸 옆쪽 45°에서 전신이 다 나오게 다시 찍어주세요.",
   "ai.failed": "분석에 실패했어요. 잠시 후 다시 시도해주세요.",
+  // 무료 한도는 앱 전체가 나눠 쓰고 한국 시간 오후 4~5시에 풀린다 — "잠시 후"라고
+  // 하면 계속 다시 누르므로 몇 시간 단위라는 걸 알려준다
+  "ai.dailyLimit":
+    "오늘 준비된 AI 분석이 모두 소진됐어요. 몇 시간 뒤에 다시 시도해주세요.",
   "ai.guideTitle": "정확한 분석을 위한 촬영 가이드",
   "ai.guideLead":
     "AI는 영상에서 뽑은 장면 몇 장만 봐요. 아래 네 가지만 지키면 피드백이 훨씬 정확해져요.",
@@ -181,9 +188,9 @@ const ko = {
   "ai.guideFrame": "머리끝부터 발끝까지 한 화면에",
   "ai.guideFrameDesc":
     "발이 잘리면 무게중심을, 머리가 잘리면 상체 각도를 못 읽어요. 폰을 무릎 높이에 세로로 세우고 세 걸음쯤 떨어지면 전신이 들어와요. 바벨을 쓴다면 원판 끝까지 들어오게 해주세요.",
-  "ai.guideReps": "같은 동작 2~3회, 10~20초로 짧게",
+  "ai.guideReps": "한 세트만, 1분 안쪽으로",
   "ai.guideRepsDesc":
-    "길게 찍어도 AI가 보는 장면 수는 똑같아요 — 영상이 길수록 장면 사이가 벌어져서 놓치는 구간만 생겨요. 자세를 잡는 순간부터 마지막 반복을 끝낼 때까지만 담아주세요.",
+    "장비 세팅하고 호흡 잡는 시간은 그대로 찍혀도 괜찮아요 — AI가 먼저 영상 전체를 훑어 실제로 드는 구간을 찾고, 그 구간만 촘촘히 봐요. 1RM처럼 한 번만 들어도 돼요. 다만 1분을 넘기면 훑는 간격이 벌어져서 짧은 동작을 놓칠 수 있어요.",
   "ai.guideLight": "밝은 곳에서, 화면에 나 혼자만",
   "ai.guideLightDesc":
     "어두우면 관절 위치가 뭉개지고, 뒤로 다른 사람이 지나가면 그 사람 자세를 같이 읽어요. 옷은 몸선이 보이는 게 좋아요 — 헐렁한 옷은 허리가 말렸는지를 가려요.",
@@ -193,7 +200,7 @@ const ko = {
     "조건에 맞지 않으면 분석 정확도가 크게 떨어져요. 리포트는 영상당 한 번만 만들 수 있어 다시 받을 수 없어요.",
   "ai.guideOpen": "촬영 가이드",
   "ai.consentDesc":
-    "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면 몇 장과 최근 기록한 운동 종목 이름이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
+    "* 광고를 한 편 보면 리포트를 받을 수 있어요.\n* 영상에서 뽑은 장면들과 최근 기록한 운동 종목 이름이 Google AI로 전송돼요. 무료로 쓰는 대신 Google이 서비스 개선에 사용할 수 있어요.",
   "ai.consentAction": "분석하기",
   "ai.reportTitle": "AI 자세 리포트",
   "ai.score": "자세 점수",
@@ -287,6 +294,8 @@ const ko = {
   "data.resetDone": "모든 데이터가 초기화 되었습니다",
   "data.shareUnavailable": "이 기기에서는 파일 공유를 사용할 수 없어요.",
   "data.backupFailed": "백업 파일 저장 중 오류가 발생했습니다.",
+  "data.backingUp": "백업 파일을 만들고 있어요…",
+  "data.restoring": "데이터를 복원하고 있어요…",
   "data.notBackupFile": "Pown 백업 파일이 아니에요. 파일을 확인해주세요.",
   "data.restored": "복원되었습니다",
   "data.restoreFailed": "복원 중 오류가 발생했습니다. 파일을 확인해주세요.",
@@ -298,6 +307,12 @@ const ko = {
   // 계산기
   "calc.kg": "킬로그램/kg",
   "calc.lb": "파운드/lb",
+
+  // 업데이트 안내
+  "update.title": "새 버전이 나왔어요 (v{version})",
+  "update.desc": "업데이트하고 새 기능과 개선 사항을 만나보세요.",
+  "update.later": "나중에",
+  "update.action": "업데이트",
 } as const;
 
 export type TKey = keyof typeof ko;
@@ -428,7 +443,9 @@ const en: Record<TKey, string> = {
   "calendar.gymVisits": "gym visits",
   "calendar.hint": "Tap a day you trained to see that day's records.",
 
-  "shorts.title": "My Workout Shorts",
+  "shorts.sort": "Sort",
+  "shorts.sortLatest": "Newest",
+  "shorts.sortOldest": "Oldest",
   "shorts.addShorts": "Add short",
   "shorts.added": "Short added",
   "shorts.addFailed": "Something went wrong while saving the short.",
@@ -438,8 +455,7 @@ const en: Record<TKey, string> = {
   "shorts.recordFailed": "Something went wrong while recording.",
   "shorts.retake": "Retake",
   "shorts.useVideo": "Use Video",
-  "shorts.permission":
-    "Camera and microphone access is required to record shorts.",
+  "shorts.permission": "Camera access is required to record shorts.",
 
   "ai.analyze": "AI form analysis",
   "ai.scanning": "Analyzing your form…",
@@ -449,6 +465,8 @@ const en: Record<TKey, string> = {
   "ai.unknownWorkout":
     "Couldn't tell which exercise this is. Film again from 45° to your side with your whole body in frame.",
   "ai.failed": "Analysis failed. Please try again in a moment.",
+  "ai.dailyLimit":
+    "Today's AI analyses have run out. Please try again in a few hours.",
   "ai.guideTitle": "How to film for an accurate analysis",
   "ai.guideLead":
     "The AI only sees a few frames pulled from your video. Get these four right and the feedback gets much sharper.",
@@ -458,9 +476,9 @@ const en: Record<TKey, string> = {
   "ai.guideFrame": "Everything from head to feet in frame",
   "ai.guideFrameDesc":
     "Cut off the feet and the balance point is gone; cut off the head and so is the torso angle. Stand your phone upright at knee height and step back about three paces. With a barbell, get the plates in shot too.",
-  "ai.guideReps": "Same movement 2-3 times, 10-20 seconds",
+  "ai.guideReps": "One set, under a minute",
   "ai.guideRepsDesc":
-    "The AI sees the same number of frames however long you film — a longer clip only spreads them further apart and misses more. Film from the moment you set up to the end of the last rep.",
+    "Setting up and bracing on camera is fine — the AI first skims the whole clip to find where you actually lift, then looks closely at just that part. A single rep, like a 1RM attempt, works too. Past a minute the skim gets sparse and can miss a quick rep.",
   "ai.guideLight": "Good light, and only you in shot",
   "ai.guideLightDesc":
     "Dim light blurs where the joints are, and someone walking behind you gets read as part of your form. Fitted clothing helps — baggy layers hide whether your back is rounding.",
@@ -470,7 +488,7 @@ const en: Record<TKey, string> = {
     "If the clip does not meet these, the analysis gets much less accurate. A report is made only once per video, so you cannot redo it.",
   "ai.guideOpen": "Filming guide",
   "ai.consentDesc":
-    "* Watch one ad to get your report.\n* A few frames from this video, plus the names of exercises you logged recently, are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
+    "* Watch one ad to get your report.\n* Frames from this video, plus the names of exercises you logged recently, are sent to Google AI. It's free, and in exchange Google may use them to improve their services.",
   "ai.consentAction": "Analyze",
   "ai.reportTitle": "AI Form Report",
   "ai.score": "Form score",
@@ -557,6 +575,8 @@ const en: Record<TKey, string> = {
   "data.resetDone": "All data has been reset",
   "data.shareUnavailable": "File sharing isn't available on this device.",
   "data.backupFailed": "Something went wrong while saving the backup file.",
+  "data.backingUp": "Creating your backup…",
+  "data.restoring": "Restoring your data…",
   "data.notBackupFile": "That's not a Pown backup file. Please check the file.",
   "data.restored": "Restored",
   "data.restoreFailed":
@@ -569,6 +589,12 @@ const en: Record<TKey, string> = {
 
   "calc.kg": "Kilograms/kg",
   "calc.lb": "Pounds/lb",
+
+  // 업데이트 안내
+  "update.title": "New version available (v{version})",
+  "update.desc": "Update to get the latest features and fixes.",
+  "update.later": "Later",
+  "update.action": "Update",
 };
 
 export const translations: Record<Lang, Record<TKey, string>> = { ko, en };

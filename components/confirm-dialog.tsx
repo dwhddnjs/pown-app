@@ -14,6 +14,8 @@ interface ConfirmDialogProps {
   title: string;
   // 글자 크기까지 직접 잡아야 하면 desc 대신 content로 그린다
   desc?: string;
+  // 왼쪽 버튼 문구 — 기본은 "취소"
+  cancelLabel?: string;
   // 실행 버튼의 문구와 색 (삭제는 fail, 그 외는 tint)
   actionLabel: string;
   actionColor: string;
@@ -33,6 +35,7 @@ export const ConfirmDialog = ({
   onClose,
   title,
   desc,
+  cancelLabel,
   actionLabel,
   actionColor,
   onConfirm,
@@ -86,7 +89,7 @@ export const ConfirmDialog = ({
               style={{ ...styles.button, backgroundColor: themeColor.subText }}
               onPress={onClose}
             >
-              {t("common.cancel")}
+              {cancelLabel ?? t("common.cancel")}
             </Button>
             <Button
               type="solid"
