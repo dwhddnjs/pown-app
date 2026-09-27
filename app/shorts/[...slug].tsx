@@ -215,7 +215,7 @@ export default function ShortsView() {
   // 리포트는 영상당 한 번만 만든다 — 이미 있으면 같은 버튼이 "보기"가 된다
   const onAnalyze = useCallback(
     (videoId: number, durationMs: number) => {
-      // position은 onMomentumScrollEnd에서만 갱신된다 — 페이지 전환 애니메이션 중에는
+      // position은 스크롤이 멈췄을 때만 갱신된다(settle) — 페이지 전환 애니메이션 중에는
       // 버튼을 누른 영상과 videos[position]이 서로 다른 항목을 가리킨다
       const video = videos.find((item) => item.id === videoId);
       if (!video || analyzingIds.has(videoId)) {
@@ -280,6 +280,21 @@ export default function ShortsView() {
     opacity: pageHeight.value > 0 ? barOpacity.value : 0,
   }));
 
+  // 스크롤이 멈춘 페이지를 재생 대상으로 확정한다. 재생·헤더 날짜·메모·삭제가 전부
+  // position을 본다 — 여기서 놓치면 화면엔 B가 보이는데 삭제는 A를 지운다
+  const settle = (offsetY: number) => {
+    barOpacity.value = withTiming(1, { duration: 180 });
+    if (!fullHeight) {
+      return;
+    }
+    const index = Math.min(
+      Math.max(Math.round(offsetY / fullHeight), 0),
+      videos.length - 1,
+    );
+    setNear(index);
+    setPosition(index);
+  };
+
   // 첫 진입 시 슬러그가 가리키는 페이지로 한 번 맞춘다 — 자식 레이아웃이 잡힌 뒤라야
   // offset이 0으로 clamp되지 않는다
   useEffect(() => {
@@ -328,20 +343,17 @@ export default function ShortsView() {
               setNear(Math.round(e.nativeEvent.contentOffset.y / fullHeight));
             }
           }}
-          // 재생 대상은 사용자 스와이프가 끝났을 때만 바꾼다 — 스크롤 도중에 바꾸면
-          // 넘기는 중인 영상들이 켜졌다 꺼졌다 한다
-          onMomentumScrollEnd={(e) => {
-            barOpacity.value = withTiming(1, { duration: 180 });
-            if (!fullHeight) {
-              return;
-            }
+          // 재생 대상은 스크롤이 멈췄을 때만 바꾼다 — 스크롤 도중에 바꾸면 넘기는 중인
+          // 영상들이 켜졌다 꺼졌다 한다
+          onMomentumScrollEnd={(e) => settle(e.nativeEvent.contentOffset.y)}
+          // 페이지 경계에 딱 맞춰 멈춘 채 손을 떼면 감속이 없어 onMomentumScrollEnd가
+          // 오지 않는다(iOS는 감속할 때만 보낸다). 경계에 있으면 이미 멈춘 것이니 여기서
+          // 확정하고, 경계가 아니면 뒤따르는 감속(페이징 스냅)이 확정한다
+          onScrollEndDrag={(e) => {
             const offsetY = e.nativeEvent.contentOffset.y;
-            const index = Math.min(
-              Math.max(Math.round(offsetY / fullHeight), 0),
-              videos.length - 1,
-            );
-            if (index !== position) {
-              setPosition(index);
+            const page = fullHeight ? Math.round(offsetY / fullHeight) : 0;
+            if (fullHeight && Math.abs(offsetY - page * fullHeight) < 1) {
+              settle(offsetY);
             }
           }}
         >
