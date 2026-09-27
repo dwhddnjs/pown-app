@@ -11,9 +11,11 @@ import { mmkv } from "@/lib/storage";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 
-// 백엔드가 없으니 App Store 공개 조회 API가 "최신 버전"의 출처다
-const LOOKUP_URL =
-  "https://itunes.apple.com/lookup?bundleId=com.anonymous.workout-app&country=kr";
+// 백엔드가 없으니 App Store 공개 조회 API가 "최신 버전"의 출처다. bundle id를 적어
+// 두면 app.json이 바뀔 때 조회가 조용히 빈 결과를 돌려주고 팝업이 영영 안 뜬다.
+// country=kr은 "버전 조회처"일 뿐이다 — 바이너리는 하나라 어느 스토어든 버전이 같고,
+// 한국 스토어엔 반드시 있다. 사용자가 여는 링크는 아래에서 국가 없이 만든다
+const LOOKUP_URL = `https://itunes.apple.com/lookup?bundleId=${Constants.expoConfig?.ios?.bundleIdentifier}&country=kr`;
 const SNOOZE_KEY = "update-snoozed-at";
 const DAY = 86_400_000;
 
@@ -46,7 +48,12 @@ const fetchStoreUpdate = async (): Promise<StoreUpdate | null> => {
   if (isMinorAhead(store.minimumOsVersion, String(Platform.Version))) {
     return null;
   }
-  return { version: store.version, url: store.trackViewUrl };
+  // trackViewUrl은 조회한 kr 스토어 링크다 — 국가 없는 링크여야 App Store가 사용자
+  // 계정의 스토어(미국·일본 등)로 연다
+  return {
+    version: store.version,
+    url: `https://apps.apple.com/app/id${store.trackId}`,
+  };
 };
 
 // 마이너 이상 새 버전이 스토어에 있으면 콜드 스타트 때 한 번 권장 업데이트를 띄운다.

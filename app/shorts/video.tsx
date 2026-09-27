@@ -185,10 +185,23 @@ export default function Video() {
   // 버린 녹화는 캐시에 수십 MB짜리 임시 파일로 남는다(iOS는 저장공간이 모자랄 때만
   // 비운다) — 다시 찍을 때마다 쌓이므로 여기서 지운다
   const onRetake = () => {
+    // "비디오 사용"이 저장 중이면 복사하고 있는 원본을 지우게 된다 — 저장이 실패하거나,
+    // 이미 복사가 끝났으면 버리려던 영상이 저장되고 화면이 닫힌다
+    if (isSavingRef.current) return;
     setUri(null);
     if (uri) {
       FileSystem.deleteAsync(uri, { idempotent: true }).catch(() => {});
     }
+  };
+
+  // 설정에서 켜고 돌아와도 훅은 예전(거부) 상태를 들고 있어, canAskAgain만 보고
+  // 설정으로 보내면 이미 켰는데도 설정으로 도는 루프가 된다. 먼저 다시 요청해 현재
+  // 상태를 받는다 — 이미 정해진 권한이면 창 없이 바로 돌아오고 훅도 갱신된다.
+  // 한 번 거부해 iOS가 다시 묻지 않는 상태였을 때만 설정으로 보낸다.
+  const onAllowCamera = async () => {
+    const couldAsk = cameraPermission?.canAskAgain !== false;
+    const { granted } = await requestCameraPermission();
+    if (!granted && !couldAsk) Linking.openSettings();
   };
 
   const renderVideo = () => {
@@ -278,14 +291,7 @@ export default function Video() {
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
           <Text style={styles.cancelText}>{t("shorts.permission")}</Text>
-          <Pressable
-            // 한 번 거부하면 iOS가 다시 묻지 않는다 — 요청해봐야 아무 일도 없으니 설정으로 보낸다
-            onPress={() =>
-              cameraPermission?.canAskAgain === false
-                ? Linking.openSettings()
-                : requestCameraPermission()
-            }
-          >
+          <Pressable onPress={onAllowCamera}>
             <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}
             </Text>
