@@ -62,25 +62,29 @@ const ShortsTabHeader = () => {
     >
       <SafeAreaView>
         <View style={styles.container}>
-          {/* 정렬할 영상이 없으면 감춘다 — 빈 화면의 제목이 "최신순"으로 읽히지 않게.
-              언마운트하면 헤더 높이가 줄어 화면 위 여백(useHeaderHeight)이 같이 흔들린다 */}
-          <TouchableOpacity
-            style={[styles.title, !hasVideos && styles.hidden]}
-            disabled={!hasVideos}
-            accessibilityElementsHidden={!hasVideos}
-            hitSlop={12}
-            accessibilityRole="button"
-            accessibilityLabel={t("shorts.sort")}
-            accessibilityValue={{ text: t(SORT_LABEL[sort]) }}
-            onPress={open}
-          >
-            <Text style={{ fontSize: 16 }}>{t(SORT_LABEL[sort])}</Text>
-            <Feather
-              name={visible ? "chevron-up" : "chevron-down"}
-              size={CHEVRON_SIZE}
-              color={themeColor.text}
-            />
-          </TouchableOpacity>
+          {/* 정렬할 영상이 없으면 정렬 대신 탭 이름을 둔다 — 빈 화면의 제목이 "최신순"으로
+              읽히지 않게. 같은 글자 크기라 헤더 높이(useHeaderHeight)가 흔들리지 않는다 */}
+          {hasVideos ? (
+            <TouchableOpacity
+              style={styles.title}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel={t("shorts.sort")}
+              accessibilityValue={{ text: t(SORT_LABEL[sort]) }}
+              onPress={open}
+            >
+              <Text style={{ fontSize: 16 }}>{t(SORT_LABEL[sort])}</Text>
+              <Feather
+                name={visible ? "chevron-up" : "chevron-down"}
+                size={CHEVRON_SIZE}
+                color={themeColor.text}
+              />
+            </TouchableOpacity>
+          ) : (
+            <Text style={{ fontSize: 16 }} accessibilityRole="header">
+              {t("tab.shorts")}
+            </Text>
+          )}
           {/* 타이틀이 가운데 정렬이라 흐름에 넣으면 밀린다 — 오른쪽에 띄운다 */}
           <TouchableOpacity
             style={styles.guide}
@@ -188,9 +192,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: CHEVRON_GAP,
     paddingLeft: CHEVRON_SIZE + CHEVRON_GAP,
-  },
-  hidden: {
-    opacity: 0,
   },
   guide: {
     position: "absolute",

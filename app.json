@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "3.3.0",
-    "runtimeVersion": "3.3.0",
+    "version": "3.4.0",
+    "runtimeVersion": "3.4.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-dark.png",
     "scheme": "myapp",
@@ -18,11 +18,19 @@
       "supportsTablet": true,
       "jsEngine": "hermes",
       "bundleIdentifier": "com.anonymous.workout-app",
+      "appleTeamId": "W6FUWFHBPW",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleLocalizations": ["ko", "en"],
         "UIDesignRequiresCompatibility": true,
-        "LSApplicationQueriesSchemes": ["googlegmail"]
+        "LSApplicationQueriesSchemes": ["googlegmail"],
+        "NSHealthShareUsageDescription": "운동 중 에어팟 등 웨어러블에서 측정한 심박수와 칼로리를 실시간으로 보여주기 위해 건강 데이터를 읽습니다.",
+        "NSHealthUpdateUsageDescription": "측정한 운동과 심박수·칼로리를 건강 앱에 저장해 활동 링에 반영합니다.",
+        "NSSupportsLiveActivities": true
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": []
       }
     },
     "android": {
@@ -95,7 +103,8 @@
         {
           "userTrackingPermission": "관련성 높은 광고를 보여주기 위해 사용됩니다. 허용하지 않아도 모든 기능을 그대로 쓸 수 있어요."
         }
-      ]
+      ],
+      "@bacons/apple-targets"
     ],
     "experiments": {
       "typedRoutes": true
