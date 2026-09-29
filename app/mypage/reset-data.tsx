@@ -10,7 +10,10 @@ import { toast } from "sonner-native";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useShortsStore } from "@/hooks/use-shorts-store";
-import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
+import {
+  useHeartRateLiveStore,
+  useHeartRateStore,
+} from "@/hooks/use-heart-rate-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -18,6 +21,8 @@ import { useT } from "@/hooks/use-t";
 import { createBackup, restoreBackup } from "@/lib/backup";
 import { buildSeedPlans, SEED_COUNT } from "@/lib/seed";
 import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
+// native
+import { HeartRate } from "@/modules/heart-rate";
 // expo
 import { useRouter } from "expo-router";
 // icon
@@ -52,6 +57,13 @@ export default function ResetData() {
     onReset();
     onResetVideo();
     onResetRecords();
+    // 측정 중이면 세션도 끝낸다(요약은 버린다) — 안 끝내면 지운 뒤에도 아일랜드에 남고,
+    // 나중에 종료를 누르면 방금 비운 기록에 옛 측정이 다시 저장된다
+    const { live, setLive } = useHeartRateLiveStore.getState();
+    if (live) {
+      HeartRate?.end().catch(() => {});
+      setLive(null);
+    }
     toast.success(t("data.resetDone"));
     back();
   };

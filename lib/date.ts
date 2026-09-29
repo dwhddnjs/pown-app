@@ -10,6 +10,10 @@ import type { WorkoutPlanTypes } from "@/hooks/use-workout-plan-store";
 // 프로젝트 전역 날짜 저장 포맷 (CLAUDE.md)
 export const PLAN_DATE_FORMAT = "yyyy.MM.dd HH:mm:ss";
 
+// 날짜 헤더 키("yyyy.MM.dd") — groupByDate가 createdAt에서 잘라 쓰는 것과 같은 조각
+export const dateKey = (date: Date) =>
+  format(date, PLAN_DATE_FORMAT).split(" ")[0];
+
 const EN_MONTHS = [
   "Jan",
   "Feb",

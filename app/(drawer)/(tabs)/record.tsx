@@ -6,6 +6,7 @@ import {
   BodyChart,
   ConditionCount,
   EquipmentChart,
+  HeartRateChart,
   SbdChart,
   WorkoutCount,
   WorkoutPieChart,
@@ -60,6 +61,7 @@ export default function Record() {
         <WorkoutPieChart />
         <ConditionCount />
         <EquipmentChart />
+        <HeartRateChart />
         <SbdChart />
         <BodyChart />
       </ScrollView>

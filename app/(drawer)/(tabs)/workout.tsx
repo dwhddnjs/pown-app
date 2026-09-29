@@ -21,23 +21,14 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
-import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
+import { useHeartRateLiveStore } from "@/hooks/use-heart-rate-store";
 // hooks
-import {
-  getRowKey,
-  getRowType,
-  GRASS_ROW,
-  HEART_ROW,
-  Row,
-  usePlanRows,
-} from "@/hooks/use-plan-rows";
+import { getRowKey, getRowType, Row, usePlanRows } from "@/hooks/use-plan-rows";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { convertChartDate } from "@/lib/date";
-// native
-import { isHeartRateSupported } from "@/modules/heart-rate";
 // expo
 import { useRouter } from "expo-router";
 // navigation
@@ -76,11 +67,8 @@ export default function TabOneScreen() {
   const t = useT();
   const lang = useLanguage();
   const { open } = useIsModalOpenStore();
-  // 블루투스 이어폰(에어팟 등)으로 소리가 나갈 때만 버튼을 보인다. 측정 중이면 빼도 박스는 남는다
-  const showHeart = useHeartRateStore(
-    (state) => isHeartRateSupported && (state.deviceAvailable || !!state.live),
-  );
-  const isLive = useHeartRateStore((state) => !!state.live);
+  // 측정 중엔 계획을 다 지워도 빈 화면 대신 리스트(헤더의 측정 박스)를 남긴다
+  const isLive = useHeartRateLiveStore((state) => !!state.live);
 
   const router = useRouter();
 
@@ -91,17 +79,13 @@ export default function TabOneScreen() {
   // 시작점이 바뀔 때 스크롤을 맨 위로 되돌리려면 리마운트가 가장 확실하다
   const [listKey, setListKey] = useState(0);
 
-  const rows = useMemo<Row[]>(() => {
-    // 잔디(와 심박수 박스)는 진짜 최상단일 때만 — 중간부터 볼 때 얹히면 안 된다
-    if (startDateIndex === 0) {
-      // 측정 중(일시정지 포함)엔 연간 잔디가 쓸모없다 — 빼서 박스 바로 밑에 오늘 계획이 오게 한다
-      if (isLive) return [HEART_ROW, ...allRows];
-      return showHeart
-        ? [HEART_ROW, GRASS_ROW, ...allRows]
-        : [GRASS_ROW, ...allRows];
-    }
-    return allRows.slice(starts[startDateIndex] ?? 0);
-  }, [allRows, starts, startDateIndex, showHeart, isLive]);
+  const rows = useMemo<Row[]>(
+    () =>
+      startDateIndex === 0
+        ? allRows
+        : allRows.slice(starts[startDateIndex] ?? 0),
+    [allRows, starts, startDateIndex],
+  );
 
   const listRef = useRef<FlashListRef<Row>>(null);
 
@@ -120,14 +104,16 @@ export default function TabOneScreen() {
 
       const row = top.item as Row | undefined;
       if (!row) return;
-      if (row.kind === "heart" || row.kind === "grass") {
+      // 잔디는 리스트 헤더라 viewability에 안 잡힌다 — 최신 기준 첫 행이 맨 위면 아직
+      // 잔디 구간으로 본다(타이틀은 로고)
+      if (top.index === 0 && startDateIndex === 0) {
         setWorkoutTitle("");
         return;
       }
       const [year, month] = row.date.split(".");
       setWorkoutTitle(convertChartDate(`${year}${month}`, lang));
     },
-    [setScrolled, setWorkoutTitle, lang],
+    [setScrolled, setWorkoutTitle, lang, startDateIndex],
   );
 
   useEffect(() => {
@@ -198,8 +184,6 @@ export default function TabOneScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Row }) => {
-      if (item.kind === "heart") return <HeartRateRow />;
-      if (item.kind === "grass") return <GrassRow />;
       if (item.kind === "header") {
         return (
           <DateHeaderRow date={item.date} themeColor={themeColor} lang={lang} />
@@ -217,23 +201,30 @@ export default function TabOneScreen() {
     [headerHeight],
   );
 
+  // 심박 박스·잔디를 행이 아니라 헤더에 두는 이유는 use-plan-rows.tsx 참고
   const listHeader = useMemo(
-    () =>
-      // 날짜를 골라 과거로 온 상태에서는 위쪽에 더 최신 기록이 없다 —
-      // 돌아갈 길을 리스트 맨 위에 둔다
-      startDateIndex > 0 ? (
-        <View style={styles.backToLatest}>
-          {/* 하단 "맨 위로"(⇈)와 겹치지 않게 방향 화살표를 쓰지 않는다 —
-              이 버튼은 스크롤이 아니라 보고 있는 기간을 최신으로 되돌린다 */}
-          <CircleButton
-            onPress={resetToLatest}
-            label={t("workout.backToLatest")}
-            icon="update"
-            iconSize={22}
-            style={circleButtonSmall}
-          />
-        </View>
-      ) : null,
+    () => (
+      <>
+        <HeartRateRow isLatest={startDateIndex === 0} />
+        {startDateIndex === 0 ? (
+          <GrassRow />
+        ) : (
+          // 날짜를 골라 과거로 온 상태에서는 위쪽에 더 최신 기록이 없다 —
+          // 돌아갈 길을 리스트 맨 위에 둔다
+          <View style={styles.backToLatest}>
+            {/* 하단 "맨 위로"(⇈)와 겹치지 않게 방향 화살표를 쓰지 않는다 —
+                이 버튼은 스크롤이 아니라 보고 있는 기간을 최신으로 되돌린다 */}
+            <CircleButton
+              onPress={resetToLatest}
+              label={t("workout.backToLatest")}
+              icon="update"
+              iconSize={22}
+              style={circleButtonSmall}
+            />
+          </View>
+        )}
+      </>
+    ),
     [startDateIndex, resetToLatest, t],
   );
 
@@ -262,7 +253,7 @@ export default function TabOneScreen() {
     />
   );
 
-  if (workoutPlanList.length === 0) {
+  if (workoutPlanList.length === 0 && !isLive) {
     return (
       <View style={{ flex: 1, position: "relative" }}>
         <EmptyList />
