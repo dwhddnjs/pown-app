@@ -14,6 +14,8 @@ const Colors = {
     // 탭바 FAB 플러스 전용 — 항상 tint 원 위라 양 테마 흰색 계열로 통일
     fabIcon: "#fff",
     divider: "#D8D7DE",
+    // 일시정지처럼 "지금은 안 움직이는" 값. 라벨(subText)보다 흐려야 멈춘 게 보인다
+    disabled: "#BCBCC0",
     // 선택색은 다크와 동일한 #00ccbb로 통일(기존 #009488).
     // 비선택은 선택색보다 확실히 연하게 빼서 두 상태를 명도로 가른다.
     // 주의: 두 색의 상호 대비는 1.07:1로 여전히 낮다 — 실제 구분은 색상(hue)에 의존한다.
@@ -38,6 +40,7 @@ const Colors = {
     // 라이트만 흰색, 다크는 기존대로 background(어두움) 유지
     fabIcon: "#1a1a1a",
     divider: "#555555",
+    disabled: "#5E5E63",
     tabIconDefault: "#8E8E93",
     tabIconSelected: "#00ccbb",
     tabBar: "#1e1e1e",

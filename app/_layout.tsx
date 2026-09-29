@@ -34,6 +34,7 @@ import {
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
+import { useHeartRateSync } from "@/hooks/use-heart-rate-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -66,6 +67,7 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const { theme } = useUserStore();
   const imageUri = useImageUriStore((state) => state.uri);
+  useHeartRateSync();
 
   useEffect(() => {
     if (loaded) {

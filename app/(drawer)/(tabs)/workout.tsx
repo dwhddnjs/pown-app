@@ -10,6 +10,7 @@ import {
   PlanRow,
 } from "@/components/workout-plan/plan-list-row";
 import { ScrollTopButton } from "@/components/workout-plan/scroll-top-button";
+import { HeartRateRow } from "@/components/heart-rate/heart-rate-row";
 import {
   CircleButton,
   circleButtonSmall,
@@ -20,11 +21,13 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
+import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
 // hooks
 import {
   getRowKey,
   getRowType,
   GRASS_ROW,
+  HEART_ROW,
   Row,
   usePlanRows,
 } from "@/hooks/use-plan-rows";
@@ -33,6 +36,8 @@ import { useT } from "@/hooks/use-t";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { convertChartDate } from "@/lib/date";
+// native
+import { isHeartRateSupported } from "@/modules/heart-rate";
 // expo
 import { useRouter } from "expo-router";
 // navigation
@@ -71,6 +76,11 @@ export default function TabOneScreen() {
   const t = useT();
   const lang = useLanguage();
   const { open } = useIsModalOpenStore();
+  // 블루투스 이어폰(에어팟 등)으로 소리가 나갈 때만 버튼을 보인다. 측정 중이면 빼도 박스는 남는다
+  const showHeart = useHeartRateStore(
+    (state) => isHeartRateSupported && (state.deviceAvailable || !!state.live),
+  );
+  const isLive = useHeartRateStore((state) => !!state.live);
 
   const router = useRouter();
 
@@ -82,10 +92,16 @@ export default function TabOneScreen() {
   const [listKey, setListKey] = useState(0);
 
   const rows = useMemo<Row[]>(() => {
-    // 잔디는 진짜 최상단일 때만 — 중간부터 볼 때 얹히면 안 된다
-    if (startDateIndex === 0) return [GRASS_ROW, ...allRows];
+    // 잔디(와 심박수 박스)는 진짜 최상단일 때만 — 중간부터 볼 때 얹히면 안 된다
+    if (startDateIndex === 0) {
+      // 측정 중(일시정지 포함)엔 연간 잔디가 쓸모없다 — 빼서 박스 바로 밑에 오늘 계획이 오게 한다
+      if (isLive) return [HEART_ROW, ...allRows];
+      return showHeart
+        ? [HEART_ROW, GRASS_ROW, ...allRows]
+        : [GRASS_ROW, ...allRows];
+    }
     return allRows.slice(starts[startDateIndex] ?? 0);
-  }, [allRows, starts, startDateIndex]);
+  }, [allRows, starts, startDateIndex, showHeart, isLive]);
 
   const listRef = useRef<FlashListRef<Row>>(null);
 
@@ -104,7 +120,7 @@ export default function TabOneScreen() {
 
       const row = top.item as Row | undefined;
       if (!row) return;
-      if (row.kind === "grass") {
+      if (row.kind === "heart" || row.kind === "grass") {
         setWorkoutTitle("");
         return;
       }
@@ -182,6 +198,7 @@ export default function TabOneScreen() {
 
   const renderItem = useCallback(
     ({ item }: { item: Row }) => {
+      if (item.kind === "heart") return <HeartRateRow />;
       if (item.kind === "grass") return <GrassRow />;
       if (item.kind === "header") {
         return (

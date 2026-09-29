@@ -3,6 +3,7 @@ import { tt } from "@/hooks/use-t";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useShortsStore } from "@/hooks/use-shorts-store";
+import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
 // lib
 import { ensureMediaDir, MEDIA_DIR, resolveMediaUri } from "@/lib/media";
 // expo
@@ -30,6 +31,8 @@ type Manifest = {
       "workoutPlanList"
     >;
     shorts: Pick<ReturnType<typeof useShortsStore.getState>, "videos">;
+    // 심박수 기능 전에 만든 백업에는 없다
+    heartRate?: Pick<ReturnType<typeof useHeartRateStore.getState>, "records">;
   };
 };
 
@@ -84,6 +87,7 @@ export const createBackup = async () => {
     const { userInfo, workoutList, theme, language } = useUserStore.getState();
     const { workoutPlanList } = useWorkoutPlanStore.getState();
     const { videos } = useShortsStore.getState();
+    const { records } = useHeartRateStore.getState();
 
     const bundledPlans = await Promise.all(
       workoutPlanList.map(async (plan) => ({
@@ -117,6 +121,7 @@ export const createBackup = async () => {
         user: { userInfo, workoutList, theme, language },
         workoutPlan: { workoutPlanList: bundledPlans },
         shorts: { videos: bundledVideos },
+        heartRate: { records },
       },
     };
 
@@ -195,7 +200,7 @@ export const restoreBackup = async () => {
       }
     }
 
-    const { user, workoutPlan, shorts } = manifest.stores;
+    const { user, workoutPlan, shorts, heartRate } = manifest.stores;
     const { setUser } = useUserStore.getState();
     setUser("userInfo", user.userInfo);
     if (user.workoutList) setUser("workoutList", user.workoutList);
@@ -203,6 +208,9 @@ export const restoreBackup = async () => {
     if (user.language) setUser("language", user.language);
     useWorkoutPlanStore.getState().onSetMockout(workoutPlan.workoutPlanList);
     useShortsStore.getState().onSetVideos(shorts.videos);
+    if (Array.isArray(heartRate?.records)) {
+      useHeartRateStore.getState().onSetRecords(heartRate.records);
+    }
 
     toast.success(tt("data.restored"));
     return true;

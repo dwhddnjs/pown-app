@@ -10,6 +10,7 @@ import { toast } from "sonner-native";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useShortsStore } from "@/hooks/use-shorts-store";
+import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -38,6 +39,7 @@ export default function ResetData() {
 
   const { onReset } = useUserStore();
   const { onResetVideo } = useShortsStore();
+  const onResetRecords = useHeartRateStore((state) => state.onResetRecords);
   const { back } = useRouter();
   const themeColor = useCurrentThemeColor();
   const t = useT();
@@ -49,6 +51,7 @@ export default function ResetData() {
     onResetPlanList();
     onReset();
     onResetVideo();
+    onResetRecords();
     toast.success(t("data.resetDone"));
     back();
   };
