@@ -130,6 +130,7 @@ function RootLayoutNav() {
       <Stack.Screen name="(modals)/calendar-workout" options={modal} />
       <Stack.Screen name="(modals)/select-type" options={modal} />
       <Stack.Screen name="(modals)/note" options={modal} />
+      <Stack.Screen name="(modals)/heart-rate-records" options={modal} />
 
       {/* 계획 작성·수정 — 저장 버튼은 각 화면이 headerRight로 붙인다.
           폼 리셋은 화면의 beforeRemove 리스너가 담당한다. */}

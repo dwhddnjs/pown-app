@@ -5,6 +5,7 @@ module.exports = {
   type: "widget",
   name: "HeartRateWidget",
   displayName: "Pown",
-  deploymentTarget: "16.2",
+  // 버튼(Button(intent:))이 17+다. 측정 자체가 iOS 26 전용이라 잃는 기기는 없다
+  deploymentTarget: "17.0",
   frameworks: ["SwiftUI", "ActivityKit", "WidgetKit"],
 };

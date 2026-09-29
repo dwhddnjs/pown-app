@@ -82,8 +82,36 @@ const ko = {
   "heartRate.tooShort": "1분 미만은 저장하지 않아요.",
   "heartRate.minutes": "{n}분",
   "heartRate.range": "심박수",
+  "heartRate.avg": "평균 심박",
+  "heartRate.hoursMinutes": "{h}시간 {m}분",
+  "heartRate.openHealth": "건강 앱 열기",
+  "heartRate.recordsTitle": "심박수 기록",
+  "heartRate.recordsNote": "지우면 건강 앱에 저장된 운동도 함께 지워져요.",
+  "heartRate.deleteTitle": "이 기록을 지울까요?",
+  "heartRate.deleteDesc": "건강 앱의 운동 기록도 함께 지워져요.",
   "heartRate.needPlan": "오늘 운동 계획을 먼저 추가해 주세요.",
   "heartRate.autoPaused": "이어폰이 빠져서 측정을 일시정지했어요.",
+  "heartRate.startMore": "심박수 추가 측정",
+  "heartRate.todayRecorded": "오늘 {n}분 기록됨",
+  "heartRate.added": "오늘 기록에 더했어요!",
+  "heartRate.savedNoPlan":
+    "기록은 저장했어요. 그날 운동 계획을 추가하면 날짜 아래에 보여요.",
+  "heartRate.guideTitle": "에어팟으로 심박수 재기",
+  "heartRate.guideLead":
+    "운동하는 동안 이어폰의 심박 센서로 심박수와 칼로리를 실시간으로 재고, 끝내면 오늘 운동 기록에 남겨요.",
+  "heartRate.guideDevice": "AirPods Pro 3 · Powerbeats Pro 2",
+  "heartRate.guideDeviceDesc":
+    "심박 센서가 들어 있는 이 이어폰들로 잴 수 있어요. 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
+  "heartRate.guideSetting": "이어폰 설정에서 심박수를 켜 주세요",
+  "heartRate.guideSettingDesc":
+    "설정 > AirPods > 심박수가 켜져 있어야 신호가 들어와요.",
+  "heartRate.guideIsland": "앱을 나가도 계속 재요",
+  "heartRate.guideIslandDesc":
+    "잠금 화면과 다이나믹 아일랜드에서 심박수와 운동 시간을 보고 바로 일시정지·종료할 수 있어요. 이어폰을 빼면 자동으로 일시정지돼요.",
+  "heartRate.guideRecord": "종료하면 오늘 운동에 저장돼요",
+  "heartRate.guideRecordDesc":
+    "날짜 아래에 칼로리·운동 시간·평균 심박이 남고, 건강 앱에도 운동으로 기록돼요. 요약을 누르면 측정별로 보고 지울 수 있어요. 1분 미만은 저장하지 않아요.",
+  "heartRate.guideConsent": "다음 화면에서 건강 데이터 접근을 허용해 주세요.",
 
   // 계획 추가 / 수정
   "plan.requireFields": "운동과 목표 중량은 필수에요..",
@@ -162,6 +190,12 @@ const ko = {
   "chart.sbdEmpty": "기록된 3대중량 데이터가 없습니다.",
   "chart.bodyTitle": "몸무게의 변화",
   "chart.bodyEmpty": "기록된 몸무게 데이터가 없습니다.",
+  "chart.heartTitle": "심박수 측정",
+  "chart.heartEmpty": "기록된 심박수 데이터가 없습니다.",
+  "chart.heartKcal": "활동 칼로리",
+  "chart.heartTotalKcal": "총 활동 칼로리",
+  "chart.heartTotalTime": "총 운동 시간",
+  "chart.heartTime": "운동 시간",
   "chart.conditionTitle": "컨디션 별 횟수",
   "chart.conditionEmpty": "기록된 컨디션 데이터가 없습니다.",
   "chart.countTitle": "기록한 운동 횟수",
@@ -409,8 +443,38 @@ const en: Record<TKey, string> = {
   "heartRate.tooShort": "Sessions under 1 minute aren't saved.",
   "heartRate.minutes": "{n} min",
   "heartRate.range": "Heart rate",
+  "heartRate.avg": "Avg HR",
+  "heartRate.hoursMinutes": "{h}h {m}m",
+  "heartRate.openHealth": "Open Health",
+  "heartRate.recordsTitle": "Heart rate records",
+  "heartRate.recordsNote":
+    "Deleting also removes the workout saved to the Health app.",
+  "heartRate.deleteTitle": "Delete this record?",
+  "heartRate.deleteDesc":
+    "The workout saved to the Health app will be deleted too.",
   "heartRate.needPlan": "Add today's workout plan first.",
   "heartRate.autoPaused": "Earphones removed — measurement paused.",
+  "heartRate.startMore": "Measure again",
+  "heartRate.todayRecorded": "{n} min today",
+  "heartRate.added": "Added to today's record!",
+  "heartRate.savedNoPlan":
+    "Saved. Add a workout plan for that day to see it under the date.",
+  "heartRate.guideTitle": "Track heart rate with AirPods",
+  "heartRate.guideLead":
+    "While you work out, your earphones' heart rate sensor tracks heart rate and calories live. When you finish, it's saved to today's workout.",
+  "heartRate.guideDevice": "AirPods Pro 3 · Powerbeats Pro 2",
+  "heartRate.guideDeviceDesc":
+    "Works with these earphones' built-in heart rate sensor. Earphones without one won't show heart rate.",
+  "heartRate.guideSetting": "Turn on heart rate in earphone settings",
+  "heartRate.guideSettingDesc":
+    "Settings > AirPods > Heart Rate must be on to get a signal.",
+  "heartRate.guideIsland": "Keeps measuring outside the app",
+  "heartRate.guideIslandDesc":
+    "See heart rate and time on the Lock Screen and Dynamic Island, and pause or end right there. Taking out your earphones pauses it automatically.",
+  "heartRate.guideRecord": "Saved to today's workout when you end",
+  "heartRate.guideRecordDesc":
+    "Calories, duration and average heart rate appear under the date and are saved to the Health app as a workout. Tap the summary to view or delete each session. Sessions under 1 minute aren't saved.",
+  "heartRate.guideConsent": "Next, allow access to your Health data.",
 
   "plan.requireFields": "Workout and target weight are required.",
   "plan.added": "Workout plan added!",
@@ -484,6 +548,12 @@ const en: Record<TKey, string> = {
   "chart.sbdEmpty": "No Big 3 data recorded.",
   "chart.bodyTitle": "Body Weight Progress",
   "chart.bodyEmpty": "No body weight data recorded.",
+  "chart.heartTitle": "Heart rate",
+  "chart.heartEmpty": "No heart rate data recorded.",
+  "chart.heartKcal": "Active kcal",
+  "chart.heartTotalKcal": "Total active",
+  "chart.heartTotalTime": "Total time",
+  "chart.heartTime": "Duration",
   "chart.conditionTitle": "Condition Breakdown",
   "chart.conditionEmpty": "No condition data recorded.",
   "chart.countTitle": "Workout Count",

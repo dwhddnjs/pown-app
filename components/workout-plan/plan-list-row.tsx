@@ -5,21 +5,33 @@ import { View } from "@/components/themed";
 import { WorkoutPlan } from "./workout-plan";
 import { PlanDateHeader } from "./plan-date-header";
 import { YearGrass } from "@/components/grass";
+import { AnimatedHeight } from "@/components/animated-height";
+// zustand
+import { useHeartRateLiveStore } from "@/hooks/use-heart-rate-store";
 // hook
 import { Row } from "@/hooks/use-plan-rows";
 // lib
 import { ThemeColorType } from "@/constants/colors";
 import { Lang } from "@/lib/i18n";
 
-// 운동 탭 리스트의 행 3종(잔디 / 날짜 헤더 / 계획 카드).
+// 운동 탭 리스트의 행 2종(날짜 헤더 / 계획 카드)과 리스트 헤더의 잔디.
 // 색과 언어는 prop으로 받는다 — 셀이 재사용되므로 renderItem이 이 값들을 의존성으로
 // 들고 있어야 테마·언어 변경이 반영된다(workout.tsx의 extraData 참고).
 
-export const GrassRow = () => (
-  <View style={styles.grass}>
-    <YearGrass />
-  </View>
-);
+// 측정 중(준비 포함)엔 연간 잔디가 쓸모없다 — 접어서 박스 바로 밑에 오늘 계획이 오게 한다.
+// 심박 카드가 펼쳐지는 것과 같은 곡선으로 접혀 한 동작처럼 보인다(그래서 리스트 헤더에 있다)
+export const GrassRow = () => {
+  const isMeasuring = useHeartRateLiveStore(
+    (state) => !!state.live || state.preparingAt !== null,
+  );
+  return (
+    <AnimatedHeight collapsed={isMeasuring}>
+      <View style={styles.grass}>
+        <YearGrass />
+      </View>
+    </AnimatedHeight>
+  );
+};
 
 export const DateHeaderRow = ({
   date,

@@ -5,10 +5,9 @@ import { groupByDate } from "@/lib/date";
 // 날짜 그룹을 통째로 한 행에 넣으면 행 하나가 화면 몇 개 높이가 되어 가상화가
 // 무의미해진다 — 빠른 플릭으로 창을 벗어나면 그 거대한 행들을 처음부터 다시
 // 그리는 동안 화면이 비어 보인다. 그래서 운동 하나가 한 행이다.
-// 잔디도 행으로 두면 헤더 타이틀을 "맨 위에 걸친 행" 하나로만 판정할 수 있다.
+// 심박 박스·잔디는 행이 아니라 리스트 헤더다 — 높이가 애니메이션으로 바뀌는데, 셀이면
+// 아래 셀 위치를 JS가 다시 잡을 때까지 한 프레임씩 겹치거나 튄다(깜빡임의 원인이었다).
 export type Row =
-  | { kind: "heart" }
-  | { kind: "grass" }
   | { kind: "header"; date: string }
   | {
       kind: "plan";
@@ -17,10 +16,6 @@ export type Row =
       index: number;
       total: number;
     };
-
-export const GRASS_ROW: Row = { kind: "grass" };
-// 심박수 측정 버튼/박스 — 잔디 위, 리스트 최상단
-export const HEART_ROW: Row = { kind: "heart" };
 
 // 재활용 풀을 "구조가 같은 것끼리" 나눈다. 전부 "plan" 하나로 두면 세트 5개짜리
 // 셀을 세트 1개짜리로 재활용할 때 React가 SetListItem 4개(=네이티브 뷰 수십 개)를
@@ -35,11 +30,7 @@ export const getRowType = (item: Row) =>
     : item.kind;
 
 export const getRowKey = (item: Row) =>
-  item.kind === "heart" || item.kind === "grass"
-    ? item.kind
-    : item.kind === "header"
-      ? `h${item.date}`
-      : `p${item.plan.id}`;
+  item.kind === "header" ? `h${item.date}` : `p${item.plan.id}`;
 
 // 기록 전체를 한 번만 행 목록으로 펼친다 — 화면에 그리는 양은 가상화가 알아서
 // 줄이므로 스크롤 도중 데이터를 덧붙일(=리렌더할) 이유가 없다.

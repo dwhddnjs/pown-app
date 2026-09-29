@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 // component
-import { View as RNView, StyleSheet } from "react-native";
+import { View as RNView, StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/themed";
 import { Stat } from "@/components/heart-rate/heart-rate-row";
 // zustand
@@ -11,6 +11,8 @@ import { useT } from "@/hooks/use-t";
 import { formatDate } from "@/lib/date";
 import { ThemeColorType } from "@/constants/colors";
 import { Lang } from "@/lib/i18n";
+// expo
+import { useRouter } from "expo-router";
 
 // 기록 목록 카드의 날짜 헤더. 운동 탭·검색·달력 히스토리가 같은 걸 쓴다 —
 // 세 군데에 복사해 두니 검색 화면만 점이 빠지고, 달력 히스토리만 글자색이
@@ -29,6 +31,7 @@ export const PlanDateHeader = ({
   const records = useHeartRateStore((state) => state.records);
   const heart = useMemo(() => summarizeDay(records, date), [records, date]);
   const t = useT();
+  const { push } = useRouter();
 
   return (
     <RNView>
@@ -42,9 +45,15 @@ export const PlanDateHeader = ({
         />
       </View>
       {/* 심박수 측정 요약 — 헤더 아래 카드 첫 줄. 세 화면 모두 헤더 밑에 itemColor
-          카드가 이어지므로 카드의 일부처럼 보인다. 측정 박스와 같은 칸, 중요도 순 */}
+          카드가 이어지므로 카드의 일부처럼 보인다. 측정 박스와 같은 칸, 중요도 순.
+          누르면 세션별 기록(보기·삭제)이 모달로 뜬다 — 달력 히스토리도 모달이라 바텀시트는
+          그 밑에 깔린다 */}
       {heart && (
-        <RNView
+        <TouchableOpacity
+          activeOpacity={0.6}
+          onPress={() =>
+            push({ pathname: "/heart-rate-records", params: { date } })
+          }
           style={[styles.summary, { backgroundColor: themeColor.itemColor }]}
         >
           <RNView style={styles.stats}>
@@ -61,13 +70,27 @@ export const PlanDateHeader = ({
                 n: Math.max(1, Math.round(heart.durationSec / 60)),
               })}
             />
-            {heart.minHR != null && heart.maxHR != null && (
+            {/* 강도는 평균이 가장 잘 보여준다. 범위는 세션별 기록 화면에 있다.
+                평균이 없는 예전 기록만 있는 날은 범위를 대신 둔다 */}
+            {heart.avgHR != null ? (
               <Stat
                 compact
-                label={t("heartRate.range")}
-                value={`${heart.minHR}–${heart.maxHR}`}
+                label={t("heartRate.avg")}
+                value={String(heart.avgHR)}
                 unit="bpm"
               />
+            ) : (
+              heart.minHR != null &&
+              heart.maxHR != null && (
+                <Stat
+                  compact
+                  label={t("heartRate.range")}
+                  // en dash(–)는 sb 폰트에 없어 대체 폰트로 그려진다 — 그 줄만 1.7pt 내려앉고
+                  // 띠 높이까지 늘어 아래 여백이 커 보였다. 폰트에 있는 하이픈을 쓴다
+                  value={`${heart.minHR}-${heart.maxHR}`}
+                  unit="bpm"
+                />
+              )
             )}
             <Stat
               compact
@@ -79,7 +102,7 @@ export const PlanDateHeader = ({
           <RNView
             style={[styles.divider, { backgroundColor: themeColor.divider }]}
           />
-        </RNView>
+        </TouchableOpacity>
       )}
     </RNView>
   );
@@ -112,7 +135,10 @@ const styles = StyleSheet.create({
   stats: {
     flexDirection: "row",
     justifyContent: "space-between",
-    paddingVertical: 12,
+    // 위아래를 글자 잉크 기준으로 같게(각 14pt) 맞춘 값이다. 똑같이 12씩 주면 라벨 한글은
+    // 줄 박스 위에 붙고 숫자 아래엔 디센더 자리가 남아, 아래가 3.7pt 더 넓어 보였다(@3x 실측)
+    paddingTop: 13.67,
+    paddingBottom: 10,
     // 구분선은 헤더와 같은 12 안쪽에 두고 칸만 4 더 들인다
     paddingHorizontal: 4,
   },

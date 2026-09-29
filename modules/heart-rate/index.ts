@@ -8,6 +8,7 @@ export type HeartRateSnapshot = {
   heartRate?: number;
   minHR?: number;
   maxHR?: number;
+  avgHR?: number;
   activeKcal: number;
   totalKcal: number;
   elapsedSec: number;
@@ -19,19 +20,27 @@ type HeartRateModule = {
   isSupported(): boolean;
   hasHeartRateDevice(): boolean;
   requestAuthorization(): Promise<boolean>;
-  start(): Promise<void>;
+  // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null)
+  start(): Promise<HeartRateSnapshot | null>;
   pause(): Promise<void>;
   resume(): Promise<void>;
   // 1분 미만이면 저장하지 않고 null
   end(): Promise<HeartRateSnapshot | null>;
   getActive(): Promise<HeartRateSnapshot | null>;
+  // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. 못 찾으면 false
+  deleteWorkout(startedAt: number): Promise<boolean>;
   addListener(
     event: "onUpdate",
-    listener: (body: HeartRateSnapshot | { state: "ended" }) => void,
+    // 시스템이 세션을 닫거나(다른 운동 앱 등) 아일랜드 버튼으로 끝내면 ended에 저장할 요약이
+    // 붙는다 (1분 미만이면 없다)
+    listener: (
+      body: HeartRateSnapshot | { state: "ended"; summary?: HeartRateSnapshot },
+    ) => void,
   ): Subscription;
   addListener(
     event: "onDeviceChange",
-    listener: (body: { available: boolean }) => void,
+    // removed: 이어폰을 뺀 경우만 true (마이크 등으로 출력이 바뀐 건 false)
+    listener: (body: { available: boolean; removed: boolean }) => void,
   ): Subscription;
 };
 
