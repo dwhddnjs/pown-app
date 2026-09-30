@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 12,
     borderRadius: 12,
+    borderCurve: "continuous",
     gap: 12,
   },
   title: {

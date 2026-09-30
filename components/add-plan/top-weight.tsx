@@ -140,6 +140,8 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     paddingRight: 8,
     borderRadius: 10,
+    borderCurve: "continuous",
+    overflow: "hidden",
     width: 94,
     justifyContent: "flex-end",
   },

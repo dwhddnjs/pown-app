@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginHorizontal: 20,
     borderRadius: 12,
+    borderCurve: "continuous",
   },
   bordered: {
     backgroundColor: "transparent",
@@ -73,6 +74,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginHorizontal: 20,
     borderRadius: 12,
+    borderCurve: "continuous",
+    overflow: "hidden",
   },
   icon: {
     backgroundColor: "transparent",
@@ -84,5 +87,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     marginHorizontal: 20,
     borderRadius: 12,
+    borderCurve: "continuous",
+    overflow: "hidden",
   },
 });

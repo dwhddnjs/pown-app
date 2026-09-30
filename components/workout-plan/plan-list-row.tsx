@@ -6,6 +6,7 @@ import { WorkoutPlan } from "./workout-plan";
 import { PlanDateHeader } from "./plan-date-header";
 import { YearGrass } from "@/components/grass";
 import { AnimatedHeight } from "@/components/animated-height";
+import { RoundedSide } from "@/components/rounded-side";
 // zustand
 import { useHeartRateLiveStore } from "@/hooks/use-heart-rate-store";
 // hook
@@ -54,24 +55,26 @@ export const PlanRow = ({
   item: Extract<Row, { kind: "plan" }>;
   themeColor: ThemeColorType;
 }) => {
-  // 한 그룹의 첫/마지막 행이 카드의 위아래를 맡는다 (예전엔 그룹 컨테이너가 했다)
+  // 한 그룹의 첫/마지막 행이 카드의 위아래를 맡는다 (예전엔 그룹 컨테이너가 했다).
+  // 위 모서리는 날짜 헤더가, 아래 모서리는 마지막 행이 RoundedSide로 둥글린다
   const isLast = item.index === item.total - 1;
 
   return (
     <View style={[styles.row, isLast && styles.groupBottomSpace]}>
-      <View
-        style={[
-          { backgroundColor: themeColor.itemColor },
-          item.index === 0 && styles.groupTop,
-          isLast && styles.groupBottom,
-        ]}
-      >
-        <WorkoutPlan
-          item={item.plan}
-          index={item.index}
-          totalLength={item.total}
-        />
-      </View>
+      <RoundedSide side={isLast ? "bottom" : null}>
+        <View
+          style={[
+            { backgroundColor: themeColor.itemColor },
+            item.index === 0 && styles.groupTop,
+          ]}
+        >
+          <WorkoutPlan
+            item={item.plan}
+            index={item.index}
+            totalLength={item.total}
+          />
+        </View>
+      </RoundedSide>
     </View>
   );
 };
@@ -92,11 +95,6 @@ const styles = StyleSheet.create({
   },
   groupTop: {
     paddingTop: 2,
-  },
-  groupBottom: {
-    borderBottomRightRadius: 12,
-    borderBottomLeftRadius: 12,
-    overflow: "hidden",
   },
   // 그룹 사이 간격 — 날짜 헤더의 paddingTop 24와 합쳐 예전 paddingVertical: 24와 같다
   groupBottomSpace: {

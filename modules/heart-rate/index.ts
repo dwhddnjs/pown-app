@@ -14,6 +14,8 @@ export type HeartRateSnapshot = {
   elapsedSec: number;
   // 세션 시작 시각(ms)
   startedAt: number;
+  // 종료 요약에만 온다 — 측정 중 받은 심박 [시작 후 초, bpm]
+  samples?: [number, number][];
 };
 
 type HeartRateModule = {
@@ -24,8 +26,11 @@ type HeartRateModule = {
   start(): Promise<HeartRateSnapshot | null>;
   pause(): Promise<void>;
   resume(): Promise<void>;
-  // 1분 미만이면 저장하지 않고 null
+  // 1분 미만이면 저장하지 않고 null. 이미 끝나는 중(아일랜드·시스템 종료)이거나 세션이
+  // 없으면 reject — 저장은 먼저 끝내던 쪽의 ended 이벤트가 한다
   end(): Promise<HeartRateSnapshot | null>;
+  // 길이와 상관없이 저장 없이 버린다(건강 앱에도 안 남는다) — 전체 초기화용
+  discard(): Promise<void>;
   getActive(): Promise<HeartRateSnapshot | null>;
   // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. 못 찾으면 false
   deleteWorkout(startedAt: number): Promise<boolean>;

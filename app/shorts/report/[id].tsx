@@ -205,6 +205,7 @@ const styles = StyleSheet.create({
   },
   card: {
     borderRadius: 14,
+    borderCurve: "continuous",
     padding: 16,
     gap: 10,
   },

@@ -2,6 +2,7 @@ import React from "react";
 // component
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/themed";
+import { DashedBorder } from "@/components/dashed-border";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -25,8 +26,9 @@ export const EmptyRoutine = ({ onPress }: { onPress: () => void }) => {
         accessibilityRole="button"
         accessibilityLabel={t("routine.addWorkout")}
         onPress={onPress}
-        style={[styles.card, { borderColor: themeColor.subText }]}
+        style={styles.card}
       >
+        <DashedBorder color={themeColor.subText} />
         <View style={[styles.iconCircle, { borderColor: themeColor.subText }]}>
           <FontAwesome6 name="plus" size={14} color={themeColor.subText} />
         </View>
@@ -49,7 +51,9 @@ export const EmptyRoutine = ({ onPress }: { onPress: () => void }) => {
               style={[styles.dot, { backgroundColor: themeColor.subText }]}
             />
           </View>
-          <View style={[styles.slot, { borderColor: themeColor.subText }]} />
+          <View style={styles.slot}>
+            <DashedBorder color={themeColor.subText} />
+          </View>
         </View>
       ))}
     </View>
@@ -63,11 +67,11 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     gap: GHOST_GAP,
   },
+  // 점선은 DashedBorder가 그린다 — 예전 테두리 굵기(1.5)만큼 패딩에 더해 높이를 지킨다
   card: {
-    borderWidth: 1.5,
-    borderStyle: "dashed",
     borderRadius: 12,
-    paddingVertical: 22,
+    borderCurve: "continuous",
+    paddingVertical: 23.5,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -113,9 +117,8 @@ const styles = StyleSheet.create({
   slot: {
     flex: 1,
     marginLeft: 8,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
     borderRadius: 12,
+    borderCurve: "continuous",
     height: 52,
   },
 });

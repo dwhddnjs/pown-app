@@ -91,6 +91,8 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 2,
     borderRadius: 12,
+    borderCurve: "continuous",
+    overflow: "hidden",
     paddingVertical: 14,
     paddingLeft: 12,
     fontSize: 14,

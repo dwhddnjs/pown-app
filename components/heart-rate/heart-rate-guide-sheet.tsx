@@ -45,7 +45,10 @@ export const HeartRateGuideSheet = forwardRef<
       enableDynamicSizing
       enablePanDownToClose
       backdropComponent={renderBackdrop}
-      backgroundStyle={{ backgroundColor: themeColor.background }}
+      backgroundStyle={{
+        backgroundColor: themeColor.background,
+        borderCurve: "continuous",
+      }}
       handleIndicatorStyle={{ backgroundColor: themeColor.subText }}
     >
       <BottomSheetView style={styles.sheet}>

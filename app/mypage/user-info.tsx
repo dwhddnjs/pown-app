@@ -237,6 +237,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderCurve: "continuous",
     borderWidth: 1.5,
+    overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
   },

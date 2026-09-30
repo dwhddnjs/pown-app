@@ -58,7 +58,7 @@ npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-cli
 - `types/workout.ts` — 도메인 타입(`WorkoutTypes`, `SetWithCountType`, `ImageUriType`)과 부위 순회 목록 `WORKOUT_TYPE_LIST`. 부위 유니온을 인라인으로 다시 적지 말 것.
 - `constants/body-part.tsx` — 부위별 SVG 아이콘 맵(`BODY_PART_ICON`)과 선택 UI용 `BODY_PART_ITEMS`.
 - `lib/date.ts` — 날짜 포맷·정렬·그룹핑. `lib/stats.ts` — 차트 집계. `lib/hangul.ts` — 초성 검색. `lib/seed.ts` — 테스트용 더미 기록.
-- 공용 컴포넌트: `components/confirm-dialog.tsx`(취소+실행 2버튼 확인창), `components/circle-button.tsx`(떠 있는 원형 버튼), `components/chart/chart-card.tsx`(기록 탭 카드 껍데기 `ChartCard`/`ChartBody`), `components/mypage/settings-screen-styles.ts`(설정 화면 공통 여백).
+- 공용 컴포넌트: `components/confirm-dialog.tsx`(취소+실행 2버튼 확인창), `components/circle-button.tsx`(떠 있는 원형 버튼), `components/chart/chart-card.tsx`(기록 탭 카드 껍데기 `ChartCard`/`ChartBody`), `components/mypage/settings-screen-styles.ts`(설정 화면 공통 여백), `components/rounded-side.tsx`(위나 아래 모서리만 연속 곡률), `components/dashed-border.tsx`(연속 곡률 점선 테두리).
 - 계획 작성 폼은 `components/plan-form.tsx` 하나다 — 추가·수정·루틴 추가가 모두 이걸 쓰고, 화면별 차이는 `header`/`extraSheets`/`onLeave` prop으로 넘긴다. 폼을 복사하지 말 것.
 
 ### SVG / 폰트
@@ -70,6 +70,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **경로 별칭** `@/*` → 루트. import 순서: React → RN/컴포넌트 → zustand → hooks → lib → expo → icon.
 - **파일/폴더** kebab-case. **컴포넌트** PascalCase + arrow function export만, 스타일은 하단 `StyleSheet.create()`. **스토어 파일** `use-*-store.tsx`, export는 `use*Store`. **타입** PascalCase + `Types`(스토어)/`Props`(컴포넌트) 접미사.
 - **ID는 `Date.now()`** — 순차 ID 금지(삭제 후 충돌).
+- **둥근 모서리는 iOS 연속 곡률로** — `borderRadius` 옆에 `borderCurve: "continuous"`(원·알약은 픽셀이 같아 생략). RN 0.79는 네 모서리 반경이 같고 테두리가 없을(또는 `overflow: "hidden"`) 때만 이걸 지킨다: 테두리가 있으면 `overflow: "hidden"`도 주고, 한쪽 모서리만 둥글면 `RoundedSide`, 점선이면 `DashedBorder`, 바텀시트는 `backgroundStyle`에 넣는다.
 
 ### 방어 코딩 (실제 크래시 유발)
 

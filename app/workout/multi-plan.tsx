@@ -84,6 +84,7 @@ export default function MultiPlanScreen() {
           <View
             style={{
               borderRadius: 12,
+              borderCurve: "continuous",
               overflow: "hidden",
 
               backgroundColor: themeColor.itemColor,

@@ -12,6 +12,11 @@ public class HeartRateModule: Module {
   private var manager: AnyObject?
   private var routeObserver: NSObjectProtocol?
   private var controlObserver: NSObjectProtocol?
+  // 아일랜드 종료 버튼이 앱을 백그라운드로 깨운 직후엔 JS가 아직 onUpdate를 안 듣고 있어
+  // 이벤트가 버려진다 — 저장할 요약이 붙은 ended만 들고 있다가 구독이 붙으면 넘긴다.
+  // 둘 다 메인 스레드에서만 만진다
+  private var isObservingUpdate = false
+  private var pendingEnded: [String: Any]?
 
   public func definition() -> ModuleDefinition {
     Name("HeartRate")
@@ -65,6 +70,20 @@ public class HeartRateModule: Module {
       self.routeObserver = nil
     }
 
+    // 모듈 큐에서 불린다 — 메인으로 옮겨 sendUpdate와 순서를 맞춘다
+    OnStartObserving("onUpdate") {
+      DispatchQueue.main.async {
+        self.isObservingUpdate = true
+        guard let body = self.pendingEnded else { return }
+        self.pendingEnded = nil
+        self.sendEvent("onUpdate", body)
+      }
+    }
+
+    OnStopObserving("onUpdate") {
+      DispatchQueue.main.async { self.isObservingUpdate = false }
+    }
+
     Function("isSupported") { () -> Bool in
       guard #available(iOS 26.0, *) else { return false }
       return HKHealthStore.isHealthDataAvailable()
@@ -94,9 +113,14 @@ public class HeartRateModule: Module {
       await self.workout().resume()
     }
 
-    AsyncFunction("end") { () async -> [String: Any]? in
+    AsyncFunction("end") { () async throws -> [String: Any]? in
       guard #available(iOS 26.0, *) else { return nil }
-      return await self.workout().end()
+      return try await self.workout().end()
+    }
+
+    AsyncFunction("discard") { () async throws in
+      guard #available(iOS 26.0, *) else { return }
+      _ = try await self.workout().end(discard: true)
     }
 
     AsyncFunction("getActive") { () async -> [String: Any]? in
@@ -124,11 +148,19 @@ public class HeartRateModule: Module {
         // 앱이 뒤에 있을 때 끝난 것이라 종료 버튼 쪽 저장이 없다 — 시스템 종료와 같은 이벤트로
         // 요약을 넘겨 JS가 기록을 남긴다
         var body: [String: Any] = ["state": "ended"]
-        if let summary = await manager.end() { body["summary"] = summary }
-        self.sendEvent("onUpdate", body)
+        if let summary = try? await manager.end() { body["summary"] = summary }
+        self.sendUpdate(body)
       default: break
       }
     }
+  }
+
+  private func sendUpdate(_ body: [String: Any]) {
+    guard isObservingUpdate else {
+      if body["summary"] != nil { pendingEnded = body }
+      return
+    }
+    sendEvent("onUpdate", body)
   }
 
   @available(iOS 26.0, *)
@@ -136,7 +168,7 @@ public class HeartRateModule: Module {
   private func workout() -> WorkoutManager {
     if let manager = manager as? WorkoutManager { return manager }
     let manager = WorkoutManager { [weak self] body in
-      self?.sendEvent("onUpdate", body)
+      self?.sendUpdate(body)
     }
     self.manager = manager
     return manager
@@ -178,6 +210,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 빌더 통계에 최소·최대가 비어 올 때를 대비해 직접 본 값도 들고 있는다
   private var seenMin: Int?
   private var seenMax: Int?
+  // 기록 화면 그래프용 심박 [시작 후 초, bpm]. JS는 백그라운드에서 샘플을 못 받아 여기서 모은다.
+  // 종료 때 건강 앱에서 읽은 심박(storedSamples)이 없을 때만 쓰는 대체값이다
+  private var samples: [[Int]] = []
+  private var lastSampleAt: Date?
 
   init(emit: @escaping ([String: Any]) -> Void) {
     self.emit = emit
@@ -214,14 +250,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       session.prepare()
       // 애플 권장: prepare 뒤 3초 — 에어팟 심박 센서가 붙을 시간을 준다
       try await Task.sleep(nanoseconds: 3_000_000_000)
-      // 기다리는 사이 시스템이 세션을 닫았으면 그쪽에서 이미 정리했다 — 끝난 세션에
-      // 시작을 걸면 아무도 끝내지 않는 Live Activity가 남는다
-      guard self.session === session else { throw CancellationError() }
+      // 기다리는 사이 시스템이 세션을 닫았으면(정리 중이어도) 그쪽이 마무리한다 — 끝난
+      // 세션에 시작을 걸면 아무도 끝내지 않는 Live Activity가 남는다
+      guard self.session === session, !isEnding else { throw CancellationError() }
       let now = Date()
       session.startActivity(with: now)
       try await builder.beginCollection(at: now)
+      guard self.session === session, !isEnding else { throw CancellationError() }
     } catch {
-      if self.session === session {
+      if self.session === session, !isEnding {
         session.end()
         reset()
       }
@@ -240,9 +277,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     session?.resume()
   }
 
-  func end() async -> [String: Any]? {
+  // nil은 1분 미만(버림)뿐이다. 이미 끝나는 중이거나 세션이 없으면 던진다 — 그 경우 저장은
+  // 먼저 끝내던 쪽이 하므로, JS가 "1분 미만" 안내를 잘못 띄우지 않게 구분한다
+  // discard: 길이와 상관없이 건강 앱에도 남기지 않고 버린다(전체 초기화)
+  func end(discard: Bool = false) async throws -> [String: Any]? {
     // 두 번 불려도 한 번만 마무리한다 — 두 번째가 stopped를 덮어쓰면 첫 호출이 영영 안 끝난다
-    guard !isEnding, let session, let builder else { return nil }
+    guard !isEnding, let session, let builder else { throw CancellationError() }
     isEnding = true
     defer { reset() }
 
@@ -252,25 +292,51 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         session.stopActivity(with: .now)
       }
     }
-    return await finish(session, builder)
+    return await finish(session, builder, discard: discard)
   }
 
   // 우리가 끝내든 시스템이 끝내든 같은 길로 마무리한다. 1분 미만이면 버리고 nil
-  private func finish(_ session: HKWorkoutSession, _ builder: HKLiveWorkoutBuilder) async
-    -> [String: Any]?
-  {
+  private func finish(
+    _ session: HKWorkoutSession, _ builder: HKLiveWorkoutBuilder, discard: Bool = false
+  ) async -> [String: Any]? {
     try? await builder.endCollection(at: .now)
-    let summary = snapshot()
+    var summary = snapshot()
 
-    if builder.elapsedTime < Self.minimumDuration {
+    if discard || builder.elapsedTime < Self.minimumDuration {
       builder.discardWorkout()
       session.end()
       return nil
     }
     // 건강 앱 저장이 실패해도(쓰기 권한 해제 등) 앱 기록은 남긴다
-    _ = try? await builder.finishWorkout()
+    let workout = try? await builder.finishWorkout()
     session.end()
+    let stored = await storedSamples(of: workout)
+    let all = stored.isEmpty ? samples : stored
+    if !all.isEmpty { summary?["samples"] = all }
     return summary
+  }
+
+  // 건강 앱에 저장된 이 운동의 심박 전부 [시작 후 초, bpm]. 측정 중 콜백은 샘플이 여러 개 묶여
+  // 와도 최근 값 하나만 보여 사이 값이 빠지고, 앱이 죽었다 복구되면 그 전 구간이 없다. 시리즈
+  // 샘플도 값 하나하나 읽는다. 읽기 권한이 없거나(빈 결과) 잠금 상태라 못 읽으면 빈 배열
+  private func storedSamples(of workout: HKWorkout?) async -> [[Int]] {
+    guard let workout else { return [] }
+    let query = HKQuantitySeriesSampleQueryDescriptor(
+      predicate: .quantitySample(
+        type: Self.heartRate, predicate: HKQuery.predicateForObjects(from: workout)))
+    var found: [[Int]] = []
+    do {
+      for try await result in query.results(for: store) {
+        found.append([
+          max(0, Int(result.dateInterval.start.timeIntervalSince(workout.startDate))),
+          Int(result.quantity.doubleValue(for: Self.bpm).rounded()),
+        ])
+      }
+    } catch {
+      // 중간에 실패한 결과는 반쪽이라 통째로 버리고 측정 중 모은 것을 쓴다
+      return []
+    }
+    return found
   }
 
   // 다른 운동 앱이 세션을 가져가는 등 우리가 끝내지 않았는데 닫힌 경우. 버리면 몇십 분
@@ -311,7 +377,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
 
   func recover() async -> [String: Any]? {
     // 준비 중(prepared)엔 아직 측정 전이다 — 스냅샷을 주면 JS가 "측정 중"으로 그린다
-    if session != nil { return isLive ? snapshot() : nil }
+    if session != nil {
+      // 준비 3초 사이 앱이 뒤로 가면 Live Activity 요청이 거절된다(앞에 있을 때만 된다) —
+      // 돌아왔을 때 다시 띄운다. 안 그러면 이 세션 내내 아일랜드·잠금화면이 없다
+      if isLive, !isEnding, activity == nil {
+        startLiveActivity()
+        publish()
+      }
+      return isLive ? snapshot() : nil
+    }
     guard let recovered = (try? await store.recoverActiveWorkoutSession()) ?? nil else {
       // 앱이 죽은 사이 세션이 끝났으면 아일랜드에 멈춘 숫자만 남아 있다
       for activity in Activity<HeartRateAttributes>.activities {
@@ -349,7 +423,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   ) {
     Task { @MainActor in
       guard workoutSession === self.session else { return }
-      if toState == .stopped {
+      // 종료를 기다리는 중 시스템이 stopped를 건너뛰고 바로 끝내도 풀어준다 — 안 풀면 end()가
+      // 영영 안 끝나 앱을 다시 켜기 전까지 측정을 시작할 수 없다
+      if toState == .stopped || toState == .ended {
         self.stopped?.resume()
         self.stopped = nil
       }
@@ -374,7 +450,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   nonisolated func workoutBuilder(
     _ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>
   ) {
-    Task { @MainActor in self.publish() }
+    Task { @MainActor in
+      self.recordSample()
+      self.publish()
+    }
   }
 
   nonisolated func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {
@@ -394,6 +473,21 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     isEnding = false
     seenMin = nil
     seenMax = nil
+    samples = []
+    lastSampleAt = nil
+  }
+
+  // 새 심박이 들어왔을 때만 쌓는다 — 칼로리만 갱신된 콜백에도 불린다
+  private func recordSample() {
+    guard let builder, let start = builder.startDate,
+      let heart = builder.statistics(for: Self.heartRate),
+      let at = heart.mostRecentQuantityDateInterval()?.end, at != lastSampleAt,
+      let quantity = heart.mostRecentQuantity()
+    else { return }
+    lastSampleAt = at
+    samples.append([
+      Int(at.timeIntervalSince(start)), Int(quantity.doubleValue(for: Self.bpm).rounded()),
+    ])
   }
 
   private func snapshot() -> [String: Any]? {

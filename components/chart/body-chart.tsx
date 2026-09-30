@@ -154,6 +154,8 @@ export const BodyChart = () => {
                     top: 0,
                     width: POINTER_LABEL_WIDTH,
                     borderRadius: 8,
+                    borderCurve: "continuous",
+                    overflow: "hidden",
                     backgroundColor: themeColor.background,
                     paddingVertical: 6,
                     paddingHorizontal: 8,

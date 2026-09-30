@@ -272,7 +272,10 @@ export default function Video() {
                 <Animated.View
                   style={[
                     animatedShutterStyle,
-                    { backgroundColor: themeColor.fail },
+                    {
+                      backgroundColor: themeColor.fail,
+                      borderCurve: "continuous",
+                    },
                   ]}
                 />
               </View>

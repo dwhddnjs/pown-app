@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
     width: "90%",
     maxHeight: "85%",
     borderRadius: 16,
+    borderCurve: "continuous",
     paddingBottom: 20,
   },
   // 원형 보더(36)가 빠진 만큼 여백을 키워 아이콘 중심을 예전 자리에 둔다

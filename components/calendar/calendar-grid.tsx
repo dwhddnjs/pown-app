@@ -203,6 +203,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     gap: 12,
     borderRadius: 12,
+    borderCurve: "continuous",
     paddingHorizontal: 6,
   },
   week: {

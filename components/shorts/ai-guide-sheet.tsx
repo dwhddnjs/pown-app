@@ -75,7 +75,10 @@ export const AiGuideSheet = forwardRef<BottomSheetModal, AiGuideSheetProps>(
         snapPoints={snapPoints}
         enablePanDownToClose
         backdropComponent={renderBackdrop}
-        backgroundStyle={{ backgroundColor: themeColor.background }}
+        backgroundStyle={{
+          backgroundColor: themeColor.background,
+          borderCurve: "continuous",
+        }}
         handleIndicatorStyle={{ backgroundColor: themeColor.subText }}
       >
         {/* flex:1이 없으면 내용 높이 그대로 자라서 버튼이 시트 밖으로 밀린다 */}

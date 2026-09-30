@@ -24,10 +24,10 @@ import Animated, {
 import Svg, { Circle, G } from "react-native-svg";
 // zustand
 import {
-  HeartRateLiveTypes,
   hasPlanOn,
   saveRecord,
   summarizeDay,
+  toMinutes,
   useHeartRateLiveStore,
   useHeartRateStore,
 } from "@/hooks/use-heart-rate-store";
@@ -81,11 +81,16 @@ export const formatElapsed = (seconds: number) => {
 };
 
 // 운동 탭 리스트 헤더 맨 위. 대기 중엔 얇은 시작 버튼, 누르면 같은 카드가 아래로
-// 펼쳐져 측정 박스가 된다. 리스트 헤더라 재활용·언마운트되지 않아 로컬 상태가 안전하다.
+// 펼쳐져 측정 박스가 된다. 리스트 헤더라 재활용되진 않지만 날짜를 고르면 리스트 key가
+// 바뀌어 다시 마운트된다 — 로컬 상태(isEnding 등)가 풀려도 네이티브가 중복 종료를 막는다.
 // isLatest: 최신부터 보고 있을 때만 시작 버튼을 보인다. 측정 중이면 과거 날짜를 보고
 // 있어도 박스를 둔다 — 일시정지·종료가 여기에만 있다
 export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
-  const live = useHeartRateLiveStore((state) => state.live);
+  // 샘플마다 바뀌는 live 전체는 LiveBox만 구독한다 — 여기서 구독하면 몇 초마다 확인창·안내
+  // 시트까지 다시 그린다. 세션이 있는지와 어느 세션인지(시작 시각)만 본다
+  const liveStartedAt = useHeartRateLiveStore(
+    (state) => state.live?.startedAt ?? null,
+  );
   const preparingAt = useHeartRateLiveStore((state) => state.preparingAt);
   const deviceAvailable = useHeartRateLiveStore(
     (state) => state.deviceAvailable,
@@ -100,7 +105,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
 
-  const isMeasuring = !!live || preparingAt !== null;
+  const isMeasuring = liveStartedAt !== null || preparingAt !== null;
   if (!isHeartRateSupported || (!isMeasuring && !(isLatest && deviceAvailable)))
     return null;
 
@@ -119,6 +124,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
     }
     starting.current = true;
     const { setLive, setPreparingAt } = useHeartRateLiveStore.getState();
+    let preparedAt: number | null = null;
     try {
       if (!(await HeartRate.requestAuthorization())) {
         // 한 번 거부하면 권한 창이 다시 안 뜬다 — 켜는 곳으로 바로 보낸다. 설정 앱의
@@ -133,12 +139,17 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
         return;
       }
       // 여기서 바로 박스로 펼친다 — 센서가 붙는 3초를 버튼에서 기다리지 않는다
-      setPreparingAt(Date.now());
+      preparedAt = Date.now();
+      setPreparingAt(preparedAt);
       // 시작 결과를 이벤트보다 먼저 받아 넣는다 — 준비 표시를 끄는 순간 live가 비어
       // 있으면 박스가 한 프레임 버튼으로 되돌아간다
       setLive(await HeartRate.start());
     } catch {
-      toast.error(t("heartRate.startFailed"));
+      // 준비 중에 전체 초기화가 세션을 버렸으면(준비 표시도 이미 지웠다) 실패가 아니다
+      const discarded =
+        preparedAt !== null &&
+        useHeartRateLiveStore.getState().preparingAt === null;
+      if (!discarded) toast.error(t("heartRate.startFailed"));
     } finally {
       setPreparingAt(null);
       starting.current = false;
@@ -155,7 +166,11 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       if (summary) saveRecord(summary);
       else toast(t("heartRate.tooShort"));
     } catch {
+      // 이미 끝나는 중이면 그쪽 ended 이벤트가 저장한다 — 박스만 네이티브에 맞춘다.
       // 세션이 살아 있으면 박스가 그대로 남아 다시 누를 수 있다
+      HeartRate.getActive()
+        .then(useHeartRateLiveStore.getState().setLive)
+        .catch(() => {});
     } finally {
       setIsEnding(false);
     }
@@ -171,10 +186,9 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
           {isMeasuring ? (
             <LiveBox
               key="box"
-              live={live}
               preparingAt={preparingAt}
               isEnding={isEnding}
-              onEnd={() => live && setConfirmFor(live.startedAt)}
+              onEnd={() => setConfirmFor(liveStartedAt)}
             />
           ) : (
             <StartButton key="button" onPress={onStart} />
@@ -182,7 +196,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
         </AnimatedHeight>
       </LayoutAnimationConfig>
       <ConfirmDialog
-        isOpen={!!live && confirmFor === live.startedAt}
+        isOpen={liveStartedAt !== null && confirmFor === liveStartedAt}
         onClose={() => setConfirmFor(null)}
         title={t("heartRate.endTitle")}
         desc={t("heartRate.endDesc")}
@@ -226,9 +240,7 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
         </Text>
         <Text style={[styles.startHint, { color: themeColor.subText }]}>
           {todaySec
-            ? t("heartRate.todayRecorded", {
-                n: Math.max(1, Math.round(todaySec / 60)),
-              })
+            ? t("heartRate.todayRecorded", { n: toMinutes(todaySec) })
             : t("heartRate.connected")}
         </Text>
         {/* 누르면 이 자리에서 아래로 펼쳐져 측정 박스가 된다 */}
@@ -244,16 +256,15 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
 
 // live가 없으면 준비 중(센서 연결 대기) — 같은 박스에 카운트다운만 띄우고 조작은 막는다
 const LiveBox = ({
-  live,
   preparingAt,
   isEnding,
   onEnd,
 }: {
-  live: HeartRateLiveTypes | null;
   preparingAt: number | null;
   isEnding: boolean;
   onEnd: () => void;
 }) => {
+  const live = useHeartRateLiveStore((state) => state.live);
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const isRunning = live?.state === "running";

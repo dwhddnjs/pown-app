@@ -4,6 +4,7 @@ import { useT } from "@/hooks/use-t";
 import { StyleSheet, FlatList } from "react-native";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
+import { RoundedSide } from "@/components/rounded-side";
 // expo
 import { useLocalSearchParams } from "expo-router";
 // hook
@@ -39,22 +40,24 @@ export default function CalendarWorkout() {
           return (
             <View style={styles.list}>
               <PlanDateHeader date={item[0]} themeColor={themeColor} />
-              <View
-                style={[
-                  styles.workoutList,
-                  { backgroundColor: themeColor.itemColor },
-                ]}
-              >
-                {item[1].map((data, index) => (
-                  <WorkoutPlan
-                    key={data.id}
-                    item={data}
-                    index={index}
-                    totalLength={item[1].length}
-                    hideMenu
-                  />
-                ))}
-              </View>
+              <RoundedSide side="bottom">
+                <View
+                  style={[
+                    styles.workoutList,
+                    { backgroundColor: themeColor.itemColor },
+                  ]}
+                >
+                  {item[1].map((data, index) => (
+                    <WorkoutPlan
+                      key={data.id}
+                      item={data}
+                      index={index}
+                      totalLength={item[1].length}
+                      hideMenu
+                    />
+                  ))}
+                </View>
+              </RoundedSide>
             </View>
           );
         }}
@@ -69,11 +72,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingTop: 12,
   },
+  // 아래 모서리는 RoundedSide가 연속 곡률로 둥글린다
   workoutList: {
-    borderBottomRightRadius: 12,
-    borderBottomLeftRadius: 12,
     paddingTop: 2,
-    overflow: "hidden",
   },
   list: {
     paddingHorizontal: 12,
