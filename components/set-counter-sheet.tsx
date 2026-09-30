@@ -123,6 +123,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           animatedPosition={animatedPosition}
           backgroundStyle={{
             backgroundColor: themeColor.itemColor,
+            borderCurve: "continuous",
           }}
           handleIndicatorStyle={{
             backgroundColor: themeColor.subText,

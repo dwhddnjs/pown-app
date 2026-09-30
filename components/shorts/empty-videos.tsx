@@ -6,6 +6,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Text, View } from "../themed";
+import { DashedBorder } from "@/components/dashed-border";
 // hooks
 import { useT } from "@/hooks/use-t";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -39,11 +40,9 @@ export const EmptyVideos = () => {
         accessibilityRole="button"
         accessibilityLabel={t("shorts.addShorts")}
         onPress={() => router.push("/shorts/video")}
-        style={[
-          styles.card,
-          { width: width / 3 - 12, borderColor: themeColor.subText },
-        ]}
+        style={[styles.card, { width: width / 3 - 12 }]}
       >
+        <DashedBorder color={themeColor.subText} />
         <View style={[styles.iconCircle, { borderColor: themeColor.subText }]}>
           <FontAwesome6 name="plus" size={14} color={themeColor.subText} />
         </View>
@@ -62,9 +61,8 @@ const styles = StyleSheet.create({
   },
   card: {
     aspectRatio: 9 / 16,
-    borderWidth: 1.5,
-    borderStyle: "dashed",
     borderRadius: 12,
+    borderCurve: "continuous",
     justifyContent: "center",
     alignItems: "center",
     gap: 10,

@@ -78,8 +78,10 @@ export const HeartRateChart = () => {
     unit,
     Math.ceil((Math.max(...bars.map((bar) => bar.value)) * 1.1) / unit) * unit,
   );
-  const hours = total ? Math.floor(total.durationSec / 3600) : 0;
-  const minutes = total ? Math.round((total.durationSec % 3600) / 60) : 0;
+  // 분으로 먼저 반올림해야 "1시간 60분"이 안 나온다
+  const totalMinutes = total ? Math.round(total.durationSec / 60) : 0;
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
 
   return (
     <ChartCard

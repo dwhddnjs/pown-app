@@ -57,12 +57,15 @@ export default function ResetData() {
     onReset();
     onResetVideo();
     onResetRecords();
-    // 측정 중이면 세션도 끝낸다(요약은 버린다) — 안 끝내면 지운 뒤에도 아일랜드에 남고,
-    // 나중에 종료를 누르면 방금 비운 기록에 옛 측정이 다시 저장된다
-    const { live, setLive } = useHeartRateLiveStore.getState();
-    if (live) {
-      HeartRate?.end().catch(() => {});
+    // 측정 중이거나 센서를 기다리는 중(3초)이면 세션도 저장 없이 버린다(건강 앱에도 안 남긴다) —
+    // 안 버리면 지운 뒤에도 아일랜드에 남고, 나중에 종료를 누르면 방금 비운 기록에 옛 측정이
+    // 다시 저장된다
+    const { live, preparingAt, setLive, setPreparingAt } =
+      useHeartRateLiveStore.getState();
+    if (live || preparingAt !== null) {
+      HeartRate?.discard().catch(() => {});
       setLive(null);
+      setPreparingAt(null);
     }
     toast.success(t("data.resetDone"));
     back();

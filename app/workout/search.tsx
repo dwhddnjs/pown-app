@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
+import { RoundedSide } from "@/components/rounded-side";
 import { FlashList } from "@shopify/flash-list";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -100,21 +101,23 @@ export default function Search() {
                 themeColor={themeColor}
                 lang={lang}
               />
-              <View
-                style={[
-                  styles.workoutList,
-                  { backgroundColor: themeColor.itemColor },
-                ]}
-              >
-                {item[1].map((data, index) => (
-                  <WorkoutPlan
-                    key={data.id}
-                    item={data}
-                    index={index}
-                    totalLength={item[1].length}
-                  />
-                ))}
-              </View>
+              <RoundedSide side="bottom">
+                <View
+                  style={[
+                    styles.workoutList,
+                    { backgroundColor: themeColor.itemColor },
+                  ]}
+                >
+                  {item[1].map((data, index) => (
+                    <WorkoutPlan
+                      key={data.id}
+                      item={data}
+                      index={index}
+                      totalLength={item[1].length}
+                    />
+                  ))}
+                </View>
+              </RoundedSide>
             </View>
           );
         }}
@@ -153,11 +156,9 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     fontSize: 16,
   },
+  // 아래 모서리는 RoundedSide가 연속 곡률로 둥글린다
   workoutList: {
-    borderBottomRightRadius: 12,
-    borderBottomLeftRadius: 12,
     paddingTop: 2,
-    overflow: "hidden",
   },
 
   list: {

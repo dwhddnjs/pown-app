@@ -82,5 +82,6 @@ const styles = StyleSheet.create({
   cellFill: {
     flex: 1,
     borderRadius: 2,
+    borderCurve: "continuous",
   },
 });

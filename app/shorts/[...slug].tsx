@@ -474,6 +474,7 @@ export default function ShortsView() {
 const styles = StyleSheet.create({
   checkBox: {
     borderRadius: 12,
+    borderCurve: "continuous",
     padding: 14,
     gap: 10,
   },

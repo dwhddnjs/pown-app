@@ -113,6 +113,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderWidth: 2,
     borderRadius: 12,
+    borderCurve: "continuous",
+    overflow: "hidden",
     paddingHorizontal: 12,
     fontFamily: "sb-l",
   },

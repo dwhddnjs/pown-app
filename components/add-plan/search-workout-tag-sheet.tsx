@@ -71,6 +71,7 @@ export const SearchWorkoutTagSheet = forwardRef<
       onClose={onClose}
       backgroundStyle={{
         backgroundColor: themeColor.itemColor,
+        borderCurve: "continuous",
       }}
       handleIndicatorStyle={{
         backgroundColor: themeColor.subText,

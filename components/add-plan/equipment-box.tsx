@@ -42,6 +42,7 @@ export const EquipmentBox = () => {
               equipment === item && {
                 backgroundColor: themeColor.tint,
                 borderRadius: 8,
+                borderCurve: "continuous",
               },
             ]}
             onPress={() => onPressEquipment(item)}
@@ -88,6 +89,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderWidth: 2,
     borderRadius: 14,
+    borderCurve: "continuous",
+    overflow: "hidden",
     paddingHorizontal: 4,
     paddingVertical: 4,
   },

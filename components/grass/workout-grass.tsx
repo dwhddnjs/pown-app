@@ -269,6 +269,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 12,
+    borderCurve: "continuous",
     gap: 8,
   },
   row: {
@@ -311,6 +312,7 @@ const styles = StyleSheet.create({
     width: 9,
     height: 9,
     borderRadius: 2,
+    borderCurve: "continuous",
   },
   legendText: {
     fontFamily: "sb-l",

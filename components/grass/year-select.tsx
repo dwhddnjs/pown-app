@@ -146,6 +146,7 @@ const styles = StyleSheet.create({
     minWidth: 72,
     paddingVertical: 2,
     borderRadius: 8,
+    borderCurve: "continuous",
   },
   dropdownItem: {
     paddingVertical: 5,

@@ -172,7 +172,10 @@ export const ShortsMemoSheet = forwardRef<BottomSheet, ShortsMemoSheetProps>(
         // 같은 순간의 close()를 취소해버린다 (extend라 애초에 움직이지도 않으니 되돌릴 것도 없다)
         keyboardBlurBehavior="none"
         animatedPosition={animatedPosition}
-        backgroundStyle={{ backgroundColor: themeColor.background }}
+        backgroundStyle={{
+          backgroundColor: themeColor.background,
+          borderCurve: "continuous",
+        }}
         handleIndicatorStyle={{ backgroundColor: themeColor.subText }}
       >
         <MemoForm
