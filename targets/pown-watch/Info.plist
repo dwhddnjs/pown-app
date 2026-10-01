@@ -4,6 +4,12 @@
   <dict>
     <key>WKApplication</key>
     <true/>
+    <!-- 앱과 같은 언어 목록 — 종료 확인창의 "취소" 같은 시스템 문구가 한국어로 나온다 -->
+    <key>CFBundleLocalizations</key>
+    <array>
+      <string>ko</string>
+      <string>en</string>
+    </array>
     <!-- 화면이 꺼져도 운동 세션이 계속 돌게 -->
     <key>WKBackgroundModes</key>
     <array>
