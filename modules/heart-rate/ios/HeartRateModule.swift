@@ -3,6 +3,7 @@ import AVFoundation
 import ExpoModulesCore
 import HealthKit
 import UIKit
+import WatchConnectivity
 
 // iPhone 운동 세션(iOS 26+)으로 에어팟 프로 3 같은 웨어러블의 심박·칼로리를 받아
 // JS와 Live Activity(다이나믹 아일랜드·잠금화면)에 흘려보낸다.
@@ -17,6 +18,7 @@ public class HeartRateModule: Module {
   // 둘 다 메인 스레드에서만 만진다
   private var isObservingUpdate = false
   private var pendingEnded: [String: Any]?
+  private let watchState = WatchState()
 
   public func definition() -> ModuleDefinition {
     Name("HeartRate")
@@ -34,6 +36,23 @@ public class HeartRateModule: Module {
       ) { [weak self] notification in
         guard let action = notification.userInfo?["action"] as? String else { return }
         self?.control(action)
+      }
+      // 워치 페어링·앱 설치 여부는 활성화가 끝나야 읽힌다 — JS가 시작할 때 물은 값은
+      // false였을 수 있으니 바뀔 때마다 다시 알린다
+      self.watchState.onChange = { [weak self] in
+        DispatchQueue.main.async {
+          self?.sendEvent(
+            "onDeviceChange",
+            ["available": HeartRateModule.hasHeartRateDevice(), "removed": false])
+        }
+      }
+      if WCSession.isSupported() {
+        WCSession.default.delegate = self.watchState
+        WCSession.default.activate()
+      }
+      // 미러링 핸들러는 워치가 세션을 넘기기 전에 걸려 있어야 한다
+      if #available(iOS 26.0, *) {
+        Task { @MainActor in _ = self.workout() }
       }
     }
 
@@ -183,8 +202,35 @@ public class HeartRateModule: Module {
     let bluetooth: [AVAudioSession.Port] = [.bluetoothA2DP, .bluetoothHFP, .bluetoothLE]
     return AVAudioSession.sharedInstance().currentRoute.outputs.contains {
       bluetooth.contains($0.portType)
-    }
+    } || isWatchAvailable()
   }
+
+  // 페어링된 워치에 포운 워치 앱이 깔려 있으면 워치로 잰다
+  static func isWatchAvailable() -> Bool {
+    guard WCSession.isSupported() else { return false }
+    let session = WCSession.default
+    #if targetEnvironment(simulator)
+      // ponytail: 스파이크 — simctl로 워치에 직접 깐 앱은 아이폰이 "설치됨"으로 못 본다
+      // (appInstalled: NO). 실기기는 앱스토어 자동 설치라 해당 없음, 출시 전 삭제
+      return session.activationState == .activated && session.isPaired
+    #else
+      return session.activationState == .activated && session.isPaired
+        && session.isWatchAppInstalled
+    #endif
+  }
+}
+
+// WCSession은 델리게이트가 있어야 활성화된다 — 페어링·설치 상태 변화만 듣는다
+final class WatchState: NSObject, WCSessionDelegate {
+  var onChange: (() -> Void)?
+
+  func session(
+    _ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
+    error: Error?
+  ) { onChange?() }
+  func sessionDidBecomeInactive(_ session: WCSession) {}
+  func sessionDidDeactivate(_ session: WCSession) { session.activate() }
+  func sessionWatchStateDidChange(_ session: WCSession) { onChange?() }
 }
 
 @available(iOS 26.0, *)
@@ -214,9 +260,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 종료 때 건강 앱에서 읽은 심박(storedSamples)이 없을 때만 쓰는 대체값이다
   private var samples: [[Int]] = []
   private var lastSampleAt: Date?
+  // 워치 미러 세션일 때 워치가 마지막으로 보낸 스냅샷 — 이때는 builder가 없다
+  private var remote: [String: Any]?
 
   init(emit: @escaping ([String: Any]) -> Void) {
     self.emit = emit
+    super.init()
+    store.workoutSessionMirroringStartHandler = { [weak self] mirrored in
+      Task { @MainActor in self?.attachMirrored(mirrored) }
+    }
   }
 
   func requestAuthorization() async throws -> Bool {
@@ -236,6 +288,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     let configuration = HKWorkoutConfiguration()
     configuration.activityType = .traditionalStrengthTraining
     configuration.locationType = .indoor
+    if HeartRateModule.isWatchAvailable() { return try await startOnWatch(configuration) }
 
     let session = try HKWorkoutSession(healthStore: store, configuration: configuration)
     let builder = session.associatedWorkoutBuilder()
@@ -269,6 +322,27 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return snapshot()
   }
 
+  // ponytail: 스파이크 — 워치 값을 JS 박스에만 흘린다. Live Activity·기록 저장은 실기 검증 뒤에
+  private func startOnWatch(_ configuration: HKWorkoutConfiguration) async throws -> [String: Any]? {
+    try await store.startWatchApp(toHandle: configuration)
+    // 미러 세션은 핸들러로, 첫 값은 델리게이트로 따로 온다 — 10초 안에 둘 다 와야 시작으로 본다
+    for _ in 0..<40 where remote == nil {
+      try await Task.sleep(nanoseconds: 250_000_000)
+    }
+    guard session != nil, remote != nil else {
+      session?.end()
+      reset()
+      throw CancellationError()
+    }
+    return snapshot()
+  }
+
+  private func attachMirrored(_ mirrored: HKWorkoutSession) {
+    guard session == nil else { return }
+    mirrored.delegate = self
+    session = mirrored
+  }
+
   func pause() {
     session?.pause()
   }
@@ -282,9 +356,14 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // discard: 길이와 상관없이 건강 앱에도 남기지 않고 버린다(전체 초기화)
   func end(discard: Bool = false) async throws -> [String: Any]? {
     // 두 번 불려도 한 번만 마무리한다 — 두 번째가 stopped를 덮어쓰면 첫 호출이 영영 안 끝난다
-    guard !isEnding, let session, let builder else { throw CancellationError() }
+    guard !isEnding, let session else { throw CancellationError() }
     isEnding = true
     defer { reset() }
+    // 워치 세션: 끝내기만 하면 워치가 정리한다. 저장은 스파이크 범위 밖이라 nil
+    guard let builder else {
+      session.end()
+      return nil
+    }
 
     if session.state == .running || session.state == .paused {
       await withCheckedContinuation { continuation in
@@ -342,7 +421,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 다른 운동 앱이 세션을 가져가는 등 우리가 끝내지 않았는데 닫힌 경우. 버리면 몇십 분
   // 기록이 조용히 사라진다 — 종료와 같은 길로 저장하고 요약을 JS에 넘긴다(JS가 기록을 남긴다)
   private func closeBySystem(_ session: HKWorkoutSession) {
-    guard let builder else { return }
+    guard let builder else {
+      // 워치 세션이 워치 쪽에서 끝났거나 연결이 끊겼다
+      reset()
+      emit(["state": "ended"])
+      return
+    }
     isEnding = true
     Task {
       let summary = await finish(session, builder)
@@ -380,7 +464,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     if session != nil {
       // 준비 3초 사이 앱이 뒤로 가면 Live Activity 요청이 거절된다(앞에 있을 때만 된다) —
       // 돌아왔을 때 다시 띄운다. 안 그러면 이 세션 내내 아일랜드·잠금화면이 없다
-      if isLive, !isEnding, activity == nil {
+      if isLive, !isEnding, activity == nil, builder != nil {
         startLiveActivity()
         publish()
       }
@@ -460,6 +544,29 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     Task { @MainActor in self.publish() }
   }
 
+  // 워치가 보낸 스냅샷(아이폰 snapshot()과 같은 키). 여러 개 묶여 오면 마지막만 본다
+  nonisolated func workoutSession(
+    _ workoutSession: HKWorkoutSession, didReceiveDataFromRemoteWorkoutSession data: [Data]
+  ) {
+    guard let last = data.last,
+      let body = (try? JSONSerialization.jsonObject(with: last)) as? [String: Any]
+    else { return }
+    Task { @MainActor in
+      guard workoutSession === self.session, !self.isEnding else { return }
+      self.remote = body
+      if UIApplication.shared.applicationState == .active { self.emit(body) }
+    }
+  }
+
+  nonisolated func workoutSession(
+    _ workoutSession: HKWorkoutSession, didDisconnectFromRemoteDeviceWithError error: Error?
+  ) {
+    Task { @MainActor in
+      guard workoutSession === self.session, !self.isEnding else { return }
+      self.closeBySystem(workoutSession)
+    }
+  }
+
   // MARK: - 상태
 
   // 준비(prepared) 중이면 아직, 멈춤(stopped) 뒤면 이미 "측정 중"이 아니다
@@ -475,6 +582,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     seenMax = nil
     samples = []
     lastSampleAt = nil
+    remote = nil
   }
 
   // 새 심박이 들어왔을 때만 쌓는다 — 칼로리만 갱신된 콜백에도 불린다
@@ -491,7 +599,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   private func snapshot() -> [String: Any]? {
-    guard let session, let builder else { return nil }
+    guard let session else { return nil }
+    guard let builder else { return remote }
     let kcal = HKUnit.kilocalorie()
     let active =
       builder.statistics(for: Self.activeEnergy)?.sumQuantity()?.doubleValue(for: kcal) ?? 0
