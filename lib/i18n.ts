@@ -61,6 +61,9 @@ const ko = {
   "workout.history": "운동 히스토리",
   "heartRate.start": "심박수 측정 시작",
   "heartRate.connected": "이어폰 연결됨",
+  "heartRate.viaWatch": "애플워치로 측정",
+  "heartRate.watchPreparing": "애플워치 연결 중…",
+  "heartRate.watchUnavailable": "애플워치를 손목에 차고 잠금을 풀어 주세요.",
   "heartRate.preparing": "센서 연결 중… {n}",
   "heartRate.measuring": "측정 중",
   "heartRate.paused": "일시정지",
@@ -75,6 +78,8 @@ const ko = {
     "심박수·칼로리 기록이 오늘 운동에 저장되고 건강 앱에도 기록돼요.",
   "heartRate.noSignal":
     "심박 신호가 없어요. 에어팟 프로 3 이상을 착용하고 설정 > AirPods > 심박수를 켜 주세요.",
+  "heartRate.noSignalWatch":
+    "심박 신호가 없어요. 애플워치를 손목에 꼭 맞게 차 주세요.",
   "heartRate.permissionDenied":
     "건강 앱 > 공유 > 앱 > Pown에서 권한을 켜 주세요.",
   "heartRate.startFailed": "측정을 시작하지 못했어요.",
@@ -89,6 +94,8 @@ const ko = {
   "heartRate.recordsNote": "지우면 건강 앱에 저장된 운동도 함께 지워져요.",
   "heartRate.deleteTitle": "이 기록을 지울까요?",
   "heartRate.deleteDesc": "건강 앱의 운동 기록도 함께 지워져요.",
+  "heartRate.deleteHealthFailed":
+    "건강 앱의 운동은 지우지 못했어요. 건강 앱에서 직접 지워 주세요.",
   "heartRate.needPlan": "오늘 운동 계획을 먼저 추가해 주세요.",
   "heartRate.autoPaused": "이어폰이 빠져서 측정을 일시정지했어요.",
   "heartRate.startMore": "심박수 추가 측정",
@@ -96,13 +103,13 @@ const ko = {
   "heartRate.added": "오늘 기록에 더했어요!",
   "heartRate.savedNoPlan":
     "기록은 저장했어요. 그날 운동 계획을 추가하면 날짜 아래에 보여요.",
-  "heartRate.guideTitle": "에어팟으로 심박수 재기",
+  "heartRate.guideTitle": "심박수 재기",
   "heartRate.guideLead":
-    "운동하는 동안 이어폰의 심박 센서로 심박수와 칼로리를 실시간으로 재고, 끝내면 오늘 운동 기록에 남겨요.",
-  "heartRate.guideDevice": "AirPods Pro 3 · Powerbeats Pro 2",
+    "운동하는 동안 애플워치나 이어폰의 심박 센서로 심박수와 칼로리를 실시간으로 재고, 끝내면 오늘 운동 기록에 남겨요.",
+  "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "심박 센서가 들어 있는 이 이어폰들로 잴 수 있어요. 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
-  "heartRate.guideSetting": "이어폰 설정에서 심박수를 켜 주세요",
+    "애플워치는 포운 워치 앱이 저절로 켜져서 재요. 이어폰은 심박 센서가 들어 있는 이 모델들만 되고, 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
+  "heartRate.guideSetting": "이어폰은 설정에서 심박수를 켜 주세요",
   "heartRate.guideSettingDesc":
     "설정 > AirPods > 심박수가 켜져 있어야 신호가 들어와요.",
   "heartRate.guideIsland": "앱을 나가도 계속 재요",
@@ -422,6 +429,9 @@ const en: Record<TKey, string> = {
   "workout.history": "Workout History",
   "heartRate.start": "Start heart rate",
   "heartRate.connected": "Earphones connected",
+  "heartRate.viaWatch": "With Apple Watch",
+  "heartRate.watchPreparing": "Connecting to Apple Watch…",
+  "heartRate.watchUnavailable": "Wear your Apple Watch and unlock it.",
   "heartRate.preparing": "Connecting sensor… {n}",
   "heartRate.measuring": "Measuring",
   "heartRate.paused": "Paused",
@@ -436,6 +446,8 @@ const en: Record<TKey, string> = {
     "Your heart rate and calories are saved to today's workout and the Health app.",
   "heartRate.noSignal":
     "No heart rate signal. Wear AirPods Pro 3 or later and turn on Settings > AirPods > Heart Rate.",
+  "heartRate.noSignalWatch":
+    "No heart rate signal. Wear your Apple Watch snugly on your wrist.",
   "heartRate.permissionDenied":
     "Allow access in Health > Sharing > Apps > Pown.",
   "heartRate.startFailed": "Couldn't start measuring.",
@@ -452,6 +464,8 @@ const en: Record<TKey, string> = {
   "heartRate.deleteTitle": "Delete this record?",
   "heartRate.deleteDesc":
     "The workout saved to the Health app will be deleted too.",
+  "heartRate.deleteHealthFailed":
+    "Couldn't delete the workout in Health. Delete it in the Health app.",
   "heartRate.needPlan": "Add today's workout plan first.",
   "heartRate.autoPaused": "Earphones removed — measurement paused.",
   "heartRate.startMore": "Measure again",
@@ -459,13 +473,13 @@ const en: Record<TKey, string> = {
   "heartRate.added": "Added to today's record!",
   "heartRate.savedNoPlan":
     "Saved. Add a workout plan for that day to see it under the date.",
-  "heartRate.guideTitle": "Track heart rate with AirPods",
+  "heartRate.guideTitle": "Track your heart rate",
   "heartRate.guideLead":
-    "While you work out, your earphones' heart rate sensor tracks heart rate and calories live. When you finish, it's saved to today's workout.",
-  "heartRate.guideDevice": "AirPods Pro 3 · Powerbeats Pro 2",
+    "While you work out, your Apple Watch or earphones' heart rate sensor tracks heart rate and calories live. When you finish, it's saved to today's workout.",
+  "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "Works with these earphones' built-in heart rate sensor. Earphones without one won't show heart rate.",
-  "heartRate.guideSetting": "Turn on heart rate in earphone settings",
+    "On Apple Watch, the Pown watch app opens by itself. Earphones work only with these models' built-in heart rate sensor — earphones without one won't show heart rate.",
+  "heartRate.guideSetting": "For earphones, turn on heart rate in settings",
   "heartRate.guideSettingDesc":
     "Settings > AirPods > Heart Rate must be on to get a signal.",
   "heartRate.guideIsland": "Keeps measuring outside the app",

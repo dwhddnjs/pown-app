@@ -2,8 +2,16 @@ import { requireOptionalNativeModule } from "expo";
 
 type Subscription = { remove(): void };
 
+// 심박을 잴 기기. 워치(포운 워치 앱이 깔린 애플워치)를 먼저 쓴다
+export type HeartRateDevice = "watch" | "earphones";
+
+// 시작이 워치 쪽에서 실패하고 이어폰도 없을 때 start()가 던지는 에러 코드
+export const WATCH_UNAVAILABLE = "ERR_WATCH_UNAVAILABLE";
+
 // 네이티브 스냅샷. 심박은 최근 30초 안에 들어온 값이 없으면 빠진다.
 export type HeartRateSnapshot = {
+  // 어디서 재고 있는지 — phone: 아이폰 세션(이어폰 센서), watch: 애플워치 미러링
+  source?: "phone" | "watch";
   state: "running" | "paused";
   heartRate?: number;
   minHR?: number;
@@ -20,9 +28,10 @@ export type HeartRateSnapshot = {
 
 type HeartRateModule = {
   isSupported(): boolean;
-  hasHeartRateDevice(): boolean;
+  heartRateDevice(): HeartRateDevice | null;
   requestAuthorization(): Promise<boolean>;
-  // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null)
+  // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null). 워치가 응답하지 않으면
+  // 이어폰으로 넘어가고, 이어폰도 없으면 WATCH_UNAVAILABLE 코드로 reject
   start(): Promise<HeartRateSnapshot | null>;
   pause(): Promise<void>;
   resume(): Promise<void>;
@@ -32,8 +41,9 @@ type HeartRateModule = {
   // 길이와 상관없이 저장 없이 버린다(건강 앱에도 안 남는다) — 전체 초기화용
   discard(): Promise<void>;
   getActive(): Promise<HeartRateSnapshot | null>;
-  // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. 못 찾으면 false
-  deleteWorkout(startedAt: number): Promise<boolean>;
+  // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. failed: 찾았는데 못 지웠다
+  // (워치 앱이 저장한 운동·쓰기 권한 해제 — 앱은 자기가 저장한 것만 지울 수 있다)
+  deleteWorkout(startedAt: number): Promise<"deleted" | "notFound" | "failed">;
   addListener(
     event: "onUpdate",
     // 시스템이 세션을 닫거나(다른 운동 앱 등) 아일랜드 버튼으로 끝내면 ended에 저장할 요약이
@@ -44,8 +54,9 @@ type HeartRateModule = {
   ): Subscription;
   addListener(
     event: "onDeviceChange",
-    // removed: 이어폰을 뺀 경우만 true (마이크 등으로 출력이 바뀐 건 false)
-    listener: (body: { available: boolean; removed: boolean }) => void,
+    // device: 지금 쓸 수 있는 기기(없으면 빠진다). removed: 이어폰이 하나도 안 남게 뺀 경우만
+    // true (마이크 등으로 출력이 바뀐 건 false)
+    listener: (body: { device?: HeartRateDevice; removed: boolean }) => void,
   ): Subscription;
 };
 

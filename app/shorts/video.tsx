@@ -22,7 +22,7 @@ import { useShortsStore } from "@/hooks/use-shorts-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
-import { persistMediaLocally } from "@/lib/media";
+import { persistMediaLocally, readVideoDuration } from "@/lib/media";
 //expo
 import {
   CameraType,
@@ -154,6 +154,8 @@ export default function Video() {
     try {
       if (uri) {
         const id = Date.now();
+        // 플레이어로 열어 읽느라 느리다 — 복사하는 동안 같이 읽는다
+        const duration = readVideoDuration(uri);
         // recordAsync가 주는 캐시 경로는 iOS가 언제든 비울 수 있어 앱 내부 저장소로 옮긴다
         // 기본 quality가 1.0이라 그리드 타일(화면 1/3 폭)에 비해 몇 배 무겁고 백업에도
         // 그대로 들어간다
@@ -169,6 +171,7 @@ export default function Video() {
             `shorts-thumb-${id}.jpg`,
           ),
           createdAt: new Date().toISOString(),
+          durationSec: await duration,
         });
       }
       // uri를 비우지 않는다 — active={!uri}라서 화면이 닫히는 애니메이션 내내

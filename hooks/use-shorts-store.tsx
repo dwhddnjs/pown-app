@@ -3,6 +3,7 @@ import {
   isAppOwnedMedia,
   isMediaMissing,
   persistMediaLocally,
+  readVideoDuration,
   removeAppOwnedMedia,
   resolveMediaUri,
 } from "@/lib/media";
@@ -44,14 +45,18 @@ export type ShortsVideoTypes = {
   title?: string;
   content?: string;
   report?: ShortsReportTypes;
+  // 그리드 썸네일에 표시하는 영상 길이. 이 필드 전에 찍은 영상은 onRepairVideos가 채운다.
+  // 0이면 읽지 못한 영상이다(다시 읽지 않고, 그리드에도 안 그린다)
+  durationSec?: number;
 };
 
 // 그리드 정렬. 저장 배열은 촬영 순서 그대로 두고 보여줄 때만 정렬한다(useSortedVideos)
 export type ShortsSortTypes = "latest" | "oldest";
 
-// 파일 검사는 목록당 한 번이면 된다. 목록이 통째로 바뀌면(복원·초기화) 다시 검사한다.
+// 검사를 시작한 목록. 파일 검사는 목록당 한 번이면 된다. 목록이 통째로 바뀌면(복원·초기화)
+// 비워서 다시 검사하고, 그 전 목록을 검사하던 결과는 버린다.
 // 상태로 두면 persist가 같이 저장해 다음 실행에서 영영 안 돌게 된다.
-let hasRepaired = false;
+let repairedList: ShortsVideoTypes[] | null = null;
 
 // 파일 조회를 몇 개씩 끊어 돌지
 const REPAIR_BATCH = 8;
@@ -113,18 +118,18 @@ export const useShortsStore = create<ShortsStoreTypes>()(
       },
       onSetVideos: (videos) => {
         // 목록을 통째로 갈아끼웠다(복원) — 새 항목들은 아직 검사 전이다
-        hasRepaired = false;
+        repairedList = null;
         set({ videos });
       },
-      // 목록엔 남아 있는데 실제 파일이 없는 항목을 정리한다.
+      // 목록엔 남아 있는데 실제 파일이 없는 항목을 정리하고, 영상 길이가 없는 항목은 채운다.
       // 구 버전은 썸네일을 캐시 절대경로로 저장해서, 앱 업데이트로 컨테이너 UUID가
       // 바뀌면 파일이 통째로 사라진다 → 그리드가 전부 투명해져 "빈 화면"으로 보인다
       // (항목이 있으니 empty 화면도 안 뜬다). 영상에서 썸네일을 다시 뽑아 되살린다.
       onRepairVideos: async () => {
         const origin = get().videos;
-        // 빈 목록이면 검사할 게 없다 — 아직 하이드레이션 전일 수 있으니 플래그도 세우지 않는다
-        if (hasRepaired || origin.length === 0) return;
-        hasRepaired = true;
+        // 빈 목록이면 검사할 게 없다 — 아직 하이드레이션 전일 수 있으니 표시도 하지 않는다
+        if (repairedList || origin.length === 0) return;
+        repairedList = origin;
 
         const repairOne = async (video: ShortsVideoTypes) => {
           // 앱 소유 영상이 확실히 사라졌으면 되살릴 방법이 없는 죽은 기록이다. 샌드박스
@@ -137,6 +142,7 @@ export const useShortsStore = create<ShortsStoreTypes>()(
             removeAppOwnedMedia(video.thumbnail);
             return null;
           }
+          let next = video;
           if (await isMediaMissing(video.thumbnail)) {
             try {
               // 화질은 저장 경로(app/shorts/video.tsx)와 맞춘다
@@ -144,8 +150,8 @@ export const useShortsStore = create<ShortsStoreTypes>()(
                 resolveMediaUri(video.video),
                 { time: 0, quality: 0.7 },
               );
-              return {
-                ...video,
+              next = {
+                ...next,
                 thumbnail: await persistMediaLocally(
                   uri,
                   `shorts-thumb-${video.id}.jpg`,
@@ -155,7 +161,12 @@ export const useShortsStore = create<ShortsStoreTypes>()(
               // 썸네일만 못 살렸다 — 항목은 남기고 그리드가 대체 타일로 그린다
             }
           }
-          return video;
+          if (next.durationSec == null) {
+            // 못 읽으면 0으로 남겨 실행할 때마다 다시 열지 않는다(그리드엔 안 그린다)
+            const durationSec = (await readVideoDuration(video.video)) ?? 0;
+            next = { ...next, durationSec };
+          }
+          return next;
         };
 
         // 한 번에 다 던지면 탭을 여는 프레임에 파일 조회가 몰려 화면이 멈칫한다
@@ -168,21 +179,31 @@ export const useShortsStore = create<ShortsStoreTypes>()(
           );
         }
 
-        // 검사 중에 녹화가 끝나 목록이 바뀌었으면 옛 목록으로 덮어쓰지 않는다
-        if (get().videos !== origin) return;
-        if (repaired.every((video, index) => video === origin[index])) return;
-        set({
-          videos: repaired.filter(
-            (video): video is ShortsVideoTypes => video !== null,
-          ),
+        // 검사 중에 목록이 통째로 바뀌었으면(복원·초기화) 새 목록은 따로 검사한다
+        if (repairedList !== origin) return;
+        // 그 사이 분석·메모·삭제·새 녹화로 목록이 바뀌었을 수 있다 — 옛 목록으로 덮지 않고,
+        // 고친 항목의 썸네일·길이만 지금 목록에 얹는다(죽은 기록은 뺀다)
+        const fixes = new Map<number, ShortsVideoTypes | null>();
+        origin.forEach((video, index) => {
+          if (repaired[index] !== video) fixes.set(video.id, repaired[index]);
         });
+        if (fixes.size === 0) return;
+        set((prev) => ({
+          videos: prev.videos.flatMap((video) => {
+            const fixed = fixes.get(video.id);
+            if (fixed === undefined) return [video];
+            if (fixed === null) return [];
+            const { thumbnail, durationSec } = fixed;
+            return [{ ...video, thumbnail, durationSec }];
+          }),
+        }));
       },
       onResetVideo: () => {
         get().videos.forEach((video) => {
           removeAppOwnedMedia(video.video);
           removeAppOwnedMedia(video.thumbnail);
         });
-        hasRepaired = false;
+        repairedList = null;
         set({
           videos: [],
         });

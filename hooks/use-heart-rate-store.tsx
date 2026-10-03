@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Linking } from "react-native";
 import { toast } from "sonner-native";
 // zustand
 import { create } from "zustand";
@@ -14,6 +14,7 @@ import { format, parse } from "date-fns";
 // native
 import {
   HeartRate,
+  HeartRateDevice,
   HeartRateSnapshot,
   isHeartRateSupported,
 } from "@/modules/heart-rate";
@@ -102,23 +103,24 @@ type HeartRateLiveStoreTypes = {
   // 시작을 누르고 센서가 붙기를 기다리는 동안(3초)의 시작 시각. 박스는 이때 이미 펼쳐지고
   // 잔디도 같이 접혀야 해서 컴포넌트 상태가 아니라 여기 둔다
   preparingAt: number | null;
-  deviceAvailable: boolean;
+  // 지금 잴 수 있는 기기 — 없으면 시작 버튼을 숨긴다
+  device: HeartRateDevice | null;
   setLive: (snapshot: HeartRateSnapshot | null) => void;
   setPreparingAt: (at: number | null) => void;
-  setDeviceAvailable: (available: boolean) => void;
+  setDevice: (device: HeartRateDevice | null) => void;
 };
 
 export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
   (set) => ({
     live: null,
     preparingAt: null,
-    deviceAvailable: false,
+    device: null,
     setLive: (snapshot) =>
       set({
         live: snapshot ? { ...snapshot, receivedAt: Date.now() } : null,
       }),
     setPreparingAt: (preparingAt) => set({ preparingAt }),
-    setDeviceAvailable: (deviceAvailable) => set({ deviceAvailable }),
+    setDevice: (device) => set({ device }),
   }),
 );
 
@@ -199,7 +201,20 @@ export const deleteRecord = (record: HeartRateRecordTypes) => {
     record.startedAtMs != null
       ? Math.floor(record.startedAtMs / 1000) * 1000
       : parse(record.startedAt, PLAN_DATE_FORMAT, new Date()).getTime(),
-  ).catch(() => {});
+  )
+    .then((result) => {
+      // 찾았는데 못 지웠다(워치 앱이 저장한 운동 등) — "함께 지워져요"라고 했으니 남은 걸 알리고
+      // 직접 지우는 곳으로 보낸다
+      if (result !== "failed") return;
+      toast.error(tt("heartRate.deleteHealthFailed"), {
+        duration: 6000,
+        action: {
+          label: tt("heartRate.openHealth"),
+          onClick: () => Linking.openURL("x-apple-health://"),
+        },
+      });
+    })
+    .catch(() => {});
 };
 
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
@@ -208,16 +223,12 @@ export const useHeartRateSync = () => {
   useEffect(() => {
     const native = HeartRate;
     if (!native || !isHeartRateSupported) return;
-    const { setLive, setDeviceAvailable } = useHeartRateLiveStore.getState();
+    const { setLive, setDevice } = useHeartRateLiveStore.getState();
     const syncLive = () =>
       native
         .getActive()
         .then(setLive)
         .catch(() => {});
-
-    setDeviceAvailable(native.hasHeartRateDevice());
-    // 앱이 죽었다 다시 뜬 경우 진행 중이던 세션을 되찾는다
-    syncLive();
 
     const update = native.addListener("onUpdate", (body) => {
       if (body.state !== "ended") return setLive(body);
@@ -226,16 +237,15 @@ export const useHeartRateSync = () => {
       // 버튼으로 끝낸 건 그쪽이 저장한다
       if (body.summary) saveRecord(body.summary);
     });
-    const device = native.addListener(
+    const deviceChange = native.addListener(
       "onDeviceChange",
-      ({ available, removed }) => {
-        setDeviceAvailable(available);
+      ({ device, removed }) => {
+        setDevice(device ?? null);
         // 에어팟을 빼면 심박이 끊긴다 — 빈 심박으로 시간·칼로리만 쌓이지 않게 멈춘다.
-        // 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다)
-        if (
-          removed &&
-          useHeartRateLiveStore.getState().live?.state === "running"
-        ) {
+        // 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다). 워치로 재는 중이면
+        // 이어폰과 상관없다
+        const { live } = useHeartRateLiveStore.getState();
+        if (removed && live?.state === "running" && live.source !== "watch") {
           native.pause().catch(() => {});
           toast(tt("heartRate.autoPaused"));
         }
@@ -245,12 +255,17 @@ export const useHeartRateSync = () => {
     // 그동안 놓친 오디오 출력 변경도 다시 본다
     const app = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
-      setDeviceAvailable(native.hasHeartRateDevice());
+      setDevice(native.heartRateDevice());
       if (useHeartRateLiveStore.getState().live) syncLive();
     });
+    // 리스너를 먼저 걸고 읽는다 — 읽은 뒤 걸면 그 사이 끝난 워치 연결(WCSession 활성화) 소식을
+    // 놓쳐, 앱을 한 번 내렸다 올릴 때까지 시작 버튼이 안 보인다
+    setDevice(native.heartRateDevice());
+    // 앱이 죽었다 다시 뜬 경우 진행 중이던 세션을 되찾는다
+    syncLive();
     return () => {
       update.remove();
-      device.remove();
+      deviceChange.remove();
       app.remove();
     };
   }, []);
