@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 // component
 import {
+  ActivityIndicator,
   Linking,
   View as RNView,
   StyleSheet,
@@ -35,10 +36,14 @@ import {
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
-import { dateKey } from "@/lib/date";
+import { dateKey, formatElapsed } from "@/lib/date";
 import { mmkv } from "@/lib/storage";
 // native
-import { HeartRate, isHeartRateSupported } from "@/modules/heart-rate";
+import {
+  HeartRate,
+  isHeartRateSupported,
+  WATCH_UNAVAILABLE,
+} from "@/modules/heart-rate";
 // icon
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
@@ -73,13 +78,6 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 // 링 중심에서 잉크 중심까지 잰 만큼(시뮬레이터 @3x) 오른쪽으로 민다. 3은 정중앙이다
 const DIGIT_NUDGE: Record<number, number> = { 1: 0.67, 2: 0.33 };
 
-export const formatElapsed = (seconds: number) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor(seconds / 60) % 60;
-  const s = String(seconds % 60).padStart(2, "0");
-  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-};
-
 // 운동 탭 리스트 헤더 맨 위. 대기 중엔 얇은 시작 버튼, 누르면 같은 카드가 아래로
 // 펼쳐져 측정 박스가 된다. 리스트 헤더라 재활용되진 않지만 날짜를 고르면 리스트 key가
 // 바뀌어 다시 마운트된다 — 로컬 상태(isEnding 등)가 풀려도 네이티브가 중복 종료를 막는다.
@@ -92,9 +90,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
     (state) => state.live?.startedAt ?? null,
   );
   const preparingAt = useHeartRateLiveStore((state) => state.preparingAt);
-  const deviceAvailable = useHeartRateLiveStore(
-    (state) => state.deviceAvailable,
-  );
+  const device = useHeartRateLiveStore((state) => state.device);
   const [isEnding, setIsEnding] = useState(false);
   // 확인창은 연 세션에 묶는다 — 불리언이면 시스템이 세션을 닫았을 때 true로 남아
   // 다음 측정을 시작하자마자 저절로 떴다
@@ -106,7 +102,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
   const t = useT();
 
   const isMeasuring = liveStartedAt !== null || preparingAt !== null;
-  if (!isHeartRateSupported || (!isMeasuring && !(isLatest && deviceAvailable)))
+  if (!isHeartRateSupported || (!isMeasuring && !(isLatest && device)))
     return null;
 
   const onStart = async () => {
@@ -144,12 +140,22 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       // 시작 결과를 이벤트보다 먼저 받아 넣는다 — 준비 표시를 끄는 순간 live가 비어
       // 있으면 박스가 한 프레임 버튼으로 되돌아간다
       setLive(await HeartRate.start());
-    } catch {
+    } catch (error) {
       // 준비 중에 전체 초기화가 세션을 버렸으면(준비 표시도 이미 지웠다) 실패가 아니다
       const discarded =
         preparedAt !== null &&
         useHeartRateLiveStore.getState().preparingAt === null;
-      if (!discarded) toast.error(t("heartRate.startFailed"));
+      // 워치가 응답하지 않았고 이어폰도 없다 — 워치를 차고 잠금을 풀면 된다
+      const watchUnavailable =
+        (error as { code?: string } | null)?.code === WATCH_UNAVAILABLE;
+      if (!discarded)
+        toast.error(
+          t(
+            watchUnavailable
+              ? "heartRate.watchUnavailable"
+              : "heartRate.startFailed",
+          ),
+        );
     } finally {
       setPreparingAt(null);
       starting.current = false;
@@ -222,6 +228,7 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
   const todaySec = useHeartRateStore(
     (state) => summarizeDay(state.records, dateKey(new Date()))?.durationSec,
   );
+  const device = useHeartRateLiveStore((state) => state.device);
 
   return (
     <Animated.View entering={CONTENT_FADE}>
@@ -241,7 +248,11 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
         <Text style={[styles.startHint, { color: themeColor.subText }]}>
           {todaySec
             ? t("heartRate.todayRecorded", { n: toMinutes(todaySec) })
-            : t("heartRate.connected")}
+            : t(
+                device === "watch"
+                  ? "heartRate.watchConnected"
+                  : "heartRate.connected",
+              )}
         </Text>
         {/* 누르면 이 자리에서 아래로 펼쳐져 측정 박스가 된다 */}
         <MaterialCommunityIcons
@@ -265,6 +276,7 @@ const LiveBox = ({
   onEnd: () => void;
 }) => {
   const live = useHeartRateLiveStore((state) => state.live);
+  const device = useHeartRateLiveStore((state) => state.device);
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const isRunning = live?.state === "running";
@@ -316,6 +328,13 @@ const LiveBox = ({
               {isPaused ? t("heartRate.paused") : t("heartRate.measuring")}
             </Text>
           </RNView>
+        ) : device === "watch" ? (
+          // 워치 앱을 깨워 첫 값이 오기까지는 길이가 정해져 있지 않다(첫 사용 땐 워치에서
+          // 권한까지 허용한다) — 3초 링이 "1"에 멈춰 보이지 않게 끝없이 도는 표시를 쓴다
+          <ActivityIndicator
+            color={themeColor.tint}
+            accessibilityLabel={t("heartRate.watchPreparing")}
+          />
         ) : (
           <CountdownRing startedAt={preparingAt ?? Date.now()} />
         )}
@@ -347,7 +366,11 @@ const LiveBox = ({
 
       {noSignal && (
         <Text style={[styles.hint, { color: themeColor.subText }]}>
-          {t("heartRate.noSignal")}
+          {t(
+            live?.source === "watch"
+              ? "heartRate.noSignalWatch"
+              : "heartRate.noSignal",
+          )}
         </Text>
       )}
 

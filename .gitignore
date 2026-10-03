@@ -42,3 +42,6 @@ expo-env.d.ts
 /ios
 /android
 # @end expo-cli
+
+# @bacons/apple-targets가 expo-target.config.js의 icon으로 prebuild 때 만든다
+/targets/*/Assets.xcassets/AppIcon.appiconset/

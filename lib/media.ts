@@ -1,6 +1,7 @@
 import { tt } from "@/hooks/use-t";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import { createVideoPlayer } from "expo-video";
 import { toast } from "sonner-native";
 import { ImageUriType } from "@/types/workout";
 
@@ -54,6 +55,24 @@ export const isMediaMissing = async (stored?: string) => {
     return false;
   }
 };
+
+// 영상 길이(초). 녹화(recordAsync)가 길이를 주지 않아 플레이어로 열어 읽는다 — 화면에 붙이지
+// 않은 플레이어라 재생되지 않는다. 못 열면(파일 없음·사진첩 권한) undefined
+export const readVideoDuration = (stored: string) =>
+  new Promise<number | undefined>((resolve) => {
+    const player = createVideoPlayer(resolveMediaUri(stored));
+    const finish = (duration?: number) => {
+      clearTimeout(timer);
+      subscription.remove();
+      player.release();
+      resolve(duration && duration > 0 ? duration : undefined);
+    };
+    const timer = setTimeout(finish, 5000);
+    const subscription = player.addListener("statusChange", ({ status }) => {
+      if (status === "readyToPlay") finish(player.duration);
+      else if (status === "error") finish();
+    });
+  });
 
 // 앱 소유 media/ 파일만 삭제 — 구 데이터(절대경로·ph://)는 건드리지 않는다
 export const removeAppOwnedMedia = (stored?: string) => {

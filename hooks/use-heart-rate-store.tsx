@@ -14,6 +14,7 @@ import { format, parse } from "date-fns";
 // native
 import {
   HeartRate,
+  HeartRateDevice,
   HeartRateSnapshot,
   isHeartRateSupported,
 } from "@/modules/heart-rate";
@@ -102,23 +103,24 @@ type HeartRateLiveStoreTypes = {
   // 시작을 누르고 센서가 붙기를 기다리는 동안(3초)의 시작 시각. 박스는 이때 이미 펼쳐지고
   // 잔디도 같이 접혀야 해서 컴포넌트 상태가 아니라 여기 둔다
   preparingAt: number | null;
-  deviceAvailable: boolean;
+  // 지금 잴 수 있는 기기 — 없으면 시작 버튼을 숨긴다
+  device: HeartRateDevice | null;
   setLive: (snapshot: HeartRateSnapshot | null) => void;
   setPreparingAt: (at: number | null) => void;
-  setDeviceAvailable: (available: boolean) => void;
+  setDevice: (device: HeartRateDevice | null) => void;
 };
 
 export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
   (set) => ({
     live: null,
     preparingAt: null,
-    deviceAvailable: false,
+    device: null,
     setLive: (snapshot) =>
       set({
         live: snapshot ? { ...snapshot, receivedAt: Date.now() } : null,
       }),
     setPreparingAt: (preparingAt) => set({ preparingAt }),
-    setDeviceAvailable: (deviceAvailable) => set({ deviceAvailable }),
+    setDevice: (device) => set({ device }),
   }),
 );
 
@@ -208,14 +210,14 @@ export const useHeartRateSync = () => {
   useEffect(() => {
     const native = HeartRate;
     if (!native || !isHeartRateSupported) return;
-    const { setLive, setDeviceAvailable } = useHeartRateLiveStore.getState();
+    const { setLive, setDevice } = useHeartRateLiveStore.getState();
     const syncLive = () =>
       native
         .getActive()
         .then(setLive)
         .catch(() => {});
 
-    setDeviceAvailable(native.hasHeartRateDevice());
+    setDevice(native.heartRateDevice());
     // 앱이 죽었다 다시 뜬 경우 진행 중이던 세션을 되찾는다
     syncLive();
 
@@ -226,16 +228,15 @@ export const useHeartRateSync = () => {
       // 버튼으로 끝낸 건 그쪽이 저장한다
       if (body.summary) saveRecord(body.summary);
     });
-    const device = native.addListener(
+    const deviceChange = native.addListener(
       "onDeviceChange",
-      ({ available, removed }) => {
-        setDeviceAvailable(available);
+      ({ device, removed }) => {
+        setDevice(device ?? null);
         // 에어팟을 빼면 심박이 끊긴다 — 빈 심박으로 시간·칼로리만 쌓이지 않게 멈춘다.
-        // 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다)
-        if (
-          removed &&
-          useHeartRateLiveStore.getState().live?.state === "running"
-        ) {
+        // 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다). 워치로 재는 중이면
+        // 이어폰과 상관없다
+        const { live } = useHeartRateLiveStore.getState();
+        if (removed && live?.state === "running" && live.source !== "watch") {
           native.pause().catch(() => {});
           toast(tt("heartRate.autoPaused"));
         }
@@ -245,12 +246,12 @@ export const useHeartRateSync = () => {
     // 그동안 놓친 오디오 출력 변경도 다시 본다
     const app = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
-      setDeviceAvailable(native.hasHeartRateDevice());
+      setDevice(native.heartRateDevice());
       if (useHeartRateLiveStore.getState().live) syncLive();
     });
     return () => {
       update.remove();
-      device.remove();
+      deviceChange.remove();
       app.remove();
     };
   }, []);

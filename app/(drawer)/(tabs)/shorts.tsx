@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   StyleSheet,
+  Text,
   TouchableOpacity,
   Image,
   useWindowDimensions,
@@ -21,6 +22,7 @@ import {
   useSortedVideos,
 } from "@/hooks/use-shorts-store";
 // lib
+import { formatElapsed } from "@/lib/date";
 import { resolveMediaUri } from "@/lib/media";
 // icons
 import Entypo from "@expo/vector-icons/Entypo";
@@ -125,6 +127,11 @@ export default function TabTwoScreen() {
                 fallbackColor={themeColor.itemColor}
                 iconColor={themeColor.subText}
               />
+              {item.durationSec != null && (
+                <Text style={styles.duration}>
+                  {formatElapsed(Math.round(item.durationSec))}
+                </Text>
+              )}
             </TouchableOpacity>
           )}
         />
@@ -153,6 +160,19 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 9 / 16,
     resizeMode: "cover",
+  },
+  // 영상 위에 얹는 글자라 테마와 상관없이 흰색 — 밝은 장면에서도 읽히게 그림자를 깐다
+  duration: {
+    position: "absolute",
+    left: 6,
+    bottom: 6,
+    color: "#fff",
+    fontSize: 12,
+    fontFamily: "sb-m",
+    fontVariant: ["tabular-nums"],
+    textShadowColor: "rgba(0, 0, 0, 0.6)",
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 3,
   },
   fallback: {
     width: "100%",

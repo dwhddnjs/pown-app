@@ -14,6 +14,14 @@ export const PLAN_DATE_FORMAT = "yyyy.MM.dd HH:mm:ss";
 export const dateKey = (date: Date) =>
   format(date, PLAN_DATE_FORMAT).split(" ")[0];
 
+// 경과 시간 — 1시간 전엔 m:ss, 넘으면 h:mm:ss (심박 측정 박스·숏츠 영상 길이)
+export const formatElapsed = (seconds: number) => {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor(seconds / 60) % 60;
+  const s = String(seconds % 60).padStart(2, "0");
+  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
+};
+
 const EN_MONTHS = [
   "Jan",
   "Feb",
