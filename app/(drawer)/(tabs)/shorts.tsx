@@ -127,7 +127,7 @@ export default function TabTwoScreen() {
                 fallbackColor={themeColor.itemColor}
                 iconColor={themeColor.subText}
               />
-              {item.durationSec != null && (
+              {!!item.durationSec && (
                 <Text style={styles.duration}>
                   {formatElapsed(Math.round(item.durationSec))}
                 </Text>

@@ -67,11 +67,16 @@ export const readVideoDuration = (stored: string) =>
       player.release();
       resolve(duration && duration > 0 ? duration : undefined);
     };
-    const timer = setTimeout(finish, 5000);
-    const subscription = player.addListener("statusChange", ({ status }) => {
+    const onStatus = (status: typeof player.status) => {
       if (status === "readyToPlay") finish(player.duration);
       else if (status === "error") finish();
-    });
+    };
+    const timer = setTimeout(finish, 5000);
+    const subscription = player.addListener("statusChange", ({ status }) =>
+      onStatus(status),
+    );
+    // 듣기 전에 이미 읽혔거나 실패했으면 이벤트가 다시 오지 않는다
+    onStatus(player.status);
   });
 
 // 앱 소유 media/ 파일만 삭제 — 구 데이터(절대경로·ph://)는 건드리지 않는다
