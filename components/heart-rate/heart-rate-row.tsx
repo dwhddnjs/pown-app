@@ -36,7 +36,7 @@ import {
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
-import { dateKey } from "@/lib/date";
+import { dateKey, formatElapsed } from "@/lib/date";
 import { mmkv } from "@/lib/storage";
 // native
 import {
@@ -77,13 +77,6 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 // sb-m 숫자는 모양이 칸 안에서 왼쪽으로 쏠려 있어 가운데 정렬해도 비껴 보인다 —
 // 링 중심에서 잉크 중심까지 잰 만큼(시뮬레이터 @3x) 오른쪽으로 민다. 3은 정중앙이다
 const DIGIT_NUDGE: Record<number, number> = { 1: 0.67, 2: 0.33 };
-
-export const formatElapsed = (seconds: number) => {
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor(seconds / 60) % 60;
-  const s = String(seconds % 60).padStart(2, "0");
-  return h > 0 ? `${h}:${String(m).padStart(2, "0")}:${s}` : `${m}:${s}`;
-};
 
 // 운동 탭 리스트 헤더 맨 위. 대기 중엔 얇은 시작 버튼, 누르면 같은 카드가 아래로
 // 펼쳐져 측정 박스가 된다. 리스트 헤더라 재활용되진 않지만 날짜를 고르면 리스트 key가

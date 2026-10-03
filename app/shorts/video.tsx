@@ -22,7 +22,7 @@ import { useShortsStore } from "@/hooks/use-shorts-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
-import { persistMediaLocally } from "@/lib/media";
+import { persistMediaLocally, readVideoDuration } from "@/lib/media";
 //expo
 import {
   CameraType,
@@ -169,6 +169,7 @@ export default function Video() {
             `shorts-thumb-${id}.jpg`,
           ),
           createdAt: new Date().toISOString(),
+          durationSec: await readVideoDuration(uri),
         });
       }
       // uri를 비우지 않는다 — active={!uri}라서 화면이 닫히는 애니메이션 내내

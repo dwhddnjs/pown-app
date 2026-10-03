@@ -3,6 +3,7 @@ import {
   isAppOwnedMedia,
   isMediaMissing,
   persistMediaLocally,
+  readVideoDuration,
   removeAppOwnedMedia,
   resolveMediaUri,
 } from "@/lib/media";
@@ -44,6 +45,8 @@ export type ShortsVideoTypes = {
   title?: string;
   content?: string;
   report?: ShortsReportTypes;
+  // 그리드 썸네일에 표시하는 영상 길이. 이 필드 전에 찍은 영상은 onRepairVideos가 채운다
+  durationSec?: number;
 };
 
 // 그리드 정렬. 저장 배열은 촬영 순서 그대로 두고 보여줄 때만 정렬한다(useSortedVideos)
@@ -116,7 +119,7 @@ export const useShortsStore = create<ShortsStoreTypes>()(
         hasRepaired = false;
         set({ videos });
       },
-      // 목록엔 남아 있는데 실제 파일이 없는 항목을 정리한다.
+      // 목록엔 남아 있는데 실제 파일이 없는 항목을 정리하고, 영상 길이가 없는 항목은 채운다.
       // 구 버전은 썸네일을 캐시 절대경로로 저장해서, 앱 업데이트로 컨테이너 UUID가
       // 바뀌면 파일이 통째로 사라진다 → 그리드가 전부 투명해져 "빈 화면"으로 보인다
       // (항목이 있으니 empty 화면도 안 뜬다). 영상에서 썸네일을 다시 뽑아 되살린다.
@@ -137,6 +140,7 @@ export const useShortsStore = create<ShortsStoreTypes>()(
             removeAppOwnedMedia(video.thumbnail);
             return null;
           }
+          let next = video;
           if (await isMediaMissing(video.thumbnail)) {
             try {
               // 화질은 저장 경로(app/shorts/video.tsx)와 맞춘다
@@ -144,8 +148,8 @@ export const useShortsStore = create<ShortsStoreTypes>()(
                 resolveMediaUri(video.video),
                 { time: 0, quality: 0.7 },
               );
-              return {
-                ...video,
+              next = {
+                ...next,
                 thumbnail: await persistMediaLocally(
                   uri,
                   `shorts-thumb-${video.id}.jpg`,
@@ -155,7 +159,11 @@ export const useShortsStore = create<ShortsStoreTypes>()(
               // 썸네일만 못 살렸다 — 항목은 남기고 그리드가 대체 타일로 그린다
             }
           }
-          return video;
+          if (next.durationSec == null) {
+            const durationSec = await readVideoDuration(video.video);
+            if (durationSec != null) next = { ...next, durationSec };
+          }
+          return next;
         };
 
         // 한 번에 다 던지면 탭을 여는 프레임에 파일 조회가 몰려 화면이 멈칫한다

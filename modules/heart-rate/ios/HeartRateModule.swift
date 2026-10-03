@@ -434,6 +434,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     workoutSession.delegate = self
     session = workoutSession
     builder = nil
+    // 시작 대기(startOnWatch)가 아니면 앱이 죽었다 다시 뜬 사이 워치 측정이 이어져 핸들러가 다시
+    // 넘긴 세션이다 — Live Activity를 띄울 쪽이 없다. 백그라운드라 거절되면 앞으로 올 때
+    // recover()가 띄운다
+    if !isStartingOnWatch { attachLiveActivity() }
     return true
   }
 
@@ -626,8 +630,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       guard !isStartingOnWatch else { return nil }
       // 준비 3초 사이 앱이 뒤로 가면 Live Activity 요청이 거절된다(앞에 있을 때만 된다) —
       // 돌아왔을 때 다시 띄운다. 안 그러면 이 세션 내내 아일랜드·잠금화면이 없다
-      if isLive, !isEnding, activity == nil {
-        startLiveActivity()
+      if isLive, !isEnding, !hasLiveActivity {
+        attachLiveActivity()
         publish()
       }
       return isLive ? snapshot() : nil
@@ -850,18 +854,44 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     // 워치 세션엔 빌더가 없다 — 워치가 보낸 경과 시간(받은 뒤 흐른 시간 포함)을 쓴다
     let elapsed = builder?.elapsedTime ?? TimeInterval(body["elapsedSec"] as? Int ?? 0)
     let paused = body["state"] as? String == "paused"
+    // 초 단위로 반올림 — 안 그러면 매번 몇 ms씩 달라져 "안 바뀌면 건너뛰기"가 안 먹는다
+    var timerStart = Date(
+      timeIntervalSince1970: (Date().timeIntervalSince1970 - elapsed).rounded())
+    // 워치 값은 경과 시간이 정수 초로 잘려 와 시작 시각이 갱신마다 1초씩 흔들린다 — 그대로 보내면
+    // 섬의 시간이 1초 뒤로 갔다 앞으로 튄다. 1초 안쪽 차이면 직전 값을 둔다
+    if !paused, let last = lastPushed?.state, last.pausedElapsed == nil,
+      abs(last.timerStart.timeIntervalSince(timerStart)) <= 1
+    {
+      timerStart = last.timerStart
+    }
     let state = HeartRateAttributes.ContentState(
       heartRate: body["heartRate"] as? Int,
       activeKcal: body["activeKcal"] as? Int ?? 0,
       totalKcal: body["totalKcal"] as? Int ?? 0,
-      // 초 단위로 반올림 — 안 그러면 매번 몇 ms씩 달라져 "안 바뀌면 건너뛰기"가 안 먹는다
-      timerStart: Date(timeIntervalSince1970: (Date().timeIntervalSince1970 - elapsed).rounded()),
+      timerStart: timerStart,
       pausedElapsed: paused ? Int(elapsed) : nil
     )
     pushLiveActivity(state, paused: paused)
   }
 
   // MARK: - Live Activity
+
+  // 끝난 활동(recover가 이전 프로세스 것을 정리한 경우 등)을 들고 있으면 갱신이 허공으로 간다.
+  // 사용자가 잠금화면에서 치운(dismissed) 건 그대로 둔다 — 다시 띄우면 치운 뜻을 거스른다
+  private var hasLiveActivity: Bool {
+    guard let state = activity?.activityState else { return false }
+    return state != .ended
+  }
+
+  // 살아 있는 활동이 있으면(앱이 죽기 전에 띄운 것) 이어 쓰고, 없으면 새로 띄운다
+  private func attachLiveActivity() {
+    guard !hasLiveActivity else { return }
+    activity = Activity<HeartRateAttributes>.activities.first {
+      $0.activityState == .active || $0.activityState == .stale
+    }
+    lastPushed = nil
+    if activity == nil { startLiveActivity() }
+  }
 
   private func startLiveActivity() {
     guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
