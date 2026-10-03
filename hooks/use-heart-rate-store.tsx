@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { AppState } from "react-native";
+import { AppState, Linking } from "react-native";
 import { toast } from "sonner-native";
 // zustand
 import { create } from "zustand";
@@ -201,7 +201,20 @@ export const deleteRecord = (record: HeartRateRecordTypes) => {
     record.startedAtMs != null
       ? Math.floor(record.startedAtMs / 1000) * 1000
       : parse(record.startedAt, PLAN_DATE_FORMAT, new Date()).getTime(),
-  ).catch(() => {});
+  )
+    .then((result) => {
+      // 찾았는데 못 지웠다(워치 앱이 저장한 운동 등) — "함께 지워져요"라고 했으니 남은 걸 알리고
+      // 직접 지우는 곳으로 보낸다
+      if (result !== "failed") return;
+      toast.error(tt("heartRate.deleteHealthFailed"), {
+        duration: 6000,
+        action: {
+          label: tt("heartRate.openHealth"),
+          onClick: () => Linking.openURL("x-apple-health://"),
+        },
+      });
+    })
+    .catch(() => {});
 };
 
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
@@ -216,10 +229,6 @@ export const useHeartRateSync = () => {
         .getActive()
         .then(setLive)
         .catch(() => {});
-
-    setDevice(native.heartRateDevice());
-    // 앱이 죽었다 다시 뜬 경우 진행 중이던 세션을 되찾는다
-    syncLive();
 
     const update = native.addListener("onUpdate", (body) => {
       if (body.state !== "ended") return setLive(body);
@@ -249,6 +258,11 @@ export const useHeartRateSync = () => {
       setDevice(native.heartRateDevice());
       if (useHeartRateLiveStore.getState().live) syncLive();
     });
+    // 리스너를 먼저 걸고 읽는다 — 읽은 뒤 걸면 그 사이 끝난 워치 연결(WCSession 활성화) 소식을
+    // 놓쳐, 앱을 한 번 내렸다 올릴 때까지 시작 버튼이 안 보인다
+    setDevice(native.heartRateDevice());
+    // 앱이 죽었다 다시 뜬 경우 진행 중이던 세션을 되찾는다
+    syncLive();
     return () => {
       update.remove();
       deviceChange.remove();

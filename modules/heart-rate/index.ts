@@ -41,8 +41,9 @@ type HeartRateModule = {
   // 길이와 상관없이 저장 없이 버린다(건강 앱에도 안 남는다) — 전체 초기화용
   discard(): Promise<void>;
   getActive(): Promise<HeartRateSnapshot | null>;
-  // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. 못 찾으면 false
-  deleteWorkout(startedAt: number): Promise<boolean>;
+  // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. failed: 찾았는데 못 지웠다
+  // (워치 앱이 저장한 운동·쓰기 권한 해제 — 앱은 자기가 저장한 것만 지울 수 있다)
+  deleteWorkout(startedAt: number): Promise<"deleted" | "notFound" | "failed">;
   addListener(
     event: "onUpdate",
     // 시스템이 세션을 닫거나(다른 운동 앱 등) 아일랜드 버튼으로 끝내면 ended에 저장할 요약이

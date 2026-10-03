@@ -61,7 +61,7 @@ const ko = {
   "workout.history": "운동 히스토리",
   "heartRate.start": "심박수 측정 시작",
   "heartRate.connected": "이어폰 연결됨",
-  "heartRate.watchConnected": "애플워치 연결됨",
+  "heartRate.viaWatch": "애플워치로 측정",
   "heartRate.watchPreparing": "애플워치 연결 중…",
   "heartRate.watchUnavailable": "애플워치를 손목에 차고 잠금을 풀어 주세요.",
   "heartRate.preparing": "센서 연결 중… {n}",
@@ -94,6 +94,8 @@ const ko = {
   "heartRate.recordsNote": "지우면 건강 앱에 저장된 운동도 함께 지워져요.",
   "heartRate.deleteTitle": "이 기록을 지울까요?",
   "heartRate.deleteDesc": "건강 앱의 운동 기록도 함께 지워져요.",
+  "heartRate.deleteHealthFailed":
+    "건강 앱의 운동은 지우지 못했어요. 건강 앱에서 직접 지워 주세요.",
   "heartRate.needPlan": "오늘 운동 계획을 먼저 추가해 주세요.",
   "heartRate.autoPaused": "이어폰이 빠져서 측정을 일시정지했어요.",
   "heartRate.startMore": "심박수 추가 측정",
@@ -427,7 +429,7 @@ const en: Record<TKey, string> = {
   "workout.history": "Workout History",
   "heartRate.start": "Start heart rate",
   "heartRate.connected": "Earphones connected",
-  "heartRate.watchConnected": "Apple Watch connected",
+  "heartRate.viaWatch": "With Apple Watch",
   "heartRate.watchPreparing": "Connecting to Apple Watch…",
   "heartRate.watchUnavailable": "Wear your Apple Watch and unlock it.",
   "heartRate.preparing": "Connecting sensor… {n}",
@@ -462,6 +464,8 @@ const en: Record<TKey, string> = {
   "heartRate.deleteTitle": "Delete this record?",
   "heartRate.deleteDesc":
     "The workout saved to the Health app will be deleted too.",
+  "heartRate.deleteHealthFailed":
+    "Couldn't delete the workout in Health. Delete it in the Health app.",
   "heartRate.needPlan": "Add today's workout plan first.",
   "heartRate.autoPaused": "Earphones removed — measurement paused.",
   "heartRate.startMore": "Measure again",

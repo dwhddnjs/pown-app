@@ -7,6 +7,11 @@ final class AppDelegate: NSObject, WKApplicationDelegate {
   func handle(_ workoutConfiguration: HKWorkoutConfiguration) {
     Task { @MainActor in await WatchWorkout.shared.start(workoutConfiguration) }
   }
+
+  // 운동 중 앱이 죽었다 다시 떴다
+  func handleActiveWorkoutRecovery() {
+    Task { @MainActor in await WatchWorkout.shared.recover() }
+  }
 }
 
 @main

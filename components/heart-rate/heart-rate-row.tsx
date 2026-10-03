@@ -139,7 +139,10 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       setPreparingAt(preparedAt);
       // 시작 결과를 이벤트보다 먼저 받아 넣는다 — 준비 표시를 끄는 순간 live가 비어
       // 있으면 박스가 한 프레임 버튼으로 되돌아간다
-      setLive(await HeartRate.start());
+      const snapshot = await HeartRate.start();
+      // 시작이 끝나는 사이 취소·전체 초기화로 버렸으면(준비 표시를 지운다) 박스를 다시 펴지 않는다
+      if (useHeartRateLiveStore.getState().preparingAt === preparedAt)
+        setLive(snapshot);
     } catch (error) {
       // 준비 중에 전체 초기화가 세션을 버렸으면(준비 표시도 이미 지웠다) 실패가 아니다
       const discarded =
@@ -160,6 +163,21 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       setPreparingAt(null);
       starting.current = false;
     }
+  };
+
+  // 워치를 기다리는 중 취소. 준비 표시를 먼저 지워야 onStart가 실패 안내 없이 접는다. 버린 뒤
+  // 네이티브에 다시 맞춘다 — 취소와 거의 같이 시작이 끝났으면 그때 보낸 값이 박스를 다시 편다
+  const onCancel = () => {
+    const native = HeartRate;
+    if (!native) return;
+    const { setLive, setPreparingAt } = useHeartRateLiveStore.getState();
+    setPreparingAt(null);
+    native
+      .discard()
+      .catch(() => {})
+      .then(() => native.getActive())
+      .then(setLive)
+      .catch(() => {});
   };
 
   const onEnd = async () => {
@@ -195,6 +213,7 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
               preparingAt={preparingAt}
               isEnding={isEnding}
               onEnd={() => setConfirmFor(liveStartedAt)}
+              onCancel={onCancel}
             />
           ) : (
             <StartButton key="button" onPress={onStart} />
@@ -245,12 +264,14 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
         <Text style={styles.startLabel}>
           {todaySec ? t("heartRate.startMore") : t("heartRate.start")}
         </Text>
+        {/* 워치는 페어링·앱 설치만 알 수 있다(꺼졌거나 충전 중인지는 시작해 봐야
+            안다) — "연결됨"이라고 하지 않는다 */}
         <Text style={[styles.startHint, { color: themeColor.subText }]}>
           {todaySec
             ? t("heartRate.todayRecorded", { n: toMinutes(todaySec) })
             : t(
                 device === "watch"
-                  ? "heartRate.watchConnected"
+                  ? "heartRate.viaWatch"
                   : "heartRate.connected",
               )}
         </Text>
@@ -270,10 +291,12 @@ const LiveBox = ({
   preparingAt,
   isEnding,
   onEnd,
+  onCancel,
 }: {
   preparingAt: number | null;
   isEnding: boolean;
   onEnd: () => void;
+  onCancel: () => void;
 }) => {
   const live = useHeartRateLiveStore((state) => state.live);
   const device = useHeartRateLiveStore((state) => state.device);
@@ -295,6 +318,9 @@ const LiveBox = ({
   const dim = isRunning ? undefined : themeColor.disabled;
   // 준비 중(센서 대기)·종료 처리 중엔 누를 수 없다 — Button엔 비활성 모양이 없어 여기서 흐린다
   const locked = !live || isEnding;
+  // 워치는 첫 값이 오기까지 길게는 30초다 — 그동안 종료 자리를 취소로 쓴다. 이어폰은 3초면 끝난다
+  const canCancel = !live && device === "watch";
+  const endLocked = locked && !canCancel;
 
   return (
     <Animated.View entering={CONTENT_FADE} style={styles.box}>
@@ -390,15 +416,15 @@ const LiveBox = ({
         </Button>
         <Button
           type="solid"
-          disabled={locked}
+          disabled={endLocked}
           style={{
             ...styles.action,
             backgroundColor: themeColor.fail,
-            opacity: locked ? 0.4 : 1,
+            opacity: endLocked ? 0.4 : 1,
           }}
-          onPress={onEnd}
+          onPress={canCancel ? onCancel : onEnd}
         >
-          {t("heartRate.end")}
+          {canCancel ? t("common.cancel") : t("heartRate.end")}
         </Button>
       </RNView>
     </Animated.View>
