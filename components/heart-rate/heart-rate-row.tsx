@@ -136,11 +136,12 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       }
       // 여기서 바로 박스로 펼친다 — 센서가 붙는 3초를 버튼에서 기다리지 않는다
       preparedAt = Date.now();
-      // 네이티브 start()도 같은 기준으로 고른다
-      setPreparingAt(preparedAt, HeartRate.heartRateDevice());
+      // 네이티브도 이 기기로 시작한다 — 따로 고르면 그 사이 바뀌어 준비 표시와 어긋난다
+      const startDevice = HeartRate.heartRateDevice();
+      setPreparingAt(preparedAt, startDevice);
       // 시작 결과를 이벤트보다 먼저 받아 넣는다 — 준비 표시를 끄는 순간 live가 비어
       // 있으면 박스가 한 프레임 버튼으로 되돌아간다
-      const snapshot = await HeartRate.start();
+      const snapshot = await HeartRate.start(startDevice);
       // 시작이 끝나는 사이 취소·전체 초기화로 버렸으면(준비 표시를 지운다) 박스를 다시 펴지 않는다
       if (useHeartRateLiveStore.getState().preparingAt === preparedAt)
         setLive(snapshot);

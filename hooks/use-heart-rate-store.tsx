@@ -46,6 +46,10 @@ export type HeartRateLiveTypes = HeartRateSnapshot & {
   receivedAt: number;
 };
 
+// 전체 초기화한 시각. 그 전에 시작해 초기화 뒤에 끝난 측정(이미 끝나는 중이라 버리지 못한 것)의
+// 요약은 남기지 않는다 — 방금 비운 기록에 옛 측정이 다시 생긴다
+let resetAt = 0;
+
 type HeartRateStoreTypes = {
   records: HeartRateRecordTypes[];
   addRecord: (snapshot: HeartRateSnapshot) => void;
@@ -87,7 +91,10 @@ export const useHeartRateStore = create<HeartRateStoreTypes>()(
         set((prev) => ({
           records: prev.records.filter((record) => record.id !== id),
         })),
-      onResetRecords: () => set({ records: [] }),
+      onResetRecords: () => {
+        resetAt = Date.now();
+        set({ records: [] });
+      },
     }),
     {
       name: "heart-rate",
@@ -183,6 +190,7 @@ export const hasPlanOn = (date: string) =>
 // 종료 요약을 기록으로 남기고 상황에 맞는 토스트를 띄운다. 같은 날 두 번째부터는
 // 요약에 더해진다(summarizeDay). 측정 중에 그날 계획을 지웠으면 어디서 보이는지 알려준다
 export const saveRecord = (snapshot: HeartRateSnapshot) => {
+  if (snapshot.startedAt < resetAt) return;
   const start = new Date(snapshot.startedAt);
   const date = dateKey(start);
   const { records, addRecord } = useHeartRateStore.getState();
