@@ -48,67 +48,70 @@ struct ContentView: View {
   }
 }
 
-// 아이폰 측정 박스와 같은 구성: 심박 → 운동 시간 → 활동·총 칼로리 → 중지·종료.
-// 숫자는 Live Activity처럼 시스템 rounded, 일시정지면 전부 흐린다
+// 아이폰 측정 박스와 같은 구성: 심박 → 운동 시간 → 활동·총 칼로리 → 중지·종료. 스크롤 없이 40mm에도
+// 한 화면에 들어가게 상태 글자는 뺐다 — 일시정지면 숫자가 전부 흐려지고 버튼이 "재개"로 바뀐다.
+// 글자 크기를 키워 넘치면 그때만 스크롤된다(버튼이 화면 밖으로 잘리지 않게).
+// 숫자는 Live Activity처럼 시스템 rounded
 private struct MetricsView: View {
   @ObservedObject var workout: WatchWorkout
   @State private var confirmEnd = false
 
   var body: some View {
-    let dim: Color? = workout.isPaused ? .secondary : nil
-
-    ScrollView {
-      VStack(alignment: .leading, spacing: 6) {
-        HStack(spacing: 5) {
-          Circle()
-            .fill(workout.isPaused ? Color.secondary : pownRed)
-            .frame(width: 6, height: 6)
-          Text(workout.isPaused ? tr("일시정지", "Paused") : tr("측정 중", "Measuring"))
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
-
-        HStack(alignment: .firstTextBaseline, spacing: 4) {
-          Image(systemName: "heart.fill")
-            .font(.system(size: 18))
-            .foregroundStyle(dim ?? pownRed)
-          Text(workout.heartRate.map(String.init) ?? "--")
-            .font(.system(size: 40, weight: .semibold, design: .rounded))
-            .foregroundStyle(dim ?? .primary)
-          Text("bpm")
-            .font(.footnote)
-            .foregroundStyle(.secondary)
-        }
-
-        // 일시정지 중엔 빌더 경과 시간이 멈춰 있어 그대로 그리면 된다
-        TimelineView(.periodic(from: .now, by: 1)) { context in
-          Text(formatElapsed(workout.elapsed(at: context.date)))
-            .font(.system(size: 28, weight: .semibold, design: .rounded))
-            .foregroundStyle(dim ?? .primary)
-        }
-
-        HStack(alignment: .top) {
-          Stat(label: tr("활동 칼로리", "Active"), value: workout.activeKcal, dim: dim)
-          Stat(label: tr("총 칼로리", "Total"), value: workout.totalKcal, dim: dim)
-        }
-
-        // 앱 박스와 같은 색 규칙 — 중지는 회색 면, 종료는 빨강
-        HStack(spacing: 8) {
-          PillButton(
-            title: workout.isPaused ? tr("재개", "Resume") : tr("중지", "Pause"),
-            fill: Color.gray.opacity(0.3)
-          ) { workout.togglePause() }
-          PillButton(title: tr("종료", "End"), fill: pownRed) { confirmEnd = true }
-        }
-        .padding(.top, 4)
+    GeometryReader { proxy in
+      ScrollView {
+        content
+          // 넘치지 않으면 화면 높이를 채워 버튼을 맨 아래에 둔다
+          .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .topLeading)
       }
-      .monospacedDigit()
-      .lineLimit(1)
-      .frame(maxWidth: .infinity, alignment: .leading)
+      .scrollBounceBehavior(.basedOnSize)
     }
+    .scenePadding(.horizontal)
     .confirmationDialog(tr("측정을 종료할까요?", "End this session?"), isPresented: $confirmEnd) {
       Button(tr("종료", "End"), role: .destructive) { workout.end() }
     }
+  }
+
+  private var content: some View {
+    let dim: Color? = workout.isPaused ? .secondary : nil
+
+    return VStack(alignment: .leading, spacing: 2) {
+      HStack(alignment: .firstTextBaseline, spacing: 4) {
+        Image(systemName: "heart.fill")
+          .font(.system(size: 18))
+          .foregroundStyle(dim ?? pownRed)
+        Text(workout.heartRate.map(String.init) ?? "--")
+          .font(.system(size: 36, weight: .semibold, design: .rounded))
+          .foregroundStyle(dim ?? .primary)
+        Text("bpm")
+          .font(.footnote)
+          .foregroundStyle(.secondary)
+      }
+
+      // 일시정지 중엔 빌더 경과 시간이 멈춰 있어 그대로 그리면 된다
+      TimelineView(.periodic(from: .now, by: 1)) { context in
+        Text(formatElapsed(workout.elapsed(at: context.date)))
+          .font(.system(size: 28, weight: .semibold, design: .rounded))
+          .foregroundStyle(dim ?? .primary)
+      }
+
+      HStack(alignment: .top) {
+        Stat(label: tr("활동 칼로리", "Active"), value: workout.activeKcal, dim: dim)
+        Stat(label: tr("총 칼로리", "Total"), value: workout.totalKcal, dim: dim)
+      }
+
+      Spacer(minLength: 4)
+
+      // 앱 박스와 같은 색 규칙 — 중지는 회색 면, 종료는 빨강
+      HStack(spacing: 8) {
+        PillButton(
+          title: workout.isPaused ? tr("재개", "Resume") : tr("중지", "Pause"),
+          fill: Color.gray.opacity(0.3)
+        ) { workout.togglePause() }
+        PillButton(title: tr("종료", "End"), fill: pownRed) { confirmEnd = true }
+      }
+    }
+    .monospacedDigit()
+    .lineLimit(1)
   }
 }
 
@@ -131,6 +134,10 @@ private struct Stat: View {
           .font(.caption2)
           .foregroundStyle(.secondary)
       }
+      // 40mm에선 칸이 75pt쯤이라 네 자리(1000kcal~)부터 잘린다 — 잘리지 않게 줄인다. 높이는 고정한다 —
+      // 안 그러면 아래 버튼 앞 Spacer와 자리를 다투다 세로로 먼저 줄어든다
+      .minimumScaleFactor(0.7)
+      .fixedSize(horizontal: false, vertical: true)
     }
     .frame(maxWidth: .infinity, alignment: .leading)
   }
@@ -146,7 +153,7 @@ private struct PillButton: View {
       Text(title)
         .font(.system(size: 15, weight: .semibold))
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 10)
+        .padding(.vertical, 8)
         .background(fill, in: Capsule())
         .contentShape(Capsule())
     }

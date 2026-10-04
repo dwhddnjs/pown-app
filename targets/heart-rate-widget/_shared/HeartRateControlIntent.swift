@@ -5,7 +5,8 @@ import Foundation
 // 이 파일은 앱과 위젯 타깃 둘 다에 들어가야 한다 — _shared 폴더는 @bacons/apple-targets가
 // 둘 다에 링크한다(파일을 추가·삭제하면 prebuild를 다시 돌릴 것).
 // 세션은 HeartRate 모듈(pod)이 쥐고 있는데 이 파일은 위젯에도 컴파일돼 그 pod를 import할 수
-// 없다 — 알림만 보내고 모듈이 받는다(modules/heart-rate/ios/HeartRateModule.swift, 이름을 같게)
+// 없다 — 알림만 보내고 모듈이 받는다(modules/heart-rate/ios/HeartRateModule.swift, 이름·userInfo
+// 키와 done의 타입을 같게)
 @available(iOS 17.0, *)
 struct HeartRateControlIntent: LiveActivityIntent {
   static let title: LocalizedStringResource = "Heart rate control"
@@ -23,8 +24,16 @@ struct HeartRateControlIntent: LiveActivityIntent {
   }
 
   func perform() async throws -> some IntentResult {
-    NotificationCenter.default.post(
-      name: Notification.Name("HeartRateControl"), object: nil, userInfo: ["action": action])
+    // 받는 쪽(WorkoutManager)은 iOS 26 이상에만 있다 — 그 아래면 기다릴 상대가 없다
+    guard #available(iOS 26.0, *) else { return .result() }
+    // 앱이 처리를 마칠 때까지(done) 기다린다 — 바로 돌아가면 버튼이 꺼진 앱을 깨운 경우 처리
+    // 도중에 앱이 다시 정지될 수 있다
+    await withCheckedContinuation { continuation in
+      let done: @Sendable () -> Void = { continuation.resume() }
+      NotificationCenter.default.post(
+        name: Notification.Name("HeartRateControl"), object: nil,
+        userInfo: ["action": action, "done": done])
+    }
     return .result()
   }
 }

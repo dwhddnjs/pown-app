@@ -9,9 +9,10 @@ private let workoutURL = URL(string: "myapp://workout")
 // compact는 심박(왼쪽)과 시간(오른쪽)이 바깥 모서리에서 같은 거리에 있어야 한다
 private let compactInset: CGFloat = 4
 
-// 확장 섬·잠금화면은 애플 운동 앱 Live Activity와 같은 배치다 — 393pt 기기 3x 캡처에서 잉크를
-// 잰 값에 맞췄다. 글자 칸은 잉크보다 위아래·옆이 비어 있어, 아래 값은 시뮬레이터에서 잉크를 다시
-// 재며 칸 기준으로 옮긴 것이다(주석의 목표는 잉크 기준)
+// 확장 섬은 애플 운동 앱 Live Activity와 같은 배치다 — 393pt 기기 3x 캡처에서 잉크를
+// 잰 값에 맞췄다. 잠금화면도 이 값으로 섬과 똑같이 그린다(Lock 참고). 글자 칸은 잉크보다
+// 위아래·옆이 비어 있어, 아래 값은 시뮬레이터에서 잉크를 다시 재며 칸 기준으로 옮긴 것이다
+// (주석의 목표는 잉크 기준)
 private enum Island {
   // 버튼 왼쪽 18.33 · 시간 잉크 오른쪽 18.67 · 버튼 위 18 · 라벨 잉크 아래 20.67
   static let margins = (leading: 18.33, trailing: 18.33, top: 18.0, bottom: 18.0)
@@ -27,23 +28,14 @@ private enum Island {
   static let statsTop: CGFloat = 3.67
 }
 
+// 잠금화면 카드는 섬 값을 그대로 쓰고, 섬 영역 배치가 더해 주는 간격만 더 준다 — 실기 확장 섬 캡처와
+// 시뮬레이터 잠금화면(같은 393pt)을 같은 스크립트로 재서 잉크 위치를 맞춘 값이다
 private enum Lock {
-  // 시간 잉크 왼쪽 15.33 · 버튼 오른쪽 15.17 · 버튼 위 19.67 · 라벨 잉크 아래 17.67
-  static let padding = (leading: 16.33, trailing: 16.1, top: 20.17, bottom: 16.33)
-  static let button: CGFloat = 48
-  static let pause = PauseBars(width: 3.64, height: 25.5, gap: 6.7)
-  static let time = Font.system(size: 45.5, weight: .semibold, design: .rounded).monospacedDigit()
-  // 타이머 글자는 늘 고정폭 숫자라 맨 앞 숫자마다 왼쪽 빈 곳이 다르다(1이 5.2pt로 가장 넓다).
-  // 왼쪽 정렬이라 그대로면 1:xx:xx 내내 3.7pt 들어가 보인다 — 맨 앞 숫자의 빈 곳만큼 당긴다.
-  // 위 time 글꼴의 고정폭 숫자 글리프 왼쪽 여백(CoreText로 읽은 값)
-  static let digitBearing: [Character: CGFloat] = [
-    "0": 1.53, "1": 5.20, "2": 3.20, "3": 2.73, "4": 1.53,
-    "5": 3.02, "6": 1.93, "7": 3.09, "8": 1.89, "9": 1.89,
-  ]
-  // 시간 잉크 중심은 버튼 중심보다 1.17pt 아래
-  static let timeNudge: CGFloat = 1.17
-  // 버튼 아래 → 숫자 잉크 위 23
-  static let statsTop: CGFloat = 16.83
+  static let margins = (
+    leading: Island.margins.leading + 1.33, trailing: Island.margins.trailing,
+    top: Island.margins.top + 0.67, bottom: Island.margins.bottom + 1.33
+  )
+  static let statsTop = Island.statsTop + 8.33
 }
 
 // 두 화면 공통: 버튼 사이 8. 종료 X는 버튼 지름의 0.44배(섬 22pt)
@@ -107,19 +99,7 @@ struct HeartRateLiveActivity: Widget {
           .foregroundStyle(context.state.isPaused ? .secondary : .primary)
           .padding(.trailing, compactInset)
       } minimal: {
-        // 다른 앱의 Live Activity(음악·타이머)와 같이 뜨면 섬이 둘로 갈리고 이 작은 원만 남는다 —
-        // 하트만 두면 "숫자가 사라졌다"로 보인다. 심박이 있으면 숫자를 보인다
-        if let bpm = context.state.heartRate {
-          Text("\(bpm)")
-            .font(.system(size: 15, weight: .semibold, design: .rounded))
-            .monospacedDigit()
-            .minimumScaleFactor(0.6)
-            .lineLimit(1)
-            .foregroundStyle(context.state.isPaused ? .secondary : heartRed)
-        } else {
-          Image(systemName: "heart.fill")
-            .foregroundStyle(context.state.isPaused ? .secondary : heartRed)
-        }
+        MinimalView(state: context.state)
       }
       .contentMargins(.leading, Island.margins.leading, for: .expanded)
       .contentMargins(.trailing, Island.margins.trailing, for: .expanded)
@@ -137,13 +117,33 @@ private extension HeartRateAttributes.ContentState {
   var bpmText: String { heartRate.map(String.init) ?? "--" }
 }
 
+// 다른 앱의 Live Activity(음악·타이머)와 같이 뜨면 iOS가 둘 다 이 작은 원(최대 45×36.67pt)으로
+// 줄인다 — 앱이 고를 수 없다. 하트·심박·시간이 다 안 들어가 하트 아래 심박만 둔다
+private struct MinimalView: View {
+  let state: HeartRateAttributes.ContentState
+
+  var body: some View {
+    VStack(spacing: 0) {
+      Image(systemName: "heart.fill")
+        .font(.system(size: 10))
+        .foregroundStyle(state.isPaused ? .secondary : heartRed)
+      Text(state.bpmText)
+        .font(.system(size: 14, weight: .semibold, design: .rounded))
+        .monospacedDigit()
+        .minimumScaleFactor(0.6)
+        .lineLimit(1)
+        .foregroundStyle(state.isPaused ? .secondary : .primary)
+    }
+  }
+}
+
 // 위젯은 문구가 몇 개뿐이라 워치 앱처럼 시스템 언어로 고른다. 앱 문구(lib/i18n.ts의
 // heartRate.activeKcal·totalKcal)와 같은 말을 쓴다
 private func tr(_ ko: String, _ en: String) -> String {
   Locale.preferredLanguages.first?.hasPrefix("ko") == true ? ko : en
 }
 
-// 잠금화면: [운동 시간 ……… 중지·종료] / [심박 · 활동 칼로리 · 총 칼로리].
+// 잠금화면: 확장 섬과 같은 배치·간격 — [중지·종료 ……… 운동 시간] / [심박 · 활동 칼로리 · 총 칼로리].
 // 애플처럼 라이트 모드에서도 어두운 카드다
 private struct LockScreenView: View {
   let state: HeartRateAttributes.ContentState
@@ -151,21 +151,20 @@ private struct LockScreenView: View {
   var body: some View {
     VStack(spacing: 0) {
       HStack(spacing: 0) {
-        TimeLabel(state: state, font: Lock.time, alignment: .leading, nudge: Lock.timeNudge)
-          .frame(height: Lock.button)
-          // 그리는 순간의 맨 앞 숫자 기준 — 위젯은 심박 갱신 때마다(몇 초) 다시 그려져, 자릿수가
-          // 바뀌는 순간에만 잠깐 어긋난다
-          .offset(x: -(TimerText.text(for: state).first.flatMap { Lock.digitBearing[$0] } ?? 0))
+        ControlButtons(state: state, size: Island.button, pause: Island.pause)
         Spacer(minLength: 0)
-        ControlButtons(state: state, size: Lock.button, pause: Lock.pause)
+        TimeLabel(
+          state: state, font: Island.time, alignment: .trailing, nudge: Island.timeNudge)
+          .frame(height: Island.button)
+          .offset(x: Island.timeShift)
       }
       StatsRow(state: state)
         .padding(.top, Lock.statsTop)
     }
-    .padding(.leading, Lock.padding.leading)
-    .padding(.trailing, Lock.padding.trailing)
-    .padding(.top, Lock.padding.top)
-    .padding(.bottom, Lock.padding.bottom)
+    .padding(.leading, Lock.margins.leading)
+    .padding(.trailing, Lock.margins.trailing)
+    .padding(.top, Lock.margins.top)
+    .padding(.bottom, Lock.margins.bottom)
     .environment(\.colorScheme, .dark)
     .activityBackgroundTint(Color.black)
     .activitySystemActionForegroundColor(.white)
@@ -315,11 +314,6 @@ private struct TimerText: View {
           }
       }
     }
-  }
-
-  // 지금 보이는 글자
-  static func text(for state: HeartRateAttributes.ContentState) -> String {
-    format(state.pausedElapsed ?? Int(Date().timeIntervalSince(state.timerStart)))
   }
 
   static func widest(_ elapsed: TimeInterval) -> String {

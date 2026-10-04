@@ -136,10 +136,12 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       }
       // 여기서 바로 박스로 펼친다 — 센서가 붙는 3초를 버튼에서 기다리지 않는다
       preparedAt = Date.now();
-      setPreparingAt(preparedAt);
+      // 네이티브도 이 기기로 시작한다 — 따로 고르면 그 사이 바뀌어 준비 표시와 어긋난다
+      const startDevice = HeartRate.heartRateDevice();
+      setPreparingAt(preparedAt, startDevice);
       // 시작 결과를 이벤트보다 먼저 받아 넣는다 — 준비 표시를 끄는 순간 live가 비어
       // 있으면 박스가 한 프레임 버튼으로 되돌아간다
-      const snapshot = await HeartRate.start();
+      const snapshot = await HeartRate.start(startDevice);
       // 시작이 끝나는 사이 취소·전체 초기화로 버렸으면(준비 표시를 지운다) 박스를 다시 펴지 않는다
       if (useHeartRateLiveStore.getState().preparingAt === preparedAt)
         setLive(snapshot);
@@ -299,7 +301,9 @@ const LiveBox = ({
   onCancel: () => void;
 }) => {
   const live = useHeartRateLiveStore((state) => state.live);
-  const device = useHeartRateLiveStore((state) => state.device);
+  const preparingDevice = useHeartRateLiveStore(
+    (state) => state.preparingDevice,
+  );
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const isRunning = live?.state === "running";
@@ -319,7 +323,7 @@ const LiveBox = ({
   // 준비 중(센서 대기)·종료 처리 중엔 누를 수 없다 — Button엔 비활성 모양이 없어 여기서 흐린다
   const locked = !live || isEnding;
   // 워치는 첫 값이 오기까지 길게는 30초다 — 그동안 종료 자리를 취소로 쓴다. 이어폰은 3초면 끝난다
-  const canCancel = !live && device === "watch";
+  const canCancel = !live && preparingDevice === "watch";
   const endLocked = locked && !canCancel;
 
   return (
@@ -354,7 +358,7 @@ const LiveBox = ({
               {isPaused ? t("heartRate.paused") : t("heartRate.measuring")}
             </Text>
           </RNView>
-        ) : device === "watch" ? (
+        ) : preparingDevice === "watch" ? (
           // 워치 앱을 깨워 첫 값이 오기까지는 길이가 정해져 있지 않다(첫 사용 땐 워치에서
           // 권한까지 허용한다) — 3초 링이 "1"에 멈춰 보이지 않게 끝없이 도는 표시를 쓴다
           <ActivityIndicator

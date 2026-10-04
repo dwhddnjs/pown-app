@@ -46,6 +46,10 @@ export type HeartRateLiveTypes = HeartRateSnapshot & {
   receivedAt: number;
 };
 
+// 전체 초기화한 시각. 그 전에 시작해 초기화 뒤에 끝난 측정(이미 끝나는 중이라 버리지 못한 것)의
+// 요약은 남기지 않는다 — 방금 비운 기록에 옛 측정이 다시 생긴다
+let resetAt = 0;
+
 type HeartRateStoreTypes = {
   records: HeartRateRecordTypes[];
   addRecord: (snapshot: HeartRateSnapshot) => void;
@@ -87,7 +91,10 @@ export const useHeartRateStore = create<HeartRateStoreTypes>()(
         set((prev) => ({
           records: prev.records.filter((record) => record.id !== id),
         })),
-      onResetRecords: () => set({ records: [] }),
+      onResetRecords: () => {
+        resetAt = Date.now();
+        set({ records: [] });
+      },
     }),
     {
       name: "heart-rate",
@@ -103,10 +110,12 @@ type HeartRateLiveStoreTypes = {
   // 시작을 누르고 센서가 붙기를 기다리는 동안(3초)의 시작 시각. 박스는 이때 이미 펼쳐지고
   // 잔디도 같이 접혀야 해서 컴포넌트 상태가 아니라 여기 둔다
   preparingAt: number | null;
+  // 준비 중인 기기 — 시작할 때 고른 것. 기다리는 사이 device가 바뀌어도 준비 표시는 이걸 따른다
+  preparingDevice: HeartRateDevice | null;
   // 지금 잴 수 있는 기기 — 없으면 시작 버튼을 숨긴다
   device: HeartRateDevice | null;
   setLive: (snapshot: HeartRateSnapshot | null) => void;
-  setPreparingAt: (at: number | null) => void;
+  setPreparingAt: (at: number | null, device?: HeartRateDevice | null) => void;
   setDevice: (device: HeartRateDevice | null) => void;
 };
 
@@ -114,12 +123,14 @@ export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
   (set) => ({
     live: null,
     preparingAt: null,
+    preparingDevice: null,
     device: null,
     setLive: (snapshot) =>
       set({
         live: snapshot ? { ...snapshot, receivedAt: Date.now() } : null,
       }),
-    setPreparingAt: (preparingAt) => set({ preparingAt }),
+    setPreparingAt: (preparingAt, preparingDevice = null) =>
+      set({ preparingAt, preparingDevice }),
     setDevice: (device) => set({ device }),
   }),
 );
@@ -179,6 +190,7 @@ export const hasPlanOn = (date: string) =>
 // 종료 요약을 기록으로 남기고 상황에 맞는 토스트를 띄운다. 같은 날 두 번째부터는
 // 요약에 더해진다(summarizeDay). 측정 중에 그날 계획을 지웠으면 어디서 보이는지 알려준다
 export const saveRecord = (snapshot: HeartRateSnapshot) => {
+  if (snapshot.startedAt < resetAt) return;
   const start = new Date(snapshot.startedAt);
   const date = dateKey(start);
   const { records, addRecord } = useHeartRateStore.getState();
