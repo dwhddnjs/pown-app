@@ -2,7 +2,8 @@ import { requireOptionalNativeModule } from "expo";
 
 type Subscription = { remove(): void };
 
-// 심박을 잴 기기. 워치(포운 워치 앱이 깔린 애플워치)를 먼저 쓴다
+// 심박을 잴 기기. 워치(포운 워치 앱이 깔린 애플워치)를 먼저 쓴다 — 이어폰도 있으면 워치를
+// 찬 것 같을 때만
 export type HeartRateDevice = "watch" | "earphones";
 
 // 시작이 워치 쪽에서 실패하고 이어폰도 없을 때 start()가 던지는 에러 코드
@@ -30,8 +31,9 @@ type HeartRateModule = {
   isSupported(): boolean;
   heartRateDevice(): HeartRateDevice | null;
   requestAuthorization(): Promise<boolean>;
-  // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null). 워치가 응답하지 않으면
-  // 이어폰으로 넘어가고, 이어폰도 없으면 WATCH_UNAVAILABLE 코드로 reject
+  // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null). heartRateDevice()로
+  // 기기를 고른다 — 없으면 reject. 워치가 응답하지 않으면 이어폰으로 넘어가고, 이어폰도 없으면
+  // WATCH_UNAVAILABLE 코드로 reject
   start(): Promise<HeartRateSnapshot | null>;
   pause(): Promise<void>;
   resume(): Promise<void>;

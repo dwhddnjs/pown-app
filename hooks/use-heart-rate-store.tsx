@@ -103,10 +103,12 @@ type HeartRateLiveStoreTypes = {
   // 시작을 누르고 센서가 붙기를 기다리는 동안(3초)의 시작 시각. 박스는 이때 이미 펼쳐지고
   // 잔디도 같이 접혀야 해서 컴포넌트 상태가 아니라 여기 둔다
   preparingAt: number | null;
+  // 준비 중인 기기 — 시작할 때 고른 것. 기다리는 사이 device가 바뀌어도 준비 표시는 이걸 따른다
+  preparingDevice: HeartRateDevice | null;
   // 지금 잴 수 있는 기기 — 없으면 시작 버튼을 숨긴다
   device: HeartRateDevice | null;
   setLive: (snapshot: HeartRateSnapshot | null) => void;
-  setPreparingAt: (at: number | null) => void;
+  setPreparingAt: (at: number | null, device?: HeartRateDevice | null) => void;
   setDevice: (device: HeartRateDevice | null) => void;
 };
 
@@ -114,12 +116,14 @@ export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
   (set) => ({
     live: null,
     preparingAt: null,
+    preparingDevice: null,
     device: null,
     setLive: (snapshot) =>
       set({
         live: snapshot ? { ...snapshot, receivedAt: Date.now() } : null,
       }),
-    setPreparingAt: (preparingAt) => set({ preparingAt }),
+    setPreparingAt: (preparingAt, preparingDevice = null) =>
+      set({ preparingAt, preparingDevice }),
     setDevice: (device) => set({ device }),
   }),
 );
