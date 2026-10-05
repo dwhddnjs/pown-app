@@ -15,5 +15,8 @@ struct HeartRateAttributes: ActivityAttributes {
     var timerStart: Date
     // 일시정지 중이면 멈춘 시점의 경과 초. 이때는 타이머 대신 이 값을 그린다
     var pausedElapsed: Int?
+    // 시스템이 세션을 끝내(에어팟을 빼면 iOS가 끝낸다) 세션 없이 일시정지로 남은 측정. 재개하려면 새 세션을
+    // 열어야 하는데 백그라운드에선 못 열어, 재개 버튼이 앱을 여는 링크가 된다
+    var suspended: Bool?
   }
 }

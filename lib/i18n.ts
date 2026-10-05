@@ -64,8 +64,24 @@ const ko = {
   "heartRate.viaWatch": "애플워치로 측정",
   "heartRate.watchPreparing": "애플워치 연결 중…",
   "heartRate.watchUnavailable": "애플워치를 손목에 차고 잠금을 풀어 주세요.",
+  "heartRate.watchCheck":
+    "애플워치 화면을 확인해 주세요. 처음이면 워치에서 건강 데이터 접근을 허용해야 해요.",
+  "heartRate.watchLost":
+    "워치와 연결이 끊겼어요. 워치는 계속 재고 있고, 아이폰이 가까이 오면 이어져요.",
   "heartRate.preparing": "센서 연결 중… {n}",
-  "heartRate.measuring": "측정 중",
+  "heartRate.measuringWatch": "워치로 측정 중",
+  "heartRate.measuringEarphones": "이어폰으로 측정 중",
+  "heartRate.standby": "이어폰 대기 중 — 워치를 풀면 이어서 재요.",
+  "heartRate.switchedToEarphones": "워치를 풀어서 이어폰으로 재고 있어요.",
+  "heartRate.pausedWatchRemoved":
+    "워치를 풀어서 일시정지했어요. 다시 차고 잠금을 푼 뒤 재개를 눌러 주세요.",
+  "heartRate.pausedEarphonesRemoved":
+    "이어폰이 빠져서 일시정지했어요. 다시 끼고 재개를 눌러 주세요.",
+  "heartRate.resuming": "연결 중…",
+  "heartRate.resumeNoDevice": "이어폰을 끼거나 애플워치를 차 주세요.",
+  "heartRate.resumeFailed": "측정을 이어가지 못했어요.",
+  "heartRate.watchAppMissing":
+    "애플워치에 포운 앱을 설치해 주세요. (iPhone의 Watch 앱 > 나의 시계 > 사용 가능한 앱)",
   "heartRate.paused": "일시정지",
   "heartRate.activeKcal": "활동 칼로리",
   "heartRate.totalKcal": "총 칼로리",
@@ -97,7 +113,6 @@ const ko = {
   "heartRate.deleteHealthFailed":
     "건강 앱의 운동은 지우지 못했어요. 건강 앱에서 직접 지워 주세요.",
   "heartRate.needPlan": "오늘 운동 계획을 먼저 추가해 주세요.",
-  "heartRate.autoPaused": "이어폰이 빠져서 측정을 일시정지했어요.",
   "heartRate.startMore": "심박수 추가 측정",
   "heartRate.todayRecorded": "오늘 {n}분 기록됨",
   "heartRate.added": "오늘 기록에 더했어요!",
@@ -108,13 +123,13 @@ const ko = {
     "운동하는 동안 애플워치나 이어폰의 심박 센서로 심박수와 칼로리를 실시간으로 재고, 끝내면 오늘 운동 기록에 남겨요.",
   "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "애플워치는 포운 워치 앱이 저절로 켜져서 재요. 이어폰은 심박 센서가 들어 있는 이 모델들만 되고, 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
+    "애플워치는 포운 워치 앱이 저절로 켜져서 재요. 워치와 이어폰을 같이 끼면 워치로 재다가 워치를 풀면 이어폰으로 이어서 재요. 이어폰은 심박 센서가 들어 있는 이 모델들만 되고, 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
   "heartRate.guideSetting": "이어폰은 설정에서 심박수를 켜 주세요",
   "heartRate.guideSettingDesc":
     "설정 > AirPods > 심박수가 켜져 있어야 신호가 들어와요.",
   "heartRate.guideIsland": "앱을 나가도 계속 재요",
   "heartRate.guideIslandDesc":
-    "잠금 화면과 다이나믹 아일랜드에서 심박수와 운동 시간을 보고 바로 일시정지·종료할 수 있어요. 이어폰을 빼면 자동으로 일시정지돼요.",
+    "잠금 화면과 다이나믹 아일랜드에서 심박수와 운동 시간을 보고 바로 일시정지·종료할 수 있어요. 재던 기기(이어폰·워치)를 빼면 자동으로 일시정지돼요.",
   "heartRate.guideRecord": "종료하면 오늘 운동에 저장돼요",
   "heartRate.guideRecordDesc":
     "날짜 아래에 칼로리·운동 시간·평균 심박이 남고, 건강 앱에도 운동으로 기록돼요. 요약을 누르면 측정별로 보고 지울 수 있어요. 1분 미만은 저장하지 않아요.",
@@ -432,8 +447,26 @@ const en: Record<TKey, string> = {
   "heartRate.viaWatch": "With Apple Watch",
   "heartRate.watchPreparing": "Connecting to Apple Watch…",
   "heartRate.watchUnavailable": "Wear your Apple Watch and unlock it.",
+  "heartRate.watchCheck":
+    "Check your Apple Watch. The first time, allow access to Health data on your Watch.",
+  "heartRate.watchLost":
+    "Lost connection to your Watch. It keeps measuring and syncs when your iPhone is nearby.",
   "heartRate.preparing": "Connecting sensor… {n}",
-  "heartRate.measuring": "Measuring",
+  "heartRate.measuringWatch": "Measuring on Watch",
+  "heartRate.measuringEarphones": "Measuring on earphones",
+  "heartRate.standby":
+    "Earphones on standby — they take over if you take off your Watch.",
+  "heartRate.switchedToEarphones":
+    "Watch removed — measuring with your earphones.",
+  "heartRate.pausedWatchRemoved":
+    "Paused because you took off your Apple Watch. Put it back on, unlock it, and tap Resume.",
+  "heartRate.pausedEarphonesRemoved":
+    "Paused because your earphones came out. Put them back in and tap Resume.",
+  "heartRate.resuming": "Connecting…",
+  "heartRate.resumeNoDevice": "Put in your earphones or wear your Apple Watch.",
+  "heartRate.resumeFailed": "Couldn't resume measuring.",
+  "heartRate.watchAppMissing":
+    "Install Pown on your Apple Watch (Watch app on iPhone > My Watch > Available Apps).",
   "heartRate.paused": "Paused",
   "heartRate.activeKcal": "Active",
   "heartRate.totalKcal": "Total",
@@ -467,7 +500,6 @@ const en: Record<TKey, string> = {
   "heartRate.deleteHealthFailed":
     "Couldn't delete the workout in Health. Delete it in the Health app.",
   "heartRate.needPlan": "Add today's workout plan first.",
-  "heartRate.autoPaused": "Earphones removed — measurement paused.",
   "heartRate.startMore": "Measure again",
   "heartRate.todayRecorded": "{n} min today",
   "heartRate.added": "Added to today's record!",
@@ -478,13 +510,13 @@ const en: Record<TKey, string> = {
     "While you work out, your Apple Watch or earphones' heart rate sensor tracks heart rate and calories live. When you finish, it's saved to today's workout.",
   "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "On Apple Watch, the Pown watch app opens by itself. Earphones work only with these models' built-in heart rate sensor — earphones without one won't show heart rate.",
+    "On Apple Watch, the Pown watch app opens by itself. Wear both and it measures on your Watch, then switches to your earphones if you take the Watch off. Earphones work only with these models' built-in heart rate sensor — earphones without one won't show heart rate.",
   "heartRate.guideSetting": "For earphones, turn on heart rate in settings",
   "heartRate.guideSettingDesc":
     "Settings > AirPods > Heart Rate must be on to get a signal.",
   "heartRate.guideIsland": "Keeps measuring outside the app",
   "heartRate.guideIslandDesc":
-    "See heart rate and time on the Lock Screen and Dynamic Island, and pause or end right there. Taking out your earphones pauses it automatically.",
+    "See heart rate and time on the Lock Screen and Dynamic Island, and pause or end right there. Taking off the device you're measuring with (earphones or Watch) pauses it automatically.",
   "heartRate.guideRecord": "Saved to today's workout when you end",
   "heartRate.guideRecordDesc":
     "Calories, duration and average heart rate appear under the date and are saved to the Health app as a workout. Tap the summary to view or delete each session. Sessions under 1 minute aren't saved.",

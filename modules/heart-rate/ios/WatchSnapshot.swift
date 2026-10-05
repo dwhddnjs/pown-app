@@ -33,9 +33,17 @@ struct WatchSnapshot: Codable {
   var timerStart: Double?
   // 운동 시작 시각(ms)
   var startedAt: Double
+  // 손목에 차고 있는지 — 워치 앱이 손목 감지(LAPolicy.deviceOwnerAuthenticationWithWristDetection)로 확인한다.
+  // false면 풀었다(아이폰은 에어팟 값으로 넘어가거나 일시정지), nil이면 모른다(손목 확인이 안 되는 워치·옛 워치 앱).
+  // 처음 버전 뒤에 더해 옵셔널이다
+  var wrist: Bool?
 }
 
-// 아이폰 → 워치: 전체 초기화처럼 건강 앱에도 남기지 않고 버려야 할 때
+// 아이폰 → 워치
 struct WatchCommand: Codable {
+  // 전체 초기화처럼 건강 앱에도 남기지 않고 버려야 할 때 — 받은 워치가 스스로 멈춘다
   var discard: Bool
+  // 일시정지로 남은 측정에 이어 재는 구간이다 — 1분이 안 돼도 건강 앱에 남긴다(앞 구간과 합치면 1분이 넘는다).
+  // 처음 버전 뒤에 더해 옵셔널이다
+  var keep: Bool?
 }

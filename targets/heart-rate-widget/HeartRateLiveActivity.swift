@@ -5,6 +5,8 @@ import WidgetKit
 
 // 아일랜드·잠금화면을 탭하면 운동 탭이 열리고, 거기 측정 박스가 떠 있다
 private let workoutURL = URL(string: "myapp://workout")
+// 세션 없이 일시정지로 남은 측정(suspended)의 재개 — 앱이 열리며 이어서 잰다(use-heart-rate-store)
+private let resumeURL = URL(string: "myapp://workout?resume=1")
 
 // compact는 심박(왼쪽)과 시간(오른쪽)이 바깥 모서리에서 같은 거리에 있어야 한다
 private let compactInset: CGFloat = 4
@@ -241,7 +243,12 @@ private struct ControlButtons: View {
 
   var body: some View {
     HStack(spacing: buttonGap) {
-      ControlButton(action: state.isPaused ? "resume" : "pause", fill: buttonFill, size: size) {
+      ControlButton(
+        action: state.isPaused ? "resume" : "pause",
+        // 시스템이 세션을 끝내 남은 일시정지는 새 세션을 열어야 재개되는데, 뒤에서는 못 연다 — 앱을 연다
+        url: state.suspended == true ? resumeURL : nil,
+        fill: buttonFill, size: size
+      ) {
         if state.isPaused {
           Image(systemName: "play.fill")
             .font(.system(size: pause.height, weight: .semibold))
@@ -275,20 +282,24 @@ private struct PauseBars: View {
   }
 }
 
-// 누르면 앱이 앞으로 나오지 않고 그 자리에서 처리된다 (HeartRateControlIntent)
+// 누르면 앱이 앞으로 나오지 않고 그 자리에서 처리된다 (HeartRateControlIntent). url이 있으면 앱을 연다
 private struct ControlButton<Label: View>: View {
   let action: String
+  var url: URL? = nil
   let fill: Color
   let size: CGFloat
   @ViewBuilder let label: Label
 
   var body: some View {
-    Button(intent: HeartRateControlIntent(action: action)) {
-      label
-        .frame(width: size, height: size)
-        .background(fill, in: Circle())
+    let face = label
+      .frame(width: size, height: size)
+      .background(fill, in: Circle())
+    if let url {
+      Link(destination: url) { face }
+    } else {
+      Button(intent: HeartRateControlIntent(action: action)) { face }
+        .buttonStyle(.plain)
     }
-    .buttonStyle(.plain)
   }
 }
 
