@@ -17,6 +17,9 @@ import {
   HeartRateDevice,
   HeartRateSnapshot,
   isHeartRateSupported,
+  NO_DEVICE,
+  WATCH_APP_MISSING,
+  WATCH_UNAVAILABLE,
 } from "@/modules/heart-rate";
 
 // 측정 한 번의 요약. 운동 카드 하나가 아니라 "그날 운동"의 지표라 날짜 헤더에 붙는다.
@@ -39,6 +42,9 @@ export type HeartRateRecordTypes = {
   // 1분 칸마다 [최소, 최대] 심박 — 기록 화면 그래프. 심박이 없던 분(일시정지·신호 끊김)은
   // null. 이번 버전부터 저장한다
   heartRates?: ([number, number] | null)[];
+  // 건강 앱에 저장된 운동들의 시작 시각(ms) — 에어팟을 빼 일시정지됐다 이어 잰 측정은 구간마다 운동이
+  // 따로 있다. 이번 버전부터 저장한다(없으면 startedAtMs 하나)
+  healthStarts?: number[];
 };
 
 export type HeartRateLiveTypes = HeartRateSnapshot & {
@@ -82,6 +88,7 @@ export const useHeartRateStore = create<HeartRateStoreTypes>()(
                 heartRates: snapshot.samples?.length
                   ? toMinuteRanges(snapshot.samples)
                   : undefined,
+                healthStarts: snapshot.healthStarts,
               },
             ],
           };
@@ -114,9 +121,12 @@ type HeartRateLiveStoreTypes = {
   preparingDevice: HeartRateDevice | null;
   // 지금 잴 수 있는 기기 — 없으면 시작 버튼을 숨긴다
   device: HeartRateDevice | null;
+  // 일시정지로 남은 측정을 새 세션으로 잇는 중(워치를 깨우면 수십 초) — 박스가 "연결 중"을 보인다
+  resuming: boolean;
   setLive: (snapshot: HeartRateSnapshot | null) => void;
   setPreparingAt: (at: number | null, device?: HeartRateDevice | null) => void;
   setDevice: (device: HeartRateDevice | null) => void;
+  setResuming: (resuming: boolean) => void;
 };
 
 export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
@@ -125,6 +135,7 @@ export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
     preparingAt: null,
     preparingDevice: null,
     device: null,
+    resuming: false,
     setLive: (snapshot) =>
       set({
         live: snapshot ? { ...snapshot, receivedAt: Date.now() } : null,
@@ -132,6 +143,7 @@ export const useHeartRateLiveStore = create<HeartRateLiveStoreTypes>()(
     setPreparingAt: (preparingAt, preparingDevice = null) =>
       set({ preparingAt, preparingDevice }),
     setDevice: (device) => set({ device }),
+    setResuming: (resuming) => set({ resuming }),
   }),
 );
 
@@ -208,16 +220,23 @@ export const saveRecord = (snapshot: HeartRateSnapshot) => {
 // 운동 목록에 계속 보인다. 건강 앱 쪽이 실패해도(권한 해제 등) 앱 기록은 지운다
 export const deleteRecord = (record: HeartRateRecordTypes) => {
   useHeartRateStore.getState().onDeleteRecord(record.id);
+  const native = HeartRate;
+  if (!native) return;
+  // 이어 잰 측정은 건강 앱에 구간마다 운동이 있다
+  const starts = record.healthStarts ?? [
+    record.startedAtMs ??
+      parse(record.startedAt, PLAN_DATE_FORMAT, new Date()).getTime(),
+  ];
   // 네이티브는 [시작, 시작+1초) 창으로 찾는다 — 초 단위로 내려야 실제 시작이 창 안에 든다
-  HeartRate?.deleteWorkout(
-    record.startedAtMs != null
-      ? Math.floor(record.startedAtMs / 1000) * 1000
-      : parse(record.startedAt, PLAN_DATE_FORMAT, new Date()).getTime(),
+  Promise.all(
+    starts.map((start) =>
+      native.deleteWorkout(Math.floor(start / 1000) * 1000),
+    ),
   )
-    .then((result) => {
+    .then((results) => {
       // 찾았는데 못 지웠다(워치 앱이 저장한 운동 등) — "함께 지워져요"라고 했으니 남은 걸 알리고
       // 직접 지우는 곳으로 보낸다
-      if (result !== "failed") return;
+      if (!results.includes("failed")) return;
       toast.error(tt("heartRate.deleteHealthFailed"), {
         duration: 6000,
         action: {
@@ -227,6 +246,34 @@ export const deleteRecord = (record: HeartRateRecordTypes) => {
       });
     })
     .catch(() => {});
+};
+
+// 재개. 세션 없이 일시정지로 남은 측정(suspended)은 네이티브가 새 세션을 열어 잇는다 — 그동안 박스는
+// "연결 중"이고, 이을 기기가 없으면 알려준다. 섬의 재개 링크(myapp://workout?resume=1)도 이걸 부른다
+export const resumeMeasurement = async () => {
+  const native = HeartRate;
+  const { resuming, setResuming, setLive } = useHeartRateLiveStore.getState();
+  if (!native || resuming) return;
+  setResuming(true);
+  try {
+    const snapshot = await native.resume();
+    if (snapshot) setLive(snapshot);
+  } catch (error) {
+    const code = (error as { code?: string } | null)?.code;
+    toast.error(
+      tt(
+        code === NO_DEVICE
+          ? "heartRate.resumeNoDevice"
+          : code === WATCH_APP_MISSING
+            ? "heartRate.watchAppMissing"
+            : code === WATCH_UNAVAILABLE
+              ? "heartRate.watchUnavailable"
+              : "heartRate.resumeFailed",
+      ),
+    );
+  } finally {
+    setResuming(false);
+  }
 };
 
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
@@ -249,20 +296,18 @@ export const useHeartRateSync = () => {
       // 버튼으로 끝낸 건 그쪽이 저장한다
       if (body.summary) saveRecord(body.summary);
     });
-    const deviceChange = native.addListener(
-      "onDeviceChange",
-      ({ device, removed }) => {
-        setDevice(device ?? null);
-        // 에어팟을 빼면 심박이 끊긴다 — 빈 심박으로 시간·칼로리만 쌓이지 않게 멈춘다.
-        // 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다). 워치로 재는 중이면
-        // 이어폰과 상관없다
-        const { live } = useHeartRateLiveStore.getState();
-        if (removed && live?.state === "running" && live.source !== "watch") {
-          native.pause().catch(() => {});
-          toast(tt("heartRate.autoPaused"));
-        }
-      },
+    // 에어팟을 빼면 멈추는 건 네이티브가 한다 — 앱이 뒤에 있으면 여기 live가 낡아 판단을 놓친다
+    const deviceChange = native.addListener("onDeviceChange", ({ device }) =>
+      setDevice(device ?? null),
     );
+    // 섬·잠금화면의 재개 링크 — 세션 없이 일시정지로 남은 측정은 뒤에서 새 세션을 못 열어 앱을 연다
+    const onURL = (url: string | null) => {
+      if (url?.includes("resume=1")) resumeMeasurement();
+    };
+    const link = Linking.addEventListener("url", ({ url }) => onURL(url));
+    Linking.getInitialURL()
+      .then(onURL)
+      .catch(() => {});
     // 백그라운드에선 네이티브가 JS로 샘플을 안 보낸다 — 돌아오면 최신 값으로 맞추고,
     // 그동안 놓친 오디오 출력 변경도 다시 본다
     const app = AppState.addEventListener("change", (state) => {
@@ -278,6 +323,7 @@ export const useHeartRateSync = () => {
     return () => {
       update.remove();
       deviceChange.remove();
+      link.remove();
       app.remove();
     };
   }, []);

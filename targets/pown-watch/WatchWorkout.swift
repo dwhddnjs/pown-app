@@ -1,17 +1,33 @@
 import Foundation
 import HealthKit
+import LocalAuthentication
+import WatchConnectivity
+import WatchKit
+import os
+
+// 실기 진단용 — Mac Console.app에서 subsystem:com.anonymous.workout-app 으로 본다. 심박 값은 남기지 않는다
+private let log = Logger(subsystem: "com.anonymous.workout-app", category: "Watch")
 
 // 워치에서 운동 세션을 돌리고 아이폰에 미러링한다. 갱신마다 WatchSnapshot을 보내고, 아이폰은
 // 그걸로 측정 박스·Live Activity를 그린다. 1분 이상이면 끝날 때 건강 앱에 저장한다.
 @MainActor
 final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
-  HKLiveWorkoutBuilderDelegate
+  HKLiveWorkoutBuilderDelegate, WCSessionDelegate
 {
   static let shared = WatchWorkout()
   private static let heartRateType = HKQuantityType(.heartRate)
   private static let activeEnergy = HKQuantityType(.activeEnergyBurned)
   private static let basalEnergy = HKQuantityType(.basalEnergyBurned)
   private static let bpm = HKUnit.count().unitDivided(by: .minute())
+  // 미러링을 기다리는 한도 — 끝나지 않는 경우가 있다(mirror 참고)
+  private static let mirrorTimeout: UInt64 = 15_000_000_000
+  // 측정 중 손목을 보는 간격 — 두 번 연속이어야 바꾸니 풀고 3~6초 안에 안다
+  private static let wristInterval: UInt64 = 3_000_000_000
+  // 앱이 비활성일 때 손목 확인이 성공한 적 있다 — 이 워치에선 확인 실패를 "풀었다"로 믿어도 된다
+  private static let wristVerifiedKey = "wristCheckVerified"
+  // 아이폰과 끊긴 뒤 미러링을 다시 거는 간격 — 멀리 있으면 매번 실패하니 두 배씩 늘린다
+  private static let reconnectDelay: UInt64 = 5_000_000_000
+  private static let reconnectMaxDelay: UInt64 = 60_000_000_000
 
   @Published private(set) var isRunning = false
   @Published private(set) var isPaused = false
@@ -30,16 +46,35 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
   private var isStarting = false
   // 아이폰이 전체 초기화로 버리라고 했다 — 길이와 상관없이 건강 앱에 남기지 않는다
   private var discardOnClose = false
+  // 아이폰이 앞 구간에 이어 재는 구간이라고 했다 — 1분이 안 돼도 건강 앱에 남긴다(합치면 1분이 넘는다)
+  private var keepShort = false
   // 아이폰에 값이 한 번이라도 닿았는지. 닿은 뒤의 끊김은 시스템이 didDisconnect로 알려준다
   private var delivered = false
+  // 아이폰과 미러링이 끊겼다 — 운동은 계속 재면서 다시 붙인다(reconnect)
+  private var mirrorLost = false
+  private var reconnectTask: Task<Void, Never>?
   // 빌더 통계가 비었을 때(시뮬레이터 가짜 심박 포함) 최소·최대·평균에 쓰는, 직접 본 값
   private var seen: (min: Int, max: Int, sum: Int, count: Int)?
   // 곧 보낼 예정인지 — 거의 동시에 오는 수집 콜백을 한 번의 전송으로 묶는다
   private var sendPending = false
+  // 손목에 차고 있는지(checkWrist). 아이폰에 보내는 값과, 바꾸기 전에 한 번 더 확인하려고 둔 직전 값
+  private var wrist: Bool?
+  private var wristCandidate: Bool?
+  private var wristTask: Task<Void, Never>?
+  // 미러링 대기. 시도 번호로 늦게 끝난 앞 시도가 다음 시도를 풀지 않게 한다
+  private var mirrorWait: CheckedContinuation<Void, Error>?
+  private var mirrorAttempt = 0
   #if targetEnvironment(simulator)
     // 시뮬레이터엔 심박 센서가 없다 — 2초마다 가짜 값을 만든다
     private var fakeTimer: Timer?
   #endif
+
+  private override init() {
+    super.init()
+    // 아이폰과 끊긴 채 운동이 끝나면 마지막 값을 이걸로 보낸다(close) — 미러가 끊겨 그 길로는 못 간다
+    WCSession.default.delegate = self
+    WCSession.default.activate()
+  }
 
   func start(_ configuration: HKWorkoutConfiguration) async {
     guard !isStarting else { return }
@@ -59,14 +94,22 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       builder.delegate = self
       self.session = session
       self.builder = builder
-      try await session.startMirroringToCompanionDevice()
+      // 손목부터 본다 — 첫 값에 실어 보내야 아이폰이 안 찬 워치로 재지 않고 바로 이어폰으로 넘어가거나
+      // 착용을 안내한다
+      wrist = await checkWrist()
+      wristCandidate = wrist
       let now = Date()
       session.startActivity(with: now)
       try await builder.beginCollection(at: now)
+      // watchOS 26: 세션이 prepared·running이 되기 전에 미러링을 걸면 실패하거나 끝나지 않는다
+      // (FB20723311, 애플 DTS 우회 — developer.apple.com/forums/thread/804276). 시작한 뒤에 건다
+      try await mirror(session)
+      log.notice("started wrist=\(String(describing: self.wrist), privacy: .public)")
       isRunning = true
       delivered = false
       status = Self.idleStatus
       startFakeHeartRate()
+      startWristChecks()
       send()
       // 아이폰에 값이 한 번도 닿지 않은 채 startTimeout이 지나면 아이폰은 이미 시작을 포기했다 —
       // 미러링이 아예 안 붙은 것이니 워치 운동이 혼자 돌지 않게 끝낸다(일시정지 중이어도)
@@ -75,10 +118,94 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
         if !delivered, self.session === session { close(session, at: .now) }
       }
     } catch {
+      log.error("start failed: \(describe(error), privacy: .public)")
       session?.end()
       reset()
       status = tr("측정을 시작하지 못했어요", "Couldn't start measuring")
     }
+  }
+
+  // 미러링을 기다린다. 같은 버그로 끝나지 않는 경우가 있어 한도를 넘으면 실패로 본다 — 안 그러면 isStarting이
+  // 풀리지 않아, 아이폰이 다시 시작해도 워치 앱을 다시 켤 때까지 받지 않는다. 멈춘 호출은 취소할 수 없어 버린다
+  private func mirror(_ session: HKWorkoutSession) async throws {
+    // 앞 대기(되찾는 중 새 시작이 온 경우 등)는 놓아준다 — 덮어쓰면 그쪽이 영영 안 끝난다
+    resolveMirror(CancellationError())
+    mirrorAttempt += 1
+    let attempt = mirrorAttempt
+    try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+      mirrorWait = continuation
+      Task {
+        do {
+          try await session.startMirroringToCompanionDevice()
+          if self.mirrorAttempt == attempt { self.resolveMirror(nil) }
+        } catch {
+          if self.mirrorAttempt == attempt { self.resolveMirror(error) }
+        }
+      }
+      Task {
+        try? await Task.sleep(nanoseconds: Self.mirrorTimeout)
+        if self.mirrorAttempt == attempt { self.resolveMirror(MirrorTimeout()) }
+      }
+    }
+  }
+
+  // 미러링 대기를 푼다 — 끝남·실패·한도 중 먼저 온 쪽만 먹는다
+  private func resolveMirror(_ error: Error?) {
+    guard let continuation = mirrorWait else { return }
+    mirrorWait = nil
+    if let error {
+      continuation.resume(throwing: error)
+    } else {
+      continuation.resume()
+    }
+  }
+
+  // 손목에 차고 있는지. 이 정책은 "손목 감지가 켜져 있고, 암호를 넣은 뒤 계속 손목에 있었으면" UI 없이
+  // 성공한다(LAContext.h). interactionNotAllowed라 암호 화면 대신 .notInteractive로 실패한다 — 그 실패가
+  // "풀었다"인지 "여기선 확인이 안 된다"(손목 감지 꺼짐, 백그라운드 미지원)인지는 못 가른다. 그래서 앱이 비활성일
+  // 때(손목을 내린 운동 중) 한 번이라도 성공해 본 워치에서만 실패를 false로 보고, 아니면 nil(모름) — 모르면
+  // 아이폰은 심박이 들어오는지로만 판단한다
+  private func checkWrist() async -> Bool? {
+    let context = LAContext()
+    context.interactionNotAllowed = true
+    do {
+      _ = try await context.evaluatePolicy(
+        .deviceOwnerAuthenticationWithWristDetection,
+        localizedReason: tr("손목 착용 확인", "Checking your wrist"))
+      if WKApplication.shared().applicationState != .active,
+        !UserDefaults.standard.bool(forKey: Self.wristVerifiedKey)
+      {
+        UserDefaults.standard.set(true, forKey: Self.wristVerifiedKey)
+        log.notice("wrist check works in background")
+      }
+      return true
+    } catch let error as LAError where error.code == .notInteractive {
+      return UserDefaults.standard.bool(forKey: Self.wristVerifiedKey) ? false : nil
+    } catch {
+      log.notice("wrist check unavailable: \(describe(error), privacy: .public)")
+      return nil
+    }
+  }
+
+  // 측정 중 손목을 계속 본다 — 풀면 아이폰이 에어팟 값으로 넘어가거나 일시정지한다
+  private func startWristChecks() {
+    wristTask?.cancel()
+    wristTask = Task {
+      while !Task.isCancelled {
+        try? await Task.sleep(nanoseconds: Self.wristInterval)
+        guard !Task.isCancelled, self.isRunning else { return }
+        self.see(wrist: await self.checkWrist())
+      }
+    }
+  }
+
+  // 두 번 연속 같은 값일 때만 바꾼다 — 한 번 실패했다고 에어팟으로 넘어가거나 멈추지 않게. 바뀌면 바로 보낸다
+  private func see(wrist value: Bool?) {
+    defer { wristCandidate = value }
+    guard value != wrist, value == wristCandidate else { return }
+    wrist = value
+    log.notice("wrist=\(String(describing: value), privacy: .public)")
+    send()
   }
 
   // 운동 중 앱이 죽었다 다시 뜨면 시스템이 부른다(handleActiveWorkoutRecovery) — 세션을 되찾아
@@ -104,11 +231,17 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     isRunning = true
     isPaused = recovered.state == .paused
     status = Self.idleStatus
-    // 미러링이 끊겼으면 다시 붙인다 — 아직 붙어 있으면 실패하고 그대로 간다
-    try? await recovered.startMirroringToCompanionDevice()
+    // 미러링이 끊겼으면 다시 붙인다. 실패하면 아직 붙어 있거나 아이폰이 멀리 있다 — 붙을 때까지 다시 건다(reconnect가
+    // 붙어 있으면 바로 멈춘다)
+    let mirrored = (try? await mirror(recovered)) != nil
     guard recovered === session else { return }
+    log.notice("recovered")
+    if !mirrored { reconnect(recovered) }
+    wrist = await checkWrist()
+    wristCandidate = wrist
     readStatistics()
     startFakeHeartRate()
+    startWristChecks()
     send()
   }
 
@@ -125,25 +258,78 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     builder?.elapsedTime(at: date) ?? 0
   }
 
-  // 아이폰이 멈췄든(stopped), 바로 끝냈든(ended), 연결이 끊겼든 같은 길로 마무리한다.
+  // 아이폰이 멈췄든(stopped), 바로 끝냈든(ended), 세션이 실패했든 같은 길로 마무리한다.
   // report: 멈춘 시각의 값을 마지막으로 보낸다 — 아이폰도 이 경과 시간으로 1분 기준을 재서, 건강 앱
-  // 저장과 앱 기록이 같이 남거나 같이 빠진다. 멈췄을 때(워치·아이폰 종료 버튼)만 보낸다 — 끊겼거나
-  // 이미 끝난 세션엔 닿지 않는다
+  // 저장과 앱 기록이 같이 남거나 같이 빠진다. 멈췄을 때(워치·아이폰 종료 버튼)만 보낸다 — 이미 끝난 세션엔
+  // 닿지 않는다. 아이폰과 끊긴 채 끝나면 미러로는 못 보내니, 아이폰이 이 측정을 받고 있었으면(값이 닿았다)
+  // WCSession으로 남긴다 — 아이폰 앱이 다음에 뜰 때라도 받아 기다리던 측정을 이 값으로 마무리한다
   private func close(_ session: HKWorkoutSession, at date: Date, report: Bool = false) {
     guard session === self.session, let builder else { return }
-    let discard = discardOnClose || builder.elapsedTime(at: date) < WatchSnapshot.minimumDuration
-    let final = report && !discardOnClose ? snapshotData(at: date) : nil
+    let discard =
+      discardOnClose || (!keepShort && builder.elapsedTime(at: date) < WatchSnapshot.minimumDuration)
+    let lost = mirrorLost && delivered
+    let final = (report || lost) && !discardOnClose ? snapshotData(at: date) : nil
+    let start = builder.startDate
+    log.notice("close discard=\(discard) report=\(report) lost=\(lost)")
     reset()
     Task {
-      // 못 보내도 저장은 그대로 한다
-      if let final { _ = try? await session.sendToRemoteWorkoutSession(data: final) }
+      if let final, lost {
+        if WCSession.default.activationState == .activated {
+          WCSession.default.transferUserInfo(["final": final])
+        }
+      } else if let final {
+        // 못 보내도 저장은 그대로 한다
+        _ = try? await session.sendToRemoteWorkoutSession(data: final)
+      }
       try? await builder.endCollection(at: date)
       if discard {
         builder.discardWorkout()
+        if let start { await purge(from: start, to: date) }
       } else {
         _ = try? await builder.finishWorkout()
       }
       if session.state != .ended { session.end() }
+    }
+  }
+
+  // 버린 운동이 남긴 샘플을 지운다 — discardWorkout은 운동만 버리고 이미 들어간 심박·칼로리 샘플은 남긴다
+  // (HKWorkoutBuilder.h). 이 앱 출처만, 운동 시간 안만
+  private func purge(from start: Date, to end: Date) async {
+    let predicate = NSCompoundPredicate(andPredicateWithSubpredicates: [
+      HKQuery.predicateForObjects(from: .default()),
+      HKQuery.predicateForSamples(
+        withStart: start.addingTimeInterval(-1), end: end.addingTimeInterval(1),
+        options: .strictStartDate),
+    ])
+    for type in [Self.heartRateType, Self.activeEnergy, Self.basalEnergy] {
+      _ = try? await store.deleteObjects(of: type, predicate: predicate)
+    }
+  }
+
+  // 아이폰과 끊겨도 운동은 계속 잰다(폰을 사물함에 둬도 기록이 이어지게) — 붙을 때까지 미러링을 다시 건다. 붙으면
+  // 아이폰은 새 미러 세션을 같은 측정으로 이어 받는다(HeartRateModule adopt)
+  private func reconnect(_ session: HKWorkoutSession) {
+    mirrorLost = true
+    reconnectTask?.cancel()
+    reconnectTask = Task {
+      var delay = Self.reconnectDelay
+      while true {
+        try? await Task.sleep(nanoseconds: delay)
+        guard !Task.isCancelled, session === self.session else { return }
+        // 미러가 아직 살아 있으면(되찾은 직후) 보내기가 된다
+        if let data = snapshotData(at: Date()),
+          (try? await session.sendToRemoteWorkoutSession(data: data)) != nil
+        {
+          break
+        }
+        guard !Task.isCancelled, session === self.session else { return }
+        if (try? await mirror(session)) != nil { break }
+        delay = min(delay * 2, Self.reconnectMaxDelay)
+      }
+      guard !Task.isCancelled, session === self.session else { return }
+      log.notice("reconnected")
+      mirrorLost = false
+      send()
     }
   }
 
@@ -152,6 +338,13 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       fakeTimer?.invalidate()
       fakeTimer = nil
     #endif
+    wristTask?.cancel()
+    wristTask = nil
+    reconnectTask?.cancel()
+    reconnectTask = nil
+    mirrorLost = false
+    wrist = nil
+    wristCandidate = nil
     session = nil
     builder = nil
     isRunning = false
@@ -160,6 +353,7 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     activeKcal = 0
     totalKcal = 0
     discardOnClose = false
+    keepShort = false
     seen = nil
   }
 
@@ -247,7 +441,8 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       totalKcal: totalKcal,
       elapsedSec: Int(elapsed),
       timerStart: ((date.timeIntervalSince1970 - elapsed) * 1000).rounded(),
-      startedAt: (builder.startDate ?? date).timeIntervalSince1970 * 1000
+      startedAt: (builder.startDate ?? date).timeIntervalSince1970 * 1000,
+      wrist: wrist
     )
     return try? JSONEncoder().encode(snapshot)
   }
@@ -273,34 +468,46 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
 
   nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error)
   {
-    Task { @MainActor in self.close(workoutSession, at: .now) }
+    Task { @MainActor in
+      log.error("session failed: \(describe(error), privacy: .public)")
+      self.close(workoutSession, at: .now)
+    }
   }
 
-  // 아이폰과 연결이 끊기면 같이 끝낸다 — 아이폰도 끊김을 종료로 보고 기록을 남긴다.
-  // 워치 혼자 돌게 두면 배터리만 닳고, 아이폰에서 다시 시작해도 이 세션엔 붙지 않는다.
-  // ponytail: 잠깐 끊겼다 다시 붙는 경우까지 이어 가려면 재미러링이 필요하다 — 실기에서
-  // 끊김이 잦으면 그때 추가
+  // 아이폰과 연결이 끊겨도 운동은 끝내지 않는다(폰을 사물함에 둔 경우 등) — 계속 재면서 다시 붙인다.
+  // 아이폰도 측정을 끝내지 않고 기다린다. 끊긴 채 여기서 끝내면 마지막 값은 WCSession으로 간다(close)
   nonisolated func workoutSession(
     _ workoutSession: HKWorkoutSession, didDisconnectFromRemoteDeviceWithError error: Error?
   ) {
-    Task { @MainActor in self.close(workoutSession, at: .now) }
+    Task { @MainActor in
+      guard workoutSession === self.session else { return }
+      log.notice("disconnected: \(describe(error), privacy: .public)")
+      self.reconnect(workoutSession)
+    }
   }
 
   nonisolated func workoutSession(
     _ workoutSession: HKWorkoutSession, didReceiveDataFromRemoteWorkoutSession data: [Data]
   ) {
-    let discard = data.contains(where: { item in
-      (try? JSONDecoder().decode(WatchCommand.self, from: item))?.discard == true
-    })
-    guard discard else { return }
+    let commands = data.compactMap { try? JSONDecoder().decode(WatchCommand.self, from: $0) }
+    let discard = commands.contains { $0.discard }
+    let keep = commands.contains { $0.keep == true }
+    guard discard || keep else { return }
     Task { @MainActor in
       guard workoutSession === self.session else { return }
+      if keep { self.keepShort = true }
+      guard discard else { return }
       // 아이폰은 이걸 보내고 멈추지 않은 채 기다린다 — 표시한 다음 여기서 멈춰야 저장 없이 끝난다.
       // 아이폰이 같이 멈추면 멈춤이 먼저 처리돼 이 표시를 놓칠 수 있다
       self.discardOnClose = true
       workoutSession.stopActivity(with: .now)
     }
   }
+
+  nonisolated func session(
+    _ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState,
+    error: Error?
+  ) {}
 
   nonisolated func workoutBuilder(
     _ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>
@@ -313,6 +520,16 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
   }
 
   nonisolated func workoutBuilderDidCollectEvent(_ workoutBuilder: HKLiveWorkoutBuilder) {}
+}
+
+// 미러링이 한도 안에 끝나지 않았다
+private struct MirrorTimeout: Error {}
+
+// 로그용 에러 표기 — 도메인과 코드만(문구는 기기 언어를 탄다)
+private func describe(_ error: Error?) -> String {
+  guard let error else { return "nil" }
+  let nsError = error as NSError
+  return "\(nsError.domain)#\(nsError.code)"
 }
 
 // 워치 앱은 문구가 몇 개뿐이라 문자열 카탈로그 대신 시스템 언어로 고른다.

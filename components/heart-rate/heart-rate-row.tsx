@@ -26,6 +26,8 @@ import Svg, { Circle, G } from "react-native-svg";
 // zustand
 import {
   hasPlanOn,
+  HeartRateLiveTypes,
+  resumeMeasurement,
   saveRecord,
   summarizeDay,
   toMinutes,
@@ -37,11 +39,13 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
 import { dateKey, formatElapsed } from "@/lib/date";
+import { TKey } from "@/lib/i18n";
 import { mmkv } from "@/lib/storage";
 // native
 import {
   HeartRate,
   isHeartRateSupported,
+  WATCH_APP_MISSING,
   WATCH_UNAVAILABLE,
 } from "@/modules/heart-rate";
 // icon
@@ -51,6 +55,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 const PREPARE_SEC = 3;
 // 이만큼 지나도 심박이 없으면 미지원 기기·설정 꺼짐·권한 거부로 보고 안내한다
 const NO_SIGNAL_SEC = 20;
+// 워치를 이만큼 기다려도 첫 값이 없으면 워치 화면을 보라고 안내한다 — 처음이면 워치에 건강 권한 창이 떠 있다
+const WATCH_CHECK_SEC = 4;
 // 처음 시작할 때 한 번만 안내 시트를 띄운다
 const GUIDE_SEEN_KEY = "heartRateGuideSeen";
 // 카드 안 내용이 바뀔 때(버튼 ↔ 박스)만 페이드 — 카드 높이는 AnimatedHeight가 옮긴다
@@ -67,6 +73,30 @@ const useSecondTick = (enabled: boolean) => {
 };
 
 const secondsSince = (at: number) => Math.floor((Date.now() - at) / 1000);
+
+// 박스 아래 안내 한 줄 — 워치 끊김 > 일시정지 사유 > 신호 없음 > 기기 전환·대기 순
+const liveHint = (
+  live: HeartRateLiveTypes | null,
+  noSignal: boolean,
+): TKey | null => {
+  if (!live) return null;
+  if (live.watchLost) return "heartRate.watchLost";
+  if (live.state === "paused") {
+    if (live.pauseReason === "watchRemoved")
+      return "heartRate.pausedWatchRemoved";
+    if (live.pauseReason === "earphonesRemoved")
+      return "heartRate.pausedEarphonesRemoved";
+    return null;
+  }
+  if (noSignal)
+    return live.source === "watch"
+      ? "heartRate.noSignalWatch"
+      : "heartRate.noSignal";
+  if (live.watchOff && live.hrSource === "earphones")
+    return "heartRate.switchedToEarphones";
+  if (live.standby) return "heartRate.standby";
+  return null;
+};
 
 // 준비 카운트다운 링 — 상태 글자(13pt) 자리에 들어가는 크기
 const RING_SIZE = 28;
@@ -150,15 +180,17 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
       const discarded =
         preparedAt !== null &&
         useHeartRateLiveStore.getState().preparingAt === null;
-      // 워치가 응답하지 않았고 이어폰도 없다 — 워치를 차고 잠금을 풀면 된다
-      const watchUnavailable =
-        (error as { code?: string } | null)?.code === WATCH_UNAVAILABLE;
+      // 워치가 응답하지 않았거나 안 찼고 이어폰도 없다 — 워치를 차고 잠금을 풀면 된다. 워치 앱이
+      // 없어 보이면 설치 방법을 알려준다
+      const code = (error as { code?: string } | null)?.code;
       if (!discarded)
         toast.error(
           t(
-            watchUnavailable
+            code === WATCH_UNAVAILABLE
               ? "heartRate.watchUnavailable"
-              : "heartRate.startFailed",
+              : code === WATCH_APP_MISSING
+                ? "heartRate.watchAppMissing"
+                : "heartRate.startFailed",
           ),
         );
     } finally {
@@ -304,6 +336,7 @@ const LiveBox = ({
   const preparingDevice = useHeartRateLiveStore(
     (state) => state.preparingDevice,
   );
+  const resuming = useHeartRateLiveStore((state) => state.resuming);
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const isRunning = live?.state === "running";
@@ -318,11 +351,25 @@ const LiveBox = ({
       : live.elapsedSec + secondsSince(live.receivedAt);
   const noSignal =
     isRunning && live.heartRate == null && elapsed >= NO_SIGNAL_SEC;
+  const waitingWatch =
+    !live &&
+    preparingDevice === "watch" &&
+    preparingAt !== null &&
+    secondsSince(preparingAt) >= WATCH_CHECK_SEC;
+  const hint: TKey | null = waitingWatch
+    ? "heartRate.watchCheck"
+    : liveHint(live, noSignal);
+  // 지금 보이는 심박을 잰 기기 — 워치로 재다 워치를 풀면 이어폰 값을 쓴다
+  const onWatch = live?.source === "watch" && live.hrSource !== "earphones";
   // 준비 중·일시정지면 실시간 숫자를 전부 흐린다 — 라벨·상태 글자는 그대로
   const dim = isRunning ? undefined : themeColor.disabled;
-  // 준비 중(센서 대기)·종료 처리 중엔 누를 수 없다 — Button엔 비활성 모양이 없어 여기서 흐린다
-  const locked = !live || isEnding;
-  // 워치는 첫 값이 오기까지 길게는 30초다 — 그동안 종료 자리를 취소로 쓴다. 이어폰은 3초면 끝난다
+  // 준비 중(센서 대기)·종료 처리 중·이어 재기 연결 중엔 누를 수 없다 — Button엔 비활성 모양이 없어
+  // 여기서 흐린다
+  const locked = !live || isEnding || resuming;
+  // 워치와 끊긴 동안엔 일시정지·재개가 워치에 닿지 않는다 — 종료는 된다(다시 붙으면 그때 워치도 끝난다)
+  const pauseLocked = locked || !!live?.watchLost;
+  // 워치는 첫 값이 오기까지 길게는 1분이다(처음엔 워치에서 권한까지 허용) — 그동안 종료 자리를 취소로 쓴다.
+  // 이어폰은 3초면 끝난다
   const canCancel = !live && preparingDevice === "watch";
   const endLocked = locked && !canCancel;
 
@@ -355,7 +402,15 @@ const LiveBox = ({
               ]}
             />
             <Text style={[styles.statusText, { color: themeColor.subText }]}>
-              {isPaused ? t("heartRate.paused") : t("heartRate.measuring")}
+              {resuming
+                ? t("heartRate.resuming")
+                : isPaused
+                  ? t("heartRate.paused")
+                  : t(
+                      onWatch
+                        ? "heartRate.measuringWatch"
+                        : "heartRate.measuringEarphones",
+                    )}
             </Text>
           </RNView>
         ) : preparingDevice === "watch" ? (
@@ -394,13 +449,9 @@ const LiveBox = ({
         />
       </RNView>
 
-      {noSignal && (
+      {hint && (
         <Text style={[styles.hint, { color: themeColor.subText }]}>
-          {t(
-            live?.source === "watch"
-              ? "heartRate.noSignalWatch"
-              : "heartRate.noSignal",
-          )}
+          {t(hint)}
         </Text>
       )}
 
@@ -408,13 +459,13 @@ const LiveBox = ({
         {/* 보조 동작은 회색 면으로 한 톤 낮춘다 — 민트 테두리는 빨간 종료와 시선을 다퉜다 */}
         <Button
           type="solid"
-          disabled={locked}
+          disabled={pauseLocked}
           style={{
             ...styles.action,
             backgroundColor: themeColor.background,
-            opacity: locked ? 0.4 : 1,
+            opacity: pauseLocked ? 0.4 : 1,
           }}
-          onPress={() => (isPaused ? HeartRate?.resume() : HeartRate?.pause())}
+          onPress={() => (isPaused ? resumeMeasurement() : HeartRate?.pause())}
         >
           {isPaused ? t("heartRate.resume") : t("heartRate.pause")}
         </Button>
@@ -638,8 +689,11 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     paddingTop: 2,
   },
+  // 위아래 간격을 눈으로 같게 — 40pt 심박 숫자의 줄 상자는 숫자 바닥(기준선) 아래로 11pt쯤 비어 있어(실측)
+  // 같은 gap(12)이어도 위가 넓어 보인다. 그만큼 끌어올려 숫자 바닥 → 선을 선 → 아래 라벨 글자(12.3pt)에 맞춘다
   divider: {
     height: 1,
+    marginTop: -11,
   },
   // 날짜 헤더 요약 띠와 같은 규칙 — 구분선은 박스 여백(16)에 두고 칸만 4 더 들인다
   stats: {

@@ -57,9 +57,9 @@ export default function ResetData() {
     onReset();
     onResetVideo();
     onResetRecords();
-    // 측정 중이거나 센서를 기다리는 중이면 세션도 저장 없이 버린다(건강 앱에도 안 남긴다) — 안
-    // 버리면 지운 뒤에도 아일랜드에 남는다. JS가 모르는 세션도 버리게 늘 부른다(없으면 reject).
-    // 이미 끝나는 중이라 못 버린 측정의 요약은 saveRecord가 거른다
+    // 측정 중이거나 센서를 기다리는 중이면 세션도 저장 없이 버린다(건강 앱에 이미 들어간 심박·칼로리
+    // 샘플까지 지운다 — 워치 것은 워치 앱이) — 안 버리면 지운 뒤에도 아일랜드에 남는다. JS가 모르는 세션도
+    // 버리게 늘 부른다(없으면 reject). 이미 끝나는 중이라 못 버린 측정의 요약은 saveRecord가 거른다
     HeartRate?.discard().catch(() => {});
     const { setLive, setPreparingAt } = useHeartRateLiveStore.getState();
     setLive(null);
