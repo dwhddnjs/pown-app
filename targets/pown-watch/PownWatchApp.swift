@@ -48,43 +48,25 @@ struct ContentView: View {
   }
 }
 
-// 아이폰 측정 박스와 같은 구성: 심박 → 운동 시간 → 활동·총 칼로리 → 중지·종료. 스크롤 없이 40mm에도
-// 한 화면에 들어가게 상태 글자는 뺐다 — 일시정지면 숫자가 전부 흐려지고 버튼이 "재개"로 바뀐다.
-// 글자 크기를 키워 넘치면 그때만 스크롤된다(버튼이 화면 밖으로 잘리지 않게).
-// 숫자는 Live Activity처럼 시스템 rounded
+// 아이폰 측정 박스와 같은 구성: 심박·상태 → 운동 시간 → 활동·총 칼로리 → 중지·종료. 스크롤 없이 늘 한 화면이다 —
+// 40mm(본문 약 145×160pt)에 맞춘 크기이고, 글자 크기를 키워 넘치면 숫자가 줄어든다(버튼은 늘 맨 아래에 보인다).
+// 일시정지면 숫자가 전부 흐려지고 버튼이 "재개"로 바뀐다. 숫자는 Live Activity처럼 시스템 rounded
 private struct MetricsView: View {
   @ObservedObject var workout: WatchWorkout
   @State private var confirmEnd = false
 
   var body: some View {
-    GeometryReader { proxy in
-      ScrollView {
-        content
-          // 넘치지 않으면 화면 높이를 채워 버튼을 맨 아래에 둔다
-          .frame(maxWidth: .infinity, minHeight: proxy.size.height, alignment: .topLeading)
-      }
-      .scrollBounceBehavior(.basedOnSize)
-    }
-    .scenePadding(.horizontal)
-    .confirmationDialog(tr("측정을 종료할까요?", "End this session?"), isPresented: $confirmEnd) {
-      Button(tr("종료", "End"), role: .destructive) { workout.end() }
-    }
-  }
-
-  private var content: some View {
     let dim: Color? = workout.isPaused ? .secondary : nil
 
-    return VStack(alignment: .leading, spacing: 2) {
-      HStack(alignment: .firstTextBaseline, spacing: 4) {
-        Image(systemName: "heart.fill")
-          .font(.system(size: 18))
-          .foregroundStyle(dim ?? pownRed)
-        Text(workout.heartRate.map(String.init) ?? "--")
-          .font(.system(size: 36, weight: .semibold, design: .rounded))
-          .foregroundStyle(dim ?? .primary)
-        Text("bpm")
-          .font(.footnote)
-          .foregroundStyle(.secondary)
+    VStack(alignment: .leading, spacing: 2) {
+      // 상태는 심박 줄 오른쪽 끝에 — 좁은 화면(40mm)에서 안 들어가면 뺀다(일시정지는 흐린 숫자·"재개" 버튼으로 보인다)
+      ViewThatFits(in: .horizontal) {
+        HStack(alignment: .firstTextBaseline, spacing: 4) {
+          HeartRateLabel(heartRate: workout.heartRate, dim: dim)
+          Spacer(minLength: 0)
+          StatusLabel(isPaused: workout.isPaused)
+        }
+        HeartRateLabel(heartRate: workout.heartRate, dim: dim)
       }
 
       // 일시정지 중엔 빌더 경과 시간이 멈춰 있어 그대로 그리면 된다
@@ -99,9 +81,9 @@ private struct MetricsView: View {
         Stat(label: tr("총 칼로리", "Total"), value: workout.totalKcal, dim: dim)
       }
 
-      Spacer(minLength: 4)
+      Spacer(minLength: 0)
 
-      // 앱 박스와 같은 색 규칙 — 중지는 회색 면, 종료는 빨강
+      // 앱 박스와 같은 색 규칙 — 중지는 회색 면, 종료는 빨강. 자리가 모자라면 위 숫자가 먼저 줄어든다
       HStack(spacing: 8) {
         PillButton(
           title: workout.isPaused ? tr("재개", "Resume") : tr("중지", "Pause"),
@@ -109,9 +91,52 @@ private struct MetricsView: View {
         ) { workout.togglePause() }
         PillButton(title: tr("종료", "End"), fill: pownRed) { confirmEnd = true }
       }
+      .layoutPriority(1)
     }
     .monospacedDigit()
     .lineLimit(1)
+    .minimumScaleFactor(0.5)
+    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    .scenePadding(.horizontal)
+    .confirmationDialog(tr("측정을 종료할까요?", "End this session?"), isPresented: $confirmEnd) {
+      Button(tr("종료", "End"), role: .destructive) { workout.end() }
+    }
+  }
+}
+
+// 하트 · 심박 · bpm
+private struct HeartRateLabel: View {
+  let heartRate: Int?
+  let dim: Color?
+
+  var body: some View {
+    HStack(alignment: .firstTextBaseline, spacing: 4) {
+      Image(systemName: "heart.fill")
+        .font(.system(size: 18))
+        .foregroundStyle(dim ?? pownRed)
+      Text(heartRate.map(String.init) ?? "--")
+        .font(.system(size: 36, weight: .semibold, design: .rounded))
+        .foregroundStyle(dim ?? .primary)
+      Text("bpm")
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+  }
+}
+
+// 아이폰 박스 상태와 같은 표시 — 재는 중이면 빨간 점, 멈췄으면 회색 점
+private struct StatusLabel: View {
+  let isPaused: Bool
+
+  var body: some View {
+    HStack(spacing: 3) {
+      Circle()
+        .fill(isPaused ? Color.secondary : pownRed)
+        .frame(width: 6, height: 6)
+      Text(isPaused ? tr("일시정지", "Paused") : tr("측정 중", "Measuring"))
+        .font(.caption2)
+        .foregroundStyle(.secondary)
+    }
   }
 }
 

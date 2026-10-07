@@ -123,14 +123,12 @@ public class HeartRateModule: Module {
     return manager
   }
 
-  // "watch"(애플워치) > "earphones"(블루투스 이어폰) > nil. 워치를 먼저 쓴다 — 센서가 확실하다. 워치를 안
-  // 찼거나 응답하지 않으면 시작할 때 이어폰으로 넘어간다. JS가 이걸로 고른 기기를 start()에 넘긴다
+  // "earphones"(블루투스 이어폰) > "watch"(애플워치) > nil. 이어폰을 먼저 쓴다 — 끼었는지는 오디오 출력으로 바로
+  // 알지만, 아이폰이 워치를 찼는지 아는 공개 API는 없다(애플 DTS). 워치를 먼저 쓰면 안 찬 워치로 재게 된다(3.5 실기).
+  // 둘 다 끼면 이어폰으로 재고, 워치엔 Live Activity가 스마트 스택에 뜬다. JS가 이걸로 고른 기기를 start()에 넘긴다
   static func heartRateDevice() -> String? {
-    let earphones = hasEarphones()
-    // 워치 앱이 없다고 나오면 이어폰이 있을 땐 이어폰부터 — 워치 앱 없는 사용자가 매번 워치를 기다리지 않게.
-    // 이어폰도 없으면 워치를 시도해 본다(실기에서 워치 앱이 깔려 있는데 버튼이 안 떴다 — 판정이 틀릴 수 있다)
-    if isWatchAvailable(), WCSession.default.isWatchAppInstalled || !earphones { return "watch" }
-    return earphones ? "earphones" : nil
+    if hasEarphones() { return "earphones" }
+    return isWatchAvailable() ? "watch" : nil
   }
 
   // 블루투스 이어폰이 소리를 받고 있으면 "심박 기기일 수 있음"으로 본다 — 재 봤는데 심박이 안 들어온 출력은
@@ -160,20 +158,31 @@ public class HeartRateModule: Module {
   private static let noSensorWindow: TimeInterval = 30 * 24 * 3600
   private static let noSensorStrikes = 2
 
+  // 심박을 잰 적이 있는 출력 — 워치도 있을 때 이 출력은 확인 없이 바로 이어폰으로 잰다(WorkoutManager.startSegment)
+  private static let provenKey = "heartRateSensorProven"
+
   // uid별 심박을 못 잰 측정의 시각(초)
   private static func noSensorFailures() -> [String: [Double]] {
     UserDefaults.standard.dictionary(forKey: noSensorKey) as? [String: [Double]] ?? [:]
   }
 
+  static func isProven(_ uids: [String]) -> Bool {
+    let proven = UserDefaults.standard.stringArray(forKey: provenKey) ?? []
+    return uids.contains(where: proven.contains)
+  }
+
   static func learnSensor(_ uids: [String], measured: Bool) {
     guard !uids.isEmpty else { return }
     var failures = noSensorFailures()
+    var proven = Set(UserDefaults.standard.stringArray(forKey: provenKey) ?? [])
     let now = Date().timeIntervalSince1970
     for uid in uids {
       failures[uid] = measured ? nil : (failures[uid] ?? []).filter { $0 > now - noSensorWindow } + [now]
+      if measured { proven.insert(uid) } else { proven.remove(uid) }
     }
     log.notice("learn sensor measured=\(measured) outputs=\(uids.count)")
     UserDefaults.standard.set(failures, forKey: noSensorKey)
+    UserDefaults.standard.set(Array(proven), forKey: provenKey)
   }
 
   // 페어링된 워치가 있으면 워치로 잴 수 있다고 본다. 워치 앱 설치 여부(isWatchAppInstalled)로는 막지 않는다 —
@@ -310,28 +319,18 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 종료를 걸고 멈췄다는 답을 기다리는 한도 — 워치는 연결이 끊겼으면 답이 오지 않는다. 아이폰
   // 세션도 답이 없으면 종료가 끝나지 않아 다음 측정까지 막히니 같이 건다
   private static let stopTimeout: UInt64 = 5_000_000_000
-  // 이어폰도 있으면 워치를 이만큼만 기다리고 이어폰으로 넘어간다 — 워치가 충전 중이면 시작할
-  // 때마다 30초를 기다리게 된다. 깨우는 시간까지 센다. ponytail: 실기에서 워치 첫 값이 닿는
-  // 시간을 재 보고 조정할 것
-  private static let watchStartTimeoutWithEarphones: TimeInterval = 10
-  // 워치를 안 찬 것 같으면 더 짧게 — 추정이 틀려 찬 워치여도 깨어나 첫 값을 보낼 만큼은 기다린다
-  private static let watchStartTimeoutNotWorn: TimeInterval = 5
-  // 처음 워치로 잴 땐 워치에 건강 권한 창이 떠 그걸 허용하는 시간까지 든다 — 이어폰이 있어도 넉넉히 기다린다(박스가
-  // 워치 화면을 보라고 안내한다)
+  // 처음 워치로 잴 땐 워치에 건강 권한 창이 떠 그걸 허용하는 시간까지 든다 — 넉넉히 기다린다(박스가 워치 화면을
+  // 보라고 안내한다). 그 뒤로는 WatchSnapshot.startTimeout
   private static let watchFirstStartTimeout: TimeInterval = 60
   // 이어폰 측정이 이만큼 재는 동안 심박이 한 번도 안 들어왔으면 그 출력은 심박을 못 재는 것으로 센다(learnSensor).
   // 박스의 "신호 없음" 안내(20초)를 본 뒤다
   private static let sensorProbe: TimeInterval = 30
-  // ponytail: 아이폰은 워치를 찼는지 알 수 없다(공개 API 없음). 워치는 차고 있을 때만 몇 분마다
-  // 심박을 재므로, 그 심박이 이만큼 안에 건강 앱에 들어왔으면 찬 것으로 본다. 워치가 아예 답하지
-  // 않을 때(꺼짐·충전) 얼마나 기다릴지만 정한다 — 깨어난 워치는 첫 값에 손목 확인 결과를 실어 보낸다
-  private static let wornWindow: TimeInterval = 10 * 60
+  // 워치도 있을 때 처음 쓰는 이어폰의 첫 심박을 이만큼 기다리고, 안 오면 워치로 잰다(startSegment). 세션 시작(준비
+  // 3초 뒤)부터 센다. ponytail: 실기 로그("earphones first heart rate in")로 에어팟 첫 심박이 닿는 시간을 보고 조정할 것
+  private static let earphoneProbe: TimeInterval = 15
   // 시작 대기 중 미러 세션이 닫혔을 때 새 세션(재시도)을 기다리는 한도 — 안 오면 워치에서 시작이
   // 실패한 것이니 남은 시간을 다 기다리지 않는다
   private static let watchReplaceWait: UInt64 = 10_000_000_000
-  // 워치로 재는 동안 에어팟 세션을 백업으로 같이 연다(startBackup). 아이폰 primary 세션과 워치 미러 세션이
-  // 같이 돌 수 있는지는 문서에 없다 — 실기에서 안 되면 false로 끈다(워치를 풀면 일시정지만 한다)
-  private static let backupEnabled = true
   // 요약에 남기는 키 — 앞 구간(carried)에 쌓을 때 화면용 값(심박·상태 등)은 버린다
   private static let summaryKeys: Set<String> = [
     "source", "startedAt", "elapsedSec", "activeKcal", "totalKcal", "minHR", "maxHR", "avgHR",
@@ -363,15 +362,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private var session: HKWorkoutSession?
   // 아이폰 세션에만 있다. 워치 미러 세션이면 nil이고 값은 remote에서 읽는다
   private var builder: HKLiveWorkoutBuilder?
-  // 워치로 재는 동안 같이 돌리는 아이폰 세션(에어팟 심박). 워치를 풀면 이 심박을 보여준다. 칼로리는 안 모으고
-  // 끝나면 운동을 버린다 — 건강 앱 운동은 워치 것 하나만 남고, 심박 샘플은 discardWorkout이 지우지 않아 남는다
-  private var backup: HKWorkoutSession?
-  private var backupBuilder: HKLiveWorkoutBuilder?
-  // 백업이 돌고 있다 — 앱이 죽었다 뜨면 되찾은 아이폰 세션이 백업인지 이걸로 안다
-  private var backupFlag: Bool {
-    get { UserDefaults.standard.bool(forKey: "heartRateBackupActive") }
-    set { UserDefaults.standard.set(newValue, forKey: "heartRateBackupActive") }
-  }
   // 워치와 미러링이 끊겼다. 워치는 계속 재면서 미러링을 다시 건다(WatchWorkout.reconnect) — 측정을 끝내지 않고
   // 기다리다 새 미러 세션이 오면 같은 측정으로 잇는다(adopt). 끊긴 미러 세션은 더는 쓸 수 없다(HKWorkoutSession.h)
   private var isWatchLost = false
@@ -391,15 +381,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 이어폰 구간을 시작할 때의 블루투스 출력 — 끝날 때 심박이 들어왔는지로 배운다(learnSensor). 에어팟을 빼서
   // 끝나면 그땐 출력에 없어 시작 때 잡아 둔다
   private var phoneOutputs: [String] = []
-  // 백업 심박을 화면에 쓴 동안의 최소·최대(요약용)와, 그래프에 마지막으로 쌓은 백업 심박의 시각
-  private var backupSeen: (min: Int, max: Int)?
-  private var lastBackupSampleAt: Date?
-  // 자동 일시정지 사유("watchRemoved"·"earphonesRemoved") — 박스가 안내한다. 재개하면 지운다
+  // 이어폰을 빼서 멈췄다("earphonesRemoved") — 박스가 안내한다. 재개하면 지운다. 워치를 풀어 멈춘 건 워치가 스스로
+  // 멈추고 wrist=false를 보내 온다 — 그건 snapshot()이 "watchRemoved"로 붙인다
   private var pauseReason: String?
   // 세션 없이 일시정지로 남은 측정(suspended)을 새 세션으로 잇는 중
   private var isResuming = false
-  // 로그용 — 화면 심박의 출처가 바뀔 때만 남긴다
-  private var lastHRSource: String?
+  // 처음 쓰는 이어폰이 심박을 주는지 보는 중(startSegment) — 그동안은 내보내지 않는다(박스는 준비 표시)
+  private var isProbingEarphones = false
   private var activity: Activity<HeartRateAttributes>?
   private var lastPushed: (state: HeartRateAttributes.ContentState, at: Date)?
   private var stopped: CheckedContinuation<Void, Never>?
@@ -487,14 +475,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     }
   }
 
-  // 에어팟을 꽂거나 뺐다. 이어폰으로 재는 중(아이폰 세션, 또는 워치를 푼 뒤 백업)에 빼면 빈 심박으로 시간만
-  // 쌓이지 않게 멈춘다. 다시 껴도 자동 재개는 하지 않는다(사용자가 재개를 누른다). 워치로 재는 중이면 대기만 사라진다
+  // 에어팟을 꽂거나 뺐다. 이어폰으로 재는 중(아이폰 세션)에 빼면 빈 심박으로 시간만 쌓이지 않게 멈춘다. 다시 껴도
+  // 자동 재개는 하지 않는다(사용자가 재개를 누른다). 워치로 재는 중이면 시작 버튼 기기만 바뀐다
   private func routeChanged(reason: UInt, earphones: Bool, removed: Bool) {
     log.notice("route change reason=\(reason) earphones=\(earphones) removed=\(removed)")
     deviceChanged?(removed)
-    guard removed, !isEnding, session?.state == .running,
-      builder != nil || remote?.snapshot.wrist == false
-    else { return }
+    guard removed, !isEnding, session?.state == .running, builder != nil else { return }
     pause(reason: "earphonesRemoved")
   }
 
@@ -550,13 +536,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         let earphones = HeartRateModule.hasEarphones()
         log.notice(
           "watch start failed: \(String(describing: error), privacy: .public) earphones=\(earphones)")
-        guard earphones else {
-          // 워치가 답했으면(안 참) 앱은 깔려 있다 — 설치 판정은 답이 없을 때만 본다
-          if error is WatchNotWornError || WCSession.default.isWatchAppInstalled {
-            throw WatchUnavailableException()
-          }
-          throw WatchAppMissingException()
-        }
+        guard earphones else { throw Self.watchFailure(error) }
       }
     }
 
@@ -569,7 +549,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     self.session = session
     self.builder = builder
     phoneOutputs = HeartRateModule.bluetoothOutputs()
+    // 워치도 있는데 이 이어폰으로 심박을 잰 적이 없다 — 센서 없는 이어폰(에어팟 4 등)일 수 있다. 첫 심박이 오는지
+    // 보고 안 오면 워치로 잰다. 그동안은 박스가 준비 표시로 남게 내보내지 않는다(publish)
+    isProbingEarphones = HeartRateModule.isWatchAvailable() && !HeartRateModule.isProven(phoneOutputs)
+    defer { isProbingEarphones = false }
 
+    var heard = true
     do {
       session.prepare()
       // 애플 권장: prepare 뒤 3초 — 에어팟 심박 센서가 붙을 시간을 준다
@@ -581,6 +566,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       session.startActivity(with: now)
       try await builder.beginCollection(at: now)
       guard self.session === session, !isEnding else { throw CancellationError() }
+      if isProbingEarphones { heard = try await waitForHeartRate(session, builder) }
     } catch {
       log.error("phone start failed: \(describe(error), privacy: .public)")
       if self.session === session, !isEnding {
@@ -589,11 +575,63 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       }
       throw error
     }
+    if !heard { return try await fallBackToWatch(session, builder, configuration) }
+    isProbingEarphones = false
     log.notice("phone session started")
     // 일시정지로 남은 측정을 잇는 거면 그 섬을 이어 쓴다
     if !hasLiveActivity { startLiveActivity() }
     publish()
     return snapshot()
+  }
+
+  // 이어폰 첫 심박을 earphoneProbe 동안 기다린다. 오면 이 출력은 심박을 재는 이어폰으로 배운다. 그 사이 손을
+  // 뗐으면(종료·전체 초기화·시스템 종료) 취소로 던진다
+  private func waitForHeartRate(_ session: HKWorkoutSession, _ builder: HKLiveWorkoutBuilder)
+    async throws -> Bool
+  {
+    let start = Date()
+    while builder.statistics(for: Self.heartRate)?.mostRecentQuantity() == nil {
+      guard Date().timeIntervalSince(start) < Self.earphoneProbe else { return false }
+      try await Task.sleep(nanoseconds: 500_000_000)
+      guard self.session === session, !isEnding else { throw CancellationError() }
+    }
+    log.notice("earphones first heart rate in \(Int(Date().timeIntervalSince(start)))s")
+    HeartRateModule.learnSensor(phoneOutputs, measured: true)
+    return true
+  }
+
+  // 이 이어폰은 심박을 안 준다 — 구간을 버리고(건강 앱에 남은 샘플도) 워치로 잰다. 워치도 안 되면 착용 안내로 실패한다
+  // (이어폰으로 다시 넘어가지 않는다)
+  private func fallBackToWatch(
+    _ session: HKWorkoutSession, _ builder: HKLiveWorkoutBuilder,
+    _ configuration: HKWorkoutConfiguration
+  ) async throws -> [String: Any]? {
+    log.notice("earphones gave no heart rate — trying watch")
+    HeartRateModule.learnSensor(phoneOutputs, measured: false)
+    // 두 번째 실패면 이어폰이 후보에서 빠진다 — 시작 버튼 기기 표시를 바꾼다
+    deviceChanged?(false)
+    // 버리는 동안 시스템 종료 처리(closeBySystem)가 끼어들지 않게
+    isEnding = true
+    let probed = segmentSnapshot()
+    try? await builder.endCollection(at: .now)
+    builder.discardWorkout()
+    session.end()
+    purge(probed)
+    releaseSegment()
+    do {
+      return try await startOnWatch(configuration)
+    } catch is CancellationError {
+      throw CancellationError()
+    } catch {
+      throw Self.watchFailure(error)
+    }
+  }
+
+  // 워치로 못 잰 까닭을 JS가 안내할 에러로 바꾼다. 워치가 답했으면(안 참) 앱은 깔려 있다 — 설치 판정은 답이
+  // 없을 때만 본다
+  private static func watchFailure(_ error: Error) -> Exception {
+    error is WatchNotWornError || WCSession.default.isWatchAppInstalled
+      ? WatchUnavailableException() : WatchAppMissingException()
   }
 
   private static func configuration() -> HKWorkoutConfiguration {
@@ -615,9 +653,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     log.notice("watch start attempt=\(attempt)")
     do {
       // 한도는 깨우기부터 센다 — 워치가 꺼져 있으면 startWatchApp이 끝나지 않는다는 보고가 있어,
-      // 끝난 뒤부터 세면 시작이 영영 안 끝나고 앱을 다시 켤 때까지 측정이 막힌다
+      // 끝난 뒤부터 세면 시작이 영영 안 끝나고 앱을 다시 켤 때까지 측정이 막힌다. 처음이면 워치에서 권한까지
+      // 허용하니 길게 기다린다. 안 찬 워치는 이보다 일찍 첫 값에 "손목에 없음"을 실어 온다(WatchWorkout.probeWrist)
+      let limit = watchStartedBefore ? WatchSnapshot.startTimeout : Self.watchFirstStartTimeout
       let timeout = Task { @MainActor in
-        let limit = await self.watchStartLimit()
         try await Task.sleep(nanoseconds: UInt64(limit * 1e9))
         self.resolveWatchStart(WatchStartError())
       }
@@ -663,32 +702,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         if session === self.session { watchKeep = sent }
       }
     }
-    startBackup()
     publish()
     return snapshot()
-  }
-
-  // 워치 첫 값을 기다리는 한도. 처음이면 워치에서 권한까지 허용하니 길게. 이어폰이 없으면 워치뿐이라
-  // 길게. 이어폰도 있으면 실패해도 이어폰으로 재니 짧게 — 워치 심박이 한동안 건강 앱에 안
-  // 들어왔으면(안 찬 것 같으면) 더 짧게. 못 읽었으면(읽기 권한 거부) 모르니 찬 것으로 본다
-  private func watchStartLimit() async -> TimeInterval {
-    guard watchStartedBefore else { return Self.watchFirstStartTimeout }
-    guard HeartRateModule.hasEarphones() else { return WatchSnapshot.startTimeout }
-    let latest = HKSampleQueryDescriptor(
-      predicates: [
-        .quantitySample(
-          type: Self.heartRate,
-          predicate: HKQuery.predicateForObjects(
-            withDeviceProperty: HKDevicePropertyKeyModel, allowedValues: ["Watch"]))
-      ],
-      sortDescriptors: [SortDescriptor(\.endDate, order: .reverse)],
-      limit: 1)
-    if let at = try? await latest.result(for: store).first?.endDate,
-      Date().timeIntervalSince(at) >= Self.wornWindow
-    {
-      return Self.watchStartTimeoutNotWorn
-    }
-    return Self.watchStartTimeoutWithEarphones
   }
 
   // 워치 시작 대기를 푼다. 첫 값(nil)·깨우기 실패·타임아웃·취소 중 먼저 온 쪽만 먹는다
@@ -769,14 +784,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     }
   }
 
-  // reason: 자동 일시정지 사유 — 박스가 "다시 차고(끼고) 재개를 누르세요"로 안내한다. 사용자가 누르면 nil.
+  // reason: 자동 일시정지 사유 — 박스가 "다시 끼고 재개를 누르세요"로 안내한다. 사용자가 누르면 nil.
   // 워치와 끊긴 동안엔 워치에 닿지 않는다(박스가 버튼을 잠근다)
   func pause(reason: String? = nil) {
     guard let session, !isWatchLost else { return }
     log.notice("pause reason=\(reason ?? "user", privacy: .public)")
     pauseReason = reason
     session.pause()
-    backup?.pause()
   }
 
   // 세션 없이 일시정지로 남은 측정(suspended)이면 지금 쓸 기기로 새 구간을 열어 잇고 그 스냅샷을 돌려준다.
@@ -786,7 +800,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       guard !isWatchLost else { return nil }
       pauseReason = nil
       session.resume()
-      backup?.resume()
       return nil
     }
     guard carried != nil, !isStartingOnWatch, !isResuming else { return nil }
@@ -898,7 +911,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
 
   // 워치 세션 종료 — 멈추면 워치가 1분 이상일 때 건강 앱에 저장하고 끝낸다. 워치는 끝내기 직전에
   // 멈춘 시각의 값을 보낸다 — 그 값까지 받고 요약을 만들어야 1분 기준이 워치와 같아, 건강 앱과
-  // 앱 기록이 같이 남거나 같이 빠진다. 버려도 요약은 돌려준다 — merged가 그 시작 시각부터 지운다(백업 심박)
+  // 앱 기록이 같이 남거나 같이 빠진다. 버려도 요약은 돌려준다 — merged가 그 시작 시각부터 지운다(앞 구간에 남긴 것)
   private func finishOnWatch(_ session: HKWorkoutSession, discard: Bool) async -> [String: Any]? {
     if isWatchLost {
       // 끊긴 미러엔 멈춤이 닿지 않는다 — 워치는 계속 재다 다시 붙으면 그때 멈춘다(adopt)
@@ -966,7 +979,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   // 측정이 건강 앱에 남긴 것을 지운다 — 이어 붙이려고 저장해 둔 앞 구간 운동, discardWorkout이 남긴 샘플
-  // (HKWorkoutBuilder.h: 운동만 버리고 샘플은 안 지운다), 백업(에어팟) 심박. 이 앱 출처의 측정 시작부터 지금까지를
+  // (HKWorkoutBuilder.h: 운동만 버리고 샘플은 안 지운다). 이 앱 출처의 측정 시작부터 지금까지를
   // 지운다 — 측정은 한 번에 하나라 그 사이 이 앱이 남긴 건 이 측정 것뿐이다. 워치 앱이 남긴 건 워치가 지운다
   private func purge(_ summary: [String: Any]?) {
     guard let startedAt = summary?["startedAt"] as? Double else { return }
@@ -1144,7 +1157,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       for type in [Self.heartRate, Self.activeEnergy, Self.basalEnergy] {
         _ = try? await store.deleteObjects(of: type, predicate: attached)
       }
-      // 워치로 잰 운동이면 같이 돌던 백업(에어팟) 심박이 운동에 딸리지 않고 이 앱 출처로 남아 있다
+      // 3.5.x는 워치로 잴 때 에어팟 백업 세션을 같이 돌렸다 — 그 심박이 운동에 딸리지 않고 이 앱 출처로 남아
+      // 있다(그때 남긴 기록을 지울 때)
       let backup = NSCompoundPredicate(andPredicateWithSubpredicates: [
         HKQuery.predicateForObjects(from: .default()),
         HKQuery.predicateForSamples(
@@ -1164,20 +1178,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   func recover() async -> [String: Any]? {
-    // 워치 시작 대기·재개 중엔 아직 새 구간 전이다 — 스냅샷을 주면 JS가 "측정 중"으로 그린다. 잇는 중인
-    // 측정이 있으면 그 값(일시정지)을 그대로 보여준다
-    if isStartingOnWatch || isResuming { return carried != nil ? suspendedSnapshot() : nil }
-    // 되찾을 아이폰 세션. 앱이 죽은 사이 남은 백업이면 붙이지 않고 버린다 — 측정 세션으로 붙이면 다시 올
-    // 워치 미러를 닫아 버리고, 미러가 먼저 붙었으면 아무도 끝내지 않는다. 워치 측정은 미러링 핸들러가 다시 넘긴다
+    // 워치 시작 대기·이어폰 확인·재개 중엔 아직 새 구간 전이다 — 스냅샷을 주면 JS가 "측정 중"으로 그린다. 잇는
+    // 중인 측정이 있으면 그 값(일시정지)을 그대로 보여준다
+    if isStartingOnWatch || isProbingEarphones || isResuming {
+      return carried != nil ? suspendedSnapshot() : nil
+    }
+    // 되찾을 아이폰 세션. 워치 측정은 여기서 못 되찾는다 — 미러링 핸들러가 다시 넘긴다
     var recovered: HKWorkoutSession?
-    if session == nil || (backupFlag && backup == nil) {
+    if session == nil {
       recovered = (try? await store.recoverActiveWorkoutSession()) ?? nil
-      if let orphan = recovered, backupFlag, backup == nil {
-        log.notice("recover: discarding backup session")
-        backupFlag = false
-        recovered = nil
-        Self.discard(orphan)
-      }
     }
     if session != nil {
       // 준비 3초 사이 앱이 뒤로 가면 Live Activity 요청이 거절된다(앞에 있을 때만 된다) —
@@ -1236,76 +1245,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return snapshot()
   }
 
-  // MARK: - 백업(에어팟) 세션
-
-  // 워치로 재기 시작했고 이어폰도 있으면 에어팟 세션을 같이 연다 — 앱이 앞에 있는 지금 열어야 한다(뒤에선
-  // 못 연다). 워치를 풀면 이 심박을 보여준다. 실패하면 백업 없이 간다(워치를 풀면 일시정지)
-  private func startBackup() {
-    guard Self.backupEnabled, backup == nil, session?.type == .mirrored,
-      HeartRateModule.hasEarphones()
-    else { return }
-    let configuration = Self.configuration()
-    let backup: HKWorkoutSession
-    do {
-      backup = try HKWorkoutSession(healthStore: store, configuration: configuration)
-    } catch {
-      log.error("backup create failed: \(describe(error), privacy: .public)")
-      return
-    }
-    let builder = backup.associatedWorkoutBuilder()
-    let source = HKLiveWorkoutDataSource(healthStore: store, workoutConfiguration: configuration)
-    // 칼로리는 워치가 잰다 — 버린 운동의 칼로리 샘플이 건강 앱에 겹쳐 남지 않게 심박만 모은다
-    source.disableCollection(for: Self.activeEnergy)
-    source.disableCollection(for: Self.basalEnergy)
-    builder.dataSource = source
-    backup.delegate = self
-    builder.delegate = self
-    self.backup = backup
-    backupBuilder = builder
-    backupFlag = true
-    backup.prepare()
-    Task {
-      // 애플 권장: prepare 뒤 3초 — 에어팟 센서가 붙을 시간
-      try? await Task.sleep(nanoseconds: 3_000_000_000)
-      guard self.backup === backup else { return }
-      let now = Date()
-      backup.startActivity(with: now)
-      do {
-        try await builder.beginCollection(at: now)
-      } catch {
-        log.error("backup start failed: \(describe(error), privacy: .public)")
-        if self.backup === backup { self.endBackup() }
-        return
-      }
-      log.notice("backup started")
-      if self.session?.state == .paused { backup.pause() }
-    }
-  }
-
-  // 백업을 치운다 — 운동은 버린다(건강 앱엔 워치 운동만 남는다)
-  private func endBackup() {
-    guard let backup else { return }
-    self.backup = nil
-    backupBuilder = nil
-    backupFlag = false
-    backupSeen = nil
-    lastBackupSampleAt = nil
-    released.add(backup)
-    Self.discard(backup)
-  }
-
-  // 아이폰 세션을 저장하지 않고 끝낸다. 수집을 시작하지 않은 빌더는 버릴 것도 없다
-  private static func discard(_ session: HKWorkoutSession) {
-    let builder = session.associatedWorkoutBuilder()
-    Task {
-      if builder.startDate != nil {
-        try? await builder.endCollection(at: .now)
-        builder.discardWorkout()
-      }
-      if session.state != .ended { session.end() }
-    }
-  }
-
   // MARK: - HKWorkoutSessionDelegate / HKLiveWorkoutBuilderDelegate (임의 큐에서 불린다)
 
   nonisolated func workoutSession(
@@ -1315,15 +1254,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     date: Date
   ) {
     Task { @MainActor in
-      if workoutSession === self.backup {
-        log.notice("backup \(fromState.name, privacy: .public)->\(toState.name, privacy: .public)")
-        // 시스템이 백업을 끝냈다(에어팟을 빼면 iOS가 끝낸다) — 워치 측정은 그대로 두고 백업만 치운다
-        if toState == .ended || toState == .stopped {
-          self.endBackup()
-          self.publishSoon()
-        }
-        return
-      }
       guard self.adopt(workoutSession) else { return }
       log.notice(
         "\(workoutSession.type == .mirrored ? "watch" : "phone", privacy: .public) \(fromState.name, privacy: .public)->\(toState.name, privacy: .public)"
@@ -1338,12 +1268,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         self.stopped?.resume()
         self.stopped = nil
       }
-      // 아이폰·워치·섬 어디서 멈추든 재개하든 백업도 따라간다
-      if toState == .paused { self.backup?.pause() }
-      if toState == .running, fromState == .paused {
-        self.pauseReason = nil
-        self.backup?.resume()
-      }
+      // 아이폰·워치·섬 어디서 재개하든 자동 일시정지 사유를 지운다
+      if toState == .running, fromState == .paused { self.pauseReason = nil }
       // 시스템이 닫았다. 아이폰 세션은 멈춤(stopped)에서 끝나지 않고 남을 때가 있어 그때도 마무리한다 —
       // 남겨 두면 다음 시작이 조용히 막힌다
       if closed, !self.isEnding {
@@ -1356,11 +1282,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
 
   nonisolated func workoutSession(_ workoutSession: HKWorkoutSession, didFailWithError error: Error) {
     Task { @MainActor in
-      if workoutSession === self.backup {
-        log.error("backup failed: \(describe(error), privacy: .public)")
-        self.endBackup()
-        return
-      }
       guard workoutSession === self.session else { return }
       log.error("session failed: \(describe(error), privacy: .public)")
       self.stopped?.resume()
@@ -1374,12 +1295,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     _ workoutBuilder: HKLiveWorkoutBuilder, didCollectDataOf collectedTypes: Set<HKSampleType>
   ) {
     Task { @MainActor in
-      if workoutBuilder === self.backupBuilder {
-        self.recordBackupSample()
-        // 워치 값을 보여주는 동안엔 화면이 워치 갱신을 따른다 — 백업 심박을 쓸 때만 바로 내보낸다
-        if !self.watchUsable { self.publishSoon() }
-        return
-      }
       guard workoutBuilder === self.builder else { return }
       self.recordSample()
       self.publishSoon()
@@ -1405,9 +1320,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       snapshots.forEach(self.recordRemoteSample)
       self.remote = (latest, Date())
       // 첫 값에 "손목에 없음"이 오면 워치로 시작하지 않는다 — 안 찬 워치로 심박 없이 재지 않게(이어폰이
-      // 있으면 그쪽으로 넘어가고, 없으면 착용 안내)
+      // 있으면 그쪽으로 넘어가고, 없으면 착용 안내). 측정 중에 풀면 워치가 스스로 멈추고 알려 온다
       self.resolveWatchStart(latest.wrist == false ? WatchNotWornError() : nil)
-      self.checkWatchRemoved()
       self.publish()
     }
   }
@@ -1446,16 +1360,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return Date().timeIntervalSince(remote.at) < WatchSnapshot.heartRateFreshness
   }
 
-  // 백업(에어팟) 세션의 최근 심박 — 오래됐으면 nil
-  private var backupHeartRate: Int? {
-    guard let heart = backupBuilder?.statistics(for: Self.heartRate),
-      let at = heart.mostRecentQuantityDateInterval()?.end,
-      Date().timeIntervalSince(at) < WatchSnapshot.heartRateFreshness,
-      let quantity = heart.mostRecentQuantity()
-    else { return nil }
-    return Int(quantity.doubleValue(for: Self.bpm).rounded())
-  }
-
   func send(_ body: [String: Any]) {
     if emit?(body) == true { return }
     if body["summary"] != nil { pendingEnded.append(body) }
@@ -1481,11 +1385,11 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     samples = []
     lastSampleAt = nil
     remote = nil
-    lastHRSource = nil
     isWatchLost = false
     watchKeep = false
     phoneOutputs = []
-    endBackup()
+    // 확인하던 구간을 놓았다(워치로 넘어감·시스템 종료) — 그 뒤 내보내는 건 막지 않는다
+    isProbingEarphones = false
   }
 
   // 측정을 통째로 치운다
@@ -1528,29 +1432,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     samples.append([sec, heartRate])
   }
 
-  // 워치를 못 믿는 동안 화면에 쓰는 백업 심박도 그래프에 쌓는다 — 워치 값과 같은 기준(워치 운동 시작 후
-  // 실제 흐른 초). 일시정지 중엔 쌓지 않는다
-  private func recordBackupSample() {
-    guard !watchUsable, session?.state == .running, let start = remote?.snapshot.startedAt,
-      let heart = backupBuilder?.statistics(for: Self.heartRate),
-      let at = heart.mostRecentQuantityDateInterval()?.end, at != lastBackupSampleAt,
-      let quantity = heart.mostRecentQuantity()
-    else { return }
-    lastBackupSampleAt = at
-    let bpm = Int(quantity.doubleValue(for: Self.bpm).rounded())
-    backupSeen = (min(backupSeen?.min ?? bpm, bpm), max(backupSeen?.max ?? bpm, bpm))
-    samples.append([max(0, Int(at.timeIntervalSince1970 - start / 1000)), bpm])
-  }
-
-  // 워치를 풀었다고(손목 확인) 왔는데 에어팟 심박도 없다 — 빈 심박으로 시간만 쌓이지 않게 멈춘다(에어팟을
-  // 뺄 때와 같은 규칙). 다시 차도 자동 재개는 없다
-  private func checkWatchRemoved() {
-    guard builder == nil, !isStartingOnWatch, !isEnding, session?.state == .running,
-      remote?.snapshot.wrist == false, backupHeartRate == nil
-    else { return }
-    pause(reason: "watchRemoved")
-  }
-
   // 화면용 값 — 앞 구간(carried)을 더한다. 세션 없이 일시정지로 남은 측정이면 그 값 그대로
   private func snapshot() -> [String: Any]? {
     guard session != nil else { return suspendedSnapshot() }
@@ -1561,7 +1442,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       body["samples"] = nil
       body["healthStarts"] = nil
     }
-    if body["state"] as? String == "paused", let pauseReason { body["pauseReason"] = pauseReason }
+    // 워치를 풀면 워치가 스스로 멈추고 wrist=false를 보낸다(WatchWorkout.checkOnWrist) — 재개하면 워치가 지운다
+    let reason = pauseReason ?? (remote?.snapshot.wrist == false ? "watchRemoved" : nil)
+    if body["state"] as? String == "paused", let reason { body["pauseReason"] = reason }
     return body
   }
 
@@ -1608,7 +1491,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       let latest = toBpm(heart?.mostRecentQuantity())
     {
       body["heartRate"] = latest
-      body["hrSource"] = "earphones"
     }
     if let low = toBpm(heart?.minimumQuantity()) ?? seenMin { body["minHR"] = low }
     if let high = toBpm(heart?.maximumQuantity()) ?? seenMax { body["maxHR"] = high }
@@ -1617,8 +1499,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   // 워치가 마지막으로 보낸 값을 지금 기준으로 맞춘다 — 경과 시간은 워치가 잰 기준 시각으로 세고
-  // (JS는 돌려받은 시각부터 이어 센다), 그동안 소식이 없었으면 그 심박은 "지금" 값이 아니다.
-  // 워치를 풀었거나 심박이 끊겼으면 같이 돌던 백업(에어팟) 심박을 쓴다
+  // (JS는 돌려받은 시각부터 이어 센다), 그동안 소식이 없었으면 그 심박은 "지금" 값이 아니다
   private func remoteSnapshot() -> [String: Any]? {
     guard let remote else { return nil }
     let snapshot = remote.snapshot
@@ -1640,26 +1521,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       "elapsedSec": elapsed,
       "startedAt": snapshot.startedAt,
     ]
-    let watchHR = watchUsable ? snapshot.heartRate : nil
-    let backupHR = backupHeartRate
-    if let heartRate = watchHR ?? backupHR {
-      body["heartRate"] = heartRate
-      body["hrSource"] = watchHR != nil ? "watch" : "earphones"
-    }
-    // 워치로 재는 동안 에어팟도 재고 있다 — 박스가 "이어폰 대기"를 보인다
-    if watchHR != nil, backupHR != nil { body["standby"] = true }
-    if snapshot.wrist == false { body["watchOff"] = true }
+    if watchUsable, let heartRate = snapshot.heartRate { body["heartRate"] = heartRate }
     // 워치와 끊겼다 — 박스가 "워치는 계속 재고 있다"를 안내하고 일시정지를 잠근다(워치에 닿지 않는다)
     if isWatchLost { body["watchLost"] = true }
-    // 최소·최대는 화면에 쓴 백업 값까지. 평균은 백업을 썼으면 그래프 샘플로 낸다
-    // (ponytail: 샘플 간격이 고르지 않아 시간 가중이 아니다)
-    if let low = [snapshot.minHR, backupSeen?.min].compactMap({ $0 }).min() { body["minHR"] = low }
-    if let high = [snapshot.maxHR, backupSeen?.max].compactMap({ $0 }).max() { body["maxHR"] = high }
-    if backupSeen != nil, !samples.isEmpty {
-      body["avgHR"] = samples.reduce(0) { $0 + $1[1] } / samples.count
-    } else if let average = snapshot.avgHR {
-      body["avgHR"] = average
-    }
+    if let low = snapshot.minHR { body["minHR"] = low }
+    if let high = snapshot.maxHR { body["maxHR"] = high }
+    if let average = snapshot.avgHR { body["avgHR"] = average }
     return body
   }
 
@@ -1676,12 +1543,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   private func publish() {
-    // 준비 중(prepared)에 보내면 JS가 "측정 중"으로 그렸다가, 실제 시작 때 시간이 0으로 되돌아간다
-    guard !isEnding, isLive, let body = snapshot() else { return }
-    if let source = body["hrSource"] as? String, source != lastHRSource {
-      log.notice("heart rate from \(source, privacy: .public)")
-      lastHRSource = source
-    }
+    // 준비 중(prepared)에 보내면 JS가 "측정 중"으로 그렸다가, 실제 시작 때 시간이 0으로 되돌아간다. 이어폰
+    // 확인 중에도 그렇다 — 워치로 넘어가면 그 값은 버린다
+    guard !isEnding, !isProbingEarphones, isLive, let body = snapshot() else { return }
     // 화면이 안 보이는 동안 샘플마다 JS를 깨워 박스를 다시 그릴 이유가 없다 — 돌아오면
     // JS가 getActive로 다시 맞춘다. Live Activity는 이때가 제일 중요하니 계속 갱신한다
     if UIApplication.shared.applicationState == .active { send(body) }

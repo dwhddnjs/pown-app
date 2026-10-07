@@ -63,7 +63,7 @@ struct HeartRateWidgetBundle: WidgetBundle {
 struct HeartRateLiveActivity: Widget {
   var body: some WidgetConfiguration {
     ActivityConfiguration(for: HeartRateAttributes.self) { context in
-      LockScreenView(state: context.state)
+      ActivityContent(state: context.state)
         .widgetURL(workoutURL)
     } dynamicIsland: { context in
       DynamicIsland {
@@ -110,6 +110,51 @@ struct HeartRateLiveActivity: Widget {
       .widgetURL(workoutURL)
       .keylineTint(.red)
     }
+    // 애플워치 스마트 스택(watchOS 11+가 아이폰 Live Activity를 알아서 띄운다)·CarPlay용 작은 크기
+    .supplementalActivityFamilies([.small])
+  }
+}
+
+// 잠금화면(medium)과 small은 같은 클로저로 그려진다 — 크기로 가른다
+private struct ActivityContent: View {
+  @Environment(\.activityFamily) private var family
+  let state: HeartRateAttributes.ContentState
+
+  var body: some View {
+    if family == .small {
+      SmallView(state: state)
+    } else {
+      LockScreenView(state: state)
+    }
+  }
+}
+
+// 애플워치 스마트 스택(워치 위젯과 같은 크기 — 40mm 152×69.5pt ~ 49mm 191×81.5pt, HIG) — 이어폰으로 재는 동안 워치엔
+// 이것만 뜬다(워치 센서·운동 세션은 안 쓴다). 보기만 한다(조작은 아이폰·섬에서): 위 심박, 아래 운동 시간
+private struct SmallView: View {
+  let state: HeartRateAttributes.ContentState
+
+  var body: some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(alignment: .firstTextBaseline, spacing: 4) {
+        Image(systemName: "heart.fill")
+          .font(.system(size: 16))
+          .foregroundStyle(state.isPaused ? .secondary : heartRed)
+        Text(state.bpmText)
+          .font(.system(size: 32, weight: .semibold, design: .rounded))
+          .foregroundStyle(state.isPaused ? .secondary : .primary)
+        Text("bpm")
+          .font(.system(size: 14))
+          .foregroundStyle(.secondary)
+      }
+      TimerText(state: state, alignment: .leading)
+        .font(.system(size: 20, weight: .semibold, design: .rounded))
+        .foregroundStyle(state.isPaused ? .secondary : timeYellow)
+    }
+    .monospacedDigit()
+    .lineLimit(1)
+    .minimumScaleFactor(0.6)
+    .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 

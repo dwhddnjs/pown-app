@@ -2,7 +2,6 @@ import Foundation
 import HealthKit
 import LocalAuthentication
 import WatchConnectivity
-import WatchKit
 import os
 
 // 실기 진단용 — Mac Console.app에서 subsystem:com.anonymous.workout-app 으로 본다. 심박 값은 남기지 않는다
@@ -21,10 +20,14 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
   private static let bpm = HKUnit.count().unitDivided(by: .minute())
   // 미러링을 기다리는 한도 — 끝나지 않는 경우가 있다(mirror 참고)
   private static let mirrorTimeout: UInt64 = 15_000_000_000
-  // 측정 중 손목을 보는 간격 — 두 번 연속이어야 바꾸니 풀고 3~6초 안에 안다
-  private static let wristInterval: UInt64 = 3_000_000_000
-  // 앱이 비활성일 때 손목 확인이 성공한 적 있다 — 이 워치에선 확인 실패를 "풀었다"로 믿어도 된다
-  private static let wristVerifiedKey = "wristCheckVerified"
+  // 운동 중 심박이 이만큼 끊기고 손목 확인(checkWrist)도 안 되면 손목에서 풀었다고 보고 스스로 멈춘다. 운동 중 워치는
+  // 심박을 몇 초마다 재고, 손목에서 빼면 센서가 멈춘다. 시작·재개 직후엔 이만큼 센서가 붙을 시간을 준다.
+  // ponytail: 실기 로그("off wrist gap=")로 찬 채 생기는 심박 공백을 보고 조정할 것
+  private static let offWristAfter: TimeInterval = 10
+  // 시작 때 손목 확인이 안 되면 세션 시작부터 이만큼 첫 심박을 기다려 착용 여부를 정한다
+  private static let wornProbe: TimeInterval = 8
+  // 측정 중 손목을 보는 간격
+  private static let wristInterval: UInt64 = 2_000_000_000
   // 아이폰과 끊긴 뒤 미러링을 다시 거는 간격 — 멀리 있으면 매번 실패하니 두 배씩 늘린다
   private static let reconnectDelay: UInt64 = 5_000_000_000
   private static let reconnectMaxDelay: UInt64 = 60_000_000_000
@@ -57,10 +60,13 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
   private var seen: (min: Int, max: Int, sum: Int, count: Int)?
   // 곧 보낼 예정인지 — 거의 동시에 오는 수집 콜백을 한 번의 전송으로 묶는다
   private var sendPending = false
-  // 손목에 차고 있는지(checkWrist). 아이폰에 보내는 값과, 바꾸기 전에 한 번 더 확인하려고 둔 직전 값
+  // 손목에 차고 있는지 — 아이폰에 보내는 값. 시작 때 정하고(probeWrist) 측정 중 계속 본다(checkOnWrist). nil은 모름
+  // (재개 직후·되찾은 직후)
   private var wrist: Bool?
-  private var wristCandidate: Bool?
   private var wristTask: Task<Void, Never>?
+  // 마지막 심박 샘플의 시각과, 세션이 마지막으로 재기 시작한 시각(시작·재개) — 둘 중 늦은 쪽부터 심박 공백을 잰다
+  private var lastHeartRateAt: Date?
+  private var runningSince = Date()
   // 미러링 대기. 시도 번호로 늦게 끝난 앞 시도가 다음 시도를 풀지 않게 한다
   private var mirrorWait: CheckedContinuation<Void, Error>?
   private var mirrorAttempt = 0
@@ -94,21 +100,22 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       builder.delegate = self
       self.session = session
       self.builder = builder
-      // 손목부터 본다 — 첫 값에 실어 보내야 아이폰이 안 찬 워치로 재지 않고 바로 이어폰으로 넘어가거나
-      // 착용을 안내한다
-      wrist = await checkWrist()
-      wristCandidate = wrist
       let now = Date()
       session.startActivity(with: now)
       try await builder.beginCollection(at: now)
+      runningSince = now
       // watchOS 26: 세션이 prepared·running이 되기 전에 미러링을 걸면 실패하거나 끝나지 않는다
       // (FB20723311, 애플 DTS 우회 — developer.apple.com/forums/thread/804276). 시작한 뒤에 건다
       try await mirror(session)
+      startFakeHeartRate()
+      // 첫 값에 착용 여부를 확정해 싣는다 — 아이폰이 안 찬 워치로 재지 않고 착용을 안내한다(이어폰이 있으면 넘어간다).
+      // 정하기 전엔 보내지 않는다(send는 isRunning부터)
+      wrist = await probeWrist(session)
+      guard session === self.session else { return }
       log.notice("started wrist=\(String(describing: self.wrist), privacy: .public)")
       isRunning = true
       delivered = false
       status = Self.idleStatus
-      startFakeHeartRate()
       startWristChecks()
       send()
       // 아이폰에 값이 한 번도 닿지 않은 채 startTimeout이 지나면 아이폰은 이미 시작을 포기했다 —
@@ -160,11 +167,10 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     }
   }
 
-  // 손목에 차고 있는지. 이 정책은 "손목 감지가 켜져 있고, 암호를 넣은 뒤 계속 손목에 있었으면" UI 없이
-  // 성공한다(LAContext.h). interactionNotAllowed라 암호 화면 대신 .notInteractive로 실패한다 — 그 실패가
-  // "풀었다"인지 "여기선 확인이 안 된다"(손목 감지 꺼짐, 백그라운드 미지원)인지는 못 가른다. 그래서 앱이 비활성일
-  // 때(손목을 내린 운동 중) 한 번이라도 성공해 본 워치에서만 실패를 false로 보고, 아니면 nil(모름) — 모르면
-  // 아이폰은 심박이 들어오는지로만 판단한다
+  // 손목 확인. 이 정책은 "손목 감지가 켜져 있고, 암호를 넣은 뒤 계속 손목에 있었으면" UI 없이 성공한다
+  // (LAContext.h) — true. interactionNotAllowed라 그렇지 않으면 암호 화면 대신 .notInteractive로 실패한다 — false.
+  // 이 실패는 "풀었다" 말고 "여기선 확인이 안 된다"(손목 감지 꺼짐·백그라운드 제약)일 수도 있어 혼자서는 판정하지
+  // 않는다 — 심박 공백과 같이 본다. 확인 자체를 못 하면(암호 미설정 등) nil
   private func checkWrist() async -> Bool? {
     let context = LAContext()
     context.interactionNotAllowed = true
@@ -172,39 +178,72 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       _ = try await context.evaluatePolicy(
         .deviceOwnerAuthenticationWithWristDetection,
         localizedReason: tr("손목 착용 확인", "Checking your wrist"))
-      if WKApplication.shared().applicationState != .active,
-        !UserDefaults.standard.bool(forKey: Self.wristVerifiedKey)
-      {
-        UserDefaults.standard.set(true, forKey: Self.wristVerifiedKey)
-        log.notice("wrist check works in background")
-      }
       return true
     } catch let error as LAError where error.code == .notInteractive {
-      return UserDefaults.standard.bool(forKey: Self.wristVerifiedKey) ? false : nil
+      return false
     } catch {
       log.notice("wrist check unavailable: \(describe(error), privacy: .public)")
       return nil
     }
   }
 
-  // 측정 중 손목을 계속 본다 — 풀면 아이폰이 에어팟 값으로 넘어가거나 일시정지한다
+  // 지금 심박이 끊긴 시간 — 마지막 심박, 또는 시작·재개 시각 중 늦은 쪽부터 센다(그동안 센서가 붙을 시간을 준다)
+  private var heartRateGap: TimeInterval {
+    Date().timeIntervalSince(max(lastHeartRateAt ?? .distantPast, runningSince))
+  }
+
+  // 시작 때 찼는지 — 손목 확인이 되면 바로 true, 아니면 세션 시작부터 wornProbe 안에 심박이 들어오는지로 본다
+  private func probeWrist(_ session: HKWorkoutSession) async -> Bool {
+    if await checkWrist() == true { return true }
+    // lastHeartRateAt은 새 세션마다 비운다(reset) — 값이 있으면 이 세션의 심박이다
+    while session === self.session {
+      if lastHeartRateAt != nil { return true }
+      guard Date().timeIntervalSince(runningSince) < Self.wornProbe else { break }
+      try? await Task.sleep(nanoseconds: 500_000_000)
+    }
+    return false
+  }
+
+  // 측정 중 손목을 계속 본다(멈춘 동안은 쉰다)
   private func startWristChecks() {
     wristTask?.cancel()
     wristTask = Task {
       while !Task.isCancelled {
         try? await Task.sleep(nanoseconds: Self.wristInterval)
         guard !Task.isCancelled, self.isRunning else { return }
-        self.see(wrist: await self.checkWrist())
+        await self.checkOnWrist()
       }
     }
   }
 
-  // 두 번 연속 같은 값일 때만 바꾼다 — 한 번 실패했다고 에어팟으로 넘어가거나 멈추지 않게. 바뀌면 바로 보낸다
-  private func see(wrist value: Bool?) {
-    defer { wristCandidate = value }
-    guard value != wrist, value == wristCandidate else { return }
+  // 심박이 offWristAfter 넘게 끊겼고 손목 확인도 안 되면 손목에서 풀었다 — 스스로 멈춘다(아이폰과 끊겨 있어도).
+  // 아이폰은 wrist=false로 "워치를 풀어 일시정지"를 띄운다. 손목 확인이 되면 찬 채 잠깐 못 잰 것(땀·헐거움)이라
+  // 그대로 둔다. 다시 차도 자동 재개는 없다(이어폰과 같은 규칙)
+  private func checkOnWrist() async {
+    guard let session, session.state == .running else { return }
+    if heartRateGap < Self.offWristAfter {
+      setWrist(true)
+      return
+    }
+    let checked = await checkWrist()
+    guard session === self.session, session.state == .running else { return }
+    if checked == true {
+      setWrist(true)
+      return
+    }
+    log.notice(
+      "off wrist gap=\(Int(self.heartRateGap))s check=\(String(describing: checked), privacy: .public)")
+    wrist = false
+    heartRate = nil
+    session.pause()
+    send()
+  }
+
+  // 바뀌면 바로 보낸다
+  private func setWrist(_ value: Bool) {
+    guard wrist != value else { return }
     wrist = value
-    log.notice("wrist=\(String(describing: value), privacy: .public)")
+    log.notice("wrist=\(value)")
     send()
   }
 
@@ -237,8 +276,8 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     guard recovered === session else { return }
     log.notice("recovered")
     if !mirrored { reconnect(recovered) }
-    wrist = await checkWrist()
-    wristCandidate = wrist
+    // 찼는지는 손목 감시가 정한다 — 센서가 다시 붙을 시간을 준다
+    runningSince = Date()
     readStatistics()
     startFakeHeartRate()
     startWristChecks()
@@ -344,7 +383,7 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     reconnectTask = nil
     mirrorLost = false
     wrist = nil
-    wristCandidate = nil
+    lastHeartRateAt = nil
     session = nil
     builder = nil
     isRunning = false
@@ -362,6 +401,7 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       fakeTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
         Task { @MainActor in
           guard !self.isPaused else { return }
+          self.lastHeartRateAt = Date()
           self.see(Int.random(in: 90...150))
           self.send()
         }
@@ -387,7 +427,9 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     totalKcal = Int((active + basal).rounded())
     #if !targetEnvironment(simulator)
       let stat = builder?.statistics(for: Self.heartRateType)
-      if let at = stat?.mostRecentQuantityDateInterval()?.end,
+      // 손목 감시(checkOnWrist)가 이 시각으로 심박 공백을 잰다
+      lastHeartRateAt = stat?.mostRecentQuantityDateInterval()?.end
+      if let at = lastHeartRateAt,
         Date().timeIntervalSince(at) < WatchSnapshot.heartRateFreshness,
         let quantity = stat?.mostRecentQuantity()
       {
@@ -398,8 +440,9 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     #endif
   }
 
+  // 시작 때 착용 여부를 정하기 전(isRunning 전)엔 보내지 않는다 — 아이폰은 첫 값으로 시작을 끝낸다
   private func send() {
-    guard let session, let data = snapshotData(at: Date()) else { return }
+    guard isRunning, let session, let data = snapshotData(at: Date()) else { return }
     Task {
       if (try? await session.sendToRemoteWorkoutSession(data: data)) != nil, session === self.session {
         delivered = true
@@ -462,6 +505,12 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
         return
       }
       self.isPaused = toState == .paused
+      // 재개(워치·아이폰·섬 어디서든) — 센서가 다시 붙을 시간을 주고 착용 여부는 손목 감시가 다시 정한다. 풀어서 멈춘
+      // 표시(wrist=false)가 남으면 아이폰이 재개한 측정을 계속 "풀어서 멈춤"으로 안내한다
+      if toState == .running, fromState == .paused {
+        self.runningSince = date
+        self.wrist = nil
+      }
       self.send()
     }
   }

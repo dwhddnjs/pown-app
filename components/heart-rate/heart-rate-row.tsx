@@ -74,7 +74,7 @@ const useSecondTick = (enabled: boolean) => {
 
 const secondsSince = (at: number) => Math.floor((Date.now() - at) / 1000);
 
-// 박스 아래 안내 한 줄 — 워치 끊김 > 일시정지 사유 > 신호 없음 > 기기 전환·대기 순
+// 박스 아래 안내 한 줄 — 워치 끊김 > 일시정지 사유 > 신호 없음 순
 const liveHint = (
   live: HeartRateLiveTypes | null,
   noSignal: boolean,
@@ -92,9 +92,6 @@ const liveHint = (
     return live.source === "watch"
       ? "heartRate.noSignalWatch"
       : "heartRate.noSignal";
-  if (live.watchOff && live.hrSource === "earphones")
-    return "heartRate.switchedToEarphones";
-  if (live.standby) return "heartRate.standby";
   return null;
 };
 
@@ -356,11 +353,16 @@ const LiveBox = ({
     preparingDevice === "watch" &&
     preparingAt !== null &&
     secondsSince(preparingAt) >= WATCH_CHECK_SEC;
+  // 이어폰 준비 3초가 지났는데 아직이다 — 처음 쓰는 이어폰이 심박을 주는지 보거나(워치도 있을 때) 워치로 넘어가는 중.
+  // 3초 링 대신 도는 표시를 보이고 취소를 연다
+  const waitingLong =
+    !live &&
+    preparingAt !== null &&
+    secondsSince(preparingAt) > PREPARE_SEC;
   const hint: TKey | null = waitingWatch
     ? "heartRate.watchCheck"
     : liveHint(live, noSignal);
-  // 지금 보이는 심박을 잰 기기 — 워치로 재다 워치를 풀면 이어폰 값을 쓴다
-  const onWatch = live?.source === "watch" && live.hrSource !== "earphones";
+  const onWatch = live?.source === "watch";
   // 준비 중·일시정지면 실시간 숫자를 전부 흐린다 — 라벨·상태 글자는 그대로
   const dim = isRunning ? undefined : themeColor.disabled;
   // 준비 중(센서 대기)·종료 처리 중·이어 재기 연결 중엔 누를 수 없다 — Button엔 비활성 모양이 없어
@@ -369,8 +371,8 @@ const LiveBox = ({
   // 워치와 끊긴 동안엔 일시정지·재개가 워치에 닿지 않는다 — 종료는 된다(다시 붙으면 그때 워치도 끝난다)
   const pauseLocked = locked || !!live?.watchLost;
   // 워치는 첫 값이 오기까지 길게는 1분이다(처음엔 워치에서 권한까지 허용) — 그동안 종료 자리를 취소로 쓴다.
-  // 이어폰은 3초면 끝난다
-  const canCancel = !live && preparingDevice === "watch";
+  // 이어폰은 보통 3초면 끝나고, 넘기면 같은 이유로 취소를 연다
+  const canCancel = !live && (preparingDevice === "watch" || waitingLong);
   const endLocked = locked && !canCancel;
 
   return (
@@ -413,12 +415,16 @@ const LiveBox = ({
                     )}
             </Text>
           </RNView>
-        ) : preparingDevice === "watch" ? (
+        ) : preparingDevice === "watch" || waitingLong ? (
           // 워치 앱을 깨워 첫 값이 오기까지는 길이가 정해져 있지 않다(첫 사용 땐 워치에서
           // 권한까지 허용한다) — 3초 링이 "1"에 멈춰 보이지 않게 끝없이 도는 표시를 쓴다
           <ActivityIndicator
             color={themeColor.tint}
-            accessibilityLabel={t("heartRate.watchPreparing")}
+            accessibilityLabel={t(
+              preparingDevice === "watch"
+                ? "heartRate.watchPreparing"
+                : "heartRate.resuming",
+            )}
           />
         ) : (
           <CountdownRing startedAt={preparingAt ?? Date.now()} />

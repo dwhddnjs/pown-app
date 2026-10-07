@@ -2,8 +2,8 @@ import { requireOptionalNativeModule } from "expo";
 
 type Subscription = { remove(): void };
 
-// 심박을 잴 기기. 워치(포운 워치 앱이 깔린 애플워치)를 먼저 쓴다 — 응답이 없으면 시작할 때
-// 이어폰으로 넘어간다
+// 심박을 잴 기기. 이어폰이 연결돼 있으면 이어폰, 없을 때만 워치(포운 워치 앱이 깔린 애플워치) —
+// 아이폰은 워치를 찼는지 알 수 없어서다. 둘 다 끼면 이어폰으로 재고 워치엔 스마트 스택에 심박이 뜬다
 export type HeartRateDevice = "watch" | "earphones";
 
 // 시작이 워치 쪽에서 실패하고 이어폰도 없을 때 start()·resume()이 던지는 에러 코드
@@ -17,15 +17,9 @@ export const NO_DEVICE = "ERR_NO_DEVICE";
 export type HeartRateSnapshot = {
   // 어디서 재고 있는지 — phone: 아이폰 세션(이어폰 센서), watch: 애플워치 미러링
   source?: "phone" | "watch";
-  // 지금 보이는 심박을 잰 기기. 워치로 재다 워치를 풀면 같이 돌던 이어폰 세션 값("earphones")을 쓴다
-  hrSource?: "watch" | "earphones";
-  // 워치로 재는 동안 이어폰도 심박을 재고 있다 — 워치를 풀면 이어서 쓴다
-  standby?: boolean;
-  // 워치가 손목에서 풀렸다고 알려왔다(워치 앱이 손목 감지로 확인)
-  watchOff?: boolean;
   // 워치와 연결이 끊겼다 — 워치는 계속 재고, 다시 붙으면 이어진다. 그동안 일시정지·재개는 워치에 닿지 않는다
   watchLost?: boolean;
-  // 자동 일시정지 사유 — 일시정지 중에만 온다
+  // 자동 일시정지 사유 — 일시정지 중에만 온다. watchRemoved: 워치를 풀어 워치가 스스로 멈췄다
   pauseReason?: "watchRemoved" | "earphonesRemoved";
   // 시스템이 세션을 끝내(에어팟을 빼면 iOS가 끝낸다) 세션 없이 일시정지로 남은 측정. 재개하면 새
   // 세션으로 이어 재고, 종료하면 앞 구간과 합쳐 한 기록이 된다
@@ -52,8 +46,8 @@ type HeartRateModule = {
   requestAuthorization(): Promise<boolean>;
   // 시작을 마친 시점의 첫 스냅샷 (기다리는 사이 세션이 닫혔으면 null). device는 준비 표시에 쓴
   // heartRateDevice() 값 — 네이티브가 다시 고르지 않는다. 없거나 그 사이 이어폰을 뺐으면 reject.
-  // 워치가 응답하지 않거나 안 찼으면 이어폰으로 넘어가고, 이어폰도 없으면 WATCH_UNAVAILABLE
-  // (워치 앱이 없어 보이면 WATCH_APP_MISSING) 코드로 reject
+  // 워치가 응답하지 않거나 안 찼으면(워치가 첫 값에 실어 온다) 그 사이 낀 이어폰으로 넘어가고, 이어폰도
+  // 없으면 WATCH_UNAVAILABLE(워치 앱이 없어 보이면 WATCH_APP_MISSING) 코드로 reject
   start(device: HeartRateDevice | null): Promise<HeartRateSnapshot | null>;
   pause(): Promise<void>;
   // 세션 없이 일시정지로 남은 측정(suspended)이면 새 세션을 열어 잇고 그 스냅샷을 준다(워치를 깨우면

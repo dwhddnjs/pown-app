@@ -71,8 +71,6 @@ const ko = {
   "heartRate.preparing": "센서 연결 중… {n}",
   "heartRate.measuringWatch": "워치로 측정 중",
   "heartRate.measuringEarphones": "이어폰으로 측정 중",
-  "heartRate.standby": "이어폰 대기 중 — 워치를 풀면 이어서 재요.",
-  "heartRate.switchedToEarphones": "워치를 풀어서 이어폰으로 재고 있어요.",
   "heartRate.pausedWatchRemoved":
     "워치를 풀어서 일시정지했어요. 다시 차고 잠금을 푼 뒤 재개를 눌러 주세요.",
   "heartRate.pausedEarphonesRemoved":
@@ -123,7 +121,7 @@ const ko = {
     "운동하는 동안 애플워치나 이어폰의 심박 센서로 심박수와 칼로리를 실시간으로 재고, 끝내면 오늘 운동 기록에 남겨요.",
   "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "애플워치는 포운 워치 앱이 저절로 켜져서 재요. 워치와 이어폰을 같이 끼면 워치로 재다가 워치를 풀면 이어폰으로 이어서 재요. 이어폰은 심박 센서가 들어 있는 이 모델들만 되고, 센서가 없는 이어폰으로는 심박수가 표시되지 않아요.",
+    "심박 센서가 있는 이어폰을 끼고 있으면 이어폰으로 재고, 애플워치엔 스마트 스택에 심박수가 떠요. 이어폰이 없거나 센서가 없으면 애플워치로 재요(포운 워치 앱이 저절로 켜져요).",
   "heartRate.guideSetting": "이어폰은 설정에서 심박수를 켜 주세요",
   "heartRate.guideSettingDesc":
     "설정 > AirPods > 심박수가 켜져 있어야 신호가 들어와요.",
@@ -454,10 +452,6 @@ const en: Record<TKey, string> = {
   "heartRate.preparing": "Connecting sensor… {n}",
   "heartRate.measuringWatch": "Measuring on Watch",
   "heartRate.measuringEarphones": "Measuring on earphones",
-  "heartRate.standby":
-    "Earphones on standby — they take over if you take off your Watch.",
-  "heartRate.switchedToEarphones":
-    "Watch removed — measuring with your earphones.",
   "heartRate.pausedWatchRemoved":
     "Paused because you took off your Apple Watch. Put it back on, unlock it, and tap Resume.",
   "heartRate.pausedEarphonesRemoved":
@@ -510,7 +504,7 @@ const en: Record<TKey, string> = {
     "While you work out, your Apple Watch or earphones' heart rate sensor tracks heart rate and calories live. When you finish, it's saved to today's workout.",
   "heartRate.guideDevice": "Apple Watch · AirPods Pro 3 · Powerbeats Pro 2",
   "heartRate.guideDeviceDesc":
-    "On Apple Watch, the Pown watch app opens by itself. Wear both and it measures on your Watch, then switches to your earphones if you take the Watch off. Earphones work only with these models' built-in heart rate sensor — earphones without one won't show heart rate.",
+    "With heart rate earphones in, it measures with them and shows your heart rate in your Apple Watch's Smart Stack. Otherwise it measures on your Apple Watch (the Pown watch app opens by itself).",
   "heartRate.guideSetting": "For earphones, turn on heart rate in settings",
   "heartRate.guideSettingDesc":
     "Settings > AirPods > Heart Rate must be on to get a signal.",
