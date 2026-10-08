@@ -30,7 +30,6 @@ import {
   resumeMeasurement,
   saveRecord,
   summarizeDay,
-  toMinutes,
   useHeartRateLiveStore,
   useHeartRateStore,
 } from "@/hooks/use-heart-rate-store";
@@ -81,13 +80,12 @@ const liveHint = (
 ): TKey | null => {
   if (!live) return null;
   if (live.watchLost) return "heartRate.watchLost";
-  if (live.state === "paused") {
-    if (live.pauseReason === "watchRemoved")
-      return "heartRate.pausedWatchRemoved";
-    if (live.pauseReason === "earphonesRemoved")
-      return "heartRate.pausedEarphonesRemoved";
-    return null;
-  }
+  if (live.state === "paused")
+    return live.pauseReason === "earphonesRemoved"
+      ? "heartRate.pausedEarphonesRemoved"
+      : live.pauseReason === "watchNoSignal"
+        ? "heartRate.pausedWatchNoSignal"
+        : null;
   if (noSignal)
     return live.source === "watch"
       ? "heartRate.noSignalWatch"
@@ -295,16 +293,14 @@ const StartButton = ({ onPress }: { onPress: () => void }) => {
         <Text style={styles.startLabel}>
           {todaySec ? t("heartRate.startMore") : t("heartRate.start")}
         </Text>
-        {/* 워치는 페어링·앱 설치만 알 수 있다(꺼졌거나 충전 중인지는 시작해 봐야
+        {/* 지금 잴 기기. 워치는 페어링만 알 수 있다(찼는지·꺼졌는지는 시작해 봐야
             안다) — "연결됨"이라고 하지 않는다 */}
         <Text style={[styles.startHint, { color: themeColor.subText }]}>
-          {todaySec
-            ? t("heartRate.todayRecorded", { n: toMinutes(todaySec) })
-            : t(
-                device === "watch"
-                  ? "heartRate.viaWatch"
-                  : "heartRate.connected",
-              )}
+          {t(
+            device === "watch"
+              ? "heartRate.viaWatch"
+              : "heartRate.viaEarphones",
+          )}
         </Text>
         {/* 누르면 이 자리에서 아래로 펼쳐져 측정 박스가 된다 */}
         <MaterialCommunityIcons
@@ -353,16 +349,18 @@ const LiveBox = ({
     preparingDevice === "watch" &&
     preparingAt !== null &&
     secondsSince(preparingAt) >= WATCH_CHECK_SEC;
-  // 이어폰 준비 3초가 지났는데 아직이다 — 처음 쓰는 이어폰이 심박을 주는지 보거나(워치도 있을 때) 워치로 넘어가는 중.
-  // 3초 링 대신 도는 표시를 보이고 취소를 연다
+  // 이어폰 준비 3초가 지났는데 아직 시작이 안 끝났다 — 3초 링이 "1"에 멈춰 보이지 않게 도는 표시를 보이고 취소를 연다
   const waitingLong =
-    !live &&
-    preparingAt !== null &&
-    secondsSince(preparingAt) > PREPARE_SEC;
+    !live && preparingAt !== null && secondsSince(preparingAt) > PREPARE_SEC;
   const hint: TKey | null = waitingWatch
     ? "heartRate.watchCheck"
     : liveHint(live, noSignal);
-  const onWatch = live?.source === "watch";
+  // 이어폰으로 재는데 심박이 안 들어온다 — 센서 없는 이어폰·차량 오디오도 이어폰으로 잡힌다. 워치가 있으면 바꿔 잰다
+  const canSwitch =
+    noSignal &&
+    live?.source === "phone" &&
+    !resuming &&
+    !!HeartRate?.isWatchAvailable();
   // 준비 중·일시정지면 실시간 숫자를 전부 흐린다 — 라벨·상태 글자는 그대로
   const dim = isRunning ? undefined : themeColor.disabled;
   // 준비 중(센서 대기)·종료 처리 중·이어 재기 연결 중엔 누를 수 없다 — Button엔 비활성 모양이 없어
@@ -408,11 +406,7 @@ const LiveBox = ({
                 ? t("heartRate.resuming")
                 : isPaused
                   ? t("heartRate.paused")
-                  : t(
-                      onWatch
-                        ? "heartRate.measuringWatch"
-                        : "heartRate.measuringEarphones",
-                    )}
+                  : t("heartRate.measuring")}
             </Text>
           </RNView>
         ) : preparingDevice === "watch" || waitingLong ? (
@@ -459,6 +453,19 @@ const LiveBox = ({
         <Text style={[styles.hint, { color: themeColor.subText }]}>
           {t(hint)}
         </Text>
+      )}
+      {canSwitch && (
+        <TouchableOpacity
+          activeOpacity={0.7}
+          hitSlop={8}
+          accessibilityRole="button"
+          onPress={() => resumeMeasurement(true)}
+          style={styles.switch}
+        >
+          <Text style={[styles.switchLabel, { color: themeColor.tintText }]}>
+            {t("heartRate.switchToWatch")}
+          </Text>
+        </TouchableOpacity>
       )}
 
       <RNView style={styles.actions}>
@@ -737,6 +744,15 @@ const styles = StyleSheet.create({
   hint: {
     fontSize: 12,
     fontFamily: "sb-l",
+  },
+  // 안내 바로 밑에 붙는 글자 버튼 — 박스 gap(12)만큼 띄우면 안내와 떨어져 보인다
+  switch: {
+    alignSelf: "flex-start",
+    marginTop: -6,
+  },
+  switchLabel: {
+    fontSize: 13,
+    fontFamily: "sb-m",
   },
   // 숫자와 버튼 사이는 박스 gap(12)보다 조금 더 띄운다
   actions: {

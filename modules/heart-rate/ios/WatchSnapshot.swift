@@ -4,7 +4,7 @@ import Foundation
 // 똑같은 파일이 있다 — 워치 타깃과 모듈 pod은 소스를 공유할 수 없어 복사해 둔다.
 // 필드를 바꾸면 두 파일을 같이 고칠 것. 워치 앱은 아이폰 앱보다 늦게 업데이트될 수 있어 버전이
 // 섞인다 — 새 필드는 반드시 옵셔널로 더하고(받은 값에 필수 키가 빠지면 디코딩이 통째로 실패해 시작이 매번
-// 타임아웃 난다), 있던 필드는 지우지 않는다(옛 쪽이 그 키를 기다린다). 모르는 키는 무시된다.
+// 타임아웃 난다), 있던 필수 필드는 지우지 않는다(옛 쪽이 그 키를 기다린다). 모르는 키는 무시된다.
 
 // 워치 → 아이폰: 갱신마다 보내는 측정값
 struct WatchSnapshot: Codable {
@@ -33,9 +33,9 @@ struct WatchSnapshot: Codable {
   var timerStart: Double?
   // 운동 시작 시각(ms)
   var startedAt: Double
-  // 손목에 차고 있는지 — 워치 앱이 손목 감지(LAPolicy.deviceOwnerAuthenticationWithWristDetection)로 확인한다.
-  // false면 풀었다(아이폰은 에어팟 값으로 넘어가거나 일시정지), nil이면 모른다(손목 확인이 안 되는 워치·옛 워치 앱).
-  // 처음 버전 뒤에 더해 옵셔널이다
+  // false면 워치가 심박을 못 읽어 스스로 일시정지했다 — 아이폰 박스가 "워치를 차고 재개" 안내를 띄운다. 3.5.3 워치
+  // 앱은 손목 감지로, 그 뒤 워치 앱은 심박이 한참 안 들어오면(WatchWorkout.noHeartRatePause) 보낸다. 재개하면 지운다.
+  // nil은 해당 없음. 처음 버전 뒤에 더해 옵셔널이다
   var wrist: Bool?
 }
 

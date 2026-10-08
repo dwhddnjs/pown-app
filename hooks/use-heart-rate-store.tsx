@@ -249,14 +249,15 @@ export const deleteRecord = (record: HeartRateRecordTypes) => {
 };
 
 // 재개. 세션 없이 일시정지로 남은 측정(suspended)은 네이티브가 새 세션을 열어 잇는다 — 그동안 박스는
-// "연결 중"이고, 이을 기기가 없으면 알려준다. 섬의 재개 링크(myapp://workout?resume=1)도 이걸 부른다
-export const resumeMeasurement = async () => {
+// "연결 중"이고, 이을 기기가 없으면 알려준다. 섬의 재개 링크(myapp://workout?resume=1)도 이걸 부른다.
+// toWatch: 이어폰으로 재는데 심박이 안 들어와 워치로 바꿔 잇는다 — 같은 측정으로 이어지고, 워치가 안 되면 일시정지로 남는다
+export const resumeMeasurement = async (toWatch = false) => {
   const native = HeartRate;
   const { resuming, setResuming, setLive } = useHeartRateLiveStore.getState();
   if (!native || resuming) return;
   setResuming(true);
   try {
-    const snapshot = await native.resume();
+    const snapshot = await (toWatch ? native.switchToWatch() : native.resume());
     if (snapshot) setLive(snapshot);
   } catch (error) {
     const code = (error as { code?: string } | null)?.code;
@@ -309,11 +310,12 @@ export const useHeartRateSync = () => {
       .then(onURL)
       .catch(() => {});
     // 백그라운드에선 네이티브가 JS로 샘플을 안 보낸다 — 돌아오면 최신 값으로 맞추고,
-    // 그동안 놓친 오디오 출력 변경도 다시 본다
+    // 그동안 놓친 오디오 출력 변경도 다시 본다. 여기 측정이 없어도 맞춘다 — 뒤에 있는 사이 네이티브에만 측정이
+    // 남았을 수 있다(섬에서 종료를 누른 사이 시스템이 세션을 닫아 일시정지로 남은 경우 등)
     const app = AppState.addEventListener("change", (state) => {
       if (state !== "active") return;
       setDevice(native.heartRateDevice());
-      if (useHeartRateLiveStore.getState().live) syncLive();
+      syncLive();
     });
     // 리스너를 먼저 걸고 읽는다 — 읽은 뒤 걸면 그 사이 끝난 워치 연결(WCSession 활성화) 소식을
     // 놓쳐, 앱을 한 번 내렸다 올릴 때까지 시작 버튼이 안 보인다

@@ -9,14 +9,8 @@ module.exports = {
   icon: "../../assets/images/app-icon-dark.png",
   // 미러링(startMirroringToCompanionDevice)이 watchOS 10+다
   deploymentTarget: "10.0",
-  // LocalAuthentication: 손목 착용 확인(WatchWorkout.checkWrist). WatchConnectivity: 아이폰과 끊긴 채
-  // 끝난 운동의 마지막 값을 보낸다(WatchWorkout.close)
-  frameworks: [
-    "SwiftUI",
-    "HealthKit",
-    "LocalAuthentication",
-    "WatchConnectivity",
-  ],
+  // WatchConnectivity: 아이폰과 끊긴 채 끝난 운동의 마지막 값을 보낸다(WatchWorkout.close)
+  frameworks: ["SwiftUI", "HealthKit", "WatchConnectivity"],
   entitlements: {
     "com.apple.developer.healthkit": true,
     "com.apple.developer.healthkit.access": [],

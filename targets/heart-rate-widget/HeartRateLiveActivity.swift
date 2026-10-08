@@ -130,31 +130,42 @@ private struct ActivityContent: View {
 }
 
 // 애플워치 스마트 스택(워치 위젯과 같은 크기 — 40mm 152×69.5pt ~ 49mm 191×81.5pt, HIG) — 이어폰으로 재는 동안 워치엔
-// 이것만 뜬다(워치 센서·운동 세션은 안 쓴다). 보기만 한다(조작은 아이폰·섬에서): 위 심박, 아래 운동 시간
+// 이것만 뜬다(워치 센서·운동 세션은 안 쓴다). 보기만 한다(조작은 아이폰·섬에서): 한 줄에 왼쪽 심박, 오른쪽 운동
+// 시간(글자 기준선을 맞춘다). 세 자리 심박에 시간이 길면 좁은 워치엔 다 안 들어간다 — 글자마다 따로 줄이면 심박이
+// "…"로 잘려(40mm 폭으로 확인) 한 줄 전체를 같은 비율로 줄인 크기 중 들어가는 첫 번째를 쓴다
 private struct SmallView: View {
   let state: HeartRateAttributes.ContentState
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 0) {
+    ViewThatFits(in: .horizontal) {
+      row(scale: 1)
+      row(scale: 0.85)
+      row(scale: 0.72)
+      row(scale: 0.6)
+    }
+    .padding(.horizontal, 8)
+  }
+
+  private func row(scale: CGFloat) -> some View {
+    HStack(alignment: .firstTextBaseline, spacing: 0) {
       HStack(alignment: .firstTextBaseline, spacing: 4) {
         Image(systemName: "heart.fill")
-          .font(.system(size: 16))
+          .font(.system(size: 16 * scale))
           .foregroundStyle(state.isPaused ? .secondary : heartRed)
         Text(state.bpmText)
-          .font(.system(size: 32, weight: .semibold, design: .rounded))
+          .font(.system(size: 32 * scale, weight: .semibold, design: .rounded))
           .foregroundStyle(state.isPaused ? .secondary : .primary)
         Text("bpm")
-          .font(.system(size: 14))
+          .font(.system(size: 14 * scale))
           .foregroundStyle(.secondary)
       }
-      TimerText(state: state, alignment: .leading)
-        .font(.system(size: 20, weight: .semibold, design: .rounded))
+      Spacer(minLength: 8)
+      TimerText(state: state, alignment: .trailing)
+        .font(.system(size: 20 * scale, weight: .semibold, design: .rounded))
         .foregroundStyle(state.isPaused ? .secondary : timeYellow)
     }
     .monospacedDigit()
     .lineLimit(1)
-    .minimumScaleFactor(0.6)
-    .frame(maxWidth: .infinity, alignment: .leading)
   }
 }
 

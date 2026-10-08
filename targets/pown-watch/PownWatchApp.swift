@@ -133,8 +133,10 @@ private struct StatusLabel: View {
       Circle()
         .fill(isPaused ? Color.secondary : pownRed)
         .frame(width: 6, height: 6)
+      // watchOS에선 caption2가 footnote보다 커서 옆 "bpm"보다 크게 보였다(3.5.3 실기) — bpm과 같은 footnote로 맞춘다.
+      // 고정 크기로 두면 글자 크기 설정을 따르지 않는다
       Text(isPaused ? tr("일시정지", "Paused") : tr("측정 중", "Measuring"))
-        .font(.caption2)
+        .font(.footnote)
         .foregroundStyle(.secondary)
     }
   }
