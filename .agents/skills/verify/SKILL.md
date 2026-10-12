@@ -194,6 +194,11 @@ $ADB shell monkey -p com.dwhddnjs.pown 1         # 앱 실행
 $ADB logcat -d -s ReactNativeJS:V | tail -50     # JS 로그·에러
 ```
 
+**키보드 함정**: AVD 기본값 `hw.keyboard = yes`면 소프트 키보드가 안 뜬다(키보드 회피를 검증할 수
+없다) — `~/.android/avd/<AVD>.avd/config.ini`에서 `no`로 바꾸고 콜드 부팅(`-no-snapshot-load`),
+끝나면 되돌린다. `adb shell input text`를 한 번이라도 쓰면 Gboard가 물리 키보드 모드(떠 있는
+툴바)로 바뀌니, 키보드 모양은 탭으로 포커스만 한 직후에 캡처한다.
+
 축소본을 볼 때 좌표 배율 주의는 iOS와 같다(`sips -Z`는 긴 변 기준). 원본 픽셀로 환산해서 누를 것.
 
 ### iOS와 나란히 비교 (UI 변경이면 필수)

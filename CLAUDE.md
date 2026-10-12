@@ -29,6 +29,7 @@ npm run typecheck  # 타입 체크 — iOS 세계(tsconfig.json) + Android 세�
 테스트 러너는 없다 — 검증은 타입 체크 `npm run typecheck`(strict, 두 플랫폼) + 린트 `npm run lint`(eslint-config-expo, `no-console`·`Platform.OS`/`Platform.select` error). 둘 다 에러 0을 유지할 것. 포맷은 prettier(`npm run format`, 설정은 `.prettierrc`: 세미콜론 + trailing comma all) — 커밋 전에 돌린다. `ios/`·`android/`는 gitignore(CNG). `.npmrc`에 `legacy-peer-deps=true`.
 
 **배포(EAS)**: `eas build --profile production --platform ios|android` → `eas submit -p ios|android` / JS만 바뀌면 `eas update --channel production --environment production` (iOS·Android에 같이 나간다 — 한쪽만이면 `--platform`). **`--environment`를 빼면** EAS에 등록한 `EXPO_PUBLIC_GEMINI_API_KEY`가 번들에 안 들어가(로컬엔 `.env`가 없고, SDK 55 미만이라 CLI가 묻지도 않는다) AI 분석이 전부 실패하는 업데이트가 에러 없이 나간다. `appVersionSource:"remote"`(Android versionCode는 `production.android.autoIncrement`로 EAS가 올린다). `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
+**`expo-*` 패키지는 `npx expo install --check`로 SDK 패치에 맞춰 둔다** — 안드로이드는 expo 모듈이 미리 빌드된 AAR이라 `expo-modules-core`와 버전이 어긋나면 실행하자마자 `No virtual method ...`로 죽는다(iOS는 소스로 빌드해서 멀쩡해 보인다). `@shopify/flash-list`는 의도적으로 v2라 제외.
 **네이티브 의존성이 바뀐 릴리스는 OTA 금지**(두 플랫폼 모두) — 옛 바이너리에 새 JS가 내려가 실행 즉시 죽는다. 두 버전을 올리고 새로 빌드할 것.
 `eas build --profile preview --platform android`는 사이드로드용 APK를 만든다.
 
