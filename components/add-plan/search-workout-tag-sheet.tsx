@@ -101,7 +101,8 @@ export const SearchWorkoutTagSheet = forwardRef<
             autoCorrect={false}
             spellCheck={false}
             placeholder={t("tag.searchPlaceholder")}
-            style={{ color: themeColor.text }}
+            placeholderTextColor={themeColor.placeholder}
+            style={[styles.input, { color: themeColor.text }]}
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}
           />
@@ -151,6 +152,11 @@ export const SearchWorkoutTagSheet = forwardRef<
 SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet";
 
 const styles = StyleSheet.create({
+  input: {
+    flex: 1,
+    // iOS 기본값(0)을 적어 둔다 — 안드로이드 TextInput은 기본 여백이 있어 칸이 커진다
+    padding: 0,
+  },
   // 목록이 시트의 남은 높이를 다 먹어야 스크롤이 생긴다.
   // flex:1이 없으면 내용 높이 그대로 자라서 시트 밖으로 잘려 나간다.
   sheet: {

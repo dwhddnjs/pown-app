@@ -24,15 +24,14 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Circle, G } from "react-native-svg";
 // zustand
+import { summarizeDay, useHeartRateStore } from "@/hooks/use-heart-rate-store";
 import {
   hasPlanOn,
   HeartRateLiveTypes,
   resumeMeasurement,
   saveRecord,
-  summarizeDay,
   useHeartRateLiveStore,
-  useHeartRateStore,
-} from "@/hooks/use-heart-rate-store";
+} from "@/hooks/use-heart-rate-live-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";

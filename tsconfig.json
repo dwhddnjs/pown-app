@@ -2,6 +2,9 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    // 플랫폼 쌍(foo.ios.tsx / foo.android.tsx)을 확장자 없이 import한다 — 에디터·iOS 기준.
+    // Android 기준 검사는 tsconfig.android.json (npm run typecheck가 둘 다 돌린다)
+    "moduleSuffixes": [".ios", ".android", ""],
     "paths": {
       "@/*": ["./*"]
 

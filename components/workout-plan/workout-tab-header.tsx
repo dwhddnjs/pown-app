@@ -1,16 +1,11 @@
 import React from "react";
 // component
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { DrawerToggleButton } from "@react-navigation/drawer";
+import { BarBackground } from "@/components/bar-background";
 // expo
-import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import * as Haptics from "expo-haptics";
@@ -31,8 +26,8 @@ const WorkoutTabHeader = () => {
   const title = useWorkoutScrollStore((state) => state.title);
 
   return (
-    <BlurView intensity={80} tint="default" style={styles.blur}>
-      <SafeAreaView>
+    <BarBackground style={styles.blur}>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.container}>
           <View style={styles.side}>
             <TouchableOpacity
@@ -83,7 +78,7 @@ const WorkoutTabHeader = () => {
           </View>
         </View>
       </SafeAreaView>
-    </BlurView>
+    </BarBackground>
   );
 };
 

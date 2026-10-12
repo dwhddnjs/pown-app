@@ -65,6 +65,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   input: {
+    // iOS 기본값(0)을 적어 둔다 — 안드로이드 TextInput은 기본 여백이 있어 칸이 커진다
+    padding: 0,
     flex: 1,
     fontSize: 16,
     fontFamily: "sb-m",

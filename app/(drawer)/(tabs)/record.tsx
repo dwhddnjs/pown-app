@@ -6,12 +6,12 @@ import {
   BodyChart,
   ConditionCount,
   EquipmentChart,
-  HeartRateChart,
   SbdChart,
   WorkoutCount,
   WorkoutPieChart,
   WorkoutSummary,
 } from "@/components/chart";
+import { HeartRateChart } from "@/components/heart-rate";
 // zustand
 import { useChartStore } from "@/hooks/use-chart-store";
 // hook

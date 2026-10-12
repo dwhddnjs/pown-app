@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   useWindowDimensions,
 } from "react-native";
-import { Text } from "../themed";
+import { Text } from "@/components/themed";
 import { BarChart } from "react-native-gifted-charts";
 import { Stat } from "@/components/heart-rate/heart-rate-row";
-import { ChartBody, ChartCard } from "./chart-card";
+import { ChartBody, ChartCard } from "@/components/chart/chart-card";
 // zustand
 import { summarize, useHeartRateStore } from "@/hooks/use-heart-rate-store";
 // hook

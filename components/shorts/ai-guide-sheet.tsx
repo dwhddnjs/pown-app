@@ -4,6 +4,7 @@ import React, {
   useImperativeHandle,
   useMemo,
   useRef,
+  useState,
 } from "react";
 // component
 import { StyleSheet, useWindowDimensions } from "react-native";
@@ -18,6 +19,7 @@ import {
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+import { useBackToClose } from "@/hooks/use-back-to-close";
 // expo
 import { Image } from "expo-image";
 
@@ -54,6 +56,9 @@ export const AiGuideSheet = forwardRef<BottomSheetModal, AiGuideSheetProps>(
     // (ref 콜백은 레이아웃 이펙트보다 먼저 붙으므로 여기서 current는 이미 채워져 있다)
     const innerRef = useRef<BottomSheetModal>(null);
     useImperativeHandle(ref, () => innerRef.current as BottomSheetModal, []);
+    // 안드로이드 뒤로가기는 화면보다 시트부터 닫는다
+    const [isOpen, setIsOpen] = useState(false);
+    useBackToClose(isOpen, () => innerRef.current?.dismiss());
 
     // 메모 시트와 달리 뒤 영상을 볼 이유가 없다 — 읽는 동안은 덮는다
     const renderBackdrop = useCallback(
@@ -74,6 +79,7 @@ export const AiGuideSheet = forwardRef<BottomSheetModal, AiGuideSheetProps>(
         ref={innerRef}
         snapPoints={snapPoints}
         enablePanDownToClose
+        onChange={(index) => setIsOpen(index >= 0)}
         backdropComponent={renderBackdrop}
         backgroundStyle={{
           backgroundColor: themeColor.background,

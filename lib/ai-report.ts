@@ -26,6 +26,8 @@ import {
   toIdentifyResult,
 } from "@/lib/ai-identify";
 import { resolveMediaUri } from "@/lib/media";
+// 앱 식별 헤더는 플랫폼마다 다르다 — 지금은 구글이 무시한다 (ai-client-headers.ios.ts 주석)
+import { AI_CLIENT_HEADERS } from "@/lib/ai-client-headers";
 // expo
 import * as FileSystem from "expo-file-system";
 import * as VideoThumbnails from "expo-video-thumbnails";
@@ -44,14 +46,6 @@ const ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${MODE
 // 반드시 sensitive로 둔다. secret으로 두면 eas update가 값을 못 읽어 빈 키가 박힌
 // 번들이 에러 없이 조용히 배포된다.
 const API_KEY = process.env.EXPO_PUBLIC_GEMINI_API_KEY;
-
-// ponytail: 이 헤더는 현재 아무것도 막지 못한다. 2026-09부터 Gemini 키는 서비스
-// 계정에 묶인 auth key(AQ.*)로만 발급되는데, auth key에는 Cloud 콘솔의 "iOS 앱"
-// 애플리케이션 제한이 적용되지 않는다 — 헤더 없이 호출해도 200으로 통과하는 걸 확인했다.
-// 즉 번들에 박힌 키는 무방비다. 결제가 붙지 않은 프로젝트라 과금은 불가능하고
-// 최악이 일일 쿼터 소진이다. 쿼터가 실제로 털리면 ENDPOINT를 프록시로 돌린다.
-// 헤더는 구글이 제한을 고칠 때를 대비해 남겨 둔다 (무시되므로 무해).
-const BUNDLE_ID = "com.anonymous.workout-app";
 
 // flash-lite는 14프레임 리포트가 실측 3초다(사고 토큰이 없다). 60초면 충분한 여유고,
 // 재시도까지 합친 최악이 약 2분이라 ai.writing의 "최대 2분" 문구와 맞는다.
@@ -197,7 +191,7 @@ const callOnce = async (
       headers: {
         "Content-Type": "application/json",
         "x-goog-api-key": API_KEY,
-        "X-Ios-Bundle-Identifier": BUNDLE_ID,
+        ...AI_CLIENT_HEADERS,
       },
       signal: controller.signal,
       body: JSON.stringify({

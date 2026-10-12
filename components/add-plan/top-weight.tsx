@@ -150,6 +150,9 @@ const styles = StyleSheet.create({
     // minWidth: 52,
     fontSize: 16,
     fontFamily: "sb-l",
+    // iOS 기본값(0)을 적어 둔다 — 안드로이드 TextInput은 위아래 기본 여백이 있어 칸이 커지고
+    // 옆의 단위(kg)가 위로 떠 보였다
+    padding: 0,
   },
   typeButton: {
     width: 42,

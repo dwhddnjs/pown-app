@@ -9,25 +9,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `.agents/skills/`에 프로젝트 스킬이 있다. 관련 작업이면 **반드시 해당 `SKILL.md`를 먼저 읽고 따른다.**
 
 - **`expo-native-ui`** — Expo/RN 화면을 만들거나 스타일링·네이티브 컨트롤·아이콘·애니메이션·미디어·차트를 다룰 때. 세부 레시피는 `references/*.md`.
-- **`verify`** — 런타임 동작이 바뀌는 변경을 iOS 시뮬레이터에서 눈으로 검증할 때. `/verify` 슬래시 명령으로도 실행.
+- **`verify`** — 런타임 동작이 바뀌는 변경을 iOS 시뮬레이터·Android 에뮬레이터에서 눈으로 검증할 때. `/verify` 슬래시 명령으로도 실행.
 
-스킬은 일반 가이드다. **충돌 시 아래 "프로젝트 규칙"이 우선한다** (이 앱은 MMKV(`react-native-mmkv`)를 쓰고, Expo Go가 아닌 dev-client를 쓰며, 테마 색상을 인라인 배열로 주입한다 — 스킬의 반대 조언보다 프로젝트 관행을 따를 것).
+스킬은 일반 가이드다. **충돌 시 아래 "프로젝트 규칙"이 우선한다** (이 앱은 MMKV(`react-native-mmkv`)를 쓰고, Expo Go가 아닌 dev-client를 쓰며, 테마 색상을 인라인 배열로 주입하고, 플랫폼 차이는 `Platform.select`·`process.env.EXPO_OS`가 아니라 `.ios`/`.android` 파일 쌍으로 나눈다 — 스킬의 반대 조언보다 프로젝트 관행을 따를 것).
 
 ## 프로젝트
 
-Pown (포운) — 점진적 과부하 운동 계획·기록 앱. **백엔드 없음**: 모든 데이터를 기기 로컬(MMKV)에 저장하는 오프라인 우선 iOS 앱.
+Pown (포운) — 점진적 과부하 운동 계획·기록 앱. **백엔드 없음**: 모든 데이터를 기기 로컬(MMKV)에 저장하는 오프라인 우선 iOS·Android 앱. iOS가 먼저 출시됐고, 플랫폼 차이는 파일 쌍으로 나눈다(아래 "플랫폼 분리").
 
 ## 명령어
 
 ```bash
 npm start          # Expo 개발 서버
 npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-client)
+npm run android    # Android 네이티브 빌드 후 실행 (dev-client)
+npm run typecheck  # 타입 체크 — iOS 세계(tsconfig.json) + Android 세계(tsconfig.android.json)
 ```
 
-테스트 러너는 없다 — 검증은 타입 체크 `npx tsc --noEmit`(strict) + 린트 `npm run lint`(eslint-config-expo, `no-console` error). 둘 다 에러 0을 유지할 것. 포맷은 prettier(`npm run format`, 설정은 `.prettierrc`: 세미콜론 + trailing comma all) — 커밋 전에 돌린다. `ios/`·`android/`는 gitignore(CNG). `.npmrc`에 `legacy-peer-deps=true`.
+테스트 러너는 없다 — 검증은 타입 체크 `npm run typecheck`(strict, 두 플랫폼) + 린트 `npm run lint`(eslint-config-expo, `no-console`·`Platform.OS`/`Platform.select` error). 둘 다 에러 0을 유지할 것. 포맷은 prettier(`npm run format`, 설정은 `.prettierrc`: 세미콜론 + trailing comma all) — 커밋 전에 돌린다. `ios/`·`android/`는 gitignore(CNG). `.npmrc`에 `legacy-peer-deps=true`.
 
-**배포(EAS)**: `eas build --profile production --platform ios` / JS만 바뀌면 `eas update --channel production --environment production`. **`--environment`를 빼면** EAS에 등록한 `EXPO_PUBLIC_GEMINI_API_KEY`가 번들에 안 들어가(로컬엔 `.env`가 없고, SDK 55 미만이라 CLI가 묻지도 않는다) AI 분석이 전부 실패하는 업데이트가 에러 없이 나간다. `appVersionSource:"remote"`. `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
-**네이티브 의존성이 바뀐 릴리스는 OTA 금지** — 옛 바이너리에 새 JS가 내려가 실행 즉시 죽는다. 두 버전을 올리고 새로 빌드할 것.
+**배포(EAS)**: `eas build --profile production --platform ios|android` → `eas submit -p ios|android` / JS만 바뀌면 `eas update --channel production --environment production` (iOS·Android에 같이 나간다 — 한쪽만이면 `--platform`). **`--environment`를 빼면** EAS에 등록한 `EXPO_PUBLIC_GEMINI_API_KEY`가 번들에 안 들어가(로컬엔 `.env`가 없고, SDK 55 미만이라 CLI가 묻지도 않는다) AI 분석이 전부 실패하는 업데이트가 에러 없이 나간다. `appVersionSource:"remote"`(Android versionCode는 `production.android.autoIncrement`로 EAS가 올린다). `app.json`의 `version`과 `runtimeVersion`은 **동일하게** 유지해야 OTA가 매칭된다.
+**`expo-*` 패키지는 `npx expo install --check`로 SDK 패치에 맞춰 둔다** — 안드로이드는 expo 모듈이 미리 빌드된 AAR이라 `expo-modules-core`와 버전이 어긋나면 실행하자마자 `No virtual method ...`로 죽는다(iOS는 소스로 빌드해서 멀쩡해 보인다). `@shopify/flash-list`는 의도적으로 v2라 제외.
+**네이티브 의존성이 바뀐 릴리스는 OTA 금지**(두 플랫폼 모두) — 옛 바이너리에 새 JS가 내려가 실행 즉시 죽는다. 두 버전을 올리고 새로 빌드할 것.
+`eas build --profile preview --platform android`는 사이드로드용 APK를 만든다.
+
+**Android 첫 출시 전 체크리스트** (코드 밖에서 할 일):
+
+- AdMob에 Android 앱을 만들고 `app.json`의 `androidAppId`(지금은 구글 샘플 ID)와 `lib/ads-platform.android.ts`의 `REWARDED_AD_UNIT_ID`(지금은 테스트 ID)를 교체 — 안 바꾸면 에러 없이 수익 0.
+- Play Console 앱 패키지는 `com.dwhddnjs.pown` — 한 번 올리면 못 바꾼다. 첫 AAB는 콘솔에서 직접 업로드해야 그다음부터 `eas submit`(track `internal`)이 된다. 서비스 계정 키 필요.
+- 데이터 보안 양식: 광고 ID(AdMob), 카메라·마이크(숏츠 녹화), 사진은 갤러리 저장만(읽기 권한 없음 — `blockedPermissions`로 READ_MEDIA_* 제거).
 
 ## 아키텍처
 
@@ -64,6 +74,51 @@ npm run ios        # iOS 네이티브 빌드 후 실행 (Expo Go 아님, dev-cli
 ### SVG / 폰트
 
 SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 타입 `types/svg.d.ts`). 폰트: `fontFamily`에 `"sb-b"`(Bold)·`"sb-m"`(Medium)·`"sb-l"`(Light).
+
+## 플랫폼 분리 (iOS / Android)
+
+**한쪽만 작업할 때는 그쪽 파일만 보면 되게** 나눈다: `git ls-files '*.ios.*'` / `git ls-files '*.android.*'`.
+
+1. **공통 코드는 플랫폼 무관.** 플랫폼마다 동작·UI가 달라야 하는 것만 같은 이름의 쌍(`foo.ios.tsx` / `foo.android.tsx`)으로 나누고 확장자 없이 import한다(Metro가 플랫폼에 맞게 고른다). `Platform.OS`·`Platform.select` 분기는 린트 에러다.
+2. **쌍은 export 이름·시그니처가 같아야 한다.** `npm run typecheck`가 iOS 세계(`tsconfig.json`, `moduleSuffixes` .ios 우선)와 Android 세계(`tsconfig.android.json`, .android 우선·`*.ios.*` 제외)를 따로 검사해 어긋나면 잡는다.
+3. **한쪽에서 그냥 무시되는 단일 prop은 공통 코드에 둔다** — `borderCurve`, `statusBarTranslucent`, `navigationBarTranslucent`, `android_keyboardInputMode`, `allowsVideoFrameAnalysis`, `headerTitleAlign` 등. 이것 때문에 파일을 쪼개지 않는다.
+4. **라우트(`app/`)엔 플랫폼 확장자 금지** — Expo Router는 확장자 없는 fallback 파일을 요구한다. 라우트는 얇게 두고 차이는 `components/` 쌍으로 (예: `(modals)/heart-rate-records.tsx`는 한 줄 re-export).
+5. **iOS 전용 단독 모듈**(`.ios`만 있는 파일)은 `.ios` 파일에서만 import한다. 공통 파일이 import하면 Android 번들이 깨진다(typecheck Android 세계에서 걸린다). Android 전용 단독 모듈도 같은 규칙.
+6. 쌍은 원래 자리에 나란히 둔다. **쌍을 추가하면 아래 표에 한 줄 추가.**
+7. 웹은 지원하지 않는다 (`.web`·기본 파일을 두지 않는다).
+
+| 무엇                        | 파일 (확장자 없이 import)                    | iOS                                 | Android                                       |
+| --------------------------- | -------------------------------------------- | ----------------------------------- | --------------------------------------------- |
+| 헤더·탭바 배경              | `components/bar-background`                  | `BlurView`                          | iOS 블러 실측색으로 불투명                    |
+| 모달 띄우는 방식            | `components/navigation/modal-presentation`   | `modal` (page sheet, 네이티브 헤더) | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더 |
+| 운동 탭 아이콘              | `components/navigation/workout-tab-icon`     | SF Symbol                           | FontAwesome6 덤벨(가로)                       |
+| 헤더 버튼 보정·MY 헤더 높이 | `components/navigation/header-metrics`       | 푸시·모달 보정, 기본 높이           | 모달만 보정, MY 헤더 44                       |
+| 검색창 옵션                 | `components/navigation/search-bar-options`   | UISearchController, 목록 상단 110   | SearchView 색 지정·진입 시 펼침, 0            |
+| 모달 상태바                 | `components/navigation/modal-status-bar`     | `light` (시트 모달)                 | 없음 (전체화면)                               |
+| 루트 전용 요소              | `components/platform-root`                   | App Store 업데이트 안내             | 상태바 `auto`                                 |
+| 키보드 회피                 | `components/keyboard-avoid`                  | padding + 상태바 오프셋             | padding (edge-to-edge)                        |
+| 운동 날짜 선택              | `components/add-plan/select-type-date-sheet` | 다이얼로그 + datetime 스피너        | 날짜 → 시간 시스템 다이얼로그                 |
+| 목록에서 하나 고르기        | `components/option-picker`                   | 휠 (216)                            | 테두리 칸 안 드롭다운                         |
+| 뒤로가기로 시트 닫기        | `hooks/use-back-to-close`                    | 없음                                | `BackHandler`                                 |
+| 메일 앱 열기                | `lib/open-mail`                              | Gmail → mailto                      | mailto 바로                                   |
+| 광고 단위·추적 동의         | `lib/ads-platform`                           | 실 단위 ID, ATT                     | 테스트 ID(출시 전 교체), 없음                 |
+| AI 요청 앱 헤더             | `lib/ai-client-headers`                      | `X-Ios-Bundle-Identifier`           | 없음                                          |
+| 사진 저장 권한              | `lib/media-permission`                       | 읽기+쓰기                           | 쓰기 전용                                     |
+| 심박수 기능 입구            | `components/heart-rate` (index)              | 실제 기능                           | 빈 구현                                       |
+
+**iOS 전용(단독)**: `components/update-dialog.ios.tsx`, `components/heart-rate/*.ios.tsx`, `hooks/use-heart-rate-live-store.ios.tsx`, 네이티브 `modules/heart-rate/`(apple 전용 autolink)·`targets/`(워치·라이브 액티비티).
+
+**심박수는 iOS 전용**(HealthKit·애플워치·에어팟) — Android에선 아예 없다. 공통 코드는 `@/components/heart-rate` 엔트리로만 닿고, Android 엔트리는 같은 이름을 빈 구현(`null`/`false`/no-op)으로 내보낸다. 기록 **데이터**(`hooks/use-heart-rate-store.tsx`)만 공통으로 남긴다 — 백업(`lib/backup.ts`)이 담아서, iOS 백업을 Android에서 복원했다 다시 iOS로 옮겨도 기록이 산다. 측정 상태·네이티브 제어는 `use-heart-rate-live-store.ios.tsx`.
+
+**안드로이드에서 iOS처럼 보이게 — 실제로 걸렸던 것들** (새 화면에도 같은 규칙):
+
+- **플랫폼마다 다른 기본값은 iOS 값을 적어 둔다**(iOS엔 무변화): `TextInput`은 `padding: 0`(안드로이드는 기본 여백이 있어 칸이 커지고 옆 글자가 뜬다), 안내 문구 색은 `placeholderTextColor={themeColor.placeholder}`(iOS 시스템 색), 헤더 제목은 `headerTitleFont`(17pt).
+- **좁은 띠·칸 안에서 이모지를 sb 글자와 한 `Text`에 섞지 않는다** — 이모지 글꼴이 줄 높이를 플랫폼·기기마다 다르게 바꾼다. 따로 두고 가운데 정렬(`plan-date-header.tsx`).
+- **sb 글꼴에 없는 기호는 대체 글꼴로 그려져** 안드로이드에선 그 줄 아래가 잘린다 — `•`→`·`, `–`→`-`. 새 기호를 쓰면 폰트에 있는지 확인.
+- 아이콘 글꼴은 `_layout.tsx`의 `useFonts`에서 미리 불러온다 — 새 아이콘 패밀리를 쓰면 거기 추가(안 하면 처음 뜰 때 빈칸이었다 나타난다).
+- 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7).
+
+**Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.
 
 ## 프로젝트 규칙
 

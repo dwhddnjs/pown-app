@@ -51,12 +51,13 @@ const MemoForm = ({
   const { animatedKeyboardHeight } = useBottomSheetInternal();
   const [isKeyboardUp, setIsKeyboardUp] = useState(false);
 
-  // 키보드가 떠 있을 때만 "드래그해서 닫기" 제스처를 켠다
+  // 키보드가 떠 있을 때만 "드래그해서 닫기" 제스처를 켠다.
+  // Will 이벤트는 iOS에서만 온다 — 양쪽에서 오는 Did로 받는다
   useEffect(() => {
-    const show = Keyboard.addListener("keyboardWillShow", () =>
+    const show = Keyboard.addListener("keyboardDidShow", () =>
       setIsKeyboardUp(true),
     );
-    const hide = Keyboard.addListener("keyboardWillHide", () =>
+    const hide = Keyboard.addListener("keyboardDidHide", () =>
       setIsKeyboardUp(false),
     );
     return () => {
@@ -171,6 +172,9 @@ export const ShortsMemoSheet = forwardRef<BottomSheet, ShortsMemoSheetProps>(
         // restore면 키보드가 내려갈 때 시트를 스냅 위치로 되돌리는 애니메이션이 돌아
         // 같은 순간의 close()를 취소해버린다 (extend라 애초에 움직이지도 않으니 되돌릴 것도 없다)
         keyboardBlurBehavior="none"
+        // 안드로이드 엣지 투 엣지에선 창이 키보드에 밀리지 않는다 — 시트가 직접 키보드 높이를
+        // 받아야 위 marginBottom이 움직인다 (iOS는 무시하는 prop)
+        android_keyboardInputMode="adjustResize"
         animatedPosition={animatedPosition}
         backgroundStyle={{
           backgroundColor: themeColor.background,

@@ -56,7 +56,9 @@ const ko = {
   "workout.setsDone": "{completed}/{total} 세트 완료",
   "workout.galleryPermission":
     "사진을 보려면 눌러서 갤러리 접근권한을 허용해주세요.",
-  "workout.target": "목표 • {weight}kg",
+  // •(U+2022)는 sb 폰트에 없어 대체 폰트로 그려진다 — 안드로이드에선 그 줄의 글자 아래가 잘렸다.
+  // 폰트에 있는 가운뎃점(·)을 쓴다
+  "workout.target": "목표 · {weight}kg",
   "workout.deleted": "운동계획이 삭제 되었습니다!",
   "workout.history": "운동 히스토리",
   "heartRate.start": "심박수 측정 시작",
@@ -436,7 +438,7 @@ const en: Record<TKey, string> = {
   "workout.setsDone": "{completed}/{total} sets done",
   "workout.galleryPermission":
     "Tap to allow photo library access and view photos.",
-  "workout.target": "Target • {weight}kg",
+  "workout.target": "Target · {weight}kg",
   "workout.deleted": "Workout plan deleted!",
   "workout.history": "Workout History",
   "heartRate.start": "Start heart rate",
@@ -714,7 +716,7 @@ const en: Record<TKey, string> = {
   "userInfo.ageValue": "{n} yrs",
   "userInfo.emptyTitle": "Record your Big 3",
   "userInfo.emptyDesc":
-    "Fill in your profile and your Squat · Bench Press · Deadlift\nrecords will show up here",
+    "Fill in your profile and your\nSquat · Bench Press · Deadlift\nrecords will show up here",
   "userInfo.goWrite": "Fill it in",
 
   "data.title": "Keep the workout plans you've logged.",

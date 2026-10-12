@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { ConfirmDialog } from "@/components/confirm-dialog";
+import { discardHeartRateSession } from "@/components/heart-rate";
 import { SettingSection } from "@/components/mypage/setting-section";
 import { SettingItem } from "@/components/mypage/setting-item";
 import { toast } from "sonner-native";
@@ -10,10 +11,7 @@ import { toast } from "sonner-native";
 import { useUserStore } from "@/hooks/use-user-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useShortsStore } from "@/hooks/use-shorts-store";
-import {
-  useHeartRateLiveStore,
-  useHeartRateStore,
-} from "@/hooks/use-heart-rate-store";
+import { useHeartRateStore } from "@/hooks/use-heart-rate-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -21,8 +19,6 @@ import { useT } from "@/hooks/use-t";
 import { createBackup, restoreBackup } from "@/lib/backup";
 import { buildSeedPlans, SEED_COUNT } from "@/lib/seed";
 import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
-// native
-import { HeartRate } from "@/modules/heart-rate";
 // expo
 import { useRouter } from "expo-router";
 // icon
@@ -57,13 +53,7 @@ export default function ResetData() {
     onReset();
     onResetVideo();
     onResetRecords();
-    // 측정 중이거나 센서를 기다리는 중이면 세션도 저장 없이 버린다(건강 앱에 이미 들어간 심박·칼로리
-    // 샘플까지 지운다 — 워치 것은 워치 앱이) — 안 버리면 지운 뒤에도 아일랜드에 남는다. JS가 모르는 세션도
-    // 버리게 늘 부른다(없으면 reject). 이미 끝나는 중이라 못 버린 측정의 요약은 saveRecord가 거른다
-    HeartRate?.discard().catch(() => {});
-    const { setLive, setPreparingAt } = useHeartRateLiveStore.getState();
-    setLive(null);
-    setPreparingAt(null);
+    discardHeartRateSession();
     toast.success(t("data.resetDone"));
     back();
   };

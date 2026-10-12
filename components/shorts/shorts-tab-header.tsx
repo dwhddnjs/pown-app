@@ -4,14 +4,15 @@ import { useT } from "@/hooks/use-t";
 import {
   Modal,
   Pressable,
-  SafeAreaView,
   StyleSheet,
   TouchableOpacity,
   useWindowDimensions,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Animated from "react-native-reanimated";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { BarBackground } from "@/components/bar-background";
 // zustand
 import { ShortsSortTypes, useShortsStore } from "@/hooks/use-shorts-store";
 // hook
@@ -19,8 +20,6 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { usePopover } from "@/hooks/use-popover";
 // lib
 import { TKey } from "@/lib/i18n";
-// expo
-import { BlurView } from "expo-blur";
 import { Text } from "../themed";
 // icon
 import Feather from "@expo/vector-icons/Feather";
@@ -54,13 +53,11 @@ const ShortsTabHeader = () => {
   const [headerHeight, setHeaderHeight] = useState(0);
 
   return (
-    <BlurView
-      intensity={80}
-      tint="default"
+    <BarBackground
       style={styles.blur}
       onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
     >
-      <SafeAreaView>
+      <SafeAreaView edges={["top"]}>
         <View style={styles.container}>
           {/* 정렬할 영상이 없으면 정렬 대신 탭 이름을 둔다 — 빈 화면의 제목이 "최신순"으로
               읽히지 않게. 같은 글자 크기라 헤더 높이(useHeaderHeight)가 흔들리지 않는다 */}
@@ -163,7 +160,7 @@ const ShortsTabHeader = () => {
           })}
         </Animated.View>
       </Modal>
-    </BlurView>
+    </BarBackground>
   );
 };
 

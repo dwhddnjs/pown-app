@@ -6,4 +6,3 @@ export { SbdChart } from "./sbd-chart";
 export { BodyChart } from "./body-chart";
 export { ChartHeader } from "./chart-header";
 export { WorkoutSummary } from "./workout-summary";
-export { HeartRateChart } from "./heart-rate-chart";

@@ -1,19 +1,23 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 // compoents
 import { StyleSheet } from "react-native";
 import { View } from "@/components/themed";
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
 import { ChartHeader } from "@/components/chart";
+import { BarBackground } from "@/components/bar-background";
+import { WorkoutTabIcon } from "@/components/navigation/workout-tab-icon";
+import { tabHeaderHeight } from "@/components/navigation/header-metrics";
+import { headerTitleFont } from "@/components/navigation/screen-options";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // expo
 import { Tabs } from "expo-router";
-import { BlurView } from "expo-blur";
 // icon
-import { SymbolView } from "expo-symbols";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+import { useBackToClose } from "@/hooks/use-back-to-close";
 import * as Haptics from "expo-haptics";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import { FontAwesome6 } from "@expo/vector-icons";
@@ -29,8 +33,11 @@ import Animated, {
 export default function TabLayout() {
   const t = useT();
   const themColor = useCurrentThemeColor();
+  const insets = useSafeAreaInsets();
   const [fabOpen, setFabOpen] = useState(false);
   const fabProgress = useSharedValue(0);
+  const closeFab = useCallback(() => setFabOpen(false), []);
+  useBackToClose(fabOpen, closeFab);
 
   useEffect(() => {
     fabProgress.value = withTiming(fabOpen ? 1 : 0, {
@@ -45,8 +52,9 @@ export default function TabLayout() {
     ],
   }));
 
-  // FAB 오버레이(60% 검정)가 탭바 뒤에 깔리면 blur가 그걸 그대로 빨아들여
+  // FAB 오버레이(60% 검정)가 탭바 뒤에 깔리면 iOS blur가 그걸 그대로 빨아들여
   // 라이트 모드에서 탭바가 어두워지고 어두운 아이콘이 묻힌다 → 열릴 때만 불투명 배경으로 덮는다
+  // (안드로이드 탭바는 원래 같은 색으로 불투명이라 덮어도 달라지는 게 없다)
   const tabBarSolidStyle = useAnimatedStyle(() => ({
     opacity: fabProgress.value,
   }));
@@ -55,10 +63,9 @@ export default function TabLayout() {
     headerStyle: {
       backgroundColor: themColor.background,
     },
-    headerTitleStyle: {
-      fontFamily: "sb-m",
-      color: themColor.text,
-    },
+    // 안드로이드 기본은 왼쪽 정렬이다 (iOS는 원래 가운데)
+    headerTitleAlign: "center" as const,
+    headerTitleStyle: { ...headerTitleFont, color: themColor.text },
     tabBarStyle: {
       backgroundColor: "transparent",
       borderTopWidth: 0,
@@ -68,11 +75,7 @@ export default function TabLayout() {
     },
     tabBarBackground: () => (
       <>
-        <BlurView
-          intensity={80}
-          tint="systemChromeMaterial"
-          style={StyleSheet.absoluteFill}
-        />
+        <BarBackground bar="tab" style={StyleSheet.absoluteFill} />
         <Animated.View
           pointerEvents="none"
           style={[
@@ -84,7 +87,7 @@ export default function TabLayout() {
       </>
     ),
     tabBarActiveTintColor: themColor.tabIconSelected,
-    // 탭바가 반투명 BlurView라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다
+    // iOS 탭바가 반투명 블러라 RN 기본 회색으로는 어두운 콘텐츠 위에서 묻힌다
     tabBarInactiveTintColor: themColor.tabIconDefault,
     tabBarItemStyle: {
       paddingBottom: 3,
@@ -110,15 +113,7 @@ export default function TabLayout() {
         <Tabs.Screen
           name="workout"
           options={{
-            tabBarIcon: ({ color }) => (
-              <SymbolView
-                name="dumbbell.fill"
-                type="hierarchical"
-                tintColor={color}
-                // SF Symbol은 가로로 납작해서 같은 size로도 아이콘 폰트보다 작아 보인다
-                size={32}
-              />
-            ),
+            tabBarIcon: ({ color }) => <WorkoutTabIcon color={color} />,
             tabBarLabel: t("tab.workout"),
             header: () => <WorkoutTabHeader />,
             headerTransparent: true,
@@ -194,19 +189,18 @@ export default function TabLayout() {
             // 다른 탭들과 동일한 blur 헤더. 커스텀 header 대신 배경만 갈아끼우면
             // 타이틀 중앙 정렬은 기본 헤더가 그대로 맡는다
             headerTransparent: true,
-            headerStyle: { backgroundColor: "transparent" },
+            headerStyle: {
+              backgroundColor: "transparent",
+              height: tabHeaderHeight(insets.top),
+            },
             headerBackground: () => (
-              <BlurView
-                intensity={80}
-                tint="default"
-                style={StyleSheet.absoluteFill}
-              />
+              <BarBackground style={StyleSheet.absoluteFill} />
             ),
           }}
         />
         <Tabs.Screen name="index" redirect />
       </Tabs>
-      <FabOverlay isOpen={fabOpen} onClose={() => setFabOpen(false)} />
+      <FabOverlay isOpen={fabOpen} onClose={closeFab} />
     </View>
   );
 }

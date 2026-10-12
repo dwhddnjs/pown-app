@@ -6,11 +6,13 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "android": { "buildType": "apk" }
     },
     "production": {
       "channel": "production",
-      "ios": { "image": "latest" }
+      "ios": { "image": "latest" },
+      "android": { "autoIncrement": true }
     },
     "development": {
       "developmentClient": true,
@@ -23,6 +25,9 @@
         "appleId": "per1215@naver.com",
         "ascAppId": "6737919723",
         "appleTeamId": "W6FUWFHBPW"
+      },
+      "android": {
+        "track": "internal"
       }
     }
   }
