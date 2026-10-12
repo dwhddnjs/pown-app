@@ -49,8 +49,14 @@ export const YearSelect = ({
       close();
       return;
     }
-    buttonRef.current?.measureInWindow((x, y, width, height) => {
-      setAnchor({ top: y + height + 4, right: windowWidth - (x + width) });
+    // measureInWindow가 아니라 measure의 page 좌표를 쓴다 — 안드로이드(edge-to-edge)의
+    // measureInWindow는 상태바 아래부터 잰 y를 줘서, 화면 맨 위부터 그리는 Modal에선 드롭다운이
+    // 상태바 높이만큼 올라가 버튼을 덮었다. page 좌표는 두 플랫폼 모두 화면 맨 위 기준이다
+    buttonRef.current?.measure((_x, _y, width, height, pageX, pageY) => {
+      setAnchor({
+        top: pageY + height + 4,
+        right: windowWidth - (pageX + width),
+      });
       open();
     });
   };
