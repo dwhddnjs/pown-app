@@ -7,8 +7,7 @@ import { PlanDateHeader } from "./plan-date-header";
 import { YearGrass } from "@/components/grass";
 import { AnimatedHeight } from "@/components/animated-height";
 import { RoundedSide } from "@/components/rounded-side";
-// zustand
-import { useHeartRateLiveStore } from "@/hooks/use-heart-rate-store";
+import { useIsHeartRateMeasuring } from "@/components/heart-rate";
 // hook
 import { Row } from "@/hooks/use-plan-rows";
 // lib
@@ -22,9 +21,7 @@ import { Lang } from "@/lib/i18n";
 // 측정 중(준비 포함)엔 연간 잔디가 쓸모없다 — 접어서 박스 바로 밑에 오늘 계획이 오게 한다.
 // 심박 카드가 펼쳐지는 것과 같은 곡선으로 접혀 한 동작처럼 보인다(그래서 리스트 헤더에 있다)
 export const GrassRow = () => {
-  const isMeasuring = useHeartRateLiveStore(
-    (state) => !!state.live || state.preparingAt !== null,
-  );
+  const isMeasuring = useIsHeartRateMeasuring();
   return (
     <AnimatedHeight collapsed={isMeasuring}>
       <View style={styles.grass}>

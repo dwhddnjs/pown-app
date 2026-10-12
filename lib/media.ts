@@ -1,6 +1,7 @@
 import { tt } from "@/hooks/use-t";
 import * as FileSystem from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
+import { requestSavePermission } from "@/lib/media-permission";
 import { createVideoPlayer } from "expo-video";
 import { toast } from "sonner-native";
 import { ImageUriType } from "@/types/workout";
@@ -109,9 +110,7 @@ export const saveImagesToLibrary = async (
   const hasFreshCapture = newImages.some((item) =>
     item.imageUri?.startsWith(FileSystem.cacheDirectory as string),
   );
-  const status = hasFreshCapture
-    ? (await MediaLibrary.requestPermissionsAsync()).status
-    : "denied";
+  const status = hasFreshCapture ? await requestSavePermission() : "denied";
   if (hasFreshCapture && status !== "granted") {
     toast.error(tt("camera.libraryPermission"));
   }

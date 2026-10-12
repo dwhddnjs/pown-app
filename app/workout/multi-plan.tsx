@@ -1,12 +1,6 @@
 import { useEffect } from "react";
 import { View } from "@/components/themed";
-import { StatusBar } from "expo-status-bar";
-import {
-  Platform,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-} from "react-native";
+import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { toast } from "sonner-native";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -17,6 +11,7 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { EmptyRoutine } from "@/components/workout-plan/empty-routine";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { HeaderIconButton } from "@/components/header-icon-button";
+import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
 import { requestReviewOnce } from "@/lib/review";
 
 export default function MultiPlanScreen() {
@@ -118,7 +113,7 @@ export default function MultiPlanScreen() {
         </TouchableOpacity>
       </View>
 
-      <StatusBar style={Platform.OS === "ios" ? "light" : "auto"} />
+      <ModalStatusBar />
     </View>
   );
 }

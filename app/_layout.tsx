@@ -10,10 +10,12 @@ import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { Toaster } from "sonner-native";
 import { PlanMenu } from "@/components/workout-plan/plan-menu";
 import { ImageModal } from "@/components/workout-plan/image-modal";
-import { UpdateDialog } from "@/components/update-dialog";
+import { PlatformRoot } from "@/components/platform-root";
+import { useHeartRateSync } from "@/components/heart-rate";
 import {
   flatHeader,
   headerButtonLiftModal,
+  headerTitleFont,
   fullScreen,
   headerBackButton,
   modalScreen,
@@ -21,6 +23,7 @@ import {
   ScreenOptionsArgs,
   settingsScreen,
 } from "@/components/navigation/screen-options";
+import { useModalPresentation } from "@/components/navigation/modal-presentation";
 //expo
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -34,10 +37,21 @@ import {
 // zustand
 import { useUserStore } from "@/hooks/use-user-store";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
-import { useHeartRateSync } from "@/hooks/use-heart-rate-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+// icon
+import {
+  AntDesign,
+  Entypo,
+  Feather,
+  FontAwesome,
+  FontAwesome6,
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+  Octicons,
+} from "@expo/vector-icons";
 
 export { ErrorBoundary } from "expo-router";
 
@@ -63,6 +77,17 @@ export default function RootLayout() {
     "sb-b": require("../assets/fonts/SB_B.otf"),
     "sb-l": require("../assets/fonts/SB_L.otf"),
     "sb-m": require("../assets/fonts/SB_M.otf"),
+    // 아이콘 글꼴도 스플래시가 떠 있는 동안 같이 불러온다 — 처음 쓰일 때 불러오면 탭바·폼의
+    // 아이콘이 잠깐 빈칸이었다가 나타난다
+    ...AntDesign.font,
+    ...Entypo.font,
+    ...Feather.font,
+    ...FontAwesome.font,
+    ...FontAwesome6.font,
+    ...Ionicons.font,
+    ...MaterialCommunityIcons.font,
+    ...MaterialIcons.font,
+    ...Octicons.font,
   });
   const colorScheme = useColorScheme();
   const { theme } = useUserStore();
@@ -95,7 +120,7 @@ export default function RootLayout() {
           <RootLayoutNav />
         </BottomSheetModalProvider>
         <PlanMenu />
-        <UpdateDialog />
+        <PlatformRoot />
         {/* 탭 레이아웃 안에 두면 그 위로 push되는 화면(검색·루틴)에서는 가려진다 */}
         {imageUri && <ImageModal />}
         <Toaster />
@@ -109,7 +134,8 @@ function RootLayoutNav() {
   const themeColor = useCurrentThemeColor();
   const background = themeColor.background;
 
-  const modal = modalScreen(background);
+  const modalPresentation = useModalPresentation();
+  const modal = modalScreen(background, modalPresentation);
 
   return (
     <Stack
@@ -117,10 +143,9 @@ function RootLayoutNav() {
         headerStyle: {
           backgroundColor: background,
         },
-        headerTitleStyle: {
-          color: themeColor.text,
-          fontFamily: "sb-m",
-        },
+        headerTitleStyle: { ...headerTitleFont, color: themeColor.text },
+        // 안드로이드 기본은 왼쪽 정렬이다 (iOS는 원래 가운데)
+        headerTitleAlign: "center",
       }}
     >
       <Stack.Screen name="(drawer)" options={{ headerShown: false }} />
@@ -141,7 +166,7 @@ function RootLayoutNav() {
         name="workout/add-multi-plan"
         options={({ navigation }: ScreenOptionsArgs) => ({
           ...planFormScreen({ navigation }),
-          presentation: "modal" as const,
+          ...modalPresentation,
           headerLeft: headerBackButton(
             "close",
             navigation,

@@ -12,9 +12,9 @@ import { useT } from "@/hooks/use-t";
 import { useHeaderHeight } from "@react-navigation/elements";
 // lib
 import { LANG_LABEL, TKey } from "@/lib/i18n";
+import { openMail } from "@/lib/open-mail";
 // expo
 import { useRouter } from "expo-router";
-import * as Linking from "expo-linking";
 import * as Clipboard from "expo-clipboard";
 import Constants from "expo-constants";
 // icon
@@ -40,23 +40,9 @@ export default function My() {
 
   const contactEmail = "syd1215no@gmail.com";
 
-  // Gmail 앱을 우선 열고, 없으면 기본 메일 앱, 둘 다 없으면(시뮬레이터·메일 미설정) 주소를 클립보드에 복사한다.
+  // 메일 앱을 못 열면(시뮬레이터·메일 미설정) 주소를 클립보드에 복사한다
   const onContact = async () => {
-    const subject = encodeURIComponent(t("my.contactSubject"));
-    const gmailUrl = `googlegmail://co?to=${contactEmail}&subject=${subject}`;
-    const mailto = `mailto:${contactEmail}?subject=${subject}`;
-    try {
-      if (await Linking.canOpenURL(gmailUrl)) {
-        await Linking.openURL(gmailUrl);
-        return;
-      }
-      if (await Linking.canOpenURL(mailto)) {
-        await Linking.openURL(mailto);
-        return;
-      }
-    } catch {
-      // 아래 클립보드 폴백으로 이어진다
-    }
+    if (await openMail(contactEmail, t("my.contactSubject"))) return;
     await Clipboard.setStringAsync(contactEmail);
     toast.success(t("my.emailCopied"));
   };

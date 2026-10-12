@@ -31,6 +31,7 @@ import { useUserStore } from "@/hooks/use-user-store";
 import { useWorkoutTagDialogStore } from "@/hooks/use-workout-tag-dialog-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { useBackToClose } from "@/hooks/use-back-to-close";
 // type
 import { WorkoutTypes } from "@/types/workout";
 // expo
@@ -96,6 +97,11 @@ export const PlanForm = ({
   const onSheetClose = () => bottomSheetModalRef.current?.close();
   const onSheetOpen = () => bottomSheetModalRef.current?.expand();
 
+  // 안드로이드 뒤로가기는 화면보다 열린 시트·태그 수정모드부터 닫는다
+  useBackToClose(isSetCounterSheetOpen, onSheetClose);
+  useBackToClose(isWorkoutTagModalOpen, onWorkoutTagSheetClose);
+  useBackToClose(isEditMode, () => setEditMode(false));
+
   const onFocusScroll = (positionY: number) => {
     scrollRef.current?.scrollTo({ y: positionY, animated: true });
   };
@@ -143,7 +149,6 @@ export const PlanForm = ({
   return (
     <KeyBoardAvoid
       style={[styles.container, { backgroundColor: themeColor.background }]}
-      keyboardShouldPersistTaps="handled"
     >
       <Stack.Screen
         options={{

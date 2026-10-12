@@ -70,6 +70,7 @@ export const AddWorkoutTagDialog = ({
         </View>
         <TextInput
           placeholder={t("tag.namePlaceholder")}
+          placeholderTextColor={themeColor.placeholder}
           // 운동 이름은 사전에 없는 말이라 추천이 도움이 안 되고,
           // 추천 바가 키보드 위를 차지해 다이얼로그를 더 밀어올린다
           autoCorrect={false}
@@ -115,6 +116,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderCurve: "continuous",
     overflow: "hidden",
+    // 세로 여백은 iOS 기본값(0)을 적어 둔다 — 안드로이드 TextInput은 기본 여백이 있다
+    paddingVertical: 0,
     paddingHorizontal: 12,
     fontFamily: "sb-l",
   },

@@ -2,8 +2,7 @@ import React from "react";
 // component
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-// expo
-import { BlurView } from "expo-blur";
+import { BarBackground } from "@/components/bar-background";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useChartStore } from "@/hooks/use-chart-store";
@@ -21,7 +20,7 @@ export const ChartHeader = () => {
   const isCurrentMonth = date === format(new Date(), "yyyyMM");
 
   return (
-    <BlurView intensity={80} tint="default" style={styles.blur}>
+    <BarBackground style={styles.blur}>
       <SafeAreaView edges={["top"]}>
         <View style={styles.container}>
           <TouchableOpacity
@@ -53,7 +52,7 @@ export const ChartHeader = () => {
           </TouchableOpacity>
         </View>
       </SafeAreaView>
-    </BlurView>
+    </BarBackground>
   );
 };
 

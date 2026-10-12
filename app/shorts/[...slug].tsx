@@ -43,6 +43,7 @@ import { ConfirmDialog } from "@/components/confirm-dialog";
 import { GUIDE_KEYS } from "@/components/shorts/ai-guide-sheet";
 import { ScanOverlay } from "@/components/shorts/scan-overlay";
 import { useT } from "@/hooks/use-t";
+import { useBackToClose } from "@/hooks/use-back-to-close";
 import {
   generateReport,
   getLastAiFailure,
@@ -98,6 +99,8 @@ export default function ShortsView() {
   const isMountedRef = useRef(true);
   const scrollRef = useAnimatedRef<Animated.ScrollView>();
   const memoRef = useRef<BottomSheet>(null);
+  // 안드로이드 뒤로가기는 화면보다 메모 시트부터 닫는다
+  useBackToClose(isMemoOpen, () => memoRef.current?.close());
 
   // 영상 한 페이지의 원래 높이 — JS쪽 페이지 인덱스 계산용
   const [fullHeight, setFullHeight] = useState(0);

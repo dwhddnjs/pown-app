@@ -5,7 +5,6 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { Picker } from "@react-native-picker/picker";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -13,10 +12,14 @@ import { useT } from "@/hooks/use-t";
 import { Text, View } from "./themed";
 import { Button } from "./button";
 import { NumberBallIcon } from "./number-ball-icon";
+import { OPTION_PICKER_HEIGHT, OptionPicker } from "./option-picker";
 import { countData, setTypeData } from "@/constants/constants";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tSetType } from "@/lib/i18n";
+
+// 시트에서 피커를 뺀 높이 = 핸들 + 제목 + 추가 버튼 + 하단 여백
+const SHEET_CHROME_HEIGHT = 154;
 
 interface SetCountSheetProps {
   onClose: () => void;
@@ -59,9 +62,12 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
       });
     };
 
-    // 시트 높이 = 핸들 + 픽커(216) + 제목 + 추가 버튼 + 하단 여백.
+    // 시트 높이는 피커 높이에 맞춘다 (iOS 휠 216, 안드로이드 드롭다운 56).
     // "50%"로 두면 기기에 따라 픽커와 버튼 사이가 100pt 가까이 빈다.
-    const snapPoints = useMemo(() => [370], []);
+    const snapPoints = useMemo(
+      () => [SHEET_CHROME_HEIGHT + OPTION_PICKER_HEIGHT],
+      [],
+    );
     const onSheetChange = useCallback(
       (index: number) => {
         const open = index >= 0;
@@ -146,21 +152,14 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
               <Text style={[styles.title, { color: themeColor.text }]}>
                 {t("plan.setType")}
               </Text>
-              <Picker
+              <OptionPicker
                 selectedValue={picker.set}
-                onValueChange={(itemValue) =>
-                  onSelectedPicker("set", itemValue)
-                }
-              >
-                {setTypeData.map((item) => (
-                  <Picker.Item
-                    key={item}
-                    label={tSetType(item, lang)}
-                    value={item}
-                    color={themeColor.text}
-                  />
-                ))}
-              </Picker>
+                items={setTypeData.map((item) => ({
+                  label: tSetType(item, lang),
+                  value: item,
+                }))}
+                onChange={(value) => onSelectedPicker("set", value)}
+              />
             </View>
 
             <View
@@ -172,21 +171,11 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
               <Text style={[styles.title, { color: themeColor.text }]}>
                 {t("plan.repCount")}
               </Text>
-              <Picker
+              <OptionPicker
                 selectedValue={picker.count}
-                onValueChange={(itemValue) =>
-                  onSelectedPicker("count", itemValue)
-                }
-              >
-                {countData.map((item) => (
-                  <Picker.Item
-                    key={item}
-                    label={item}
-                    value={item}
-                    color={themeColor.text}
-                  />
-                ))}
-              </Picker>
+                items={countData.map((item) => ({ label: item, value: item }))}
+                onChange={(value) => onSelectedPicker("count", value)}
+              />
             </View>
           </View>
           <View

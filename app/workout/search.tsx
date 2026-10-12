@@ -5,6 +5,10 @@ import { Text, View } from "@/components/themed";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
 import { RoundedSide } from "@/components/rounded-side";
+import {
+  SEARCH_LIST_PADDING_TOP,
+  useSearchBarOptions,
+} from "@/components/navigation/search-bar-options";
 import { FlashList } from "@shopify/flash-list";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -61,22 +65,15 @@ export default function Search() {
     });
     return groupByDate(result);
   };
+  const searchBarOptions = useSearchBarOptions({
+    placeholder: t("search.placeholder"),
+    cancelText: t("search.cancel"),
+    themeColor,
+    onChangeText: setInputValue,
+  });
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerSearchBarOptions: {
-        visible: true,
-        placeholder: t("search.placeholder"),
-        autoFocus: true,
-        tintColor: themeColor.tint,
-        cancelButtonText: t("search.cancel"),
-
-        onChangeText: (e: { nativeEvent: { text: string } }) => {
-          setInputValue(e.nativeEvent.text);
-        },
-        hideWhenScrolling: false,
-      },
-    });
-  }, [navigation, t, themeColor.tint]);
+    navigation.setOptions({ headerSearchBarOptions: searchBarOptions });
+  }, [navigation, searchBarOptions]);
 
   const searchResult = inputValue
     ? Object.entries(filterWorkoutList(inputValue))
@@ -92,7 +89,7 @@ export default function Search() {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item[0]}
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: 110 }}
+        contentContainerStyle={{ paddingTop: SEARCH_LIST_PADDING_TOP }}
         renderItem={({ item }) => {
           return (
             <View style={styles.list}>

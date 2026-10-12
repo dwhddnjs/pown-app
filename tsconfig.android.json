@@ -1,0 +1,16 @@
+{
+  // Android 세계 타입 검사 — 쌍은 .android 쪽으로 풀고, iOS 전용 파일은 아예 보지 않는다.
+  // 공통 파일이 iOS 전용 단독 모듈(.ios만 있는 파일)을 import하면 여기서 걸린다
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "moduleSuffixes": [".android", ""]
+  },
+  "exclude": [
+    "node_modules",
+    "scripts",
+    "babel.config.js",
+    "metro.config.js",
+    "**/*.ios.ts",
+    "**/*.ios.tsx"
+  ]
+}

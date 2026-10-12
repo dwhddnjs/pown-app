@@ -11,6 +11,7 @@ import { mmkv } from "@/lib/storage";
 import Constants from "expo-constants";
 import * as Linking from "expo-linking";
 
+// iOS 전용 — platform-root.ios.tsx에서만 마운트한다.
 // 백엔드가 없으니 App Store 공개 조회 API가 "최신 버전"의 출처다. bundle id를 적어
 // 두면 app.json이 바뀔 때 조회가 조용히 빈 결과를 돌려주고 팝업이 영영 안 뜬다.
 // country=kr은 "버전 조회처"일 뿐이다 — 바이너리는 하나라 어느 스토어든 버전이 같고,
@@ -29,7 +30,6 @@ const isMinorAhead = (a: string, b: string) => {
 };
 
 const fetchStoreUpdate = async (): Promise<StoreUpdate | null> => {
-  if (Platform.OS !== "ios") return null;
   // runtimeVersion == version 규칙이라 OTA 뒤에도 바이너리 버전과 같다
   const installed = Constants.expoConfig?.version;
   if (!installed) return null;

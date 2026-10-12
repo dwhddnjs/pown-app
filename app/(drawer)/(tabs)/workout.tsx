@@ -10,7 +10,7 @@ import {
   PlanRow,
 } from "@/components/workout-plan/plan-list-row";
 import { ScrollTopButton } from "@/components/workout-plan/scroll-top-button";
-import { HeartRateRow } from "@/components/heart-rate/heart-rate-row";
+import { HeartRateRow, useIsHeartRateLive } from "@/components/heart-rate";
 import {
   CircleButton,
   circleButtonSmall,
@@ -21,7 +21,6 @@ import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
 import { useWorkoutScrollStore } from "@/hooks/use-workout-scroll-store";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
-import { useHeartRateLiveStore } from "@/hooks/use-heart-rate-store";
 // hooks
 import { getRowKey, getRowType, Row, usePlanRows } from "@/hooks/use-plan-rows";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -68,7 +67,7 @@ export default function TabOneScreen() {
   const lang = useLanguage();
   const { open } = useIsModalOpenStore();
   // 측정 중엔 계획을 다 지워도 빈 화면 대신 리스트(헤더의 측정 박스)를 남긴다
-  const isLive = useHeartRateLiveStore((state) => !!state.live);
+  const isLive = useIsHeartRateLive();
 
   const router = useRouter();
 

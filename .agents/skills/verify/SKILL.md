@@ -1,11 +1,14 @@
 ---
 name: verify
-description: iOS 시뮬레이터에서 Pown 앱을 띄우고 화면을 클릭으로 조작해 변경을 눈으로 검증한다. 빌드/실행/터치 주입/좌표 매핑 레시피.
+description: iOS 시뮬레이터·Android 에뮬레이터에서 Pown 앱을 띄우고 화면을 조작해 변경을 눈으로 검증한다. 빌드/실행/터치 주입/좌표 매핑 레시피.
 ---
 
-# Pown — iOS 시뮬레이터 검증
+# Pown — iOS 시뮬레이터 / Android 에뮬레이터 검증
 
-Pown은 **iOS 세로(portrait) 전용** 운동 기록 앱이다. `expo-dev-client` + 네이티브 모듈
+**어느 플랫폼에서 볼지**: 바뀐 파일이 `*.ios.*`면 iOS만, `*.android.*`면 Android만, 공통 파일이면
+둘 다 본다(플랫폼 분리 규칙은 CLAUDE.md). Android 절차는 맨 아래 **7. Android 에뮬레이터**.
+
+Pown은 **세로(portrait) 전용** 운동 기록 앱이다. `expo-dev-client` + 네이티브 모듈
 (`@react-native-google-signin/google-signin`, `expo-camera` 등)을 쓰므로 **Expo Go로는 못 띄운다.**
 네이티브 dev build가 필요하다. bundle id는 `com.anonymous.workout-app`, scheme은 `myapp`.
 
@@ -159,3 +162,52 @@ FAB 오버레이를 토글한다(`tabPress`에서 `setFabOpen`). 오버레이의
 
 사용자에게 화면을 직접 보여줘야 하면 `sips -Z 480` 으로 리사이즈해 Artifact 페이지에 data URI로
 임베드하고 링크를 전달한다. 휘발성 증거로 취급한다.
+
+## 7. Android 에뮬레이터
+
+iOS보다 훨씬 쉽다 — `adb`가 탭·스크린샷·뒤로가기를 다 하고, **좌표가 스크린샷 픽셀 그대로**다
+(베젤·배율 변환 없음). 패키지는 `com.dwhddnjs.pown`.
+
+```bash
+ADB=~/Library/Android/sdk/platform-tools/adb
+EMU=~/Library/Android/sdk/emulator/emulator
+$EMU -list-avds                                  # Pixel_6_API_35 · Pixel_9a_API_36 · Medium_Phone_API_35
+$EMU -avd Pixel_6_API_35 -no-snapshot-save -no-boot-anim   # ← 백그라운드로
+until [ "$($ADB shell getprop sys.boot_completed | tr -d '\r')" = 1 ]; do sleep 3; done
+npx expo run:android --device Pixel_6_API_35 --no-bundler  # ← 백그라운드로. --device는 AVD 이름(시리얼 X)
+npx expo start --dev-client                      # Metro(8081) — 백그라운드로
+$ADB reverse tcp:8081 tcp:8081                   # 에뮬레이터가 맥의 Metro에 닿게
+```
+
+`android/`는 CNG(gitignore)라 없으면 `run:android`가 prebuild부터 한다. 첫 Gradle 빌드는 10분 넘게
+걸린다. `app.json`의 android 설정·플러그인을 바꿨으면 `npx expo prebuild --platform android --clean`.
+
+```bash
+$ADB exec-out screencap -p > "$SHOTS/a01.png"   # 스크린샷 (1080x2400 등 실제 픽셀)
+$ADB shell input tap 540 1200                    # 스크린샷 픽셀 좌표 그대로
+$ADB shell input swipe 540 1600 540 600 300      # 스크롤
+$ADB shell input text 'bench'                    # 입력 (공백은 %s, 한글은 안 된다)
+$ADB shell input keyevent 4                      # 하드웨어 뒤로가기
+$ADB shell cmd uimode night yes                  # 시스템 다크 (no로 복귀)
+$ADB shell am force-stop com.dwhddnjs.pown       # 앱 종료 (재시작은 아래 launch)
+$ADB shell monkey -p com.dwhddnjs.pown 1         # 앱 실행
+$ADB logcat -d -s ReactNativeJS:V | tail -50     # JS 로그·에러
+```
+
+축소본을 볼 때 좌표 배율 주의는 iOS와 같다(`sips -Z`는 긴 변 기준). 원본 픽셀로 환산해서 누를 것.
+
+### iOS와 나란히 비교 (UI 변경이면 필수)
+
+"안드로이드에서 iOS처럼 보이는가"는 눈대중으로 판정하지 않는다. 두 기기에서 같은 화면을 띄워
+스크린샷을 각각 pt(iOS @3x → ÷3)·dp(안드로이드 → ÷`wm density`/160, Pixel 6는 2.625)로 줄여
+옆에 붙여 놓고 본다. 위치가 애매하면 픽셀을 세서 띠 높이·글자 위아래 여백을 숫자로 맞춘다.
+iOS 시뮬레이터 데이터는 사용자 것일 수 있으니 시드로 덮어쓰지 않는다.
+
+### Android에서 꼭 볼 것
+
+- 헤더·탭바가 **불투명**하고 상태바·하단 내비게이션 바와 겹치지 않는다(edge-to-edge). 헤더 타이틀은 가운데.
+- 상태바 아이콘 색이 앱 테마(라이트/다크/시스템)를 따라간다 — MY > 테마에서 바꿔 볼 것.
+- **뒤로가기**: 시트(세트·태그·숏츠 메모·AI 가이드)·FAB·팝오버가 열려 있으면 그것만 닫히고 화면은 남는다.
+- 계획 추가: 날짜 버튼 → 날짜 다이얼로그 → 시간 다이얼로그. 세트·횟수는 드롭다운. 목표중량·메모 입력 시 키보드에 안 가린다.
+- 심박수 박스·요약·차트가 **없다**.
+- 검색: 들어가자마자 검색창이 펼쳐지고 키보드가 뜬다. 결과 목록이 헤더 바로 밑에서 시작한다.

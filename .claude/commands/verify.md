@@ -1,9 +1,9 @@
 ---
-description: iOS 시뮬레이터에서 변경을 눈으로 검증 (verify 스킬 실행)
+description: iOS 시뮬레이터·Android 에뮬레이터에서 변경을 눈으로 검증 (verify 스킬 실행)
 argument-hint: [검증할 변경/플로우 설명 (선택)]
 ---
 
-`.agents/skills/verify/SKILL.md`를 읽고 그대로 따라, 이번 변경이 실제로 의도대로 동작하는지 iOS 시뮬레이터에서 끝까지 실행해 눈으로 검증한다.
+`.agents/skills/verify/SKILL.md`를 읽고 그대로 따라, 이번 변경이 실제로 의도대로 동작하는지 iOS 시뮬레이터·Android 에뮬레이터에서 끝까지 실행해 눈으로 검증한다. 인자에 `ios`/`android`가 있으면 그 플랫폼만, 없으면 바뀐 파일로 정한다(`*.ios.*`→iOS, `*.android.*`→Android, 공통→둘 다).
 
 검증 대상: $ARGUMENTS
 
