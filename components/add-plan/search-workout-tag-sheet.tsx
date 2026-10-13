@@ -3,6 +3,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
@@ -33,7 +34,10 @@ export const SearchWorkoutTagSheet = forwardRef<
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef<TextInput | null>(null);
 
-  const snapPoints = useMemo(() => ["80%"], []);
+  // 화면 높이의 80% — "80%"는 시트가 놓인 화면(헤더 아래 본문) 기준이라, 헤더가 본문 위 칸에 있는
+  // 안드로이드에선 헤더만큼 낮게 뜬다 (iOS는 투명 헤더라 본문이 곧 전체 화면이다)
+  const { height } = useWindowDimensions();
+  const snapPoints = useMemo(() => [height * 0.8], [height]);
   const filterWorkoutTag = workoutList?.filter((tag) => {
     const searchLower = inputValue.toLowerCase().trim();
     const nameLower = tag.toLowerCase().trim();
