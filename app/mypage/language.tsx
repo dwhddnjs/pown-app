@@ -13,6 +13,7 @@ import { Lang, LANG_LABEL } from "@/lib/i18n";
 import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
 // expo
 import { useRouter } from "expo-router";
+import { FLAG_EMOJI_BOX } from "@/constants/text-metrics";
 // icon
 import Entypo from "@expo/vector-icons/Entypo";
 
@@ -52,7 +53,9 @@ export default function Language() {
         {LANG_OPTIONS.map((option) => (
           <SettingItem
             key={option.key}
-            icon={<Text style={styles.flag}>{option.flag}</Text>}
+            icon={
+              <Text style={[styles.flag, FLAG_EMOJI_BOX]}>{option.flag}</Text>
+            }
             title={LANG_LABEL[option.key]}
             right={
               language === option.key ? (

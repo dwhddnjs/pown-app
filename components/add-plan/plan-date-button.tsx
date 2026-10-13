@@ -15,6 +15,7 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { formatPlanDateTime } from "@/lib/date";
+import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
 // icon
 import Entypo from "@expo/vector-icons/Entypo";
 
@@ -33,7 +34,12 @@ export const PlanDateButton = ({ textStyle }: PlanDateButtonProps) => {
 
   return (
     <TouchableOpacity style={styles.button} onPress={() => setOpen(true)}>
-      <Text style={[{ color: themeColor.tintText }, textStyle]}>
+      <Text
+        style={[
+          { color: themeColor.tintText, paddingTop: EMOJI_LINE_TOP.planDate },
+          textStyle,
+        ]}
+      >
         {`📆 ${formatPlanDateTime(date, lang)}`}
       </Text>
       <Entypo name="select-arrows" size={18} color={themeColor.tintText} />

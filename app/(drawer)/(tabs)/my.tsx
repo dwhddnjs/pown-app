@@ -2,6 +2,7 @@
 import { ScrollView, StyleSheet } from "react-native";
 import { UserDataCard } from "@/components/mypage/user-data-card";
 import { SettingSection } from "@/components/mypage/setting-section";
+import { settingsScreenStyles } from "@/components/mypage/settings-screen-styles";
 import { SettingItem } from "@/components/mypage/setting-item";
 import { toast } from "sonner-native";
 // zustand
@@ -64,6 +65,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="account-edit"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -76,6 +78,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="circle-half-full"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -89,6 +92,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="translate"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -102,6 +106,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="calculator-variant"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -117,6 +122,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="database-outline"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -133,6 +139,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="email-outline"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -145,6 +152,7 @@ export default function My() {
             <MaterialCommunityIcons
               name="information-outline"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }

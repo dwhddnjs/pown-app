@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useT } from "@/hooks/use-t";
 import { Pressable, StyleSheet, TouchableOpacity } from "react-native";
 import { View, Text } from "@/components/themed";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { router } from "expo-router";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Animated, {
@@ -20,10 +21,14 @@ interface FabOverlayProps {
 }
 
 const ANIMATION_DURATION = 250;
+// 메뉴 아래 끝을 탭바 콘텐츠(49) 위로 띄우는 거리. 하단 인셋을 더한다 — 110으로 고정하면
+// 홈 인디케이터(34)가 낮은 안드로이드(24)에서 메뉴가 탭바에서 10만큼 더 떠 보인다
+const MENU_ABOVE_TAB_BAR = 76;
 
 export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
   const t = useT();
   const themeColor = useCurrentThemeColor();
+  const { bottom } = useSafeAreaInsets();
   const progress = useSharedValue(0);
   const [mounted, setMounted] = useState(isOpen);
 
@@ -90,7 +95,10 @@ export const FabOverlay = ({ isOpen, onClose }: FabOverlayProps) => {
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
       </Animated.View>
 
-      <View style={styles.menuContainer} pointerEvents="box-none">
+      <View
+        style={[styles.menuContainer, { bottom: bottom + MENU_ABOVE_TAB_BAR }]}
+        pointerEvents="box-none"
+      >
         <Animated.View style={[styles.menuItem, multiButtonStyle]}>
           <TouchableOpacity
             style={[styles.actionButton, { borderColor: themeColor.tint }]}
@@ -137,7 +145,6 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     position: "absolute",
-    bottom: 110,
     alignSelf: "center",
     flexDirection: "row",
     alignItems: "center",

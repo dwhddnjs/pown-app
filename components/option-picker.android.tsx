@@ -1,9 +1,11 @@
 import React from "react";
 // component
-import { StyleSheet, View } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-// hooks
-import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { StyleSheet, useColorScheme, View } from "react-native";
+import {
+  WHEEL_BAND_COLOR,
+  WheelColumn,
+  WheelMetrics,
+} from "@/components/wheel";
 
 type OptionPickerProps = {
   selectedValue: string;
@@ -11,60 +13,63 @@ type OptionPickerProps = {
   onChange: (value: string) => void;
 };
 
-const FIELD_HEIGHT = 48;
-const FIELD_MARGIN_TOP = 10;
-// 아래 추가 버튼과의 간격 — 없으면 칸이 버튼에 붙어 보인다
-const FIELD_MARGIN_BOTTOM = 9;
+// iOS 휠(UIPickerView)을 시뮬레이터에서 잰 값 (pt) — 반지름 86.5 원통, 한 행 호 47(= 선택 띠),
+// 가운데·한 칸·두 칸 떨어진 행의 글자 불투명도
+const METRICS: WheelMetrics = {
+  height: 216,
+  row: 47,
+  radius: 86.5,
+  opacity: {
+    light: [0.77, 0.34, 0.2, 0.05],
+    dark: [0.71, 0.34, 0.2, 0.05],
+  },
+};
 
-// 피커가 차지하는 높이 — 이걸 담는 시트가 높이를 맞춘다
-export const OPTION_PICKER_HEIGHT =
-  FIELD_HEIGHT + FIELD_MARGIN_TOP + FIELD_MARGIN_BOTTOM;
+// 휠의 높이 — 이걸 담는 시트가 높이를 맞춘다
+export const OPTION_PICKER_HEIGHT = METRICS.height;
 
-// 목록에서 하나 고르기 — 안드로이드엔 네이티브 휠이 없어 드롭다운을 쓴다.
-// 맨 스피너는 테두리 없이 화면 끝에 붙어 떠 보여서, 앱의 다른 입력칸(목표 중량 등)처럼
-// 테두리 친 칸에 담는다. 글자·화살표 색을 주지 않으면 다크 테마에서 묻힌다.
-// 글꼴은 시스템 글꼴이다 — 네이티브 스피너는 앱이 실행 중에 불러온 글꼴(sb-*)을 못 쓴다
+// 목록에서 하나 고르기 — 안드로이드엔 네이티브 휠이 없어 iOS 휠을 그대로 그린다 (wheel.android.tsx).
+// 글꼴은 iOS처럼 시스템 글꼴
 export const OptionPicker = ({
   selectedValue,
   items,
   onChange,
 }: OptionPickerProps) => {
-  const themeColor = useCurrentThemeColor();
+  const bandColor = WHEEL_BAND_COLOR[useColorScheme() ?? "light"];
+  const index = Math.max(
+    0,
+    items.findIndex((item) => item.value === selectedValue),
+  );
+
   return (
-    <View style={[styles.field, { borderColor: themeColor.tint }]}>
-      <Picker
-        mode="dropdown"
-        selectedValue={selectedValue}
-        onValueChange={onChange}
-        dropdownIconColor={themeColor.text}
-        style={{ color: themeColor.text }}
-      >
-        {items.map((item) => (
-          <Picker.Item
-            key={item.value}
-            label={item.label}
-            value={item.value}
-            color={themeColor.text}
-          />
-        ))}
-      </Picker>
+    <View>
+      <View style={[styles.band, { backgroundColor: bandColor }]} />
+      <WheelColumn
+        metrics={METRICS}
+        count={items.length}
+        index={index}
+        label={(i) => items[i].label}
+        onChange={(i) => onChange(items[i].value)}
+        textStyle={styles.label}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  field: {
-    height: FIELD_HEIGHT,
-    marginTop: FIELD_MARGIN_TOP,
-    marginBottom: FIELD_MARGIN_BOTTOM,
-    // 아래 추가 버튼(Button)과 좌우 끝을 맞춘다
-    marginHorizontal: 20,
-    borderWidth: 1.5,
-    borderRadius: 12,
+  // 선택 띠 — 열 좌우로 9.5씩 들인 둥근 칸
+  band: {
+    position: "absolute",
+    top: (METRICS.height - METRICS.row) / 2,
+    height: METRICS.row,
+    left: 9.5,
+    right: 9.5,
+    borderRadius: 8,
     borderCurve: "continuous",
-    overflow: "hidden",
-    // 스피너는 자기 안쪽 여백까지 합쳐 칸보다 키가 크다 — 높이를 강제하면 글자가 아래로
-    // 밀려 잘리므로 제 키대로 두고 가운데 맞춰 위아래 여백만 잘라낸다
-    justifyContent: "center",
+  },
+  // iOS는 22pt 시스템 글꼴(SF) — 안드로이드 시스템 글꼴(Noto CJK)은 한글이 10% 커서 한 단계 줄인다
+  label: {
+    fontSize: 21,
+    textAlign: "center",
   },
 });

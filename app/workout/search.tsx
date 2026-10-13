@@ -6,8 +6,9 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
 import { RoundedSide } from "@/components/rounded-side";
 import {
-  SEARCH_LIST_PADDING_TOP,
+  SEARCH_HEADER_OPTIONS,
   useSearchBarOptions,
+  useSearchListPaddingTop,
 } from "@/components/navigation/search-bar-options";
 import { FlashList } from "@shopify/flash-list";
 // hook
@@ -72,8 +73,12 @@ export default function Search() {
     onChangeText: setInputValue,
   });
   useLayoutEffect(() => {
-    navigation.setOptions({ headerSearchBarOptions: searchBarOptions });
+    navigation.setOptions({
+      headerSearchBarOptions: searchBarOptions,
+      ...SEARCH_HEADER_OPTIONS,
+    });
   }, [navigation, searchBarOptions]);
+  const listPaddingTop = useSearchListPaddingTop();
 
   const searchResult = inputValue
     ? Object.entries(filterWorkoutList(inputValue))
@@ -89,7 +94,7 @@ export default function Search() {
         showsHorizontalScrollIndicator={false}
         keyExtractor={(item) => item[0]}
         keyboardDismissMode="on-drag"
-        contentContainerStyle={{ paddingTop: SEARCH_LIST_PADDING_TOP }}
+        contentContainerStyle={{ paddingTop: listPaddingTop }}
         renderItem={({ item }) => {
           return (
             <View style={styles.list}>

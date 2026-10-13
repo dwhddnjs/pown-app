@@ -60,6 +60,7 @@ export default function ThemeMode() {
               <MaterialCommunityIcons
                 name={option.icon}
                 size={20}
+                style={settingsScreenStyles.icon}
                 color={themeColor.tintText}
               />
             }

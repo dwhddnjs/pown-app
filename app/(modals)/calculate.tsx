@@ -12,6 +12,7 @@ import {
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useIsModalOpenStore } from "@/hooks/use-is-modal-open-store";
+import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
 
 export default function Calculate() {
   const t = useT();
@@ -45,6 +46,7 @@ export default function Calculate() {
 
       return {
         title: percentText(),
+        hasEmoji: percent >= 100,
         value: `${Math.round((num * percent) / 100).toString()}${
           selected === "kg" ? "kg" : "lb"
         }`,
@@ -168,7 +170,13 @@ export default function Calculate() {
             ]}
             key={item.title}
           >
-            <Text style={{ fontSize: 16, color: themeColor.text }}>
+            <Text
+              style={{
+                fontSize: 16,
+                color: themeColor.text,
+                paddingTop: item.hasEmoji ? EMOJI_LINE_TOP.calcRow : 0,
+              }}
+            >
               {item.title}
             </Text>
             <Text style={{ fontSize: 16, color: themeColor.tintText }}>

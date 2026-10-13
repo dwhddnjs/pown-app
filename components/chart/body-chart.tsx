@@ -165,9 +165,8 @@ export const BodyChart = () => {
                   }}
                 >
                   <Text style={{ fontSize: 10 }}>{items[0].date}</Text>
-                  <Text
-                    style={{ fontWeight: "bold", color: themeColor.tintText }}
-                  >
+                  {/* fontWeight 없이 — 안드로이드는 sb-m에 가짜 굵게를 입힌다 */}
+                  <Text style={{ color: themeColor.tintText }}>
                     {items[0].value + "kg"}
                   </Text>
                 </View>

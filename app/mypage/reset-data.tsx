@@ -98,6 +98,7 @@ export default function ResetData() {
             <MaterialCommunityIcons
               name="tray-arrow-up"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -110,6 +111,7 @@ export default function ResetData() {
             <MaterialCommunityIcons
               name="tray-arrow-down"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.tintText}
             />
           }
@@ -124,6 +126,7 @@ export default function ResetData() {
             <MaterialCommunityIcons
               name="trash-can-outline"
               size={20}
+              style={settingsScreenStyles.icon}
               color={themeColor.fail}
             />
           }

@@ -6,7 +6,11 @@ import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
 import { ChartHeader } from "@/components/chart";
 import { BarBackground } from "@/components/bar-background";
 import { WorkoutTabIcon } from "@/components/navigation/workout-tab-icon";
-import { tabHeaderHeight } from "@/components/navigation/header-metrics";
+import {
+  headerBarTop,
+  headerTitleOffset,
+  tabHeaderHeight,
+} from "@/components/navigation/header-metrics";
 import { headerTitleFont } from "@/components/navigation/screen-options";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // expo
@@ -193,6 +197,9 @@ export default function TabLayout() {
               backgroundColor: "transparent",
               height: tabHeaderHeight(insets.top),
             },
+            // 바가 시작하는 높이 — 안드로이드는 iOS 내비 바 자리(안전영역 − 5⅓)에 맞춘다
+            headerStatusBarHeight: headerBarTop(insets.top),
+            headerTitleStyle: [tabOption.headerTitleStyle, headerTitleOffset],
             headerBackground: () => (
               <BarBackground style={StyleSheet.absoluteFill} />
             ),

@@ -17,6 +17,7 @@ import { View } from "../themed";
 import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { MULTILINE_INPUT_TOP } from "@/constants/text-metrics";
 import { useT } from "@/hooks/use-t";
 // lib
 import {
@@ -215,6 +216,7 @@ const styles = StyleSheet.create({
     paddingLeft: 2,
     fontSize: 16,
     paddingVertical: 14,
+    paddingTop: 14 + MULTILINE_INPUT_TOP,
     fontFamily: "sb-l",
     textAlignVertical: "top",
     // 이게 없으면 길게 쓸 때 스크롤된 글자가 입력칸 밖(제목 밑줄 위)까지 그려진다

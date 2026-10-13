@@ -1,14 +1,16 @@
 import { StyleSheet } from "react-native";
 import { Text, View } from "../themed";
 import { Dialog } from "../dialog";
+import { DateTimeSpinner } from "./date-time-spinner";
 import { useIsDialogOpenStore } from "@/hooks/use-is-dialog-open-store";
-import RNDateTimePicker from "@react-native-community/datetimepicker";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { Button } from "../button";
 import { usePlanStore } from "@/hooks/use-plan-store";
+import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
 import { useEffect, useState } from "react";
 
+// 운동 날짜·시간 선택 다이얼로그. 스피너는 플랫폼마다 다르다 (date-time-spinner.ios/.android)
 export const SelectTypeDateSheet = () => {
   const { open, setOpen } = useIsDialogOpenStore();
   const { date, setDate } = usePlanStore();
@@ -41,6 +43,7 @@ export const SelectTypeDateSheet = () => {
         <Text
           style={{
             fontSize: 18,
+            paddingTop: EMOJI_LINE_TOP.dateTitle,
           }}
         >
           {t("plan.selectDate")}
@@ -54,17 +57,9 @@ export const SelectTypeDateSheet = () => {
           },
         ]}
       >
-        <RNDateTimePicker
-          mode="datetime"
-          display="spinner"
-          locale="ko"
+        <DateTimeSpinner
           value={new Date(selectedDate)}
-          // dismissed 이벤트에는 timestamp가 없다 — 그대로 넣으면 Invalid Date가
-          // 저장까지 흘러가 format()이 던진다
-          onChange={(e) => {
-            const timestamp = e.nativeEvent.timestamp;
-            if (timestamp) setSelectedDate(timestamp);
-          }}
+          onChange={(next) => setSelectedDate(next.valueOf())}
         />
       </View>
       <Button type="solid" onPress={onSubmitDate}>

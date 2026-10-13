@@ -1,14 +1,8 @@
-import { RefObject, useEffect, useMemo, useRef } from "react";
-import type { SearchBarCommands, SearchBarProps } from "react-native-screens";
-import type {
-  NavigationProp,
-  NavigationState,
-  ParamListBase,
-} from "@react-navigation/native";
+import { useMemo } from "react";
+import type { SearchBarProps } from "react-native-screens";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // lib
 import { ThemeColorType } from "@/constants/colors";
-// expo
-import { useNavigation } from "expo-router";
 
 type SearchBarOptionsArgs = {
   placeholder: string;
@@ -17,53 +11,26 @@ type SearchBarOptionsArgs = {
   onChangeText: (text: string) => void;
 };
 
-// 네이티브 스택이 보내는 이벤트 중 여기서 듣는 것만
-type StackEvents = { transitionEnd: { data: { closing: boolean } } };
-
-// 툴바 검색 아이콘을 누르면 펼쳐지는 네이티브 SearchView.
-// 색을 주지 않으면 툴바 기본(밝은 테마) 색이라 다크 테마에서 글자·아이콘이 묻힌다.
-// 취소 버튼은 iOS에만 있다 — 안드로이드는 뒤로가기가 검색을 닫는다
+// 검색창은 헤더(stack-header.android.tsx)가 iOS UISearchController 모양으로 그린다 —
+// 네이티브 SearchView는 제목·뒤로 버튼을 통째로 덮어 iOS와 딴판이다.
+// 들어오자마자 펼치지 않는다(iOS처럼 칸을 눌러야 키보드가 뜬다)
 export const useSearchBarOptions = ({
   placeholder,
-  themeColor,
+  cancelText,
   onChangeText,
-}: SearchBarOptionsArgs): SearchBarProps => {
-  const ref = useRef<SearchBarCommands>(null);
-  const navigation =
-    useNavigation<
-      NavigationProp<
-        ParamListBase,
-        string,
-        undefined,
-        NavigationState,
-        object,
-        StackEvents
-      >
-    >();
-
-  // 검색하러 들어온 화면이라 바로 펼쳐 키보드를 띄운다. autoFocus 옵션은 검색창이 만들어질 때
-  // 이미 들어와 있어야 먹는데, 화면이 setOptions로 넣으면 늦어서 무시된다 — 전환이 끝나면 직접 연다
-  useEffect(
-    () =>
-      navigation.addListener("transitionEnd", (e) => {
-        if (!e.data.closing) ref.current?.focus();
-      }),
-    [navigation],
-  );
-
-  return useMemo(
+}: SearchBarOptionsArgs): SearchBarProps =>
+  useMemo(
     () => ({
-      // react-native-screens 타입은 null 없는 RefObject를 받는다
-      ref: ref as RefObject<SearchBarCommands>,
       placeholder,
-      textColor: themeColor.text,
-      hintTextColor: themeColor.subText,
-      headerIconColor: themeColor.text,
+      cancelButtonText: cancelText,
       onChangeText: (e) => onChangeText(e.nativeEvent.text),
     }),
-    [placeholder, themeColor, onChangeText],
+    [placeholder, cancelText, onChangeText],
   );
-};
 
-// 헤더가 불투명이라 목록이 이미 헤더 밑에서 시작한다
-export const SEARCH_LIST_PADDING_TOP = 0;
+// 헤더를 목록 위에 겹친다 — 검색 중 바가 줄어도 목록이 움직이지 않게 (iOS와 같다)
+export const SEARCH_HEADER_OPTIONS = { headerTransparent: true };
+
+// 목록이 헤더 뒤(화면 맨 위)부터 깔리므로 내려 줄 높이 — iOS(110 = 안전영역 62 + 48)와
+// 같은 자리. 결과 첫 카드가 검색 중인 칸 바로 밑에 온다
+export const useSearchListPaddingTop = () => useSafeAreaInsets().top + 48;

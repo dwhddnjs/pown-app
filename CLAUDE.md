@@ -87,24 +87,28 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 6. 쌍은 원래 자리에 나란히 둔다. **쌍을 추가하면 아래 표에 한 줄 추가.**
 7. 웹은 지원하지 않는다 (`.web`·기본 파일을 두지 않는다).
 
-| 무엇                        | 파일 (확장자 없이 import)                    | iOS                                 | Android                                       |
-| --------------------------- | -------------------------------------------- | ----------------------------------- | --------------------------------------------- |
-| 헤더·탭바 배경              | `components/bar-background`                  | `BlurView`                          | iOS 블러 실측색으로 불투명                    |
-| 모달 띄우는 방식            | `components/navigation/modal-presentation`   | `modal` (page sheet, 네이티브 헤더) | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더 |
-| 운동 탭 아이콘              | `components/navigation/workout-tab-icon`     | SF Symbol                           | FontAwesome6 덤벨(가로)                       |
-| 헤더 버튼 보정·MY 헤더 높이 | `components/navigation/header-metrics`       | 푸시·모달 보정, 기본 높이           | 모달만 보정, MY 헤더 44                       |
-| 검색창 옵션                 | `components/navigation/search-bar-options`   | UISearchController, 목록 상단 110   | SearchView 색 지정·진입 시 펼침, 0            |
-| 모달 상태바                 | `components/navigation/modal-status-bar`     | `light` (시트 모달)                 | 없음 (전체화면)                               |
-| 루트 전용 요소              | `components/platform-root`                   | App Store 업데이트 안내             | 상태바 `auto`                                 |
-| 키보드 회피                 | `components/keyboard-avoid`                  | padding + 상태바 오프셋             | padding (edge-to-edge)                        |
-| 운동 날짜 선택              | `components/add-plan/select-type-date-sheet` | 다이얼로그 + datetime 스피너        | 날짜 → 시간 시스템 다이얼로그                 |
-| 목록에서 하나 고르기        | `components/option-picker`                   | 휠 (216)                            | 테두리 칸 안 드롭다운                         |
-| 뒤로가기로 시트 닫기        | `hooks/use-back-to-close`                    | 없음                                | `BackHandler`                                 |
-| 메일 앱 열기                | `lib/open-mail`                              | Gmail → mailto                      | mailto 바로                                   |
-| 광고 단위·추적 동의         | `lib/ads-platform`                           | 실 단위 ID, ATT                     | 테스트 ID(출시 전 교체), 없음                 |
-| AI 요청 앱 헤더             | `lib/ai-client-headers`                      | `X-Ios-Bundle-Identifier`           | 없음                                          |
-| 사진 저장 권한              | `lib/media-permission`                       | 읽기+쓰기                           | 쓰기 전용                                     |
-| 심박수 기능 입구            | `components/heart-rate` (index)              | 실제 기능                           | 빈 구현                                       |
+| 무엇                         | 파일 (확장자 없이 import)                  | iOS                                   | Android                                                                    |
+| ---------------------------- | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
+| 헤더·탭바 배경               | `components/bar-background`                | `BlurView`                            | iOS 블러 실측색으로 불투명                                                 |
+| 모달 띄우는 방식             | `components/navigation/modal-presentation` | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
+| 푸시 화면 헤더               | `components/navigation/stack-header`       | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
+| 운동 탭 아이콘               | `components/navigation/workout-tab-icon`   | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
+| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`     | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
+| 검색창 옵션                  | `components/navigation/search-bar-options` | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
+| 모달 상태바                  | `components/navigation/modal-status-bar`   | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
+| 루트 전용 요소               | `components/platform-root`                 | App Store 업데이트 안내               | 상태바 `auto`                                                              |
+| 키보드 회피                  | `components/keyboard-avoid`                | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
+| 날짜·시간 스피너             | `components/add-plan/date-time-spinner`    | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
+| 목록에서 하나 고르기         | `components/option-picker`                 | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
+| 글자 배치 보정값             | `constants/text-metrics`                   | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
+| 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                  | 없음                                  | `BackHandler`                                                              |
+| 메일 앱 열기                 | `lib/open-mail`                            | Gmail → mailto                        | mailto 바로                                                                |
+| 광고 단위·추적 동의          | `lib/ads-platform`                         | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
+| AI 요청 앱 헤더              | `lib/ai-client-headers`                    | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
+| 사진 저장 권한               | `lib/media-permission`                     | 읽기+쓰기                             | 쓰기 전용                                                                  |
+| 심박수 기능 입구             | `components/heart-rate` (index)            | 실제 기능                             | 빈 구현                                                                    |
+
+**Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 
 **iOS 전용(단독)**: `components/update-dialog.ios.tsx`, `components/heart-rate/*.ios.tsx`, `hooks/use-heart-rate-live-store.ios.tsx`, 네이티브 `modules/heart-rate/`(apple 전용 autolink)·`targets/`(워치·라이브 액티비티).
 
@@ -116,7 +120,12 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **좁은 띠·칸 안에서 이모지를 sb 글자와 한 `Text`에 섞지 않는다** — 이모지 글꼴이 줄 높이를 플랫폼·기기마다 다르게 바꾼다. 따로 두고 가운데 정렬(`plan-date-header.tsx`).
 - **sb 글꼴에 없는 기호는 대체 글꼴로 그려져** 안드로이드에선 그 줄 아래가 잘린다 — `•`→`·`, `–`→`-`. 새 기호를 쓰면 폰트에 있는지 확인.
 - 아이콘 글꼴은 `_layout.tsx`의 `useFonts`에서 미리 불러온다 — 새 아이콘 패밀리를 쓰면 거기 추가(안 하면 처음 뜰 때 빈칸이었다 나타난다).
-- 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7).
+- **sb 글꼴에 `fontWeight`를 주지 않는다** — sb-*엔 굵은 변형이 없어 iOS는 무시하지만 안드로이드는 가짜 굵게(synthetic bold)를 입혀 글자가 뭉개진다. 굵기는 글꼴(`sb-b`/`sb-m`/`sb-l`)로 고른다.
+- **글자와 섞인 컬러 이모지는 iOS에서만 줄을 키운다** — 같은 줄의 글자와 그 아래가 안드로이드에서 위로 붙는다. 이모지마다 늘어나는 양이 달라 쓰는 곳마다 재서 `constants/text-metrics`의 `EMOJI_LINE_TOP`에 넣는다.
+- **헤더 높이는 iOS 내비 바 기하를 따른다**(`header-metrics`·`stack-header`) — 안드로이드 기본 툴바(56dp)를 쓰면 헤더가 12dp 두꺼워 본문이 통째로 내려간다. 투명 헤더(`headerTransparent`/`headerBackground`)를 쓰면 react-navigation이 안드로이드에서 헤더 높이를 56+인셋으로 덮어쓰니(라이브러리 FIXME) `useHeaderHeight()`에 기대지 말 것.
+- **RN `Modal` 안의 제스처(gesture-handler)는 그 안에 `GestureHandlerRootView`가 있어야 먹는다**(안드로이드) — `components/dialog.tsx`가 깔아 둔다. 새 Modal에 휠·팬 제스처를 넣으면 같이 깐다.
+- **바텀시트(@gorhom) 안의 스크롤뷰는 시트 드래그에 터치를 뺏긴다** — 휠처럼 세로로 끄는 건 짧은 `activeOffsetY`의 팬 제스처로 만든다(`wheel.android`).
+- 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.
 

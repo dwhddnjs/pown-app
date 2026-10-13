@@ -23,7 +23,11 @@ import {
   ScreenOptionsArgs,
   settingsScreen,
 } from "@/components/navigation/screen-options";
-import { useModalPresentation } from "@/components/navigation/modal-presentation";
+import {
+  modalBarHeader,
+  useModalPresentation,
+} from "@/components/navigation/modal-presentation";
+import { stackHeader } from "@/components/navigation/stack-header";
 //expo
 import { useFonts } from "expo-font";
 import { Stack } from "expo-router";
@@ -140,6 +144,8 @@ function RootLayoutNav() {
   return (
     <Stack
       screenOptions={{
+        // 안드로이드는 iOS 내비 바 모양의 JS 헤더 (iOS는 빈 객체)
+        ...stackHeader,
         headerStyle: {
           backgroundColor: background,
         },
@@ -167,6 +173,7 @@ function RootLayoutNav() {
         options={({ navigation }: ScreenOptionsArgs) => ({
           ...planFormScreen({ navigation }),
           ...modalPresentation,
+          ...modalBarHeader,
           headerLeft: headerBackButton(
             "close",
             navigation,

@@ -1,6 +1,6 @@
-import { StyleProp, StyleSheet, ViewStyle } from "react-native";
+import { StyleProp, ViewStyle } from "react-native";
 import { HeaderIconButton } from "@/components/header-icon-button";
-import { BarBackground } from "@/components/bar-background";
+import { blurHeader } from "@/components/navigation/stack-header";
 import {
   headerButtonLift,
   headerButtonLiftModal,
@@ -87,15 +87,10 @@ export const fullScreen =
   });
 
 // 계획 작성/수정 폼 — 저장 버튼(headerRight)은 각 화면이 직접 붙인다.
-// 헤더 배경은 workout 탭과 같은 BarBackground(iOS는 blur). 맨 위에서는 뒤에 배경색밖에
-// 없어서 구분이 안 보이고, 스크롤하면 콘텐츠가 지나가며 blur가 드러난다.
-// 폼 본문(ScrollView)은 useHeaderHeight()만큼 paddingTop을 잡아 헤더 아래로 내려간다.
+// 헤더 배경은 workout 탭과 같은 BarBackground(iOS는 투명 헤더 + blur, stack-header.ios/.android).
+// 폼 본문(ScrollView)은 useBlurHeaderInset()만큼 paddingTop을 잡아 헤더 아래로 내려간다.
 export const planFormScreen = ({ navigation }: ScreenOptionsArgs) => ({
   headerTitle: "",
-  headerTransparent: true,
-  // 루트 screenOptions가 헤더에 배경색을 깔아둔다 — 여기서 지우지 않으면
-  // 그 불투명 색이 아래 BarBackground를 덮어 blur가 아예 보이지 않는다
-  headerStyle: { backgroundColor: "transparent" },
-  headerBackground: () => <BarBackground style={StyleSheet.absoluteFill} />,
+  ...blurHeader,
   headerLeft: headerBackButton("back", navigation, headerButtonLift),
 });

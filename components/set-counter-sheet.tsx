@@ -62,7 +62,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
       });
     };
 
-    // 시트 높이는 피커 높이에 맞춘다 (iOS 휠 216, 안드로이드 드롭다운 56).
+    // 시트 높이는 피커 높이에 맞춘다 (휠 216 — 안드로이드도 같은 모양을 JS로 그린다).
     // "50%"로 두면 기기에 따라 픽커와 버튼 사이가 100pt 가까이 빈다.
     const snapPoints = useMemo(
       () => [SHEET_CHROME_HEIGHT + OPTION_PICKER_HEIGHT],
