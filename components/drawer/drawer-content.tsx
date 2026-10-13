@@ -8,6 +8,8 @@ import {
   useDrawerStatus,
 } from "@react-navigation/drawer";
 import { WorkoutFolderTree } from "./workout-folder-tree";
+import { drawerHeaderTop } from "@/components/navigation/header-metrics";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 // zustand
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
@@ -31,6 +33,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
   const t = useT();
   const { onSetDate } = useSelectDateStore();
   const { push } = useRouter();
+  const insets = useSafeAreaInsets();
 
   // 드로어는 닫혀 있어도 항상 마운트돼 있고, 세트 완료 토글은 workoutPlanList
   // 참조를 매번 새로 만든다 — memo만으로는 그 탭마다 전체 기록을 다시 훑는다.
@@ -61,7 +64,9 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View
+        style={[styles.header, { paddingTop: drawerHeaderTop(insets.top) }]}
+      >
         <View style={styles.headerRow}>
           <View style={{ gap: 4 }}>
             <Text style={{ fontSize: 18 }}>{t("drawer.title")}</Text>
@@ -121,7 +126,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   header: {
-    paddingTop: 72,
     paddingBottom: 12,
     gap: 4,
   },

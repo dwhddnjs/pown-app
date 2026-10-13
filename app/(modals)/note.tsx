@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import { useT } from "@/hooks/use-t";
 // component
 import { StyleSheet, TextInput } from "react-native";
+import { MULTILINE_INPUT_TOP } from "@/constants/text-metrics";
 import { View } from "@/components/themed";
 import { HeaderIconButton } from "@/components/header-icon-button";
 // zustand
@@ -102,6 +103,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
 
     paddingVertical: 14,
+    paddingTop: 14 + MULTILINE_INPUT_TOP,
     height: 300,
     fontFamily: "sb-l",
     textAlignVertical: "top",

@@ -11,6 +11,7 @@ import {
 import { View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { KeyBoardAvoid } from "@/components/keyboard-avoid";
+import { useBlurHeaderInset } from "@/components/navigation/stack-header";
 import { WorkoutTags } from "@/components/add-plan/workout-tags";
 import { SetCounter } from "@/components/add-plan/set-counter";
 import { TopWeight } from "@/components/add-plan/top-weight";
@@ -36,7 +37,6 @@ import { useBackToClose } from "@/hooks/use-back-to-close";
 import { WorkoutTypes } from "@/types/workout";
 // expo
 import { Stack, useFocusEffect, useNavigation } from "expo-router";
-import { useHeaderHeight } from "@react-navigation/elements";
 
 interface PlanFormProps {
   workoutType: WorkoutTypes;
@@ -70,9 +70,10 @@ export const PlanForm = ({
   const { isEditMode, setEditMode } = useWorkoutTagDialogStore();
   const navigation = useNavigation();
   const themeColor = useCurrentThemeColor();
-  // 헤더가 투명(blur)이라 ScrollView가 그 뒤까지 깔린다 — 실제 헤더 높이를 직접 받아
+  // iOS는 헤더가 투명(blur)이라 ScrollView가 그 뒤까지 깔린다 — 실제 헤더 높이를 직접 받아
   // 위쪽 여백으로 준다. 모달(add-multi-plan)은 네비바가 더 높은데 이 값이 알아서 다르다.
-  const headerHeight = useHeaderHeight();
+  // 안드로이드는 헤더가 본문 위 칸에 있어 0이다 (stack-header.android.tsx)
+  const headerHeight = useBlurHeaderInset();
   const [isWorkoutTagModalOpen, setIsWorkoutTagModalOpen] = useState(false);
   const [isSetCounterSheetOpen, setIsSetCounterSheetOpen] = useState(false);
   const [currentScrollY, setCurrentScrollY] = useState(0);

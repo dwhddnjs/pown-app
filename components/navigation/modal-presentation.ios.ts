@@ -3,3 +3,6 @@
 const MODAL_PRESENTATION = { presentation: "modal" as const };
 
 export const useModalPresentation = () => MODAL_PRESENTATION;
+
+// 시트 헤더를 바 색으로 — iOS는 화면 옵션의 blur 헤더(headerBackground)가 그대로 보인다
+export const modalBarHeader = {};

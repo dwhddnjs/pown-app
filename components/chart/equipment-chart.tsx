@@ -107,15 +107,15 @@ export const EquipmentChart = () => {
           rotateLabel={lang === "en"}
           xAxisLabelsHeight={lang === "en" ? 44 : undefined}
           xAxisLabelsVerticalShift={lang === "en" ? 12 : undefined}
+          // fontWeight를 주지 않는다 — sb-l엔 굵은 변형이 없어 iOS는 무시하지만 안드로이드는
+          // 가짜 굵게(synthetic bold)를 입혀 글자가 뭉개진다
           xAxisLabelTextStyle={{
             color: themeColor.text,
-            fontWeight: "bold",
             fontSize: lang === "en" ? 9 : undefined,
             fontFamily: "sb-l",
           }}
           yAxisTextStyle={{
             color: themeColor.text,
-            fontWeight: "bold",
             fontFamily: "sb-l",
           }}
         />

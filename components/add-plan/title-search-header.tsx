@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 // color
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
 // icon
 import { FontAwesome } from "@expo/vector-icons";
 import { Text, View } from "../themed";
@@ -18,7 +19,9 @@ export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
 
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{t("plan.whichWorkout")}</Text>
+      <Text style={[styles.title, { paddingTop: EMOJI_LINE_TOP.formTitle }]}>
+        {t("plan.whichWorkout")}
+      </Text>
       <TouchableOpacity onPress={onPress} style={{ padding: 8 }}>
         <FontAwesome name="search" size={20} color={themeColor.text} />
       </TouchableOpacity>
