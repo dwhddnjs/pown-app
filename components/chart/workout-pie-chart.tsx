@@ -84,7 +84,9 @@ export const WorkoutPieChart = () => {
           showText
           showValuesAsLabels
           textColor={themeColor.text}
-          fontWeight="bold"
+          // 라벨도 앱 글꼴로 — fontWeight="bold"만 주면 시스템 글꼴(SF / Roboto)로 그려져 두 플랫폼 모양이
+          // 다르다. sb엔 굵은 변형이 없어 굵기는 글꼴로 고른다
+          font="sb-b"
           textBackgroundRadius={26}
           backgroundColor={themeColor.itemColor}
         />

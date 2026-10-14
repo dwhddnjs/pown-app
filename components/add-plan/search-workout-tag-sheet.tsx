@@ -160,6 +160,8 @@ SearchWorkoutTagSheet.displayName = "SearchWorkoutTagSheet";
 const styles = StyleSheet.create({
   input: {
     flex: 1,
+    // 글꼴을 안 주면 입력 글자가 시스템 글꼴(SF / Roboto)이라 플랫폼마다 다르다
+    fontFamily: "sb-m",
     // iOS 기본값(0)을 적어 둔다 — 안드로이드 TextInput은 기본 여백이 있어 칸이 커진다
     padding: 0,
   },
