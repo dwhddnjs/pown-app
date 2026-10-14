@@ -101,9 +101,12 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     paddingVertical: 8,
     paddingLeft: 2,
+    // 안드로이드 TextInput 기본 오른쪽 여백을 없앤다 — iOS는 0이라 글자가 더 일찍 줄바꿈됐다
+    paddingRight: 0,
   },
   descInput: {
     paddingLeft: 2,
+    paddingRight: 0,
     fontSize: 16,
 
     paddingVertical: 14,

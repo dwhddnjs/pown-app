@@ -213,11 +213,14 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     paddingVertical: 8,
     paddingLeft: 2,
+    // 안드로이드 TextInput 기본 오른쪽 여백을 없앤다 — iOS는 0이라 글자가 더 일찍 줄바꿈됐다
+    paddingRight: 0,
   },
   descInput: {
     // 고정 높이 대신 남는 공간을 채운다 — 키보드가 뜨면 그만큼 줄어든다
     flex: 1,
     paddingLeft: 2,
+    paddingRight: 0,
     fontSize: 16,
     paddingVertical: 14,
     paddingTop: 14 + MULTILINE_INPUT_TOP,
