@@ -38,7 +38,7 @@ const Colors = {
     text: "#fff",
     subText: "#9a9aa0",
     placeholder: "rgba(235, 235, 245, 0.3)",
-    cursor: "#6E8CF3",
+    cursor: "#426BF2",
     background: "#1a1a1a",
     tint: "#00ccbb",
     tintText: "#00ccbb",
