@@ -121,6 +121,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **sb 글꼴에 없는 기호는 대체 글꼴로 그려져** 안드로이드에선 그 줄 아래가 잘린다 — `•`→`·`, `–`→`-`. 새 기호를 쓰면 폰트에 있는지 확인.
 - 아이콘 글꼴은 `_layout.tsx`의 `useFonts`에서 미리 불러온다 — 새 아이콘 패밀리를 쓰면 거기 추가(안 하면 처음 뜰 때 빈칸이었다 나타난다).
 - **sb 글꼴에 `fontWeight`를 주지 않는다** — sb-*엔 굵은 변형이 없어 iOS는 무시하지만 안드로이드는 가짜 굵게(synthetic bold)를 입혀 글자가 뭉개진다. 굵기는 글꼴(`sb-b`/`sb-m`/`sb-l`)로 고른다.
+- **sb 글자 줄 높이는 테마 `Text`가 맞춘다** — 안드로이드는 글꼴 ascent·descent를 픽셀 정수로 올려 줄마다 0.25~0.55 길어져 목록이 아래로 갈수록 밀렸다. `@/components/themed`의 `Text`가 `sbLineHeight`(text-metrics)로 iOS 줄 높이를 명시한다 — 반복되는 목록 행에 RN `Text`를 직접 쓰지 말 것. 아이콘이 줄 높이를 정하는 행은 아이콘에 `includeFontPadding: false`.
 - **글자와 섞인 컬러 이모지는 iOS에서만 줄을 키운다** — 같은 줄의 글자와 그 아래가 안드로이드에서 위로 붙는다. 이모지마다 늘어나는 양이 달라 쓰는 곳마다 재서 `constants/text-metrics`의 `EMOJI_LINE_TOP`에 넣는다.
 - **헤더 높이는 iOS 내비 바 기하를 따른다**(`header-metrics`·`stack-header`) — 안드로이드 기본 툴바(56dp)를 쓰면 헤더가 12dp 두꺼워 본문이 통째로 내려간다. 투명 헤더(`headerTransparent`/`headerBackground`)를 쓰면 react-navigation이 안드로이드에서 헤더 높이를 56+인셋으로 덮어쓰니(라이브러리 FIXME) `useHeaderHeight()`에 기대지 말 것.
 - **RN `Modal` 안의 제스처(gesture-handler)는 그 안에 `GestureHandlerRootView`가 있어야 먹는다**(안드로이드) — `components/dialog.tsx`가 깔아 둔다. 새 Modal에 휠·팬 제스처를 넣으면 같이 깐다.

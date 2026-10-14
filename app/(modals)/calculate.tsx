@@ -144,6 +144,8 @@ export default function Calculate() {
           value={inputNumber}
           onChangeText={(value) => setInputNumber(value)}
           placeholderTextColor={themeColor.subText}
+          cursorColor={themeColor.cursor}
+          selectionHandleColor={themeColor.cursor}
           returnKeyType="done"
           selectTextOnFocus
         />

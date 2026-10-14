@@ -5,6 +5,7 @@ import {
 } from "react-native";
 
 import Colors from "@/constants/colors";
+import { sbLineHeight } from "@/constants/text-metrics";
 
 type ThemeProps = {
   lightColor?: string;
@@ -32,9 +33,18 @@ export function Text(props: TextProps) {
   const { style, lightColor, darkColor, ...otherProps } = props;
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
+  const textStyle = [{ fontFamily: "sb-m" }, { color }, style];
+
   return (
     <DefaultText
-      style={[{ fontFamily: "sb-m" }, { color }, style]}
+      style={[
+        textStyle,
+        sbLineHeight(
+          textStyle,
+          otherProps.children,
+          otherProps.allowFontScaling,
+        ),
+      ]}
       {...otherProps}
     />
   );

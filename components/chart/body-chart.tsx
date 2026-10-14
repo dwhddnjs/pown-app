@@ -110,7 +110,8 @@ export const BodyChart = () => {
           rulesType="dashed"
           rulesColor={themeColor.divider}
           yAxisLabelWidth={Y_AXIS_LABEL_WIDTH}
-          yAxisTextStyle={{ color: themeColor.text }}
+          // 축 글자도 앱 글꼴 — 빠지면 시스템 글꼴(SF / Roboto)이라 플랫폼마다 모양이 다르다
+          yAxisTextStyle={{ color: themeColor.text, fontFamily: "sb-l" }}
           yAxisThickness={1}
           xAxisColor={themeColor.subText}
           xAxisThickness={1}

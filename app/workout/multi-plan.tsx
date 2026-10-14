@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { View } from "@/components/themed";
 import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Stack, useRouter } from "expo-router";
 import { toast } from "sonner-native";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -11,12 +12,12 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { EmptyRoutine } from "@/components/workout-plan/empty-routine";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { HeaderIconButton } from "@/components/header-icon-button";
-import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
 import { requestReviewOnce } from "@/lib/review";
 
 export default function MultiPlanScreen() {
   const themeColor = useCurrentThemeColor();
   const t = useT();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { tempPlans, setMultiPlanMode, commitTempPlans, resetMultiPlan } =
     useMultiPlanStore();
@@ -98,7 +99,14 @@ export default function MultiPlanScreen() {
         </ScrollView>
       )}
 
-      <View style={styles.addButtonContainer}>
+      {/* 화면 끝에서 40 — 안드로이드 3버튼 내비(48)처럼 하단 인셋이 크면 그 위로 올린다
+          (iPhone은 인셋 0·34라 어느 기종이든 40 그대로) */}
+      <View
+        style={[
+          styles.addButtonContainer,
+          { bottom: Math.max(40, insets.bottom + 6) },
+        ]}
+      >
         <TouchableOpacity
           onPress={handleAddPlan}
           style={[
@@ -112,8 +120,6 @@ export default function MultiPlanScreen() {
           <FontAwesome6 name="plus" size={30} color={themeColor.tintText} />
         </TouchableOpacity>
       </View>
-
-      <ModalStatusBar />
     </View>
   );
 }
@@ -134,7 +140,6 @@ const styles = StyleSheet.create({
   },
   addButtonContainer: {
     position: "absolute",
-    bottom: 40,
     alignSelf: "center",
     backgroundColor: "transparent",
   },

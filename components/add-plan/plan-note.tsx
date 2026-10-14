@@ -63,6 +63,8 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
           ]}
           placeholder={t("plan.notePlaceholder")}
           placeholderTextColor={themeColor.subText}
+          cursorColor={themeColor.cursor}
+          selectionHandleColor={themeColor.cursor}
           value={content}
           onChangeText={(value) => setPlanValue("content", value)}
         />
@@ -95,6 +97,8 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingVertical: 14,
     paddingLeft: 12,
+    // 안드로이드 TextInput 기본 오른쪽 여백을 없앤다 — iOS는 0이다
+    paddingRight: 0,
     fontSize: 14,
     fontFamily: "sb-l",
     marginHorizontal: 20,

@@ -11,6 +11,7 @@ import {
   useSearchListPaddingTop,
 } from "@/components/navigation/search-bar-options";
 import { FlashList } from "@shopify/flash-list";
+import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -125,7 +126,13 @@ export default function Search() {
         }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={[styles.emptyText, { color: themeColor.subText }]}>
+            <Text
+              style={[
+                styles.emptyText,
+                { color: themeColor.subText },
+                !inputValue && { paddingTop: EMOJI_LINE_TOP.searchHint },
+              ]}
+            >
               {!inputValue ? t("search.hint") : t("search.noResult")}
             </Text>
           </View>

@@ -202,8 +202,10 @@ export const ShortsPlayer = ({
         // 방향은 영상 크기(videoTrack.size)로 못 본다 — 회전 전 원본 크기라 세로 영상도
         // 가로로 나온다. 썸네일 생성은 회전을 적용하므로 아주 작게 한 장 뽑아 본다
         onFirstFrameRender={() => {
+          // 시각은 배열로 넘긴다 — 타입은 숫자 하나도 받지만 네이티브는 배열만 받는다(iOS 디버그는
+          // 숫자에서 JSI assert로 죽고, 안드로이드는 변환 실패로 거절돼 방향을 못 읽는다)
           player
-            .generateThumbnailsAsync(0, { maxWidth: 32, maxHeight: 32 })
+            .generateThumbnailsAsync([0], { maxWidth: 32, maxHeight: 32 })
             .then(([frame]) =>
               setIsLandscape(!!frame && frame.width > frame.height),
             )

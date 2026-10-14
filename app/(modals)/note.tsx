@@ -62,6 +62,8 @@ export default function Note() {
           },
         ]}
         placeholderTextColor={themeColor.subText}
+        cursorColor={themeColor.cursor}
+        selectionHandleColor={themeColor.cursor}
         onChangeText={(value) => setValue("title", value)}
       />
       <TextInput
@@ -78,6 +80,8 @@ export default function Note() {
         ]}
         placeholder={t("plan.contentPlaceholder")}
         placeholderTextColor={themeColor.subText}
+        cursorColor={themeColor.cursor}
+        selectionHandleColor={themeColor.cursor}
         onChangeText={(value) => setValue("content", value)}
       />
     </View>
@@ -97,9 +101,12 @@ const styles = StyleSheet.create({
     fontFamily: "sb-m",
     paddingVertical: 8,
     paddingLeft: 2,
+    // 안드로이드 TextInput 기본 오른쪽 여백을 없앤다 — iOS는 0이라 글자가 더 일찍 줄바꿈됐다
+    paddingRight: 0,
   },
   descInput: {
     paddingLeft: 2,
+    paddingRight: 0,
     fontSize: 16,
 
     paddingVertical: 14,

@@ -71,6 +71,8 @@ export const AddWorkoutTagDialog = ({
         <TextInput
           placeholder={t("tag.namePlaceholder")}
           placeholderTextColor={themeColor.placeholder}
+          cursorColor={themeColor.cursor}
+          selectionHandleColor={themeColor.cursor}
           // 운동 이름은 사전에 없는 말이라 추천이 도움이 안 되고,
           // 추천 바가 키보드 위를 차지해 다이얼로그를 더 밀어올린다
           autoCorrect={false}

@@ -170,6 +170,8 @@ const PlanImages = ({ imageUri, bgColor, subTextColor }: PlanImagesProps) => {
           <Image
             source={{ uri: resolveMediaUri(imageItem.imageUri) }}
             style={[styles.image, { borderColor: bgColor }]}
+            // 안드로이드는 마운트마다 300ms 페이드인한다(iOS는 바로) — 목록이 셀을 재활용할 때마다 깜빡인다
+            fadeDuration={0}
           />
         </Pressable>
       ))}

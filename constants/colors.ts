@@ -4,6 +4,9 @@ const Colors = {
     subText: "#767680",
     // 입력칸 안내 문구 — iOS 시스템 placeholderText 그대로. 안드로이드 기본 힌트 색은 달라서 적어 둔다
     placeholder: "rgba(60, 60, 67, 0.3)",
+    // 입력칸 커서·선택 손잡이 — iOS 기본 커서 색을 시뮬레이터에서 잰 값. 안드로이드 전용 prop
+    // (cursorColor·selectionHandleColor)에만 넘긴다 — 안드로이드 기본은 머티리얼 청록(#008577)
+    cursor: "#6E8CF3",
     background: "#EFEEF3",
     tint: "#00BAAB",
     // 채워진 배경(버튼/막대)에는 tint, 글자·아이콘에는 tintText.
@@ -35,6 +38,7 @@ const Colors = {
     text: "#fff",
     subText: "#9a9aa0",
     placeholder: "rgba(235, 235, 245, 0.3)",
+    cursor: "#426BF2",
     background: "#1a1a1a",
     tint: "#00ccbb",
     tintText: "#00ccbb",
