@@ -262,7 +262,12 @@ const renderStackHeader = (props: NativeStackHeaderProps) => (
   <StackHeader {...props} />
 );
 
-export const stackHeader = { header: renderStackHeader };
+export const stackHeader = {
+  header: renderStackHeader,
+  // 푸시 전환도 iOS처럼 오른쪽에서 밀려 들어오고 뒤 화면이 살짝 물러난다 — 안드로이드 기본은
+  // 페이드·확대라 다른 앱처럼 보인다. 화면이 slide_from_bottom을 주면 그쪽이 덮어쓴다
+  animation: "ios_from_right" as const,
+};
 
 // 계획 폼 헤더 — iOS는 투명 헤더 + blur지만, 안드로이드 바 배경은 불투명이라 투명으로 둘
 // 이유가 없다. 헤더를 본문 위 칸에 두고 iOS blur가 맨 위에서 보이는 색을 칠한다.

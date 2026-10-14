@@ -264,16 +264,16 @@ const ko = {
   // 분석 전 확인 다이얼로그는 설명 없이 이 제목만 보여준다(app/shorts/[...slug].tsx).
   "ai.guideAngle": "정면 말고, 몸 옆쪽 45°에서 비스듬히",
   "ai.guideAngleDesc":
-    "정면이나 뒤에서는 무릎이 얼마나 접혔는지, 허리가 말렸는지가 몸에 가려 안 보여요. 완전한 옆면(90°)보다 45°가 나아요 — 허리 각도와 무릎 방향을 한 번에 볼 수 있거든요.",
+    "정면이나 뒤에서는 무릎이 얼마나 접혔는지, 허리가 말렸는지가 몸에 가려 안 보여요. 완전한 옆면(90°)보다 45°가 나아요. 허리 각도와 무릎 방향을 한 번에 볼 수 있거든요.",
   "ai.guideFrame": "머리끝부터 발끝까지 한 화면에",
   "ai.guideFrameDesc":
     "발이 잘리면 무게중심을, 머리가 잘리면 상체 각도를 못 읽어요. 폰을 무릎 높이에 세로로 세우고 세 걸음쯤 떨어지면 전신이 들어와요. 바벨을 쓴다면 원판 끝까지 들어오게 해주세요.",
   "ai.guideReps": "한 세트만, 1분 안쪽으로",
   "ai.guideRepsDesc":
-    "장비 세팅하고 호흡 잡는 시간은 그대로 찍혀도 괜찮아요 — AI가 먼저 영상 전체를 훑어 실제로 드는 구간을 찾고, 그 구간만 촘촘히 봐요. 1RM처럼 한 번만 들어도 돼요. 다만 1분을 넘기면 훑는 간격이 벌어져서 짧은 동작을 놓칠 수 있어요.",
+    "장비 세팅하고 호흡 잡는 시간은 그대로 찍혀도 괜찮아요. AI가 먼저 영상 전체를 훑어 실제로 드는 구간을 찾고, 그 구간만 촘촘히 봐요. 1RM처럼 한 번만 들어도 돼요. 다만 1분을 넘기면 훑는 간격이 벌어져서 짧은 동작을 놓칠 수 있어요.",
   "ai.guideLight": "밝은 곳에서, 화면에 나 혼자만",
   "ai.guideLightDesc":
-    "어두우면 관절 위치가 뭉개지고, 뒤로 다른 사람이 지나가면 그 사람 자세를 같이 읽어요. 옷은 몸선이 보이는 게 좋아요 — 헐렁한 옷은 허리가 말렸는지를 가려요.",
+    "어두우면 관절 위치가 뭉개지고, 뒤로 다른 사람이 지나가면 그 사람 자세를 같이 읽어요. 옷은 몸선이 보이는 게 좋아요. 헐렁한 옷은 허리가 말렸는지를 가려요.",
   "ai.guideGotIt": "알겠어요",
   "ai.checkTitle": "촬영 가이드대로 찍으셨나요?",
   "ai.checkWarn":
@@ -632,16 +632,16 @@ const en: Record<TKey, string> = {
     "The AI only sees a few frames pulled from your video. Get these four right and the feedback gets much sharper.",
   "ai.guideAngle": "Film from 45° to your side, not straight on",
   "ai.guideAngleDesc":
-    "From the front or behind, your body hides how far the knees bend and whether the back is rounding. 45° beats a full side-on (90°) view — you can see back angle and knee direction at once.",
+    "From the front or behind, your body hides how far the knees bend and whether the back is rounding. 45° beats a full side-on (90°) view: you can see back angle and knee direction at once.",
   "ai.guideFrame": "Everything from head to feet in frame",
   "ai.guideFrameDesc":
     "Cut off the feet and the balance point is gone; cut off the head and so is the torso angle. Stand your phone upright at knee height and step back about three paces. With a barbell, get the plates in shot too.",
   "ai.guideReps": "One set, under a minute",
   "ai.guideRepsDesc":
-    "Setting up and bracing on camera is fine — the AI first skims the whole clip to find where you actually lift, then looks closely at just that part. A single rep, like a 1RM attempt, works too. Past a minute the skim gets sparse and can miss a quick rep.",
+    "Setting up and bracing on camera is fine. The AI first skims the whole clip to find where you actually lift, then looks closely at just that part. A single rep, like a 1RM attempt, works too. Past a minute the skim gets sparse and can miss a quick rep.",
   "ai.guideLight": "Good light, and only you in shot",
   "ai.guideLightDesc":
-    "Dim light blurs where the joints are, and someone walking behind you gets read as part of your form. Fitted clothing helps — baggy layers hide whether your back is rounding.",
+    "Dim light blurs where the joints are, and someone walking behind you gets read as part of your form. Fitted clothing helps, since baggy layers hide whether your back is rounding.",
   "ai.guideGotIt": "Got it",
   "ai.checkTitle": "Did you film it the way the guide says?",
   "ai.checkWarn":
@@ -692,7 +692,7 @@ const en: Record<TKey, string> = {
   "theme.systemMode": "System Default",
   "theme.title": "Pick your appearance!",
   "theme.desc":
-    "If dark mode isn't your thing, try light mode — a bright screen awaits. We still recommend dark mode though.",
+    "If dark mode isn't your thing, try light mode: a bright screen awaits. We still recommend dark mode though.",
 
   "language.title": "Pick your language!",
   "language.desc":
@@ -700,7 +700,7 @@ const en: Record<TKey, string> = {
 
   "userInfo.title": "Tell us about yourself.",
   "userInfo.desc":
-    "Fill in your Big 3 lifts, age, gender and body stats. Update them whenever your lifts go up or your weight goes down — it makes your charts much more useful.",
+    "Fill in your Big 3 lifts, age, gender and body stats. Update them whenever your lifts go up or your weight goes down. It makes your charts much more useful.",
   "userInfo.sbd": "Big 3 Lifts",
   "userInfo.body": "Body Stats",
   "userInfo.height": "Height",

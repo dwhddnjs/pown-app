@@ -4,6 +4,7 @@ export const EMOJI_LINE_TOP = {
   planDate: 0,
   calcRow: 0,
   dateTitle: 0,
+  searchHint: 0,
 };
 
 export const MULTILINE_INPUT_TOP = 0;

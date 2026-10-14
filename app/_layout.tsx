@@ -127,11 +127,15 @@ export default function RootLayout() {
         <PlatformRoot />
         {/* 탭 레이아웃 안에 두면 그 위로 push되는 화면(검색·루틴)에서는 가려진다 */}
         {imageUri && <ImageModal />}
-        <Toaster />
+        {/* 토스트 글자도 앱 글꼴로 — 기본은 시스템 글꼴(iOS SF·애플 고딕 / 안드로이드 Noto)이라 두
+            플랫폼 모양이 다르다. 기본 굵기 600은 sb에 없는 굵기라 안드로이드가 가짜 굵게를 입힌다 */}
+        <Toaster toastOptions={{ titleStyle: TOAST_TITLE }} />
       </GestureHandlerRootView>
     </ThemeProvider>
   );
 }
+
+const TOAST_TITLE = { fontFamily: "sb-m", fontWeight: "400" } as const;
 
 function RootLayoutNav() {
   const t = useT();

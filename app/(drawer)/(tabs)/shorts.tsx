@@ -56,6 +56,8 @@ const Thumbnail = ({
     <Image
       source={{ uri: resolveMediaUri(uri) }}
       style={styles.image}
+      // 안드로이드 기본 300ms 페이드인을 끈다 — iOS는 바로 보인다
+      fadeDuration={0}
       onError={() => setIsFailed(true)}
     />
   );

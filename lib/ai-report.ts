@@ -225,7 +225,10 @@ const callOnce = async (
       .join("");
     if (!text) lastFailure = "empty response";
     return {
-      result: text ? JSON.parse(text) : null,
+      // 모델이 즐겨 쓰는 —·–·•는 sb 글꼴에 없어 대체 글꼴로 그려진다(안드로이드는 줄 아래가 잘린다)
+      result: text
+        ? JSON.parse(text.replace(/[—–]/g, "-").replace(/•/g, "·"))
+        : null,
       retryable: false,
       body: "",
     };

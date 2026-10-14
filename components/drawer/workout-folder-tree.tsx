@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
   },
   rowText: {
     fontSize: 14,
-    fontWeight: "500",
   },
   content: {
     paddingLeft: 28,
