@@ -6,6 +6,7 @@ import { PlanForm } from "@/components/plan-form";
 import { headerButtonLiftModal } from "@/components/navigation/screen-options";
 import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
+import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
 import { toast } from "sonner-native";
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store";
@@ -149,7 +150,14 @@ export default function AddMultiPlan() {
       workoutType={selectedType}
       onSubmit={onSubmitMultiPlan}
       header={header}
-      extraSheets={<SelectTypeDateSheet />}
+      // 상태바 밝은 글자는 이 시트가 떠 있을 때만 — 아래 루틴 화면은 시트가 아닌 일반 화면이라
+      // 거기 두면 라이트 테마에서 흰 글자가 밝은 배경에 묻혔다(iOS)
+      extraSheets={
+        <>
+          <SelectTypeDateSheet />
+          <ModalStatusBar />
+        </>
+      }
       onLeave={clearEditingPlan}
       saveButtonStyle={headerButtonLiftModal}
     />

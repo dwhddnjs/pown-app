@@ -11,7 +11,6 @@ import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
 import { EmptyRoutine } from "@/components/workout-plan/empty-routine";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { HeaderIconButton } from "@/components/header-icon-button";
-import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
 import { requestReviewOnce } from "@/lib/review";
 
 export default function MultiPlanScreen() {
@@ -112,8 +111,6 @@ export default function MultiPlanScreen() {
           <FontAwesome6 name="plus" size={30} color={themeColor.tintText} />
         </TouchableOpacity>
       </View>
-
-      <ModalStatusBar />
     </View>
   );
 }
