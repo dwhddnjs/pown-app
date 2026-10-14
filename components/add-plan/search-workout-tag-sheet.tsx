@@ -106,6 +106,8 @@ export const SearchWorkoutTagSheet = forwardRef<
             spellCheck={false}
             placeholder={t("tag.searchPlaceholder")}
             placeholderTextColor={themeColor.placeholder}
+            cursorColor={themeColor.cursor}
+            selectionHandleColor={themeColor.cursor}
             style={[styles.input, { color: themeColor.text }]}
             onChangeText={(text) => setInputValue(text)}
             value={inputValue}

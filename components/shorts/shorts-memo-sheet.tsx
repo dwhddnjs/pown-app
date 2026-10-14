@@ -96,6 +96,8 @@ const MemoForm = ({
         spellCheck={false}
         placeholder={t("plan.titlePlaceholder")}
         placeholderTextColor={themeColor.subText}
+        cursorColor={themeColor.cursor}
+        selectionHandleColor={themeColor.cursor}
         style={[
           styles.titleInput,
           {
@@ -113,6 +115,8 @@ const MemoForm = ({
           spellCheck={false}
           placeholder={t("plan.contentPlaceholder")}
           placeholderTextColor={themeColor.subText}
+          cursorColor={themeColor.cursor}
+          selectionHandleColor={themeColor.cursor}
           style={[styles.descInput, { color: themeColor.text }, descStyle]}
           onChangeText={onChangeContent}
         />

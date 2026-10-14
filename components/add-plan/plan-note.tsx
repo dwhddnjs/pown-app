@@ -63,6 +63,8 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
           ]}
           placeholder={t("plan.notePlaceholder")}
           placeholderTextColor={themeColor.subText}
+          cursorColor={themeColor.cursor}
+          selectionHandleColor={themeColor.cursor}
           value={content}
           onChangeText={(value) => setPlanValue("content", value)}
         />

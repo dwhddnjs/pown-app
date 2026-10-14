@@ -94,6 +94,8 @@ export const TopWeight = ({
             placeholder="0"
             returnKeyType="done"
             placeholderTextColor={themeColor.subText}
+            cursorColor={themeColor.cursor}
+            selectionHandleColor={themeColor.cursor}
           />
           <Text>{weightType}</Text>
         </Pressable>

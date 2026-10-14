@@ -62,6 +62,8 @@ export default function Note() {
           },
         ]}
         placeholderTextColor={themeColor.subText}
+        cursorColor={themeColor.cursor}
+        selectionHandleColor={themeColor.cursor}
         onChangeText={(value) => setValue("title", value)}
       />
       <TextInput
@@ -78,6 +80,8 @@ export default function Note() {
         ]}
         placeholder={t("plan.contentPlaceholder")}
         placeholderTextColor={themeColor.subText}
+        cursorColor={themeColor.cursor}
+        selectionHandleColor={themeColor.cursor}
         onChangeText={(value) => setValue("content", value)}
       />
     </View>
