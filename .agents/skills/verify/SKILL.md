@@ -211,9 +211,9 @@ iOS 시뮬레이터 데이터는 사용자 것일 수 있으니 시드로 덮어
 **같은 데이터·같은 언어로 맞추기** — 비교가 의미 있으려면 두 기기의 기록이 같아야 한다. iOS의 MMKV 파일을
 읽기만 해서(복사본) 안드로이드에 넣는다: `xcrun simctl get_app_container $SIM com.anonymous.workout-app data`
 → `Documents/mmkv/mmkv.default{,.crc}`를 스크래치패드로 복사 → `adb push` 후
-`adb shell run-as com.dwhddnjs.pown sh -c 'cp /data/local/tmp/<f> files/mmkv/<f>'`(앱 종료 상태에서).
+`adb shell "run-as com.dwhddnjs.pown cp /data/local/tmp/<f> files/mmkv/<f>"`(앱 종료 상태에서, 따옴표로 통째로 감싸야 한다). 사진·숏츠 파일(`Documents/media/*` → `files/media/`)을 **먼저** 넣는다 — MMKV를 먼저 넣고 띄우면 숏츠 복구가 파일 없는 숏츠를 지운다.
 에뮬레이터가 영어면 앱도 영어로 뜬다 — `adb root` 후 `adb shell "setprop persist.sys.locale ko-KR; setprop ctl.restart zygote"`.
-**세로 위치는 안전영역 위끝 기준으로 맞춘다**(iOS 17 Pro 62pt / Pixel 6 48.76dp) — 상태바 높이가 달라 절대 좌표로
+**세로 위치는 안전영역 위끝 기준으로 맞춘다**(iOS 17 Pro 62pt / Pixel 6 48.76dp) — 48.76은 펀치홀 컷아웃이 켜져 있을 때다. 콜드 부팅 뒤엔 꺼져 있을 수 있다(상태바 24dp, 헤더가 카메라 구멍에 붙음): `adb shell cmd overlay enable-exclusive --category com.android.internal.display.cutout.emulation.emu01`. 아래에 붙은 요소(탭바·FAB)는 안전영역 아래끝 기준(iOS 840 / 안드 890.3)으로 맞춘다 — 상태바 높이가 달라 절대 좌표로
 맞추면 헤더 아래 전부가 13dp씩 어긋나 보인다. 다크는 시스템 설정으로 바꾼다(앱 테마를 건드리지 않게):
 `xcrun simctl ui $SIM appearance dark` / `adb shell cmd uimode night yes`.
 코드를 고치면 루트 쪽 모듈은 전체 리로드라 앱이 운동 탭으로 돌아간다 — 그 상태에서 뒤로가기를 누르면 앱이
