@@ -23,7 +23,13 @@ export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
         {t("plan.whichWorkout")}
       </Text>
       <TouchableOpacity onPress={onPress} style={{ padding: 8 }}>
-        <FontAwesome name="search" size={20} color={themeColor.text} />
+        <FontAwesome
+          name="search"
+          size={20}
+          color={themeColor.text}
+          // 이 줄 높이가 제목 행 높이를 정한다 — 안드로이드 기본 글꼴 여백이면 iOS(36)보다 0.6 길다
+          style={styles.searchIcon}
+        />
       </TouchableOpacity>
     </View>
   );
@@ -35,6 +41,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: "space-between",
     alignItems: "center",
+  },
+
+  searchIcon: {
+    includeFontPadding: false,
   },
 
   title: {
