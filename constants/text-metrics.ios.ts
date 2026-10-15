@@ -25,4 +25,5 @@ export const sbLineHeight = (
   _style: StyleProp<TextStyle>,
   _children?: React.ReactNode,
   _allowFontScaling?: boolean,
+  _lines?: number,
 ): TextStyle | undefined => undefined;

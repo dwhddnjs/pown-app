@@ -1,4 +1,6 @@
+import { useState } from "react";
 import {
+  StyleSheet,
   Text as DefaultText,
   View as DefaultView,
   useColorScheme,
@@ -34,18 +36,28 @@ export function Text(props: TextProps) {
   const color = useThemeColor({ light: lightColor, dark: darkColor }, "text");
 
   const textStyle = [{ fontFamily: "sb-m" }, { color }, style];
+  // 줄 높이를 명시한 글(여러 줄 문단)은 줄 수를 재서 안드로이드 높이를 iOS에 맞춘다 (text-metrics)
+  const [lines, setLines] = useState(1);
+  const box = sbLineHeight(
+    textStyle,
+    otherProps.children,
+    otherProps.allowFontScaling,
+    lines,
+  );
+  const measureLines = !!box && !!StyleSheet.flatten(style)?.lineHeight;
 
   return (
     <DefaultText
-      style={[
-        textStyle,
-        sbLineHeight(
-          textStyle,
-          otherProps.children,
-          otherProps.allowFontScaling,
-        ),
-      ]}
+      style={[textStyle, box]}
       {...otherProps}
+      onTextLayout={
+        measureLines
+          ? (e) => {
+              setLines(e.nativeEvent.lines.length || 1);
+              otherProps.onTextLayout?.(e);
+            }
+          : otherProps.onTextLayout
+      }
     />
   );
 }

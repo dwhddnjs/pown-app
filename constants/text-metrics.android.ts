@@ -50,10 +50,11 @@ const SB_LINE: Record<string, number> = {
 
 // 안드로이드는 글꼴 ascent·descent를 각각 픽셀 정수로 올려 줄 높이를 잡는다 — 2.625배율에서 16 글자는
 // 0.25, 24 글자는 0.55씩 iOS보다 길어져, 세트 행 하나에 0.75dp, 계획 폼 끝에서 4.5dp가 쌓였다.
-// iOS도 글자 높이를 화면 픽셀(⅓pt)로 올려 잡는다(14 글자는 16.8이 아니라 17.0). 안드로이드 글자 높이는
-// 정수 픽셀이라 17.0(44.625px)을 못 만드니, 그보다 크지 않은 가장 큰 픽셀로 줄 높이를 명시하고
-// 모자란 조각(0.24 등)을 아래 여백으로 채운다 — 레이아웃이 위치를 실수로 계산하므로 다음 줄이 iOS와
-// 같은 자리에서 시작해 픽셀 오차가 쌓이지 않는다 (픽셀만 맞추면 카드·행마다 ±0.2씩 쌓였다).
+// 안드로이드 줄 높이는 정수 픽셀이라 iOS 줄 높이(16.8 = 44.1px, lineHeight 20 = 52.5px)를 그대로 못 만든다
+// → 줄마다 가장 가까운 픽셀로 명시하고, iOS 글자 상자 높이(⅓pt로 올림 — 14 글자 한 줄은 17.0)와의
+// 차이를 marginBottom으로 메운다. 레이아웃이 위치를 실수로 계산하므로 다음 요소가 iOS와 같은 자리에서
+// 시작해 픽셀 오차가 쌓이지 않는다 (픽셀만 맞추면 카드·행마다 ±0.2, 여러 줄 글은 줄마다 ±0.2씩 쌓였다).
+// lines는 그 글의 줄 수 — 테마 Text가 lineHeight를 명시한 글(여러 줄 문단)만 onTextLayout으로 재서 넘긴다.
 // (RN은 lineHeight를 ceil(px)로 쓰므로 0.01 덜 준다)
 // 컬러 이모지가 섞인 글자는 빼둔다 — 그 줄은 이모지 글꼴이 줄 높이를 바꾸고, 위 EMOJI_LINE_TOP 등은
 // 그 줄 그대로를 재서 맞춘 값이다(명시한 lineHeight는 이모지 글꼴을 무시한다)
@@ -63,20 +64,22 @@ export const sbLineHeight = (
   style: StyleProp<TextStyle>,
   children?: React.ReactNode,
   allowFontScaling = true,
+  lines = 1,
 ): TextStyle | undefined => {
   const flat = StyleSheet.flatten(style);
   const { fontFamily, fontSize = 14, lineHeight } = flat;
   const ratio = fontFamily ? SB_LINE[fontFamily] : undefined;
-  if (lineHeight || !ratio) return undefined;
+  if (!ratio) return undefined;
   if (typeof children === "string" && EMOJI.test(children)) return undefined;
   const density = PixelRatio.get();
   const fontScale = allowFontScaling ? PixelRatio.getFontScale() : 1;
-  const ios = Math.ceil(fontSize * fontScale * ratio * 3 - 1e-6) / 3;
-  const px = Math.floor(ios * density + 1e-6);
-  const bottom = flat.paddingBottom ?? flat.paddingVertical ?? flat.padding;
+  const line = (lineHeight ?? fontSize * ratio) * fontScale;
+  const px = Math.round(line * density);
+  const ios = Math.ceil(line * lines * 3 - 1e-6) / 3;
+  const margin = flat.marginBottom ?? flat.marginVertical ?? flat.margin;
   return {
     lineHeight: (px - 0.01) / (density * fontScale),
-    paddingBottom:
-      (typeof bottom === "number" ? bottom : 0) + ios - px / density,
+    marginBottom:
+      (typeof margin === "number" ? margin : 0) + ios - (lines * px) / density,
   };
 };
