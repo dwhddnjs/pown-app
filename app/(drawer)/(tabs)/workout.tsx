@@ -229,7 +229,9 @@ export default function TabOneScreen() {
 
   const listFooter = useMemo(
     () => (
-      <View style={styles.footer}>
+      // 목록이 탭바 밑까지 깔리니 끝 여백도 탭바 높이에 붙인다 — 240 고정이면 탭바가 낮은
+      // 안드로이드(하단 인셋 24)에서 마지막 카드·안내 문구가 10 높게 멈췄다 (iPhone 17 Pro는 그대로 240)
+      <View style={[styles.footer, { height: tabBarHeight + 157 }]}>
         <View style={styles.footerRow}>
           <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
           <Text style={{ color: themeColor.subText }}>
@@ -238,7 +240,7 @@ export default function TabOneScreen() {
         </View>
       </View>
     ),
-    [themeColor, t],
+    [themeColor, t, tabBarHeight],
   );
 
   const openCalculate = () => router.push("/(modals)/calculate");
@@ -300,7 +302,6 @@ export default function TabOneScreen() {
 
 const styles = StyleSheet.create({
   footer: {
-    height: 240,
     alignItems: "center",
     paddingTop: 48,
   },

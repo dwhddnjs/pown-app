@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { SetWithCountType } from "@/types/workout";
 import { NumberBallIcon } from "../number-ball-icon";
+import { iconLine } from "@/constants/text-metrics";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tSetType } from "@/lib/i18n";
@@ -57,13 +58,24 @@ export const SetCounterItem = ({ item, index }: SetCounterItemProps) => {
             onPress={() => setFilterSetWithCount(item.id)}
             style={{ paddingLeft: 12 }}
           >
-            <Ionicons name="trash" size={22} color={themeColor.text} />
+            <Ionicons
+              name="trash"
+              size={22}
+              color={themeColor.text}
+              // 이 아이콘이 세트 행 높이를 정한다 (안드로이드 글꼴 여백이면 행마다 0.86 길다)
+              style={iconLine(22)}
+            />
           </TouchableOpacity>
           <TouchableOpacity
             style={{ paddingLeft: 12, paddingRight: 4 }}
             onPress={() => setSetWithCount({ ...item, id: Date.now() })}
           >
-            <Ionicons name="copy" size={20} color={themeColor.tintText} />
+            <Ionicons
+              name="copy"
+              size={20}
+              color={themeColor.tintText}
+              style={iconLine(20)}
+            />
           </TouchableOpacity>
         </View>
       </View>

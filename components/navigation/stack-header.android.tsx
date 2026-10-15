@@ -33,9 +33,9 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 
 // iOS 내비 바와 같은 44 바 (자리는 header-metrics.android.ts의 headerBarTop)
 const BAR_HEIGHT = 44;
-// iOS 투명(blur) 헤더는 네이티브 바가 불투명 헤더보다 ⅓ 위에서 끝난다(안전영역 + 38⅓ / 38⅔) —
-// 계획 폼 본문이 그만큼 위에서 시작하니 바 색 헤더(blurHeader)도 같이 올린다
-const BLUR_BAR_LIFT = 1 / 3;
+// iOS 푸시 화면의 네이티브 내비 바(UINavigationBar)는 탭 헤더(react-navigation JS 헤더, 안전영역
+// + 38⅔)보다 ⅓ 위인 안전영역 + 38⅓에서 끝난다 — 계획 폼·설정 화면 실측. 버튼·제목·본문이 같이 올라간다
+const NATIVE_BAR_LIFT = 1 / 3;
 // 제목이 양옆 버튼(16 + 36)에 닿지 않게 비워 두는 폭
 const TITLE_INSET = 64;
 
@@ -43,7 +43,8 @@ const TITLE_INSET = 64;
 // 내비 바 바로 밑에 36 높이 칸, 좌우 16. 누르면 제목 줄이 사라지며 칸이 37 올라가고
 // 오른쪽에 "취소"가 나온다
 const SEARCH_FIELD_HEIGHT = 36;
-const SEARCH_FIELD_TOP = 2 / 3;
+// 바가 NATIVE_BAR_LIFT만큼 올라간 만큼 더 띄워 칸 자리는 그대로(실측 일치) 둔다
+const SEARCH_FIELD_TOP = 2 / 3 + NATIVE_BAR_LIFT;
 const SEARCH_ACTIVE_LIFT = 37;
 const SEARCH_CANCEL_WIDTH = 41;
 // 칸 아래 여백 — 결과 목록이 iOS와 같은 자리에서 시작하게 하는 값
@@ -203,8 +204,7 @@ const StackHeader = ({ options, back, bar }: StackHeaderProps) => {
       style={[
         {
           paddingTop:
-            (headerBarTop(insets.top) ?? insets.top) -
-            (bar ? BLUR_BAR_LIFT : 0),
+            (headerBarTop(insets.top) ?? insets.top) - NATIVE_BAR_LIFT,
           paddingBottom: headerSearchBarOptions ? SEARCH_BOTTOM : 0,
           overflow: "hidden",
         },

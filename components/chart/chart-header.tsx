@@ -3,6 +3,7 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BarBackground } from "@/components/bar-background";
+import { iconLine } from "@/constants/text-metrics";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useChartStore } from "@/hooks/use-chart-store";
@@ -31,6 +32,8 @@ export const ChartHeader = () => {
               name="leftcircleo"
               size={28}
               color={themeColor.tintText}
+              // 이 아이콘이 헤더 높이를 정한다 — 안드로이드 글꼴 여백이면 0.57 커서 본문이 내려간다
+              style={iconLine(28)}
             />
           </TouchableOpacity>
           <Text style={[styles.title, { color: themeColor.text }]}>
@@ -48,6 +51,8 @@ export const ChartHeader = () => {
               name="rightcircleo"
               size={28}
               color={themeColor.tintText}
+              // 이 아이콘이 헤더 높이를 정한다 — 안드로이드 글꼴 여백이면 0.57 커서 본문이 내려간다
+              style={iconLine(28)}
             />
           </TouchableOpacity>
         </View>

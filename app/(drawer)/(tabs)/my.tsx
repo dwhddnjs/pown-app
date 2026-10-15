@@ -11,6 +11,7 @@ import { useLanguage, useUserStore } from "@/hooks/use-user-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 // lib
 import { LANG_LABEL, TKey } from "@/lib/i18n";
 import { openMail } from "@/lib/open-mail";
@@ -34,6 +35,7 @@ export default function My() {
   const t = useT();
   // 헤더가 투명해 콘텐츠가 그 아래로 지나간다 — 첫 카드가 가리지 않게 밀어준다
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
 
   const { push } = useRouter();
 
@@ -53,7 +55,8 @@ export default function My() {
       style={{ backgroundColor: themeColor.background }}
       contentContainerStyle={[
         styles.content,
-        { paddingTop: headerHeight + 24 },
+        // 끝 여백은 탭바에 붙인다 (iPhone 17 Pro는 그대로 180) — 고정값이면 탭바가 낮은 안드로이드에서 10 높게 멈춘다
+        { paddingTop: headerHeight + 24, paddingBottom: tabBarHeight + 97 },
       ]}
       showsVerticalScrollIndicator={false}
     >
@@ -167,7 +170,6 @@ export default function My() {
 const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 180,
     gap: 24,
   },
 });
