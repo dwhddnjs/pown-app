@@ -107,6 +107,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                    | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
 | 사진 저장 권한               | `lib/media-permission`                     | 읽기+쓰기                             | 쓰기 전용                                                                  |
 | 심박수 기능 입구             | `components/heart-rate` (index)            | 실제 기능                             | 빈 구현                                                                    |
+| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`       | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 

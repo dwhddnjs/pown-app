@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, Pressable, StyleSheet, View } from "react-native";
-import { resolveMediaUri } from "@/lib/media";
+import { isMediaMissing, resolveMediaUri } from "@/lib/media";
+import { UnplayableBadge } from "./unplayable-badge";
 import { useEvent, useEventListener } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Animated, {
@@ -79,6 +80,19 @@ export const ShortsPlayer = ({
     player.timeUpdateEventInterval = 0.25;
   });
 
+  const { status } = useEvent(player, "statusChange", {
+    status: player.status,
+  });
+  // 안드로이드 플레이어는 없는 파일(옛 iOS 절대경로 등)에서 오류 없이 loading에 머문다 — 파일이
+  // 확실히 없으면 iOS처럼 재생 불가 표시를 띄운다
+  const [missing, setMissing] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    isMediaMissing(uri).then((value) => alive && setMissing(value));
+    return () => {
+      alive = false;
+    };
+  }, [uri]);
   const { muted } = useEvent(player, "mutedChange", {
     muted: player.muted,
   });
@@ -223,6 +237,7 @@ export const ShortsPlayer = ({
         />
       </View>
       <View style={styles.playOverlay} pointerEvents="none">
+        <UnplayableBadge visible={missing || status === "error"} />
         <Animated.View style={[styles.playBadge, iconStyle]}>
           <Feather
             name={icon}
