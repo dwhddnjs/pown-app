@@ -3,6 +3,7 @@ import { StyleSheet } from "react-native";
 import { Text, View } from "../themed";
 import InfoIcon from "@expo/vector-icons/FontAwesome6";
 import { ThemeColorType } from "@/constants/colors";
+import { iconLine } from "@/constants/text-metrics";
 
 interface ChartEmptyStateProps {
   message: string;
@@ -15,7 +16,13 @@ export const ChartEmptyState = ({
 }: ChartEmptyStateProps) => {
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
-      <InfoIcon name="circle-info" size={16} color={themeColor.subText} />
+      <InfoIcon
+        name="circle-info"
+        size={16}
+        color={themeColor.subText}
+        // FontAwesome6 줄 높이(ascent+descent)는 크기의 1.043배
+        style={iconLine(16, 1.043)}
+      />
       <Text style={{ color: themeColor.subText }}>{message}</Text>
     </View>
   );

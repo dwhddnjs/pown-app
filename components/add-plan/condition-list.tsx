@@ -4,6 +4,7 @@ import { StyleSheet, FlatList } from "react-native";
 import { Text, View } from "../themed";
 import { ConditionButton } from "@/components/add-plan/condition-icon";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 // color
 // lib
 import { conditionData } from "@/constants/constants";
@@ -24,6 +25,7 @@ export const ConditionList = () => {
             name="battery-heart-variant"
             size={20}
             color={themeColor.tintText}
+            style={iconLine(20)}
           />
           <Text style={{ fontSize: 16 }}>{t("plan.condition")}</Text>
         </IconTitle>

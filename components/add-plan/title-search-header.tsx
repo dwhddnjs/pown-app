@@ -4,7 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 // color
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
-import { EMOJI_LINE_TOP } from "@/constants/text-metrics";
+import { EMOJI_LINE_TOP, iconLine } from "@/constants/text-metrics";
 // icon
 import { FontAwesome } from "@expo/vector-icons";
 import { Text, View } from "../themed";
@@ -28,7 +28,7 @@ export const TitleSearchHeader = ({ onPress }: TitleSearchHeaderProps) => {
           size={20}
           color={themeColor.text}
           // 이 줄 높이가 제목 행 높이를 정한다 — 안드로이드 기본 글꼴 여백이면 iOS(36)보다 0.6 길다
-          style={styles.searchIcon}
+          style={iconLine(20)}
         />
       </TouchableOpacity>
     </View>
@@ -41,10 +41,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     justifyContent: "space-between",
     alignItems: "center",
-  },
-
-  searchIcon: {
-    includeFontPadding: false,
   },
 
   title: {

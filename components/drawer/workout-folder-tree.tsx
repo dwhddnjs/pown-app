@@ -5,6 +5,7 @@ import { Text, View } from "@/components/themed";
 import Accordion from "react-native-collapsible/Accordion";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+import { iconLine } from "@/constants/text-metrics";
 // lib
 import { transformWorkoutData } from "@/lib/date";
 // icons
@@ -31,13 +32,15 @@ const TreeRow = ({
 }) => {
   const themeColor = useCurrentThemeColor();
   const style = [styles.row, { backgroundColor: themeColor.background }];
+  const size = icon === "file-text" ? 18 : 20;
   const content = (
     <>
       <View style={{ width: 20 }}>
         <FontAwesome
           name={icon}
-          size={icon === "file-text" ? 18 : 20}
+          size={size}
           color={themeColor.subText}
+          style={iconLine(size)}
         />
       </View>
       <Text style={[styles.rowText, { color: themeColor.subText }]}>

@@ -18,12 +18,14 @@ import { useChartStore } from "@/hooks/use-chart-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 // lib
 import { useHeaderHeight } from "@react-navigation/elements";
+import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 // expo
 import { useFocusEffect } from "expo-router";
 
 export default function Record() {
   const themeColor = useCurrentThemeColor();
   const headerHeight = useHeaderHeight();
+  const tabBarHeight = useBottomTabBarHeight();
   const { date } = useChartStore();
   const scrollRef = useRef<ScrollView>(null);
 
@@ -52,7 +54,8 @@ export default function Record() {
           gap: 24,
           paddingTop: headerHeight,
           paddingHorizontal: 20,
-          paddingBottom: 180,
+          // 탭바 밑까지 깔리는 목록이라 끝 여백을 탭바에 붙인다 (iPhone 17 Pro는 그대로 180)
+          paddingBottom: tabBarHeight + 97,
           backgroundColor: themeColor.background,
         }}
       >

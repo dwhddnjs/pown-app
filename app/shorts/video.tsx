@@ -242,7 +242,14 @@ export default function Video() {
           onCameraReady={() => setIsCameraReady(true)}
           responsiveOrientationWhenOrientationLocked
         />
-        <View style={styles.shutterContainer}>
+        <View
+          style={[
+            styles.shutterContainer,
+            // 홈 인디케이터·내비 바 위 10 — 화면 끝 44 고정이면 하단 인셋이 작은 안드로이드(24)에서
+            // 10 높게 떴다 (iPhone 17 Pro는 그대로 44, 인셋 없는 기기도 44)
+            { bottom: insets.bottom ? insets.bottom + 10 : 44 },
+          ]}
+        >
           <PressScale
             onPress={() => router.back()}
             style={{ paddingVertical: 24 }}
@@ -409,7 +416,6 @@ const styles = StyleSheet.create({
   },
   shutterContainer: {
     position: "absolute",
-    bottom: 44,
     left: 0,
     width: "100%",
     backgroundColor: "transparent",

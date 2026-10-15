@@ -1,6 +1,5 @@
 import {
   StyleSheet,
-  Text,
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
@@ -8,6 +7,7 @@ import {
 } from "react-native";
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from "react";
 import BottomSheet, { BottomSheetScrollView } from "@gorhom/bottom-sheet";
+import { Text } from "@/components/themed";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { FontAwesome } from "@expo/vector-icons";

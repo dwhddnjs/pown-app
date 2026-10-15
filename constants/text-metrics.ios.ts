@@ -14,9 +14,16 @@ export const MULTILINE_INPUT_TOP = 0;
 
 export const FLAG_EMOJI_BOX = {};
 
+// iOS는 아이콘 글꼴 줄 높이가 기준이다 (text-metrics.android.ts 참고)
+export const iconLine = (
+  _size: number,
+  _ratio?: number,
+): TextStyle | undefined => undefined;
+
 // iOS는 sb 글꼴 줄 높이를 그대로 쓴다 (text-metrics.android.ts 참고)
 export const sbLineHeight = (
   _style: StyleProp<TextStyle>,
   _children?: React.ReactNode,
   _allowFontScaling?: boolean,
+  _lines?: number,
 ): TextStyle | undefined => undefined;

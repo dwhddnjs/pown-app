@@ -8,6 +8,7 @@ import {
 } from "react-native";
 // 안드로이드 sb 줄 높이 보정(text-metrics)이 붙는 테마 Text — 목록 카드마다 반복되는 줄이다
 import { Text } from "@/components/themed";
+import { iconLine } from "@/constants/text-metrics";
 // zustand
 import { usePlanMenuStore } from "@/hooks/use-plan-menu-store";
 // lib
@@ -88,8 +89,8 @@ export const WeightDate = ({
               size={ICON_SIZE}
               color={themeColor.text}
               // 이 아이콘이 시간 줄 높이를 정한다 — 안드로이드 기본 글꼴 여백(글리프 외곽 기준)이면
-              // 줄이 iOS(20)보다 0.6 길어져 카드마다 아래가 밀린다. iOS엔 없는 속성이라 무시된다
-              style={styles.menuIcon}
+              // 줄이 iOS(20)보다 0.6 길어져 카드마다 아래가 밀린다
+              style={iconLine(ICON_SIZE)}
             />
           </TouchableOpacity>
         )}
@@ -132,9 +133,5 @@ const styles = StyleSheet.create({
 
   date: {
     fontFamily: "sb-l",
-  },
-
-  menuIcon: {
-    includeFontPadding: false,
   },
 });

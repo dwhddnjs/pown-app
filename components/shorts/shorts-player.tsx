@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { PanResponder, Pressable, StyleSheet, View } from "react-native";
-import { resolveMediaUri } from "@/lib/media";
+import { isMediaMissing, resolveMediaUri } from "@/lib/media";
+import { UnplayableBadge } from "./unplayable-badge";
 import { useEvent, useEventListener } from "expo";
 import { useVideoPlayer, VideoView } from "expo-video";
 import Animated, {
@@ -79,6 +80,19 @@ export const ShortsPlayer = ({
     player.timeUpdateEventInterval = 0.25;
   });
 
+  const { status } = useEvent(player, "statusChange", {
+    status: player.status,
+  });
+  // 안드로이드 플레이어는 없는 파일(옛 iOS 절대경로 등)에서 오류 없이 loading에 머문다 — 파일이
+  // 확실히 없으면 iOS처럼 재생 불가 표시를 띄운다
+  const [missing, setMissing] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    isMediaMissing(uri).then((value) => alive && setMissing(value));
+    return () => {
+      alive = false;
+    };
+  }, [uri]);
   const { muted } = useEvent(player, "mutedChange", {
     muted: player.muted,
   });
@@ -192,27 +206,38 @@ export const ShortsPlayer = ({
 
   return (
     <Pressable style={{ width: "100%", flex: 1 }} onPress={onTogglePlay}>
-      <VideoView
+      {/* 영상 뷰는 터치를 아예 못 받게 감싼다 — 안드로이드 PlayerView가 손가락이 조금만 움직여도
+          터치 잠금을 요청하고, gesture-handler가 그걸 네이티브 제스처로 보고 이 Pressable을 취소해
+          실기기 탭(이동이 섞인다)으로는 일시정지가 거의 안 됐다. VideoView에 pointerEvents를 직접 주면
+          네이티브 뷰라 안드로이드에선 안 먹는다 */}
+      <View
+        pointerEvents="none"
+        collapsable={false}
         style={StyleSheet.absoluteFill}
-        contentFit={compact || isLandscape ? "contain" : "cover"}
-        player={player}
-        nativeControls={false}
-        // 일시정지 시 우하단에 뜨는 iOS Live Text(텍스트 복사) 버튼 비활성화
-        allowsVideoFrameAnalysis={false}
-        // 방향은 영상 크기(videoTrack.size)로 못 본다 — 회전 전 원본 크기라 세로 영상도
-        // 가로로 나온다. 썸네일 생성은 회전을 적용하므로 아주 작게 한 장 뽑아 본다
-        onFirstFrameRender={() => {
-          // 시각은 배열로 넘긴다 — 타입은 숫자 하나도 받지만 네이티브는 배열만 받는다(iOS 디버그는
-          // 숫자에서 JSI assert로 죽고, 안드로이드는 변환 실패로 거절돼 방향을 못 읽는다)
-          player
-            .generateThumbnailsAsync([0], { maxWidth: 32, maxHeight: 32 })
-            .then(([frame]) =>
-              setIsLandscape(!!frame && frame.width > frame.height),
-            )
-            .catch(() => {});
-        }}
-      />
+      >
+        <VideoView
+          style={StyleSheet.absoluteFill}
+          contentFit={compact || isLandscape ? "contain" : "cover"}
+          player={player}
+          nativeControls={false}
+          // 일시정지 시 우하단에 뜨는 iOS Live Text(텍스트 복사) 버튼 비활성화
+          allowsVideoFrameAnalysis={false}
+          // 방향은 영상 크기(videoTrack.size)로 못 본다 — 회전 전 원본 크기라 세로 영상도
+          // 가로로 나온다. 썸네일 생성은 회전을 적용하므로 아주 작게 한 장 뽑아 본다
+          onFirstFrameRender={() => {
+            // 시각은 배열로 넘긴다 — 타입은 숫자 하나도 받지만 네이티브는 배열만 받는다(iOS 디버그는
+            // 숫자에서 JSI assert로 죽고, 안드로이드는 변환 실패로 거절돼 방향을 못 읽는다)
+            player
+              .generateThumbnailsAsync([0], { maxWidth: 32, maxHeight: 32 })
+              .then(([frame]) =>
+                setIsLandscape(!!frame && frame.width > frame.height),
+              )
+              .catch(() => {});
+          }}
+        />
+      </View>
       <View style={styles.playOverlay} pointerEvents="none">
+        <UnplayableBadge visible={missing || status === "error"} />
         <Animated.View style={[styles.playBadge, iconStyle]}>
           <Feather
             name={icon}

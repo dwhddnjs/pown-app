@@ -107,6 +107,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                    | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
 | 사진 저장 권한               | `lib/media-permission`                     | 읽기+쓰기                             | 쓰기 전용                                                                  |
 | 심박수 기능 입구             | `components/heart-rate` (index)            | 실제 기능                             | 빈 구현                                                                    |
+| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`       | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 
@@ -121,11 +122,13 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **sb 글꼴에 없는 기호는 대체 글꼴로 그려져** 안드로이드에선 그 줄 아래가 잘린다 — `•`→`·`, `–`→`-`. 새 기호를 쓰면 폰트에 있는지 확인.
 - 아이콘 글꼴은 `_layout.tsx`의 `useFonts`에서 미리 불러온다 — 새 아이콘 패밀리를 쓰면 거기 추가(안 하면 처음 뜰 때 빈칸이었다 나타난다).
 - **sb 글꼴에 `fontWeight`를 주지 않는다** — sb-*엔 굵은 변형이 없어 iOS는 무시하지만 안드로이드는 가짜 굵게(synthetic bold)를 입혀 글자가 뭉개진다. 굵기는 글꼴(`sb-b`/`sb-m`/`sb-l`)로 고른다.
-- **sb 글자 줄 높이는 테마 `Text`가 맞춘다** — 안드로이드는 글꼴 ascent·descent를 픽셀 정수로 올려 줄마다 0.25~0.55 길어져 목록이 아래로 갈수록 밀렸다. `@/components/themed`의 `Text`가 `sbLineHeight`(text-metrics)로 iOS 줄 높이를 명시한다 — 반복되는 목록 행에 RN `Text`를 직접 쓰지 말 것. 아이콘이 줄 높이를 정하는 행은 아이콘에 `includeFontPadding: false`.
+- **sb 글자 줄 높이는 테마 `Text`가 맞춘다** — 안드로이드는 글꼴 ascent·descent를 픽셀 정수로 올려 줄마다 0.25~0.55 길어져 목록이 아래로 갈수록 밀렸다. `@/components/themed`의 `Text`가 `sbLineHeight`(text-metrics)로 iOS 줄 높이를 명시한다 — 반복되는 목록 행에 RN `Text`를 직접 쓰지 말 것. 아이콘이 줄 높이를 정하는 행은 아이콘에 `style={iconLine(size)}`(text-metrics — 안드로이드 아이콘 박스를 iOS 줄 높이로 못박는다, iOS는 무변화).
 - **글자와 섞인 컬러 이모지는 iOS에서만 줄을 키운다** — 같은 줄의 글자와 그 아래가 안드로이드에서 위로 붙는다. 이모지마다 늘어나는 양이 달라 쓰는 곳마다 재서 `constants/text-metrics`의 `EMOJI_LINE_TOP`에 넣는다.
 - **헤더 높이는 iOS 내비 바 기하를 따른다**(`header-metrics`·`stack-header`) — 안드로이드 기본 툴바(56dp)를 쓰면 헤더가 12dp 두꺼워 본문이 통째로 내려간다. 투명 헤더(`headerTransparent`/`headerBackground`)를 쓰면 react-navigation이 안드로이드에서 헤더 높이를 56+인셋으로 덮어쓰니(라이브러리 FIXME) `useHeaderHeight()`에 기대지 말 것.
 - **RN `Modal` 안의 제스처(gesture-handler)는 그 안에 `GestureHandlerRootView`가 있어야 먹는다**(안드로이드) — `components/dialog.tsx`가 깔아 둔다. 새 Modal에 휠·팬 제스처를 넣으면 같이 깐다.
 - **바텀시트(@gorhom) 안의 스크롤뷰는 시트 드래그에 터치를 뺏긴다** — 휠처럼 세로로 끄는 건 짧은 `activeOffsetY`의 팬 제스처로 만든다(`wheel.android`).
+- **화면 아래에 붙는 요소는 화면 끝이 아니라 안전영역(탭바·홈 인디케이터) 기준으로 띄운다** — 하단 인셋이 iOS 34 / 안드로이드 24라 화면 끝 고정값이면 안드로이드에서 10 높게 뜬다. 탭 화면 끝 여백은 `useBottomTabBarHeight() + n`, 그 밖은 `insets.bottom ? insets.bottom + n : 원래값`(iPhone 17 Pro 값이 그대로 나오게 n을 고른다).
+- **Pressable 안의 네이티브 영상 뷰(expo-video)는 `pointerEvents="none"` View로 감싼다** — 안드로이드 PlayerView가 손가락이 1px만 움직여도 터치 잠금을 요청해 gesture-handler가 JS 터치를 취소한다(실기기 탭이 씹힌다). 네이티브 뷰에 직접 준 pointerEvents는 안드로이드에서 안 먹는다.
 - 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.

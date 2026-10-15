@@ -2,6 +2,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { Text, View } from "../themed";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { equipmentData } from "@/constants/constants";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -30,6 +31,7 @@ export const EquipmentBox = () => {
           name="dumbbell"
           size={20}
           color={themeColor.tintText}
+          style={iconLine(20)}
         />
         <Text style={{ fontSize: 16 }}>{t("plan.equipment")}</Text>
       </IconTitle>

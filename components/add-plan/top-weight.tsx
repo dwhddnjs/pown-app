@@ -3,6 +3,7 @@ import React, { useEffect, useRef } from "react";
 import { Pressable, StyleSheet, TextInput } from "react-native";
 import { Text, View } from "../themed";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 // icon
 import WeightIcon from "@expo/vector-icons/MaterialCommunityIcons";
 // hook
@@ -61,6 +62,7 @@ export const TopWeight = ({
           name="weight-kilogram"
           size={20}
           color={themeColor.tintText}
+          style={iconLine(20)}
         />
         <Text style={{ fontSize: 16 }}>{t("plan.targetWeight")}</Text>
       </IconTitle>
