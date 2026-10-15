@@ -9,6 +9,7 @@ import {
 } from "@react-navigation/drawer";
 import { WorkoutFolderTree } from "./workout-folder-tree";
 import { drawerHeaderTop } from "@/components/navigation/header-metrics";
+import { iconLine } from "@/constants/text-metrics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 // zustand
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
@@ -89,6 +90,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
               name="settings-sharp"
               size={24}
               color={themeColor.subText}
+              style={iconLine(24)}
             />
           </TouchableOpacity>
         </View>
@@ -99,6 +101,7 @@ export const DrawerContent = (props: DrawerContentComponentProps) => {
             name="folder-off"
             size={20}
             color={themeColor.subText}
+            style={iconLine(20)}
           />
           <Text style={{ color: themeColor.subText, fontFamily: "sb-l" }}>
             {t("drawer.empty")}

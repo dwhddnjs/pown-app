@@ -31,6 +31,15 @@ export const FLAG_EMOJI_BOX = { paddingTop: 6.1, marginBottom: -2.5 };
 // 첫 줄이 iOS UITextView보다 5.3 아래에 놓인다 (한 줄 입력칸은 같다). 그만큼 위 여백을 덜 준다
 export const MULTILINE_INPUT_TOP = -5.3;
 
+// 아이콘 글꼴 한 글자의 박스를 iOS 줄 높이(글꼴 ascent+descent, MaterialCommunityIcons·AntDesign·
+// FontAwesome·Ionicons는 크기 그대로, Octicons는 1.0156배)로 못박는다. 안드로이드는 기본 글꼴 여백(글리프
+// 외곽 기준)에 ascent·descent 픽셀 올림까지 더해 20 아이콘이 20.57이 된다 — 아이콘이 행 높이를 정하는
+// 줄(섹션 제목 등)마다 0.57씩 쌓여 계획 폼 끝에서 3dp 밀렸다. 박스를 줄여도 글리프는 위끝 기준이라 자리가 같다
+export const iconLine = (size: number, ratio = 1): TextStyle => ({
+  includeFontPadding: false,
+  height: size * ratio,
+});
+
 // sb 글꼴의 자연 줄 높이 비율 — hhea ascent 800 + descent 399(sb-l 400), lineGap 0, UPM 1000.
 // iOS는 이 값을 그대로 줄 높이로 쓴다
 const SB_LINE: Record<string, number> = {
@@ -41,7 +50,7 @@ const SB_LINE: Record<string, number> = {
 
 // 안드로이드는 글꼴 ascent·descent를 각각 픽셀 정수로 올려 줄 높이를 잡는다 — 2.625배율에서 16 글자는
 // 0.25, 24 글자는 0.55씩 iOS보다 길어져, 세트 행 하나에 0.75dp, 계획 폼 끝에서 4.5dp가 쌓였다.
-// lineHeight가 없는 sb 글자에 iOS 줄 높이를 가장 가까운 픽셀로 맞춰 명시한다
+// lineHeight가 없는 sb 글자에 iOS 줄 높이를 픽셀로 맞춰 명시한다
 // (RN은 lineHeight를 ceil(px)로 쓰므로 0.01 덜 준다).
 // 컬러 이모지가 섞인 글자는 빼둔다 — 그 줄은 이모지 글꼴이 줄 높이를 바꾸고, 위 EMOJI_LINE_TOP 등은
 // 그 줄 그대로를 재서 맞춘 값이다(명시한 lineHeight는 이모지 글꼴을 무시한다)
@@ -58,5 +67,9 @@ export const sbLineHeight = (
   if (typeof children === "string" && EMOJI.test(children)) return undefined;
   const scale =
     PixelRatio.get() * (allowFontScaling ? PixelRatio.getFontScale() : 1);
-  return { lineHeight: (Math.round(fontSize * ratio * scale) - 0.01) / scale };
+  // iOS도 글자 높이를 화면 픽셀(⅓pt)로 올려 잡는다(14 글자는 16.8이 아니라 17). 그 높이에 가장 가까운
+  // 안드로이드 픽셀을 고르고, 반 픽셀이면 아래로 — 세트 행처럼 14·10 글자가 한 행에 같이 있을 때
+  // 둘의 오차가 상쇄돼 운동 카드 한 장 오차가 0.05 안에 든다(가까운 픽셀만 보면 카드마다 0.5씩 짧았다)
+  const ios = Math.ceil(fontSize * ratio * 3 - 1e-6) / 3;
+  return { lineHeight: (Math.ceil(ios * scale - 0.5) - 0.01) / scale };
 };

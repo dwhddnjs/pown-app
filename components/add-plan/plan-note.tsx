@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { StyleSheet, TextInput } from "react-native";
 import { Text, View } from "../themed";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 // icon
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons";
 import { Link } from "expo-router";
@@ -27,7 +28,12 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
     <View style={styles.main}>
       <View style={styles.container}>
         <IconTitle style={{ gap: 7, paddingLeft: 20, paddingBottom: 10 }}>
-          <NoteIcon name="note-text" size={20} color={themeColor.tintText} />
+          <NoteIcon
+            name="note-text"
+            size={20}
+            color={themeColor.tintText}
+            style={iconLine(20)}
+          />
           <Text style={{ fontSize: 16 }}>{t("plan.quickNote")}</Text>
         </IconTitle>
         <Link

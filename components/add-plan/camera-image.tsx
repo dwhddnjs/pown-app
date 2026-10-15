@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "../themed";
 import { Button } from "../button";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 // expo
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
@@ -37,7 +38,12 @@ export const CameraImage = () => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
-          <AntDesign name="camera" size={20} color={themeColor.tintText} />
+          <AntDesign
+            name="camera"
+            size={20}
+            color={themeColor.tintText}
+            style={iconLine(20)}
+          />
           <Text style={{ fontSize: 16 }}>{t("plan.photo")}</Text>
         </IconTitle>
         <Text style={[styles.subText, { color: themeColor.tintText }]}>

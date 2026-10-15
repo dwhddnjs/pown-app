@@ -3,6 +3,7 @@ import { Text, View } from "../themed";
 import { Octicons } from "@expo/vector-icons";
 import { Button } from "../button";
 import { IconTitle } from "../icon-title";
+import { iconLine } from "@/constants/text-metrics";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { SetCounterItem } from "./set-counter-item";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
@@ -24,7 +25,12 @@ export const SetCounter = ({ onOpen, isSheetOpen }: SetCounterProps) => {
     <View style={styles.container}>
       <View style={styles.titleContainer}>
         <IconTitle style={{ paddingLeft: 20 }}>
-          <Octicons name="number" size={20} color={themeColor.tintText} />
+          <Octicons
+            name="number"
+            size={20}
+            color={themeColor.tintText}
+            style={iconLine(20, 1.0156)}
+          />
           <Text style={{ fontSize: 16 }}>{t("plan.setAndReps")}</Text>
         </IconTitle>
         <Text style={[styles.subText, { color: themeColor.tintText }]}>

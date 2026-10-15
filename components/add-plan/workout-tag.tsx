@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useState } from "react";
 // component
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet } from "react-native";
+import { Text } from "../themed";
 import Animated, {
   cancelAnimation,
   runOnJS,
@@ -222,6 +223,9 @@ WorkoutTag.displayName = "WorkoutTag";
 // 검색 시트(search-workout-tag-sheet)도 같은 칩을 쓴다. 모양이 갈라지지 않게 여기서만 정의한다.
 export const tagChipStyles = StyleSheet.create({
   tag: {
+    // iOS 칩 높이(글자 17 + 위아래 6씩) — 안드로이드는 픽셀 반올림으로 28.57이 돼 줄마다 0.43씩 붙었다
+    minHeight: 29,
+    justifyContent: "center",
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderWidth: 2,
@@ -230,6 +234,9 @@ export const tagChipStyles = StyleSheet.create({
   title: {
     fontFamily: "sb-l",
     fontSize: 14,
+    // iOS는 16.8을 화면 픽셀로 올려 17로 잡는다(값을 줘도 같다). 안드로이드는 이 값이면 44px(16.76)라
+    // 위 minHeight 29가 칩 높이를 iOS와 같게 맞춘다 — 기본 보정(17.14)이면 칩이 29.14가 돼 줄마다 밀린다
+    lineHeight: 16.75,
   },
 });
 

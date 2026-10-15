@@ -23,8 +23,9 @@ export const settingsScreenStyles = StyleSheet.create({
   },
   // 설정 행 아이콘(MaterialCommunityIcons 20)이 행 높이를 정한다. 안드로이드는 기본 글꼴 여백
   // (글리프 외곽 기준)으로 줄이 0.6 커져 행마다 1씩 iOS보다 길어진다 — 꺼서 iOS 줄높이(20)에 맞춘다.
-  // iOS엔 없는 속성이라 무시된다
+  // 꺼도 ascent·descent를 픽셀 정수로 올려 0.2 남으니 높이를 iOS 줄높이로 못박는다(iOS는 원래 20)
   icon: {
     includeFontPadding: false,
+    height: 20,
   },
 });
