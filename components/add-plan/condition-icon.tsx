@@ -72,6 +72,7 @@ export const ConditionButton = ({ item }: ConditionButtonProps) => {
   const themeColor = useCurrentThemeColor();
   const lang = useLanguage();
   const isSelected = condition.includes(item.condition);
+  const label = tCondition(item.condition, lang);
 
   const onPressCondition = () => {
     if (isSelected) {
@@ -100,11 +101,14 @@ export const ConditionButton = ({ item }: ConditionButtonProps) => {
       <Text
         style={[
           styles.text,
+          // 원 아래쪽은 폭이 좁아 여섯 글자 넘는 영어 라벨("Pumped")은 테두리에 닿는다 — 한 단계 줄인다
+          // (adjustsFontSizeToFit은 안드로이드에서 안 먹어 두 플랫폼이 갈린다)
+          label.length > 5 && styles.longText,
           { color: themeColor.tintText },
           isSelected && { color: themeColor.onTint },
         ]}
       >
-        {tCondition(item.condition, lang)}
+        {label}
       </Text>
     </TouchableOpacity>
   );
@@ -144,5 +148,8 @@ const styles = StyleSheet.create({
 
   text: {
     fontSize: 8,
+  },
+  longText: {
+    fontSize: 7,
   },
 });
