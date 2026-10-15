@@ -15,7 +15,7 @@ export const EMOJI_LINE_TOP = {
   // 📆 14 — 계획 날짜 버튼 (iOS 23.33, 안드로이드 18.67)
   planDate: 4.8,
   // 💪🏻 16 — 중량 계산기 행 (iOS 26.67, 안드로이드 21.33)
-  calcRow: 5.4,
+  calcRow: 5.2,
   // 📆 18 — 날짜 선택 다이얼로그 제목 (글자가 iOS보다 3.9 위)
   dateTitle: 3.9,
   // 🔍 16 — 검색 안내 문구(두 줄, lineHeight 24). 이모지 줄이 iOS에서 1.1 커져 첫 줄이 1.5,
