@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 // component
 import { ScrollView, StyleSheet, TouchableOpacity } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Button } from "@/components/button";
 import { Text, View } from "@/components/themed";
 import { toast } from "sonner-native";
@@ -46,6 +47,7 @@ export default function UserInfo() {
 
   const themeColor = useCurrentThemeColor();
   const t = useT();
+  const insets = useSafeAreaInsets();
   const lang = useLanguage();
 
   const { back } = useRouter();
@@ -91,7 +93,14 @@ export default function UserInfo() {
   ] as const;
 
   return (
-    <View style={{ flex: 1, paddingBottom: 48 }}>
+    // 저장 버튼은 홈 인디케이터·내비 바 위 14 — 화면 끝 48 고정이면 하단 인셋이 작은 안드로이드(24)에서
+    // 10 높게 떴다 (iPhone 17 Pro는 그대로 48, 인셋 없는 기기도 48)
+    <View
+      style={{
+        flex: 1,
+        paddingBottom: insets.bottom ? insets.bottom + 14 : 48,
+      }}
+    >
       <ScrollView
         showsVerticalScrollIndicator={false}
         style={{ backgroundColor: themeColor.background }}
