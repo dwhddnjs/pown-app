@@ -50,8 +50,11 @@ const SB_LINE: Record<string, number> = {
 
 // 안드로이드는 글꼴 ascent·descent를 각각 픽셀 정수로 올려 줄 높이를 잡는다 — 2.625배율에서 16 글자는
 // 0.25, 24 글자는 0.55씩 iOS보다 길어져, 세트 행 하나에 0.75dp, 계획 폼 끝에서 4.5dp가 쌓였다.
-// lineHeight가 없는 sb 글자에 iOS 줄 높이를 픽셀로 맞춰 명시한다
-// (RN은 lineHeight를 ceil(px)로 쓰므로 0.01 덜 준다).
+// iOS도 글자 높이를 화면 픽셀(⅓pt)로 올려 잡는다(14 글자는 16.8이 아니라 17.0). 안드로이드 글자 높이는
+// 정수 픽셀이라 17.0(44.625px)을 못 만드니, 그보다 크지 않은 가장 큰 픽셀로 줄 높이를 명시하고
+// 모자란 조각(0.24 등)을 아래 여백으로 채운다 — 레이아웃이 위치를 실수로 계산하므로 다음 줄이 iOS와
+// 같은 자리에서 시작해 픽셀 오차가 쌓이지 않는다 (픽셀만 맞추면 카드·행마다 ±0.2씩 쌓였다).
+// (RN은 lineHeight를 ceil(px)로 쓰므로 0.01 덜 준다)
 // 컬러 이모지가 섞인 글자는 빼둔다 — 그 줄은 이모지 글꼴이 줄 높이를 바꾸고, 위 EMOJI_LINE_TOP 등은
 // 그 줄 그대로를 재서 맞춘 값이다(명시한 lineHeight는 이모지 글꼴을 무시한다)
 const EMOJI = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u;
@@ -61,15 +64,19 @@ export const sbLineHeight = (
   children?: React.ReactNode,
   allowFontScaling = true,
 ): TextStyle | undefined => {
-  const { fontFamily, fontSize = 14, lineHeight } = StyleSheet.flatten(style);
+  const flat = StyleSheet.flatten(style);
+  const { fontFamily, fontSize = 14, lineHeight } = flat;
   const ratio = fontFamily ? SB_LINE[fontFamily] : undefined;
   if (lineHeight || !ratio) return undefined;
   if (typeof children === "string" && EMOJI.test(children)) return undefined;
-  const scale =
-    PixelRatio.get() * (allowFontScaling ? PixelRatio.getFontScale() : 1);
-  // iOS도 글자 높이를 화면 픽셀(⅓pt)로 올려 잡는다(14 글자는 16.8이 아니라 17). 그 높이에 가장 가까운
-  // 안드로이드 픽셀을 고르고, 반 픽셀이면 아래로 — 세트 행처럼 14·10 글자가 한 행에 같이 있을 때
-  // 둘의 오차가 상쇄돼 운동 카드 한 장 오차가 0.05 안에 든다(가까운 픽셀만 보면 카드마다 0.5씩 짧았다)
-  const ios = Math.ceil(fontSize * ratio * 3 - 1e-6) / 3;
-  return { lineHeight: (Math.ceil(ios * scale - 0.5) - 0.01) / scale };
+  const density = PixelRatio.get();
+  const fontScale = allowFontScaling ? PixelRatio.getFontScale() : 1;
+  const ios = Math.ceil(fontSize * fontScale * ratio * 3 - 1e-6) / 3;
+  const px = Math.floor(ios * density + 1e-6);
+  const bottom = flat.paddingBottom ?? flat.paddingVertical ?? flat.padding;
+  return {
+    lineHeight: (px - 0.01) / (density * fontScale),
+    paddingBottom:
+      (typeof bottom === "number" ? bottom : 0) + ios - px / density,
+  };
 };
