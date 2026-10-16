@@ -2,6 +2,7 @@ import React from "react";
 // component
 import { Modal, Pressable, StyleSheet } from "react-native";
 import { Image } from "expo-image";
+import { ViewerStatusBar } from "./viewer-status-bar";
 // hook
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
 
@@ -10,18 +11,20 @@ import { useImageUriStore } from "@/hooks/use-image-uri-store";
 export const ImageModal = () => {
   const { uri, onResetImageUri } = useImageUriStore();
   return (
-    <Modal
-      visible
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      navigationBarTranslucent
-      onRequestClose={onResetImageUri}
-    >
-      <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
-        <Image source={{ uri }} contentFit="contain" style={styles.image} />
-      </Pressable>
-    </Modal>
+    <ViewerStatusBar>
+      <Modal
+        visible
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        navigationBarTranslucent
+        onRequestClose={onResetImageUri}
+      >
+        <Pressable onPress={() => onResetImageUri()} style={styles.overlay}>
+          <Image source={{ uri }} contentFit="contain" style={styles.image} />
+        </Pressable>
+      </Modal>
+    </ViewerStatusBar>
   );
 };
 

@@ -87,27 +87,29 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 6. 쌍은 원래 자리에 나란히 둔다. **쌍을 추가하면 아래 표에 한 줄 추가.**
 7. 웹은 지원하지 않는다 (`.web`·기본 파일을 두지 않는다).
 
-| 무엇                         | 파일 (확장자 없이 import)                  | iOS                                   | Android                                                                    |
-| ---------------------------- | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
-| 헤더·탭바 배경               | `components/bar-background`                | `BlurView`                            | iOS 블러 실측색으로 불투명                                                 |
-| 모달 띄우는 방식             | `components/navigation/modal-presentation` | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
-| 푸시 화면 헤더               | `components/navigation/stack-header`       | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
-| 운동 탭 아이콘               | `components/navigation/workout-tab-icon`   | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
-| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`     | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
-| 검색창 옵션                  | `components/navigation/search-bar-options` | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
-| 모달 상태바                  | `components/navigation/modal-status-bar`   | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
-| 루트 전용 요소               | `components/platform-root`                 | App Store 업데이트 안내               | 상태바 `auto`                                                              |
-| 키보드 회피                  | `components/keyboard-avoid`                | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
-| 날짜·시간 스피너             | `components/add-plan/date-time-spinner`    | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
-| 목록에서 하나 고르기         | `components/option-picker`                 | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
-| 글자 배치 보정값             | `constants/text-metrics`                   | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
-| 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                  | 없음                                  | `BackHandler`                                                              |
-| 메일 앱 열기                 | `lib/open-mail`                            | Gmail → mailto                        | mailto 바로                                                                |
-| 광고 단위·추적 동의          | `lib/ads-platform`                         | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
-| AI 요청 앱 헤더              | `lib/ai-client-headers`                    | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
-| 사진 저장 권한               | `lib/media-permission`                     | 읽기+쓰기                             | 쓰기 전용                                                                  |
-| 심박수 기능 입구             | `components/heart-rate` (index)            | 실제 기능                             | 빈 구현                                                                    |
-| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`       | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
+| 무엇                         | 파일 (확장자 없이 import)                   | iOS                                   | Android                                                                    |
+| ---------------------------- | ------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------- |
+| 헤더·탭바 배경               | `components/bar-background`                 | `BlurView`                            | iOS 블러 실측색으로 불투명                                                 |
+| 모달 띄우는 방식             | `components/navigation/modal-presentation`  | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
+| 푸시 화면 헤더               | `components/navigation/stack-header`        | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
+| 운동 탭 아이콘               | `components/navigation/workout-tab-icon`    | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
+| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
+| 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
+| 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
+| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`                                                              |
+| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
+| 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
+| 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
+| 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
+| 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
+| 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
+| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
+| AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
+| 사진 저장 권한               | `lib/media-permission`                      | 읽기+쓰기                             | 쓰기 전용                                                                  |
+| 심박수 기능 입구             | `components/heart-rate` (index)             | 실제 기능                             | 빈 구현                                                                    |
+| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`        | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
+| 로딩 스피너(토스트)          | `components/activity-spinner`               | `ActivityIndicator`                   | iOS 바퀴살 스피너 실측(JS)                                                 |
+| 사진 뷰어 상태바             | `components/workout-plan/viewer-status-bar` | 그대로 (시스템이 흰 글자로)           | 흰 글자를 먼저 깔고 한 프레임 뒤 Modal                                     |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 

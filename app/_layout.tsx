@@ -11,6 +11,7 @@ import { Toaster } from "sonner-native";
 import { PlanMenu } from "@/components/workout-plan/plan-menu";
 import { ImageModal } from "@/components/workout-plan/image-modal";
 import { PlatformRoot } from "@/components/platform-root";
+import { ActivitySpinner } from "@/components/activity-spinner";
 import { useHeartRateSync } from "@/components/heart-rate";
 import {
   flatHeader,
@@ -129,7 +130,10 @@ export default function RootLayout() {
         {imageUri && <ImageModal />}
         {/* 토스트 글자도 앱 글꼴로 — 기본은 시스템 글꼴(iOS SF·애플 고딕 / 안드로이드 Noto)이라 두
             플랫폼 모양이 다르다. 기본 굵기 600은 sb에 없는 굵기라 안드로이드가 가짜 굵게를 입힌다 */}
-        <Toaster toastOptions={{ titleStyle: TOAST_TITLE }} />
+        <Toaster
+          toastOptions={{ titleStyle: TOAST_TITLE }}
+          icons={{ loading: <ActivitySpinner /> }}
+        />
       </GestureHandlerRootView>
     </ThemeProvider>
   );

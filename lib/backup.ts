@@ -132,8 +132,11 @@ export const createBackup = async () => {
     );
 
     await zip(toPath(staging), toPath(archive));
-    // 공유 시트가 떠 있는 내내 로딩이 남아 있지 않게 먼저 걷는다
+    // 공유 시트가 떠 있는 내내 로딩이 남아 있지 않게 먼저 걷는다. 퇴장 애니메이션(300ms)이
+    // 끝난 뒤 띄운다 — 안드로이드 공유 시트는 다른 액티비티라 앱이 멈추면 reanimated도 멈춰서,
+    // 바로 띄우면 다 사라지지 못한 토스트가 시트 뒤에 그대로 남는다
     toast.dismiss(loading);
+    await new Promise((resolve) => setTimeout(resolve, 300));
     await shareAsync(archive, { mimeType: "application/zip" });
     return true;
   } catch {
