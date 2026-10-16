@@ -2,6 +2,7 @@
 import { StyleSheet, TouchableOpacity } from "react-native";
 import React from "react";
 import { Text, View } from "@/components/themed";
+import { iconLine } from "@/constants/text-metrics";
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
@@ -34,11 +35,13 @@ const CONDITION_ICON: Record<
   양호함: "emoticon-neutral",
 };
 
+// 아이콘 글리프가 상자를 정하는 곳(차트 44 칸·태그 줄)이라 안드로이드 글꼴 여백을 걷어 iOS 높이로 못박는다
 export const getIcon = (value: string, size: number, color: string) => (
   <MaterialCommunityIcons
     name={CONDITION_ICON[value] ?? "emoticon-sad"}
     size={size}
     color={color}
+    style={iconLine(size)}
   />
 );
 

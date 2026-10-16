@@ -3,7 +3,10 @@ import { useEffect, useRef, useState } from "react";
 import { Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { PressScale } from "@/components/press-scale";
-import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { toast } from "sonner-native";
 //expo
 import { CameraType, CameraView, useCameraPermissions } from "expo-camera";
@@ -24,6 +27,7 @@ const Camera = () => {
 
   const [facing, setFacing] = useState<CameraType>("back");
   const themeColor = useCurrentThemeColor();
+  const insets = useSafeAreaInsets();
   const router = useRouter();
   const { setImageUri } = usePlanStore();
   // 카메라 권한은 앱 시작이 아닌 카메라를 실제로 여는 이 시점에 요청한다
@@ -95,7 +99,14 @@ const Camera = () => {
           mute={false}
           responsiveOrientationWhenOrientationLocked
         />
-        <View style={styles.shutterContainer}>
+        <View
+          style={[
+            styles.shutterContainer,
+            // 홈 인디케이터·내비 바 위 10 — 화면 끝 44 고정이면 하단 인셋이 작은 안드로이드(24)에서
+            // 10 높게 떴다 (iPhone 17 Pro는 그대로 44, 숏츠 촬영 화면과 같은 규칙)
+            { bottom: insets.bottom ? insets.bottom + 10 : 44 },
+          ]}
+        >
           {/* 텍스트로 두면 영어("Cancel")에서 길어져 셔터가 밀린다 — 아이콘으로 폭을 고정한다 */}
           <PressScale
             onPress={() => router.back()}

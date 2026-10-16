@@ -90,6 +90,14 @@ export const removeAppOwnedMedia = (stored?: string) => {
 
 // 기록이 사라질 때 첨부 사진 파일도 같이 지운다 — 안 지우면 media/에 계속 쌓인다.
 // 파일명이 이미지 id 기준(plan-img-<id>.jpg)이라 기록끼리 공유되지 않아 안전하다.
+// 사진 칸을 두 장씩 한 줄로 나눈다 — 잰 폭에서 반 칸 폭을 계산해 flexWrap으로 접으면, 폭이 픽셀
+// 경계에 안 떨어지는 안드로이드(2.625배)에서 두 칸 합이 반올림 오차로 부모보다 커져 둘째 칸이
+// 아랫줄로 떨어졌다. 줄마다 flex: 1 두 칸이면 잴 것도 없다
+export const imageRows = <T>(list: T[]) =>
+  Array.from({ length: Math.ceil(list.length / 2) }, (_, row) =>
+    list.slice(row * 2, row * 2 + 2),
+  );
+
 export const removePlanImages = (images?: ImageUriType[]) =>
   (images || []).forEach((image) => removeAppOwnedMedia(image.imageUri));
 

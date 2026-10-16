@@ -10,7 +10,8 @@
     "lint": "expo lint",
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.android.json",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "postinstall": "node scripts/patch-sonner-native.js"
   },
   "dependencies": {
     "@bacons/apple-targets": "^4.0.7",

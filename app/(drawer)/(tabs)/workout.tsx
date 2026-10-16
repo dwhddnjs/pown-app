@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // component
-import { StyleSheet, ViewToken } from "react-native";
+import {
+  NativeScrollEvent,
+  NativeSyntheticEvent,
+  StyleSheet,
+  ViewToken,
+} from "react-native";
 import { Text, View } from "@/components/themed";
 import { FlashList, FlashListRef } from "@shopify/flash-list";
 import { EmptyList } from "@/components/workout-plan/empty-list";
@@ -29,7 +34,7 @@ import { useLanguage } from "@/hooks/use-user-store";
 // lib
 import { convertChartDate } from "@/lib/date";
 // expo
-import { useRouter } from "expo-router";
+import { useNavigation, useRouter } from "expo-router";
 // navigation
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
@@ -87,6 +92,11 @@ export default function TabOneScreen() {
   );
 
   const listRef = useRef<FlashListRef<Row>>(null);
+  const navigation = useNavigation();
+  // 가려진 채 맨 위로 보낸 뒤 다시 보일 때 — 새 계획이 붙으며 생긴 보던 위치 유지(MVCP) 보정을
+  // iOS는 가려진 동안 바로 적용해 맨 위 그대로인데, 안드로이드는 미뤘다가 다시 붙는 순간 적용해
+  // 새 행 높이만큼 밀려 내려갔다. 다시 보일 때 그 한 번의 밀림을 되돌린다 — 사용자가 먼저 끌면 푼다
+  const pinTop = useRef(false);
 
   // 맨 위로 버튼은 최상단이 아닐 때만 뜬다. 스크롤 이벤트를 따로 받지 않고 이미
   // 도는 viewability 결과를 쓴다 — 스크롤 중 JS 스레드에 일을 더 얹지 않는다.
@@ -127,11 +137,26 @@ export default function TabOneScreen() {
     // 스크롤한다 — 이미 그려둔 구간이라 애니메이션을 켜도 빈 화면이 없다.
     // animated: true를 scrollToIndex에 주면 안 된다: 내부에서 scrollTo를 연달아
     // 두 번 불러 마지막 애니메이션이 취소된다.
+    // 다른 탭에서 계획을 추가하면 이 화면은 가려진 채 맨 위로 간다 — 안드로이드는 가려진 탭에선
+    // 스크롤 애니메이션이 돌지 않아 첫 행 오프셋(잔디 높이)만큼 남은 채 멈췄다. 안 보일 땐 바로 간다
+    const animated = navigation.isFocused();
+    pinTop.current = !animated;
     listRef.current
       ?.scrollToIndex({ index: 0, animated: false })
-      .then(() =>
-        listRef.current?.scrollToOffset({ offset: 0, animated: true }),
-      );
+      .then(() => listRef.current?.scrollToOffset({ offset: 0, animated }));
+  }, [navigation]);
+
+  const onScroll = useCallback(
+    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+      if (!pinTop.current || e.nativeEvent.contentOffset.y <= 0) return;
+      if (!navigation.isFocused()) return;
+      pinTop.current = false;
+      listRef.current?.scrollToOffset({ offset: 0, animated: false });
+    },
+    [navigation],
+  );
+  const onScrollBeginDrag = useCallback(() => {
+    pinTop.current = false;
   }, []);
 
   // 리마운트하면 리스트가 통째로 사라졌다 다시 그려져 깜빡인다 — 1만 행이면 더 심하다.
@@ -287,6 +312,8 @@ export default function TabOneScreen() {
         getItemType={getRowType}
         drawDistance={DRAW_DISTANCE}
         onViewableItemsChanged={onViewableItemsChanged}
+        onScroll={onScroll}
+        onScrollBeginDrag={onScrollBeginDrag}
         viewabilityConfig={VIEWABILITY_CONFIG}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}

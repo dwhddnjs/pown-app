@@ -1,4 +1,3 @@
-import { useState } from "react";
 // component
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "../themed";
@@ -13,22 +12,19 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { usePlanStore } from "@/hooks/use-plan-store";
 // lib
-import { resolveMediaUri } from "@/lib/media";
+import { imageRows, resolveMediaUri } from "@/lib/media";
 // icon
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { toast } from "sonner-native";
 
-// 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
 const IMAGE_GAP = 8;
-const LIST_PADDING = 20;
 
 export const CameraImage = () => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const router = useRouter();
   const { imageUri, setRemoveImageUri } = usePlanStore();
-  const [gridWidth, setGridWidth] = useState(0);
 
   const onRemoveImageUri = (id: number) => {
     setRemoveImageUri(id);
@@ -62,49 +58,45 @@ export const CameraImage = () => {
       >
         {t("plan.takePhoto")}
       </Button>
-      <View
-        style={styles.imageListContainer}
-        onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
-      >
-        {imageUri.map((item) => (
-          <View
-            style={{
-              position: "relative",
-              width:
-                imageUri.length === 1 || !gridWidth
-                  ? "100%"
-                  : (gridWidth - LIST_PADDING * 2 - IMAGE_GAP) / 2,
-            }}
-            key={item.id}
-          >
-            <Image
-              key={item.id}
-              source={{ uri: resolveMediaUri(item.imageUri) }}
-              contentFit="cover"
-              style={[
-                styles.image,
-                {
-                  borderColor: themeColor.itemColor,
-                },
-              ]}
-            />
-            <TouchableOpacity
-              onPress={() => onRemoveImageUri(item.id)}
-              style={[
-                styles.closeButton,
-                {
-                  borderColor: themeColor.pressed,
-                  backgroundColor: themeColor.background,
-                },
-              ]}
-            >
-              {/* AntDesign close는 획이 가늘다 — 같은 X를 더 두껍게 그리는 아이콘 */}
-              <MaterialCommunityIcons
-                name="close-thick"
-                size={14}
-                color={themeColor.pressed}
-              />
-            </TouchableOpacity>
+      <View style={styles.imageListContainer}>
+        {imageRows(imageUri).map((row) => (
+          <View key={row[0].id} style={styles.imageRow}>
+            {row.map((item) => (
+              <View style={styles.imageCell} key={item.id}>
+                <Image
+                  key={item.id}
+                  source={{ uri: resolveMediaUri(item.imageUri) }}
+                  contentFit="cover"
+                  style={[
+                    styles.image,
+                    {
+                      borderColor: themeColor.itemColor,
+                    },
+                  ]}
+                />
+                <TouchableOpacity
+                  onPress={() => onRemoveImageUri(item.id)}
+                  style={[
+                    styles.closeButton,
+                    {
+                      borderColor: themeColor.pressed,
+                      backgroundColor: themeColor.background,
+                    },
+                  ]}
+                >
+                  {/* AntDesign close는 획이 가늘다 — 같은 X를 더 두껍게 그리는 아이콘 */}
+                  <MaterialCommunityIcons
+                    name="close-thick"
+                    size={14}
+                    color={themeColor.pressed}
+                  />
+                </TouchableOpacity>
+              </View>
+            ))}
+            {/* 홀수 장의 마지막 줄도 반 칸 — 한 장일 때만 줄을 꽉 채운다 */}
+            {imageUri.length > 1 && row.length === 1 && (
+              <View style={styles.imageCell} />
+            )}
           </View>
         ))}
       </View>
@@ -129,11 +121,16 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   imageListContainer: {
-    paddingHorizontal: LIST_PADDING,
+    paddingHorizontal: 20,
     paddingVertical: 12,
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: IMAGE_GAP,
+  },
+  imageRow: {
+    flexDirection: "row",
+    gap: IMAGE_GAP,
+  },
+  imageCell: {
+    flex: 1,
   },
   image: {
     aspectRatio: 1,

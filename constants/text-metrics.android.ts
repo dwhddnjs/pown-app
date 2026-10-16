@@ -76,9 +76,13 @@ export const sbLineHeight = (
   const line = (lineHeight ?? fontSize * ratio) * fontScale;
   const px = Math.round(line * density);
   const ios = Math.ceil(line * lines * 3 - 1e-6) / 3;
+  const lineBox = { lineHeight: (px - 0.01) / (density * fontScale) };
+  // 높이를 명시한 글은 상자가 이미 iOS와 같다 — 모자란 조각을 margin으로 또 붙이면 그만큼 길어진다
+  // (잔디 요일 축 7줄이 0.095씩 붙어 카드가 0.67 길었다)
+  if (typeof flat.height === "number") return lineBox;
   const margin = flat.marginBottom ?? flat.marginVertical ?? flat.margin;
   return {
-    lineHeight: (px - 0.01) / (density * fontScale),
+    ...lineBox,
     marginBottom:
       (typeof margin === "number" ? margin : 0) + ios - (lines * px) / density,
   };

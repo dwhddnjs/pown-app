@@ -87,27 +87,29 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 6. 쌍은 원래 자리에 나란히 둔다. **쌍을 추가하면 아래 표에 한 줄 추가.**
 7. 웹은 지원하지 않는다 (`.web`·기본 파일을 두지 않는다).
 
-| 무엇                         | 파일 (확장자 없이 import)                  | iOS                                   | Android                                                                    |
-| ---------------------------- | ------------------------------------------ | ------------------------------------- | -------------------------------------------------------------------------- |
-| 헤더·탭바 배경               | `components/bar-background`                | `BlurView`                            | iOS 블러 실측색으로 불투명                                                 |
-| 모달 띄우는 방식             | `components/navigation/modal-presentation` | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
-| 푸시 화면 헤더               | `components/navigation/stack-header`       | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
-| 운동 탭 아이콘               | `components/navigation/workout-tab-icon`   | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
-| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`     | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
-| 검색창 옵션                  | `components/navigation/search-bar-options` | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
-| 모달 상태바                  | `components/navigation/modal-status-bar`   | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
-| 루트 전용 요소               | `components/platform-root`                 | App Store 업데이트 안내               | 상태바 `auto`                                                              |
-| 키보드 회피                  | `components/keyboard-avoid`                | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
-| 날짜·시간 스피너             | `components/add-plan/date-time-spinner`    | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
-| 목록에서 하나 고르기         | `components/option-picker`                 | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
-| 글자 배치 보정값             | `constants/text-metrics`                   | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
-| 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                  | 없음                                  | `BackHandler`                                                              |
-| 메일 앱 열기                 | `lib/open-mail`                            | Gmail → mailto                        | mailto 바로                                                                |
-| 광고 단위·추적 동의          | `lib/ads-platform`                         | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
-| AI 요청 앱 헤더              | `lib/ai-client-headers`                    | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
-| 사진 저장 권한               | `lib/media-permission`                     | 읽기+쓰기                             | 쓰기 전용                                                                  |
-| 심박수 기능 입구             | `components/heart-rate` (index)            | 실제 기능                             | 빈 구현                                                                    |
-| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`       | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
+| 무엇                         | 파일 (확장자 없이 import)                   | iOS                                   | Android                                                                    |
+| ---------------------------- | ------------------------------------------- | ------------------------------------- | -------------------------------------------------------------------------- |
+| 헤더·탭바 배경               | `components/bar-background`                 | `BlurView`                            | iOS 블러 실측색으로 불투명                                                 |
+| 모달 띄우는 방식             | `components/navigation/modal-presentation`  | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
+| 푸시 화면 헤더               | `components/navigation/stack-header`        | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
+| 운동 탭 아이콘               | `components/navigation/workout-tab-icon`    | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
+| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
+| 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
+| 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
+| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`                                                              |
+| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
+| 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
+| 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
+| 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
+| 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
+| 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
+| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
+| AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
+| 사진 저장 권한               | `lib/media-permission`                      | 읽기+쓰기                             | 쓰기 전용                                                                  |
+| 심박수 기능 입구             | `components/heart-rate` (index)             | 실제 기능                             | 빈 구현                                                                    |
+| 재생 불가 영상 표시          | `components/shorts/unplayable-badge`        | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
+| 로딩 스피너(토스트)          | `components/activity-spinner`               | `ActivityIndicator`                   | iOS 바퀴살 스피너 실측(JS)                                                 |
+| 사진 뷰어 상태바             | `components/workout-plan/viewer-status-bar` | 그대로 (시스템이 흰 글자로)           | 흰 글자를 먼저 깔고 한 프레임 뒤 Modal                                     |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 
@@ -129,6 +131,9 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **바텀시트(@gorhom) 안의 스크롤뷰는 시트 드래그에 터치를 뺏긴다** — 휠처럼 세로로 끄는 건 짧은 `activeOffsetY`의 팬 제스처로 만든다(`wheel.android`).
 - **화면 아래에 붙는 요소는 화면 끝이 아니라 안전영역(탭바·홈 인디케이터) 기준으로 띄운다** — 하단 인셋이 iOS 34 / 안드로이드 24라 화면 끝 고정값이면 안드로이드에서 10 높게 뜬다. 탭 화면 끝 여백은 `useBottomTabBarHeight() + n`, 그 밖은 `insets.bottom ? insets.bottom + n : 원래값`(iPhone 17 Pro 값이 그대로 나오게 n을 고른다).
 - **Pressable 안의 네이티브 영상 뷰(expo-video)는 `pointerEvents="none"` View로 감싼다** — 안드로이드 PlayerView가 손가락이 1px만 움직여도 터치 잠금을 요청해 gesture-handler가 JS 터치를 취소한다(실기기 탭이 씹힌다). 네이티브 뷰에 직접 준 pointerEvents는 안드로이드에서 안 먹는다.
+- **칸 폭을 잰 폭(onLayout)에서 나눠 flexWrap으로 접지 않는다** — onLayout 값은 픽셀로 반올림돼 실제보다 클 수 있어, 두 칸 합이 넘쳐 둘째 칸이 아랫줄로 떨어졌다(안드로이드 2.625배). 줄을 직접 나누고 칸은 `flex: 1`(`lib/media` `imageRows`).
+- **iOS는 시트(`presentation: "modal"`)가 떠 있으면 루트에 둔 RN `Modal`이 안 뜬다**("already presenting" — 그 뒤 앱이 터치를 안 받았다). 시트 화면 위에 띄울 Modal은 그 시트 화면 안에 둔다(사진 뷰어는 `ImageModalHost`).
+- **RN `Modal`(안드로이드는 다이얼로그 창)은 열리는 순간 상태바 글자색을 한 번 복사한다** — 모달 위 글자색을 바꾸려면 열기 전에 바꿔 둔다(`viewer-status-bar`). 상태바는 edge-to-edge라 `expo-status-bar`(SystemBars 스택)로만 바꾼다 — RN `StatusBar.pushStackEntry`는 다른 스택이라 닫은 뒤 흰 글자로 남았다.
 - 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.
@@ -148,6 +153,6 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 
 ## 주요 라이브러리
 
-`@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
+`@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트 — 0.15의 "누르면 안 사라짐" 버그를 postinstall `scripts/patch-sonner-native.js`가 고친다. 버전을 올리면 스크립트를 지울 것), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
 
 컨텍스트 메뉴/드롭다운은 `hooks/use-popover.tsx` + `Modal`(전체 화면 backdrop) 조합을 쓴다. 운동계획 카드의 ⋯ 메뉴는 `components/workout-plan/plan-menu.tsx` 하나만 `_layout.tsx`에 마운트하고, 각 행은 `use-plan-menu-store`에 좌표만 올린다.

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 // component
 import { Pressable, StyleSheet, Image } from "react-native";
 import Animated, {
@@ -22,7 +22,7 @@ import { useT } from "@/hooks/use-t";
 // expo
 import * as MediaLibrary from "expo-media-library";
 import { useImageUriStore } from "@/hooks/use-image-uri-store";
-import { isAppOwnedMedia, resolveMediaUri } from "@/lib/media";
+import { imageRows, isAppOwnedMedia, resolveMediaUri } from "@/lib/media";
 
 interface ProgressBarProps {
   planId: number;
@@ -112,7 +112,6 @@ const ProgressBar = ({
   );
 };
 
-// 가로/세로 간격을 같게 하려면 칸 폭을 퍼센트가 아니라 실제 폭에서 gap을 뺀 px로 잡아야 한다
 const IMAGE_GAP = 8;
 
 interface PlanImagesProps {
@@ -129,7 +128,6 @@ const PlanImages = ({ imageUri, bgColor, subTextColor }: PlanImagesProps) => {
   const [mediaPermission, requestMediaPermission] =
     MediaLibrary.usePermissions();
   const { setImageUri } = useImageUriStore();
-  const [gridWidth, setGridWidth] = useState(0);
 
   // 앱 소유 사진(media/)은 권한 없이도 보이고, 구 데이터(사진첩 참조)만 권한이 필요하다
   const hasMediaPermission =
@@ -149,31 +147,33 @@ const PlanImages = ({ imageUri, bgColor, subTextColor }: PlanImagesProps) => {
   return (
     <View
       style={[styles.imageList, { backgroundColor: bgColor, marginTop: 4 }]}
-      onLayout={(e) => setGridWidth(e.nativeEvent.layout.width)}
     >
-      {imageUri.map((imageItem) => (
-        <Pressable
-          key={imageItem.id}
-          style={[
-            {
-              width:
-                imageUri.length === 1 || !gridWidth
-                  ? "100%"
-                  : (gridWidth - IMAGE_GAP) / 2,
-            },
-            { backgroundColor: bgColor },
-          ]}
-          onPress={() =>
-            setImageUri(resolveMediaUri(imageItem.imageUri) as string)
-          }
+      {imageRows(imageUri).map((row) => (
+        <View
+          key={row[0].id}
+          style={[styles.imageRow, { backgroundColor: bgColor }]}
         >
-          <Image
-            source={{ uri: resolveMediaUri(imageItem.imageUri) }}
-            style={[styles.image, { borderColor: bgColor }]}
-            // 안드로이드는 마운트마다 300ms 페이드인한다(iOS는 바로) — 목록이 셀을 재활용할 때마다 깜빡인다
-            fadeDuration={0}
-          />
-        </Pressable>
+          {row.map((imageItem) => (
+            <Pressable
+              key={imageItem.id}
+              style={[styles.imageCell, { backgroundColor: bgColor }]}
+              onPress={() =>
+                setImageUri(resolveMediaUri(imageItem.imageUri) as string)
+              }
+            >
+              <Image
+                source={{ uri: resolveMediaUri(imageItem.imageUri) }}
+                style={[styles.image, { borderColor: bgColor }]}
+                // 안드로이드는 마운트마다 300ms 페이드인한다(iOS는 바로) — 목록이 셀을 재활용할 때마다 깜빡인다
+                fadeDuration={0}
+              />
+            </Pressable>
+          ))}
+          {/* 홀수 장의 마지막 줄도 반 칸 — 한 장일 때만 줄을 꽉 채운다 */}
+          {imageUri.length > 1 && row.length === 1 && (
+            <View style={[styles.imageCell, { backgroundColor: bgColor }]} />
+          )}
+        </View>
       ))}
     </View>
   );
@@ -331,9 +331,14 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   imageList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
     gap: IMAGE_GAP,
+  },
+  imageRow: {
+    flexDirection: "row",
+    gap: IMAGE_GAP,
+  },
+  imageCell: {
+    flex: 1,
   },
   image: {
     aspectRatio: 1,
