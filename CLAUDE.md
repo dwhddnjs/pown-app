@@ -150,6 +150,6 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 
 ## 주요 라이브러리
 
-`@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
+`@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트 — 0.15의 "누르면 안 사라짐" 버그를 postinstall `scripts/patch-sonner-native.js`가 고친다. 버전을 올리면 스크립트를 지울 것), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
 
 컨텍스트 메뉴/드롭다운은 `hooks/use-popover.tsx` + `Modal`(전체 화면 backdrop) 조합을 쓴다. 운동계획 카드의 ⋯ 메뉴는 `components/workout-plan/plan-menu.tsx` 하나만 `_layout.tsx`에 마운트하고, 각 행은 `use-plan-menu-store`에 좌표만 올린다.
