@@ -3,6 +3,7 @@ import { View, Text } from "@/components/themed";
 import { useT } from "@/hooks/use-t";
 import { StyleSheet, FlatList } from "react-native";
 import { WorkoutPlan } from "@/components/workout-plan/workout-plan";
+import { ImageModalHost } from "@/components/workout-plan/image-modal";
 import { PlanDateHeader } from "@/components/workout-plan/plan-date-header";
 import { RoundedSide } from "@/components/rounded-side";
 // expo
@@ -62,6 +63,7 @@ export default function CalendarWorkout() {
           );
         }}
       />
+      <ImageModalHost />
     </View>
   );
 }

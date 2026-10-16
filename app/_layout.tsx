@@ -97,6 +97,8 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const { theme } = useUserStore();
   const imageUri = useImageUriStore((state) => state.uri);
+  // 사진 있는 시트 화면이 떠 있으면 그 화면이 뷰어를 띄운다 (image-modal.tsx)
+  const imageHosts = useImageUriStore((state) => state.hosts);
   useHeartRateSync();
 
   useEffect(() => {
@@ -127,7 +129,7 @@ export default function RootLayout() {
         <PlanMenu />
         <PlatformRoot />
         {/* 탭 레이아웃 안에 두면 그 위로 push되는 화면(검색·루틴)에서는 가려진다 */}
-        {imageUri && <ImageModal />}
+        {!!imageUri && imageHosts === 0 && <ImageModal />}
         {/* 토스트 글자도 앱 글꼴로 — 기본은 시스템 글꼴(iOS SF·애플 고딕 / 안드로이드 Noto)이라 두
             플랫폼 모양이 다르다. 기본 굵기 600은 sb에 없는 굵기라 안드로이드가 가짜 굵게를 입힌다 */}
         <Toaster
