@@ -3,6 +3,7 @@ import React from "react";
 import { useWindowDimensions } from "react-native";
 import { Text, View } from "../themed";
 import { LineChart } from "react-native-gifted-charts";
+import { LinearGradient, Stop } from "react-native-svg";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useLanguage, useUserStore } from "@/hooks/use-user-store";
@@ -15,6 +16,11 @@ import { ChartBody, ChartCard } from "./chart-card";
 const POINTER_LABEL_WIDTH = 90;
 // 차트 높이를 고정해야 세로선을 정확히 꽉 채울 수 있다(pointerStripHeight = 높이).
 const CHART_HEIGHT = 200;
+// 영역 그라데이션 — 원래 청록 0.9 → 카드색 0.2였는데, 색이 바뀌는 그라데이션을 iOS는 색·투명도를 따로
+// 섞고(비-프리멀티플라이) 안드로이드는 투명도를 곱한 채 섞어(프리멀티플라이) 안드로이드만 선형으로
+// 옅어졌다. 색은 청록 하나로 두고 iOS가 섞던 청록의 비중 (0.9 - 0.7t)(1 - t)을 단계로 찍으면 두 플랫폼이
+// 같은 그라데이션을 그린다 (9단계면 곡선과의 차이가 색값 1 미만)
+const AREA_STOPS = Array.from({ length: 9 }, (_, index) => index / 8);
 
 export const BodyChart = () => {
   const themeColor = useCurrentThemeColor();
@@ -96,10 +102,18 @@ export const BodyChart = () => {
           dataPointsColor={themeColor.tint}
           color={themeColor.tintText}
           thickness={2}
-          startFillColor={themeColor.pressed}
-          endFillColor={themeColor.itemColor}
-          startOpacity={0.9}
-          endOpacity={0.2}
+          areaGradientComponent={() => (
+            <LinearGradient id="Gradient" x1="0" y1="0" x2="0" y2="1">
+              {AREA_STOPS.map((offset) => (
+                <Stop
+                  key={offset}
+                  offset={offset}
+                  stopColor={themeColor.pressed}
+                  stopOpacity={(0.9 - 0.7 * offset) * (1 - offset)}
+                />
+              ))}
+            </LinearGradient>
+          )}
           initialSpacing={0}
           endSpacing={0}
           noOfSections={noOfSections}
