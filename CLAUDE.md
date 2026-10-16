@@ -131,6 +131,8 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **바텀시트(@gorhom) 안의 스크롤뷰는 시트 드래그에 터치를 뺏긴다** — 휠처럼 세로로 끄는 건 짧은 `activeOffsetY`의 팬 제스처로 만든다(`wheel.android`).
 - **화면 아래에 붙는 요소는 화면 끝이 아니라 안전영역(탭바·홈 인디케이터) 기준으로 띄운다** — 하단 인셋이 iOS 34 / 안드로이드 24라 화면 끝 고정값이면 안드로이드에서 10 높게 뜬다. 탭 화면 끝 여백은 `useBottomTabBarHeight() + n`, 그 밖은 `insets.bottom ? insets.bottom + n : 원래값`(iPhone 17 Pro 값이 그대로 나오게 n을 고른다).
 - **Pressable 안의 네이티브 영상 뷰(expo-video)는 `pointerEvents="none"` View로 감싼다** — 안드로이드 PlayerView가 손가락이 1px만 움직여도 터치 잠금을 요청해 gesture-handler가 JS 터치를 취소한다(실기기 탭이 씹힌다). 네이티브 뷰에 직접 준 pointerEvents는 안드로이드에서 안 먹는다.
+- **칸 폭을 잰 폭(onLayout)에서 나눠 flexWrap으로 접지 않는다** — onLayout 값은 픽셀로 반올림돼 실제보다 클 수 있어, 두 칸 합이 넘쳐 둘째 칸이 아랫줄로 떨어졌다(안드로이드 2.625배). 줄을 직접 나누고 칸은 `flex: 1`(`lib/media` `imageRows`).
+- **RN `Modal`(안드로이드는 다이얼로그 창)은 열리는 순간 상태바 글자색을 한 번 복사한다** — 모달 위 글자색을 바꾸려면 열기 전에 바꿔 둔다(`viewer-status-bar`). 상태바는 edge-to-edge라 `expo-status-bar`(SystemBars 스택)로만 바꾼다 — RN `StatusBar.pushStackEntry`는 다른 스택이라 닫은 뒤 흰 글자로 남았다.
 - 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.
