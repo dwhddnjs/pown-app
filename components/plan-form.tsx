@@ -79,7 +79,8 @@ export const PlanForm = ({
   // 태그 블록의 위치·높이와 보이는 영역의 높이 — 수정모드에 들어갈 때 얼마나 올릴지 계산한다
   const tagsRect = useRef({ y: 0, height: 0 });
   const viewportHeight = useRef(0);
-  // 키보드가 뜨기 전에 건 포커스 스크롤 — 키보드가 아래를 비운 뒤 한 번 더 건다(onFocusScroll)
+  const contentHeight = useRef(0);
+  // 키보드가 뜨기 전이라 스크롤 끝을 넘는 포커스 스크롤 — 키보드가 아래를 비운 뒤 건다(onFocusScroll)
   const pendingFocusY = useRef<number | null>(null);
 
   const workoutListData = workoutList[workoutType];
@@ -109,10 +110,17 @@ export const PlanForm = ({
   const pageYBias = focusPageYBias(useSafeAreaInsets().top, sheet);
   const onFocusScroll = (pageY: number, divisor: number) => {
     const y = (currentScrollY + pageY + pageYBias) / divisor;
-    scrollRef.current?.scrollTo({ y, animated: true });
     // 키보드가 뜨기 전이라 스크롤 끝이 화면 높이에서 막혀 있다 — 두 플랫폼 다 끝을 넘는 scrollTo는
-    // 거기서 멈춘다(퀵노트가 iOS는 덜 올라가고 안드로이드는 키보드에 가렸다). 아래가 비워진 뒤 마저 간다
-    if (!Keyboard.isVisible()) pendingFocusY.current = y;
+    // 거기서 멈춘다(퀵노트가 iOS는 덜 올라가고 안드로이드는 키보드에 가렸다). 끝을 넘으면 키보드가
+    // 아래를 비운 뒤(onLayout) 한 번에 간다 — 지금 걸면 끝에서 멈췄다 다시 가 두 번 끊겨 보인다
+    if (
+      !Keyboard.isVisible() &&
+      y > contentHeight.current - viewportHeight.current
+    ) {
+      pendingFocusY.current = y;
+      return;
+    }
+    scrollRef.current?.scrollTo({ y, animated: true });
   };
 
   // 태그를 끌어 옮기는 동안 스크롤이 같이 움직이면 안 된다. 잠그기 전에 태그 줄이 전부
@@ -175,7 +183,7 @@ export const PlanForm = ({
         ref={scrollRef}
         onLayout={(e) => {
           viewportHeight.current = e.nativeEvent.layout.height;
-          // 키보드가 아래를 비워 보이는 영역이 줄었다 — 잘렸던 포커스 스크롤을 마저 한다
+          // 키보드가 아래를 비워 보이는 영역이 줄었다 — 미뤄 둔 포커스 스크롤을 한다
           if (pendingFocusY.current !== null) {
             scrollRef.current?.scrollTo({
               y: pendingFocusY.current,
@@ -185,6 +193,9 @@ export const PlanForm = ({
           }
         }}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}
+        onContentSizeChange={(_, height) => {
+          contentHeight.current = height;
+        }}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         scrollEnabled={!isEditMode}
