@@ -135,6 +135,11 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **칸 폭을 잰 폭(onLayout)에서 나눠 flexWrap으로 접지 않는다** — onLayout 값은 픽셀로 반올림돼 실제보다 클 수 있어, 두 칸 합이 넘쳐 둘째 칸이 아랫줄로 떨어졌다(안드로이드 2.625배). 줄을 직접 나누고 칸은 `flex: 1`(`lib/media` `imageRows`).
 - **iOS는 시트(`presentation: "modal"`)가 떠 있으면 루트에 둔 RN `Modal`이 안 뜬다**("already presenting" — 그 뒤 앱이 터치를 안 받았다). 시트 화면 위에 띄울 Modal은 그 시트 화면 안에 둔다(사진 뷰어는 `ImageModalHost`).
 - **RN `Modal`(안드로이드는 다이얼로그 창)은 열리는 순간 상태바 글자색을 한 번 복사한다** — 모달 위 글자색을 바꾸려면 열기 전에 바꿔 둔다(`viewer-status-bar`). 상태바는 edge-to-edge라 `expo-status-bar`(SystemBars 스택)로만 바꾼다 — RN `StatusBar.pushStackEntry`는 다른 스택이라 닫은 뒤 흰 글자로 남았다.
+- **iOS(Fabric)의 `measure`/`measureInWindow` pageY는 투명 헤더·시트 화면에서 보이는 자리보다 크다**(푸시 +헤더 높이, 시트 +102) — pageY로 스크롤 양을 정하면 안드로이드가 덜 올라간다. 계획 폼은 `header-metrics` `focusPageYBias`로 맞춘다. 새로 pageY를 쓰면 같은 차이를 확인할 것.
+- **키보드가 뜨기 전에 건 `scrollTo`는 그 순간의 스크롤 끝에서 멈춘다**(두 플랫폼) — 키보드가 아래를 비운 뒤(ScrollView onLayout) 건다(`plan-form.tsx`).
+- **2.625배율에선 4·12·36dp처럼 x.5px가 되는 값의 위치가 단계마다 0.19씩 올림된다**(Yoga가 부모 기준 상대 위치를 반올림) — 깊은 폼이 0.3~0.7 내려가는 건 이것이라 고칠 수 없다. 0.7을 넘으면 다른 원인(아이콘 `iconLine` 누락 등)을 찾는다.
+- **바텀시트·시트 안 버튼의 아래 여백도 안전영역 기준**(세트 시트·AI 가이드 시트) — 화면 끝 고정값이면 안드로이드에서 10 높고, 3버튼 내비(인셋 48)에선 내비 바에 걸린다.
+- **햅틱은 `@/lib/haptics`로** — expo-haptics의 selection·impact는 안드로이드에서 진동 모터를 직접 돌린다.
 - 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.
