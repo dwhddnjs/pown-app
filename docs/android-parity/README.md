@@ -30,6 +30,7 @@
 | 세로 기준 | 안전영역 위끝 62pt | 안전영역 위끝 48.76dp (펀치홀 컷아웃 켠 상태) |
 | 다크 | `xcrun simctl ui $SIM appearance dark` | `adb shell cmd uimode night yes` |
 
+- **측정 도구** `docs/android-parity/tools/` — `SP=<스크래치패드> source tools/t.sh`로 두 기기 누르기·캡처(`tapt "글자"`는 안드로이드 화면에서 글자를 찾아 두 기기 같은 자리를 누른다), `cmp.py ios.png and.png [x0 x1] [--bottom]`(가로 띠 세로 위치를 안전영역 기준으로 나란히), `hcmp.py ios.png and.png y0 y1`(한 줄의 왼쪽·오른쪽 기준 가로 위치), `col.py`(코드에 임시 배경색을 칠해 레이아웃 박스 재기), `vscan.py`(한 열 색 경계), `mont.py`(여러 쌍을 한 장으로 — 이미지 확인 횟수를 줄인다)
 - 앱은 dev-client가 깔려 있으면 재빌드 없이 Metro만 띄운다: `npx expo start --dev-client` + `adb reverse tcp:8081 tcp:8081`.
 - **컷아웃 확인**: 콜드 부팅하면 컷아웃 에뮬레이션이 꺼져 있을 수 있다 — 그러면 상태바가 24dp라 헤더가 카메라 구멍에 붙는다(앱 문제 아님). `adb shell cmd overlay enable-exclusive --category com.android.internal.display.cutout.emulation.emu01` → `dumpsys window | grep statusBars`가 128px(48.76dp)인지 본다.
 - 같은 데이터: iOS MMKV(`Documents/mmkv/mmkv.default{,.crc}`)를 **복사본으로** 읽어 안드로이드 `files/mmkv/`에 넣는다(verify 스킬 §7). 로케일 ko-KR.
