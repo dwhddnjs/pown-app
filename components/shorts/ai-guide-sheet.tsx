@@ -8,6 +8,7 @@ import React, {
 } from "react";
 // component
 import { StyleSheet, useWindowDimensions } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Text, View } from "@/components/themed";
 import { Button } from "@/components/button";
 import {
@@ -52,6 +53,11 @@ export const AiGuideSheet = forwardRef<BottomSheetModal, AiGuideSheetProps>(
     const illustWidth = (width - CONTENT_PADDING * 2 - ILLUST_GAP) / 2;
     const illustHeight = Math.round((illustWidth * 16) / 9) - 10;
     const snapPoints = useMemo(() => ["90%"], []);
+    // 버튼 아래 여백 — iOS는 버튼이 홈 인디케이터 영역에 6 걸쳐 앉는다(안전영역 아래끝 + 6).
+    // 화면 끝 28 고정이면 하단 인셋이 작은 안드로이드에서 9.4 높았다 — 제스처 내비는 iOS와 같은
+    // 자리, 3버튼 내비(인셋 48)는 버튼이 내비 바에 걸리지 않게 그 위로 띄운다
+    const { bottom } = useSafeAreaInsets();
+    const footerBottom = !bottom ? 28 : bottom > 34 ? bottom + 6 : bottom - 6;
     // 읽기 전용일 때 버튼으로 스스로 닫아야 해서 안쪽 ref를 따로 들고 넘겨준다.
     // (ref 콜백은 레이아웃 이펙트보다 먼저 붙으므로 여기서 current는 이미 채워져 있다)
     const innerRef = useRef<BottomSheetModal>(null);
@@ -138,7 +144,7 @@ export const AiGuideSheet = forwardRef<BottomSheetModal, AiGuideSheetProps>(
               </View>
             ))}
           </BottomSheetScrollView>
-          <View style={styles.footer}>
+          <View style={[styles.footer, { paddingBottom: footerBottom }]}>
             {/* 동의는 분석을 시작하는 쪽에서만 받는다. 스크롤 영역에 두면 아래로
                 밀려 안 보인 채 버튼을 누르게 되므로 버튼과 같은 푸터에 고정한다. */}
             {onStart ? (
@@ -227,7 +233,6 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: CONTENT_PADDING,
     paddingTop: 12,
-    paddingBottom: 28,
     gap: 12,
   },
 });
