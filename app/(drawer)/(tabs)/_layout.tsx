@@ -13,6 +13,8 @@ import {
 } from "@/components/navigation/header-metrics";
 import { headerTitleFont } from "@/components/navigation/screen-options";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+// lib
+import { hapticMedium, hapticSelection } from "@/lib/haptics";
 // expo
 import { Tabs } from "expo-router";
 // icon
@@ -22,7 +24,6 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 import { useBackToClose } from "@/hooks/use-back-to-close";
-import * as Haptics from "expo-haptics";
 import ShortsTabHeader from "@/components/shorts/shorts-tab-header";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { FabOverlay } from "@/components/fab-menu/fab-overlay";
@@ -110,7 +111,7 @@ export default function TabLayout() {
         screenListeners={({ route }) => ({
           tabPress: () => {
             // add는 자체 리스너에서 Medium 임팩트를 준다
-            if (route.name !== "add") Haptics.selectionAsync();
+            if (route.name !== "add") hapticSelection();
           },
         })}
       >
@@ -164,7 +165,7 @@ export default function TabLayout() {
           listeners={({ navigation }) => ({
             tabPress: (e) => {
               e.preventDefault();
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              hapticMedium();
               setFabOpen((prev) => !prev);
             },
           })}

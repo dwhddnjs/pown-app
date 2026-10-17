@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity } from "react-native";
 import { Text, View } from "@/components/themed";
 import { PlanForm } from "@/components/plan-form";
-import { headerButtonLiftModal } from "@/components/navigation/screen-options";
 import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
 import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
@@ -58,7 +57,10 @@ export default function AddMultiPlan() {
       });
       setSelectedType(editingPlan.type as WorkoutTypes);
     } else {
-      usePlanStore.getState().setPlanValue("type", selectedType);
+      const store = usePlanStore.getState();
+      store.setPlanValue("type", selectedType);
+      // 새 항목은 여는 순간의 시각부터 — 스토어 날짜는 앱을 켠 시각으로 남아 있을 수 있다
+      store.setDate(new Date());
     }
     // 진입 시 한 번만 — 이후 부위 변경은 onSelectType이 직접 스토어에 반영한다
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,7 +161,7 @@ export default function AddMultiPlan() {
         </>
       }
       onLeave={clearEditingPlan}
-      saveButtonStyle={headerButtonLiftModal}
+      sheet
     />
   );
 }

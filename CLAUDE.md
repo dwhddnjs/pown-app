@@ -35,7 +35,6 @@ npm run typecheck  # 타입 체크 — iOS 세계(tsconfig.json) + Android 세�
 
 **Android 첫 출시 전 체크리스트** (코드 밖에서 할 일):
 
-- AdMob에 Android 앱을 만들고 `app.json`의 `androidAppId`(지금은 구글 샘플 ID)와 `lib/ads-platform.android.ts`의 `REWARDED_AD_UNIT_ID`(지금은 테스트 ID)를 교체 — 안 바꾸면 에러 없이 수익 0.
 - Play Console 앱 패키지는 `com.dwhddnjs.pown` — 한 번 올리면 못 바꾼다. 첫 AAB는 콘솔에서 직접 업로드해야 그다음부터 `eas submit`(track `internal`)이 된다. 서비스 계정 키 필요.
 - 데이터 보안 양식: 광고 ID(AdMob), 카메라·마이크(숏츠 녹화), 사진은 갤러리 저장만(읽기 권한 없음 — `blockedPermissions`로 READ_MEDIA_* 제거).
 
@@ -93,23 +92,24 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 모달 띄우는 방식             | `components/navigation/modal-presentation`  | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
 | 푸시 화면 헤더               | `components/navigation/stack-header`        | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
 | 운동 탭 아이콘               | `components/navigation/workout-tab-icon`    | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
-| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
+| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목·포커스 pageY         |
 | 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
 | 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
-| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`                                                              |
-| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
+| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`·키보드 내리면 포커스 해제                                    |
+| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 오프셋(시트만)              | padding (edge-to-edge)                                                     |
 | 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
 | 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
 | 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
 | 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
 | 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
-| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
+| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 실 단위 ID, 없음                                                           |
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
 | 사진 저장 권한               | `lib/media-permission`                      | 읽기+쓰기                             | 쓰기 전용                                                                  |
 | 심박수 기능 입구             | `components/heart-rate` (index)             | 실제 기능                             | 빈 구현                                                                    |
 | 재생 불가 영상 표시          | `components/shorts/unplayable-badge`        | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
 | 로딩 스피너(토스트)          | `components/activity-spinner`               | `ActivityIndicator`                   | iOS 바퀴살 스피너 실측(JS)                                                 |
 | 사진 뷰어 상태바             | `components/workout-plan/viewer-status-bar` | 그대로 (시스템이 흰 글자로)           | 흰 글자를 먼저 깔고 한 프레임 뒤 Modal                                     |
+| 햅틱                         | `lib/haptics`                               | Taptic API (selection·impact)         | 시스템 햅틱 `performAndroidHapticsAsync` (진동 모터 직접 X)                |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 
@@ -134,6 +134,11 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 - **칸 폭을 잰 폭(onLayout)에서 나눠 flexWrap으로 접지 않는다** — onLayout 값은 픽셀로 반올림돼 실제보다 클 수 있어, 두 칸 합이 넘쳐 둘째 칸이 아랫줄로 떨어졌다(안드로이드 2.625배). 줄을 직접 나누고 칸은 `flex: 1`(`lib/media` `imageRows`).
 - **iOS는 시트(`presentation: "modal"`)가 떠 있으면 루트에 둔 RN `Modal`이 안 뜬다**("already presenting" — 그 뒤 앱이 터치를 안 받았다). 시트 화면 위에 띄울 Modal은 그 시트 화면 안에 둔다(사진 뷰어는 `ImageModalHost`).
 - **RN `Modal`(안드로이드는 다이얼로그 창)은 열리는 순간 상태바 글자색을 한 번 복사한다** — 모달 위 글자색을 바꾸려면 열기 전에 바꿔 둔다(`viewer-status-bar`). 상태바는 edge-to-edge라 `expo-status-bar`(SystemBars 스택)로만 바꾼다 — RN `StatusBar.pushStackEntry`는 다른 스택이라 닫은 뒤 흰 글자로 남았다.
+- **iOS(Fabric)의 `measure`/`measureInWindow` pageY는 투명 헤더·시트 화면에서 보이는 자리보다 크다**(푸시 +헤더 높이, 시트 +102) — pageY로 스크롤 양을 정하면 안드로이드가 덜 올라간다. 계획 폼은 `header-metrics` `focusPageYBias`로 맞춘다. 새로 pageY를 쓰면 같은 차이를 확인할 것.
+- **키보드가 뜨기 전에 건 `scrollTo`는 그 순간의 스크롤 끝에서 멈춘다**(두 플랫폼) — 키보드가 아래를 비운 뒤(ScrollView onLayout) 건다(`plan-form.tsx`).
+- **2.625배율에선 4·12·36dp처럼 x.5px가 되는 값의 위치가 단계마다 0.19씩 올림된다**(Yoga가 부모 기준 상대 위치를 반올림) — 깊은 폼이 0.3~0.7 내려가는 건 이것이라 고칠 수 없다. 0.7을 넘으면 다른 원인(아이콘 `iconLine` 누락 등)을 찾는다.
+- **바텀시트·시트 안 버튼의 아래 여백도 안전영역 기준**(세트 시트·AI 가이드 시트) — 화면 끝 고정값이면 안드로이드에서 10 높고, 3버튼 내비(인셋 48)에선 내비 바에 걸린다.
+- **햅틱은 `@/lib/haptics`로** — expo-haptics의 selection·impact는 안드로이드에서 진동 모터를 직접 돌린다.
 - 비교는 iOS 시뮬레이터와 안드로이드 에뮬레이터의 같은 화면을 pt/dp로 맞춰 나란히 놓고 본다(verify 스킬 7). 세로 위치는 **안전영역 위끝 기준**으로 맞춘다(iOS 62 / Pixel 6 48.76) — 상태바 높이가 기기마다 달라 절대 좌표는 기준이 못 된다.
 
 **Android 기본값**: edge-to-edge(`android.edgeToEdgeEnabled`) — 창이 키보드에 밀리지 않으니 키보드 회피는 JS(`KeyBoardAvoid`, 바텀시트 `android_keyboardInputMode="adjustResize"`)가 한다. 하드웨어 뒤로가기는 열린 시트·오버레이부터 닫는다(`useBackToClose`) — 새 시트를 만들면 같이 건다. RN `Modal`은 `onRequestClose`가 뒤로가기를 받는다.

@@ -22,8 +22,9 @@ import Animated, {
 } from "react-native-reanimated";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+// lib
+import { hapticSelection } from "@/lib/haptics";
 // expo
-import * as Haptics from "expo-haptics";
 
 // iOS 휠(UIPickerView·UIDatePicker 스피너)을 JS로 그린 한 열. 안드로이드 전용 —
 // option-picker.android.tsx, add-plan/date-time-spinner.android.tsx가 쓴다.
@@ -39,6 +40,9 @@ export type WheelMetrics = {
   radius: number;
   // 가운데에서 0·1·2…칸 떨어진 행의 글자 불투명도 (마지막 값은 90°). iOS는 다크에서 더 흐리다
   opacity: { light: number[]; dark: number[] };
+  // 가운데 행이 바깥 행보다 몇 배 큰가 — iOS UIDatePicker 스피너는 선택 행을 키워 그린다(UIPickerView는 1).
+  // 바깥 행을 1/magnify로 줄인다 (정렬 쪽 끝을 기준으로 — 오른쪽 정렬 열은 오른쪽 끝이 그대로)
+  magnify?: number;
 };
 
 type WheelColumnProps = {
@@ -87,8 +91,12 @@ const WheelRow = ({
   const { row, radius } = metrics;
   const opacity = metrics.opacity[useColorScheme() ?? "light"];
   const step = row / radius;
+  const small = 1 / (metrics.magnify ?? 1);
+  const origin =
+    StyleSheet.flatten(textStyle)?.textAlign === "right" ? "right" : "center";
   const style = useAnimatedStyle(() => {
     const angle = (index - offset.value / row) * step;
+    const scale = interpolate(Math.abs(angle), [0, step], [1, small], "clamp");
     const half = Math.PI / 2;
     const clamped = Math.max(-half, Math.min(half, angle));
     const stops = opacity.map((_, i) => Math.min(i * step, half));
@@ -100,7 +108,8 @@ const WheelRow = ({
           : 0,
       transform: [
         { translateY: radius * Math.sin(clamped) },
-        { scaleY: Math.cos(clamped) },
+        { scaleX: scale },
+        { scaleY: Math.cos(clamped) * scale },
       ],
     };
   });
@@ -109,7 +118,11 @@ const WheelRow = ({
       pointerEvents="none"
       style={[
         styles.row,
-        { top: (metrics.height - row) / 2, height: row },
+        {
+          top: (metrics.height - row) / 2,
+          height: row,
+          transformOrigin: origin,
+        },
         style,
       ]}
     >
@@ -149,7 +162,7 @@ export const WheelColumn = ({
 
   const tick = (next: number) => {
     setCenter(next);
-    Haptics.selectionAsync();
+    hapticSelection();
   };
   useAnimatedReaction(
     () => Math.min(count - 1, Math.max(0, Math.round(offset.value / row))),

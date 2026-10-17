@@ -13,8 +13,10 @@ import {
 // 남았다(계획 폼 끝 여백이 72 길어짐). 키보드가 없을 땐 꺼서 padding을 0으로 둔다
 export const KeyBoardAvoid = ({
   children,
+  // iOS 쌍과 시그니처를 맞춘다 — 안드로이드는 오프셋을 주지 않는다
+  sheet: _sheet,
   ...props
-}: KeyboardAvoidingViewProps) => {
+}: KeyboardAvoidingViewProps & { sheet?: boolean }) => {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(
     Keyboard.isVisible(),
   );

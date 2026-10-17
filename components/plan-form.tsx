@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 // component
-import {
-  Keyboard,
-  Pressable,
-  ScrollView,
-  StyleProp,
-  StyleSheet,
-  ViewStyle,
-} from "react-native";
+import { Keyboard, Pressable, ScrollView, StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { KeyBoardAvoid } from "@/components/keyboard-avoid";
@@ -25,7 +19,11 @@ import { AddWorkoutTagDialog } from "@/components/add-plan/add-workout-tag-dialo
 import { RemoveWorkoutTagDialog } from "@/components/add-plan/remove-workout-tag-dialog";
 import { SetCounterSheet } from "@/components/set-counter-sheet";
 import { HeaderIconButton } from "@/components/header-icon-button";
-import { headerButtonLift } from "@/components/navigation/screen-options";
+import {
+  headerButtonLift,
+  headerButtonLiftModal,
+} from "@/components/navigation/screen-options";
+import { focusPageYBias } from "@/components/navigation/header-metrics";
 // zustand
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useUserStore } from "@/hooks/use-user-store";
@@ -47,8 +45,9 @@ interface PlanFormProps {
   extraSheets?: React.ReactNode;
   // 화면을 떠날 때 폼 리셋과 함께 정리할 것 (루틴 편집 중인 항목 등)
   onLeave?: () => void;
-  // 저장 버튼의 헤더 내 위치 보정 — 모달 화면은 네비바 높이가 달라 값이 다르다
-  saveButtonStyle?: StyleProp<ViewStyle>;
+  // 시트(모달)로 뜨는 폼 (루틴 추가) — 네비바 높이가 달라 저장 버튼 위치 보정이 다르고,
+  // 입력칸 포커스 스크롤의 pageY 보정도 다르다
+  sheet?: boolean;
 }
 
 // 운동 계획 생성(add-plan)·수정(edit-plan)·루틴 추가(add-multi-plan)가 공유하는 폼 본문.
@@ -60,7 +59,7 @@ export const PlanForm = ({
   header,
   extraSheets,
   onLeave,
-  saveButtonStyle = headerButtonLift,
+  sheet = false,
 }: PlanFormProps) => {
   const bottomSheetModalRef = useRef<BottomSheetModal>(null);
   const workoutTagRef = useRef<BottomSheetModal>(null);
@@ -80,6 +79,9 @@ export const PlanForm = ({
   // 태그 블록의 위치·높이와 보이는 영역의 높이 — 수정모드에 들어갈 때 얼마나 올릴지 계산한다
   const tagsRect = useRef({ y: 0, height: 0 });
   const viewportHeight = useRef(0);
+  const contentHeight = useRef(0);
+  // 키보드가 뜨기 전이라 스크롤 끝을 넘는 포커스 스크롤 — 키보드가 아래를 비운 뒤 건다(onFocusScroll)
+  const pendingFocusY = useRef<number | null>(null);
 
   const workoutListData = workoutList[workoutType];
 
@@ -103,8 +105,22 @@ export const PlanForm = ({
   useBackToClose(isWorkoutTagModalOpen, onWorkoutTagSheetClose);
   useBackToClose(isEditMode, () => setEditMode(false));
 
-  const onFocusScroll = (positionY: number) => {
-    scrollRef.current?.scrollTo({ y: positionY, animated: true });
+  // 입력칸(목표 중량·퀵노트)을 누르면 (스크롤 + 칸의 pageY) / n 만큼 내려 칸을 키보드 위로 올린다.
+  // pageY는 iOS 기준 — 안드로이드는 iOS와 같은 자리에 멈추게 보정을 더한다 (header-metrics)
+  const pageYBias = focusPageYBias(useSafeAreaInsets().top, sheet);
+  const onFocusScroll = (pageY: number, divisor: number) => {
+    const y = (currentScrollY + pageY + pageYBias) / divisor;
+    // 키보드가 뜨기 전이라 스크롤 끝이 화면 높이에서 막혀 있다 — 두 플랫폼 다 끝을 넘는 scrollTo는
+    // 거기서 멈춘다(퀵노트가 iOS는 덜 올라가고 안드로이드는 키보드에 가렸다). 끝을 넘으면 키보드가
+    // 아래를 비운 뒤(onLayout) 한 번에 간다 — 지금 걸면 끝에서 멈췄다 다시 가 두 번 끊겨 보인다
+    if (
+      !Keyboard.isVisible() &&
+      y > contentHeight.current - viewportHeight.current
+    ) {
+      pendingFocusY.current = y;
+      return;
+    }
+    scrollRef.current?.scrollTo({ y, animated: true });
   };
 
   // 태그를 끌어 옮기는 동안 스크롤이 같이 움직이면 안 된다. 잠그기 전에 태그 줄이 전부
@@ -149,6 +165,7 @@ export const PlanForm = ({
 
   return (
     <KeyBoardAvoid
+      sheet={sheet}
       style={[styles.container, { backgroundColor: themeColor.background }]}
     >
       <Stack.Screen
@@ -157,7 +174,7 @@ export const PlanForm = ({
             <HeaderIconButton
               type="save"
               onPress={onSubmit}
-              style={saveButtonStyle}
+              style={sheet ? headerButtonLiftModal : headerButtonLift}
             />
           ),
         }}
@@ -166,14 +183,25 @@ export const PlanForm = ({
         ref={scrollRef}
         onLayout={(e) => {
           viewportHeight.current = e.nativeEvent.layout.height;
+          // 키보드가 아래를 비워 보이는 영역이 줄었다 — 미뤄 둔 포커스 스크롤을 한다
+          if (pendingFocusY.current !== null) {
+            scrollRef.current?.scrollTo({
+              y: pendingFocusY.current,
+              animated: true,
+            });
+            pendingFocusY.current = null;
+          }
         }}
         onScroll={(e) => setCurrentScrollY(e.nativeEvent.contentOffset.y)}
+        onContentSizeChange={(_, height) => {
+          contentHeight.current = height;
+        }}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
         scrollEnabled={!isEditMode}
         // 투명 blur 헤더 아래로 내용을 내린다. contentInset이 아니라 padding이어야 한다 —
         // inset을 쓰면 contentOffset.y의 0이 "맨 위"가 아니게 되고, 여기서 넘기는
-        // currentScrollY로 위치를 재는 입력창들(TopWeight·PlanNote)과 아래 수정모드
+        // currentScrollY로 스크롤 양을 정하는 입력창들(TopWeight·PlanNote)과 아래 수정모드
         // 스크롤 계산이 전부 헤더 높이만큼 어긋난다.
         contentContainerStyle={{ paddingTop: headerHeight }}
         style={{ flex: 1 }}
@@ -198,10 +226,7 @@ export const PlanForm = ({
           {/* 도구 선택 */}
           <EquipmentBox />
           {/* 목표중량 */}
-          <TopWeight
-            onFocusScroll={onFocusScroll}
-            currentScrollY={currentScrollY}
-          />
+          <TopWeight onFocusScroll={onFocusScroll} />
           {/* 세트와 횟수 */}
           <SetCounter
             onOpen={onSheetOpen}
@@ -210,10 +235,7 @@ export const PlanForm = ({
           {/* 컨디션 */}
           <ConditionList />
           {/* 퀵노트 전체 노트 */}
-          <PlanNote
-            onFocusScroll={onFocusScroll}
-            currentScrollY={currentScrollY}
-          />
+          <PlanNote onFocusScroll={onFocusScroll} />
           {/* 사진 */}
           <CameraImage />
           <View style={{ height: 160 }} />

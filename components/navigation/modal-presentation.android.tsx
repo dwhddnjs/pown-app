@@ -1,6 +1,12 @@
 import React, { useMemo } from "react";
 // component
-import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
+import {
+  PixelRatio,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { headerTitleFont } from "@/components/navigation/screen-options";
 import { headerTitleOffset } from "@/components/navigation/header-metrics";
@@ -90,7 +96,12 @@ export const useModalPresentation = () => {
   return useMemo(
     () => ({
       presentation: "formSheet" as const,
-      sheetAllowedDetents: [(height - top - TOP_GAP) / height],
+      // 네이티브는 시트 높이를 detent × 창 높이(px)에서 소수를 버려(toInt) 잡는다 — 그대로면 시트가
+      // 1px(0.38) 낮게 떠 시트 안 전부가 iOS보다 내려갔다. 가장 가까운 픽셀 + 반 픽셀을 넘겨 반올림되게 한다
+      sheetAllowedDetents: [
+        (Math.round((height - top - TOP_GAP) * PixelRatio.get()) + 0.5) /
+          (height * PixelRatio.get()),
+      ],
       sheetCornerRadius: SHEET_RADIUS,
       header: renderSheetHeader,
     }),

@@ -15,6 +15,14 @@ export const headerButtonLift = { marginBottom: 6 };
 // (시트 위에서 31pt)에 오도록 iOS와 같은 값으로 내린다
 export const headerButtonLiftModal = { marginTop: 6 };
 
+// 계획 폼은 입력칸(목표 중량·퀵노트)을 누르면 (스크롤 + 칸의 pageY) / n 만큼 스크롤한다(plan-form.tsx).
+// iOS(Fabric)의 measure pageY는 보이는 자리보다 크다 — 칸의 안전영역 기준 위치에 푸시 화면(계획 폼)은
+// 162⅓(안전영역 62 + 투명 헤더 100⅓, 헤더가 한 번 더 들어간다), 시트(루틴 계획)는 102를 더한 값이 나온다
+// (iPhone 17 Pro 실측). 안드로이드 pageY는 상태바를 포함한 보이는 자리 그대로라 덜 올라가 칸이 37 아래에
+// 멈췄다 — 그 차이를 더해 iOS와 같은 자리에 멈추게 한다
+export const focusPageYBias = (topInset: number, sheet: boolean): number =>
+  (sheet ? 102 : 162 + 1 / 3) - topInset;
+
 // 기본 헤더를 쓰는 탭(MY)의 높이 — iOS 내비 바와 같은 자리·높이
 export const tabHeaderHeight = (topInset: number): number | undefined =>
   (headerBarTop(topInset) ?? topInset) + NAV_BAR_HEIGHT;

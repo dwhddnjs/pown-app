@@ -14,6 +14,9 @@ export const headerTitleOffset = {};
 export const headerButtonLift = { marginBottom: 6 };
 export const headerButtonLiftModal = { marginTop: 6 };
 
+// 계획 폼 입력칸 포커스 스크롤의 pageY 보정 — iOS가 기준이라 없다
+export const focusPageYBias = (_topInset: number, _sheet: boolean): number => 0;
+
 // 기본 헤더를 쓰는 탭(MY)의 높이 — iOS 기본(폰 44pt, 아이패드 50pt)을 그대로 쓴다
 export const tabHeaderHeight = (_topInset: number): number | undefined =>
   undefined;

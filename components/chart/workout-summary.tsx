@@ -8,6 +8,7 @@ import { sortWorkoutPlanList } from "@/lib/stats";
 import { useLanguage } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
 import { tBodyPart } from "@/lib/i18n";
+import { iconLine } from "@/constants/text-metrics";
 import { ChartCard } from "./chart-card";
 // expo
 import { useRouter } from "expo-router";
@@ -132,6 +133,8 @@ export const WorkoutSummary = () => {
           name="calendar-month-outline"
           size={20}
           color={themeColor.tintText}
+          // 이 아이콘이 행 높이를 정한다 — 안드로이드 기본 글꼴 여백이면 0.57 길어 아래 카드가 전부 밀렸다
+          style={iconLine(20)}
         />
         <Text style={styles.calendarLinkText}>{t("chart.openCalendar")}</Text>
         <AntDesign name="right" size={15} color={themeColor.subText} />

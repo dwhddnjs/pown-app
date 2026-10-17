@@ -17,6 +17,7 @@ import { useUserStore } from "@/hooks/use-user-store";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
+import { hapticLight, hapticSelection } from "@/lib/haptics";
 import {
   findDropIndex,
   layoutTags,
@@ -27,7 +28,6 @@ import {
 import { WorkoutTypes } from "@/types/workout";
 // expo
 import { usePathname } from "expo-router";
-import * as Haptics from "expo-haptics";
 // icon
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -137,7 +137,7 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
   const onLongPress = useCallback(() => {
     if (isEditMode) return;
     setEditMode(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticLight();
   }, [isEditMode, setEditMode]);
 
   const onDragMove = useCallback((item: string, x: number, y: number) => {
@@ -177,7 +177,7 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
     const state = stateRef.current;
     if (state.order.join() === state.workoutList.join()) return;
     setReorderWorkoutTag(workoutType, state.order);
-    Haptics.selectionAsync();
+    hapticSelection();
   }, [setReorderWorkoutTag, workoutType]);
 
   const isEmpty = order.length === 0;

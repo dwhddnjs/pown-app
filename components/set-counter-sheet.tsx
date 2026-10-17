@@ -1,4 +1,5 @@
 import { StyleSheet } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import BottomSheet from "@gorhom/bottom-sheet";
 import Animated, {
@@ -17,9 +18,10 @@ import { countData, setTypeData } from "@/constants/constants";
 import { usePlanStore } from "@/hooks/use-plan-store";
 import { useLanguage } from "@/hooks/use-user-store";
 import { tSetType } from "@/lib/i18n";
+import { iconLine } from "@/constants/text-metrics";
 
-// 시트에서 피커를 뺀 높이 = 핸들 + 제목 + 추가 버튼 + 하단 여백
-const SHEET_CHROME_HEIGHT = 154;
+// 시트에서 피커·하단 여백을 뺀 높이 = 핸들 + 제목 + 추가 버튼
+const SHEET_CHROME_HEIGHT = 110;
 
 interface SetCountSheetProps {
   onClose: () => void;
@@ -37,6 +39,10 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     const { setSetWithCount, setWithCount, setFilterSetWithCount } =
       usePlanStore();
     const themeColor = useCurrentThemeColor();
+    // 추가 버튼 아래 여백 — 화면 끝이 아니라 안전영역(홈 인디케이터·내비 바) 기준으로 띄운다.
+    // 화면 끝 44 고정이면 하단 인셋이 작은 안드로이드(24)에서 시트 내용이 안전영역 기준 10 높았다
+    const { bottom } = useSafeAreaInsets();
+    const bottomGap = bottom ? bottom + 10 : 44;
     const t = useT();
     const lang = useLanguage();
 
@@ -65,8 +71,8 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
     // 시트 높이는 피커 높이에 맞춘다 (휠 216 — 안드로이드도 같은 모양을 JS로 그린다).
     // "50%"로 두면 기기에 따라 픽커와 버튼 사이가 100pt 가까이 빈다.
     const snapPoints = useMemo(
-      () => [SHEET_CHROME_HEIGHT + OPTION_PICKER_HEIGHT],
-      [],
+      () => [SHEET_CHROME_HEIGHT + OPTION_PICKER_HEIGHT + bottomGap],
+      [bottomGap],
     );
     const onSheetChange = useCallback(
       (index: number) => {
@@ -112,7 +118,13 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
                     onPress={() => setFilterSetWithCount(item.id)}
                     style={{ paddingHorizontal: 4 }}
                   >
-                    <Ionicons name="trash" size={20} color={themeColor.text} />
+                    <Ionicons
+                      name="trash"
+                      size={20}
+                      color={themeColor.text}
+                      // 이 아이콘이 행 높이를 정한다 — 안드로이드 기본 글꼴 여백이면 행마다 0.57 길다
+                      style={iconLine(20)}
+                    />
                   </TouchableOpacity>
                 </View>
               ))}
@@ -180,7 +192,7 @@ export const SetCounterSheet = forwardRef<BottomSheet, SetCountSheetProps>(
           </View>
           <View
             style={{
-              paddingBottom: 44,
+              paddingBottom: bottomGap,
               backgroundColor: themeColor.itemColor,
             }}
           >
