@@ -13,7 +13,9 @@ import {
   format,
   startOfDay,
 } from "date-fns";
-import { ko } from "date-fns/locale";
+import { enUS, ko } from "date-fns/locale";
+// hook
+import { useLanguage } from "@/hooks/use-user-store";
 
 type DateTimeSpinnerProps = {
   value: Date;
@@ -29,16 +31,35 @@ const METRICS: WheelMetrics = {
     light: [0.92, 0.42, 0.38, 0.23, 0.11],
     dark: [0.71, 0.35, 0.33, 0.19, 0.09],
   },
+  // 선택 행만 크게 — 바깥 행 글자 폭·높이가 가운데의 0.88배 (영어 날짜·분·AM/PM 열 실측)
+  magnify: 1.14,
 };
-// 열 자리 — 선택 띠(폭 310) 왼쪽 끝에서 9.5 바깥이 0. 날짜는 오른쪽 정렬, 나머지는 가운데
-const WIDTH = 329;
-const DATE_RIGHT = 149;
+// 열 자리 — 선택 띠 왼쪽 끝에서 9.5 바깥이 0. 날짜는 오른쪽 정렬, 나머지는 가운데.
+// 한국어는 날짜 | 오전·오후 | 시 | 분(폭 329, 띠 310), 영어(en_US)는 날짜 | 시 | 분 | AM·PM(폭 331, 띠 312)
+// iOS는 한국어에서만 "오늘"이 다른 날짜보다 11 안쪽에서 끝난다
 const COLUMN = 50;
-const AMPM_CENTER = 179;
-const HOUR_CENTER = 235;
-const MINUTE_CENTER = 289;
-// iOS는 "오늘"만 다른 날짜보다 11 안쪽에서 끝난다
-const TODAY_INSET = 11;
+const LAYOUT = {
+  ko: {
+    width: 329,
+    dateRight: 149,
+    hour: 235,
+    minute: 289,
+    ampm: 179,
+    todayInset: 11,
+  },
+  en: {
+    width: 331,
+    dateRight: 137.8,
+    hour: 179.3,
+    minute: 233.3,
+    ampm: 287.3,
+    todayInset: 0,
+  },
+};
+const TEXT = {
+  ko: { today: "오늘", date: "M월 d일 E", locale: ko, ampm: ["오전", "오후"] },
+  en: { today: "Today", date: "EEE MMM d", locale: enUS, ampm: ["AM", "PM"] },
+};
 
 // 날짜 범위 — 3년 전부터 1년 뒤까지 (iOS는 사실상 무한이지만 운동 기록엔 이 정도면 된다)
 const PAST_DAYS = 365 * 3;
@@ -53,6 +74,10 @@ const pad = (n: number) => String(n).padStart(2, "0");
 // (시스템 날짜→시간 다이얼로그 두 번) iOS 스피너를 JS 휠로 그린다. 표기는 iOS와 같이 한국어
 export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
   const bandColor = WHEEL_BAND_COLOR[useColorScheme() ?? "light"];
+  // 휠도 앱 언어를 따른다 (iOS UIDatePicker locale과 같게)
+  const lang = useLanguage() === "en" ? "en" : "ko";
+  const layout = LAYOUT[lang];
+  const text = TEXT[lang];
   const today = startOfDay(new Date());
   const dayIndex = PAST_DAYS + differenceInCalendarDays(value, today);
   const hours = value.getHours();
@@ -67,7 +92,7 @@ export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
   };
 
   return (
-    <View style={styles.wheel}>
+    <View style={[styles.wheel, { width: layout.width }]}>
       <View style={[styles.band, { backgroundColor: bandColor }]} />
       <WheelColumn
         metrics={METRICS}
@@ -75,22 +100,26 @@ export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
         index={dayIndex}
         label={(i) =>
           i === PAST_DAYS
-            ? "오늘"
-            : format(addDays(today, i - PAST_DAYS), "M월 d일 E", { locale: ko })
+            ? text.today
+            : format(addDays(today, i - PAST_DAYS), text.date, {
+                locale: text.locale,
+              })
         }
-        rowTextStyle={(i) => (i === PAST_DAYS ? styles.today : undefined)}
+        rowTextStyle={(i) =>
+          i === PAST_DAYS ? { paddingRight: layout.todayInset } : undefined
+        }
         onChange={(i) => update(i, pm, hour12, minute)}
-        textStyle={[styles.label, styles.right]}
-        style={styles.dateColumn}
+        textStyle={[styles.label, lang === "en" && styles.latin, styles.right]}
+        style={[styles.dateColumn, { width: layout.dateRight }]}
       />
       <WheelColumn
         metrics={METRICS}
         count={2}
         index={pm}
-        label={(i) => (i === 0 ? "오전" : "오후")}
+        label={(i) => text.ampm[i]}
         onChange={(i) => update(dayIndex, i, hour12, minute)}
-        textStyle={styles.label}
-        style={[styles.column, { left: AMPM_CENTER - COLUMN / 2 }]}
+        textStyle={[styles.label, lang === "en" && styles.latin]}
+        style={[styles.column, { left: layout.ampm - COLUMN / 2 }]}
       />
       <WheelColumn
         metrics={METRICS}
@@ -100,7 +129,7 @@ export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
         label={(i) => String(i % 12 === 0 ? 12 : i % 12)}
         onChange={(i) => update(dayIndex, pm, i % 12, minute)}
         textStyle={[styles.label, styles.digits]}
-        style={[styles.column, { left: HOUR_CENTER - COLUMN / 2 }]}
+        style={[styles.column, { left: layout.hour - COLUMN / 2 }]}
       />
       <WheelColumn
         metrics={METRICS}
@@ -109,7 +138,7 @@ export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
         label={(i) => pad(i % 60)}
         onChange={(i) => update(dayIndex, pm, hour12, i % 60)}
         textStyle={[styles.label, styles.digits]}
-        style={[styles.column, { left: MINUTE_CENTER - COLUMN / 2 }]}
+        style={[styles.column, { left: layout.minute - COLUMN / 2 }]}
       />
     </View>
   );
@@ -117,7 +146,6 @@ export const DateTimeSpinner = ({ value, onChange }: DateTimeSpinnerProps) => {
 
 const styles = StyleSheet.create({
   wheel: {
-    width: WIDTH,
     height: METRICS.height,
   },
   band: {
@@ -132,7 +160,6 @@ const styles = StyleSheet.create({
   dateColumn: {
     position: "absolute",
     left: 0,
-    width: DATE_RIGHT,
   },
   column: {
     position: "absolute",
@@ -147,10 +174,11 @@ const styles = StyleSheet.create({
   digits: {
     fontSize: 23.5,
   },
+  // 영문(Roboto)은 iOS(SF)와 크기가 같다 — 한글만 줄인다
+  latin: {
+    fontSize: 23.5,
+  },
   right: {
     textAlign: "right",
-  },
-  today: {
-    paddingRight: TODAY_INSET,
   },
 });
