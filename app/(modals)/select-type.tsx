@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 // component
 import { StyleSheet } from "react-native";
 import { View, Text } from "@/components/themed";
@@ -5,6 +6,8 @@ import { IconTitleButton } from "@/components/icon-title-button";
 import { PlanDateButton } from "@/components/add-plan/plan-date-button";
 import { SelectTypeDateSheet } from "@/components/add-plan/select-type-date-sheet";
 import { ModalStatusBar } from "@/components/navigation/modal-status-bar";
+// zustand
+import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
 import { useLanguage } from "@/hooks/use-user-store";
 import { useT } from "@/hooks/use-t";
@@ -20,6 +23,13 @@ export default function ModalScreen() {
   const lang = useLanguage();
 
   const router = useRouter();
+  const { setDate } = usePlanStore();
+
+  // 폼 날짜는 스토어가 만들어질 때(앱을 켤 때)와 폼을 떠날 때만 지금으로 맞춰진다 — 앱을 켜고
+  // 한참 뒤 처음 추가하면 켠 시각이 기본값으로 남았다. 새 기록은 여는 순간의 시각부터 시작한다
+  useEffect(() => {
+    setDate(new Date());
+  }, [setDate]);
 
   return (
     <View style={styles.container}>

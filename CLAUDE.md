@@ -93,11 +93,11 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 모달 띄우는 방식             | `components/navigation/modal-presentation`  | `modal` (page sheet, 네이티브 헤더)   | `formSheet`(머티리얼 바텀시트) + JS 시트 헤더(바 색 변형 `modalBarHeader`) |
 | 푸시 화면 헤더               | `components/navigation/stack-header`        | 네이티브 내비 바, 계획 폼은 투명+blur | iOS 내비 바 모양 JS 헤더(검색창 포함), 계획 폼은 불투명 바 색              |
 | 운동 탭 아이콘               | `components/navigation/workout-tab-icon`    | SF Symbol                             | FontAwesome6 덤벨(가로)                                                    |
-| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목 위치                 |
+| 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목·포커스 pageY         |
 | 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
 | 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
-| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`                                                              |
-| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 상태바 오프셋               | padding (edge-to-edge)                                                     |
+| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`·키보드 내리면 포커스 해제                                    |
+| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 오프셋(시트만)              | padding (edge-to-edge)                                                     |
 | 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
 | 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
 | 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |

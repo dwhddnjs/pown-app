@@ -14,11 +14,11 @@ import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 
 interface PlanNoteProps {
-  onFocusScroll: (positionY: number) => void;
-  currentScrollY: number;
+  // 칸의 pageY와 나눌 값을 넘기면 폼이 스크롤 양을 정한다 (plan-form.tsx)
+  onFocusScroll: (pageY: number, divisor: number) => void;
 }
 
-export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
+export const PlanNote = ({ onFocusScroll }: PlanNoteProps) => {
   const { title, content, setPlanValue } = usePlanStore();
   const themeColor = useCurrentThemeColor();
   const t = useT();
@@ -56,8 +56,7 @@ export const PlanNote = ({ onFocusScroll, currentScrollY }: PlanNoteProps) => {
           spellCheck={false}
           onFocus={() => {
             inputRef.current?.measure((x, y, w, h, px, py) => {
-              const targetPosition = (currentScrollY + py) / 2;
-              onFocusScroll(targetPosition);
+              onFocusScroll(py, 2);
             });
           }}
           style={[

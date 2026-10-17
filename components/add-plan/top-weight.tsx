@@ -18,14 +18,11 @@ import Animated, {
 } from "react-native-reanimated";
 
 interface TopWeightProps {
-  onFocusScroll: (node: any) => void;
-  currentScrollY: number;
+  // 칸의 pageY와 나눌 값을 넘기면 폼이 스크롤 양을 정한다 (plan-form.tsx)
+  onFocusScroll: (pageY: number, divisor: number) => void;
 }
 
-export const TopWeight = ({
-  onFocusScroll,
-  currentScrollY,
-}: TopWeightProps) => {
+export const TopWeight = ({ onFocusScroll }: TopWeightProps) => {
   const { weight, setPlanValue, weightType } = usePlanStore();
   const inputRef = useRef<TextInput>(null);
   const themeColor = useCurrentThemeColor();
@@ -84,8 +81,7 @@ export const TopWeight = ({
             ref={inputRef}
             onFocus={() => {
               inputRef.current?.measure((x, y, w, h, px, py) => {
-                const targetPosition = (currentScrollY + py) / 3;
-                onFocusScroll(targetPosition);
+                onFocusScroll(py, 3);
               });
             }}
             style={[styles.input, { color: themeColor.tintText }]}
