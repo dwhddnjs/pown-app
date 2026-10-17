@@ -35,7 +35,6 @@ npm run typecheck  # 타입 체크 — iOS 세계(tsconfig.json) + Android 세�
 
 **Android 첫 출시 전 체크리스트** (코드 밖에서 할 일):
 
-- AdMob에 Android 앱을 만들고 `app.json`의 `androidAppId`(지금은 구글 샘플 ID)와 `lib/ads-platform.android.ts`의 `REWARDED_AD_UNIT_ID`(지금은 테스트 ID)를 교체 — 안 바꾸면 에러 없이 수익 0.
 - Play Console 앱 패키지는 `com.dwhddnjs.pown` — 한 번 올리면 못 바꾼다. 첫 AAB는 콘솔에서 직접 업로드해야 그다음부터 `eas submit`(track `internal`)이 된다. 서비스 계정 키 필요.
 - 데이터 보안 양식: 광고 ID(AdMob), 카메라·마이크(숏츠 녹화), 사진은 갤러리 저장만(읽기 권한 없음 — `blockedPermissions`로 READ_MEDIA_* 제거).
 
@@ -103,7 +102,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
 | 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
 | 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
-| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 테스트 ID(출시 전 교체), 없음                                              |
+| 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 실 단위 ID, 없음                                                           |
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
 | 사진 저장 권한               | `lib/media-permission`                      | 읽기+쓰기                             | 쓰기 전용                                                                  |
 | 심박수 기능 입구             | `components/heart-rate` (index)             | 실제 기능                             | 빈 구현                                                                    |
