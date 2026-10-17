@@ -5,10 +5,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { DrawerToggleButton } from "@react-navigation/drawer";
 import { BarBackground } from "@/components/bar-background";
+// lib
+import { hapticLight } from "@/lib/haptics";
 // expo
 import { useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import * as Haptics from "expo-haptics";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useNavigation, DrawerActions } from "@react-navigation/native";
@@ -32,7 +33,7 @@ const WorkoutTabHeader = () => {
           <View style={styles.side}>
             <TouchableOpacity
               onPress={() => {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                hapticLight();
                 navigation.dispatch(DrawerActions.toggleDrawer());
               }}
             >

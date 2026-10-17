@@ -22,8 +22,9 @@ import Animated, {
 } from "react-native-reanimated";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
+// lib
+import { hapticSelection } from "@/lib/haptics";
 // expo
-import * as Haptics from "expo-haptics";
 
 // iOS 휠(UIPickerView·UIDatePicker 스피너)을 JS로 그린 한 열. 안드로이드 전용 —
 // option-picker.android.tsx, add-plan/date-time-spinner.android.tsx가 쓴다.
@@ -149,7 +150,7 @@ export const WheelColumn = ({
 
   const tick = (next: number) => {
     setCenter(next);
-    Haptics.selectionAsync();
+    hapticSelection();
   };
   useAnimatedReaction(
     () => Math.min(count - 1, Math.max(0, Math.round(offset.value / row))),

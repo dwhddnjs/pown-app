@@ -12,12 +12,12 @@ import { iconLine } from "@/constants/text-metrics";
 // zustand
 import { usePlanMenuStore } from "@/hooks/use-plan-menu-store";
 // lib
+import { hapticLight } from "@/lib/haptics";
 import { formatTime } from "@/lib/date";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 import { useLanguage } from "@/hooks/use-user-store";
 // expo
 import { Ionicons } from "@expo/vector-icons";
-import * as Haptics from "expo-haptics";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
@@ -61,7 +61,7 @@ export const WeightDate = ({
   // 직접 눌렀을 때와 여백을 눌렀을 때 기준이 달라져 값이 튄다. 그래서 버튼 프레임을
   // 아이콘에 딱 맞추고(여백은 hitSlop) 크기도 같은 노드에서 잰다.
   const onPress = (e: GestureResponderEvent) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    hapticLight();
     const { pageX, pageY, locationX, locationY } = e.nativeEvent;
     openPlanMenu({
       id,

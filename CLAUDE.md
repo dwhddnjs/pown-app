@@ -110,6 +110,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 재생 불가 영상 표시          | `components/shorts/unplayable-badge`        | 없음 (네이티브 플레이어가 그린다)     | play.slash 모양 SVG                                                        |
 | 로딩 스피너(토스트)          | `components/activity-spinner`               | `ActivityIndicator`                   | iOS 바퀴살 스피너 실측(JS)                                                 |
 | 사진 뷰어 상태바             | `components/workout-plan/viewer-status-bar` | 그대로 (시스템이 흰 글자로)           | 흰 글자를 먼저 깔고 한 프레임 뒤 Modal                                     |
+| 햅틱                         | `lib/haptics`                               | Taptic API (selection·impact)         | 시스템 햅틱 `performAndroidHapticsAsync` (진동 모터 직접 X)                |
 
 **Android 전용(단독)**: `components/wheel.android.tsx`(iOS 휠을 JS로 — 원통 투영·스냅·햅틱).
 
