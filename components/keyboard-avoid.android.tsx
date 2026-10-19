@@ -4,11 +4,12 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   KeyboardAvoidingViewProps,
+  ViewStyle,
 } from "react-native";
 
 // iOS 쌍과 이름을 맞춘다 — 안드로이드는 키보드가 다 뜬 뒤(keyboardDidShow) 아래를 비워 뜰 때는 잘리는
 // 자리가 키보드 뒤다. 내려갈 때 빈 띠가 보이는지는 에뮬레이터로 확인 전이라 그대로 둔다
-export const keyboardScrollStyle = {};
+export const keyboardScrollStyle: ViewStyle = {};
 
 // 엣지 투 엣지(app.json edgeToEdgeEnabled)에서는 키보드가 떠도 창이 줄지 않는다 —
 // iOS처럼 키보드 높이만큼 아래를 padding으로 비운다.

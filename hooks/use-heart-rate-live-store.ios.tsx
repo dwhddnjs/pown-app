@@ -170,10 +170,26 @@ export const useHeartRateSync = () => {
   const t = useT();
   // 휴식 알림은 앱이 뒤에 있어도 네이티브가 판정해 띄운다 — 켜짐 여부와 멘트(앱 언어)만 넘겨 둔다
   useEffect(() => {
-    HeartRate?.setRestAlert?.(
+    HeartRate?.setRestAlert(
       restAlert ? REST_ALERT_KEYS.map((key) => t(key)) : null,
     );
   }, [restAlert, t]);
+  // 켜 둔 뒤 설정에서 알림을 끄면 네이티브 알림이 조용히 실패한다 — 앱이 앞으로 올 때마다 보고 토글을 끈다.
+  // 다시 켜면 거절 안내(설정 열기)가 뜬다
+  useEffect(() => {
+    if (!restAlert) return;
+    const check = () =>
+      HeartRate?.hasNotificationPermission()
+        .then((granted) => {
+          if (!granted) useUserStore.getState().setUser("restAlert", false);
+        })
+        .catch(() => {});
+    check();
+    const app = AppState.addEventListener("change", (state) => {
+      if (state === "active") check();
+    });
+    return () => app.remove();
+  }, [restAlert]);
 
   useEffect(() => {
     const native = HeartRate;

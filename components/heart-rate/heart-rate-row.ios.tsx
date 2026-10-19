@@ -383,7 +383,7 @@ const LiveBox = ({
   const onRestAlertChange = async (on: boolean) => {
     const granted =
       !on ||
-      (await HeartRate?.requestNotificationPermission?.().catch(() => false));
+      (await HeartRate?.requestNotificationPermission().catch(() => false));
     if (!granted) {
       toast.error(t("heartRate.restAlertDenied"), {
         duration: 6000,
@@ -877,8 +877,8 @@ const styles = StyleSheet.create({
   },
   knob: {
     width: KNOB_W,
-    height: TOGGLE_H - KNOB_INSET * 2,
-    borderRadius: TOGGLE_H / 2,
+    height: KNOB_W,
+    borderRadius: KNOB_W / 2,
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOpacity: 0.15,

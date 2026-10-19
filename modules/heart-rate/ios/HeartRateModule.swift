@@ -14,6 +14,11 @@ private let log = Logger(subsystem: "com.anonymous.workout-app", category: "Hear
 // 휴식 알림 멘트(앱 언어)를 두는 키 — 없으면 꺼진 것. 알림 id로도 쓴다
 private let restAlertKey = "restAlertMessages"
 
+// 측정이 끝나거나 알림을 끄면 지난 "쉬는 시간 끝" 알림은 의미가 없다
+private func removeRestAlert() {
+  UNUserNotificationCenter.current().removeDeliveredNotifications(withIdentifiers: [restAlertKey])
+}
+
 // iPhone 운동 세션(iOS 26+)으로 에어팟 프로 3 같은 웨어러블의 심박·칼로리를 받거나, 애플워치
 // 운동 세션을 미러링해 받아 JS와 Live Activity(다이나믹 아일랜드·잠금화면)에 흘려보낸다.
 // Live Activity 갱신은 여기서 직접 한다 — 백그라운드에서 JS를 거치지 않는다.
@@ -109,11 +114,19 @@ public class HeartRateModule: Module {
     // 전에도 산다
     Function("setRestAlert") { (messages: [String]?) in
       UserDefaults.standard.set(messages, forKey: restAlertKey)
+      // 끄면 알림 센터에 남은 마지막 알림도 치운다
+      if messages == nil { removeRestAlert() }
     }
 
     // 휴식 알림을 켤 때 묻는다 — 이미 거절했으면 창 없이 false
     AsyncFunction("requestNotificationPermission") { () async throws -> Bool in
       try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
+    }
+
+    // 켜 둔 뒤 설정에서 알림을 껐는지 — 창은 띄우지 않는다(아직 안 물어봤으면 false)
+    AsyncFunction("hasNotificationPermission") { () async -> Bool in
+      let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+      return [.authorized, .provisional, .ephemeral].contains(status)
     }
 
     AsyncFunction("deleteWorkout") { (startedAt: Double) async -> String in
@@ -315,9 +328,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 일시정지로 남긴 채 잊은 측정은 시작한 지 이만큼 지나면 거기까지로 저장하고 끝낸다(expireSuspended)
   private static let suspendedLimit: TimeInterval = 6 * 3600
   // 휴식 알림 — 세트로 무장 값까지 오른 심박이 알림 값까지 내려오면 한 번 띄운다. 다시 무장 값을 넘기 전엔
-  // 안 울린다(100 언저리에서 오르내려도 한 번)
-  private static let restAlertArm = 110
+  // 안 울린다(100 언저리에서 오르내려도 한 번). 무장 값은 고립 운동 세트(110~130)도 넘게 낮추되, 쉬는 동안
+  // 몸을 움직여 몇 bpm 튀는 걸로 다시 무장하지 않게 알림 값과 5는 띄운다
+  private static let restAlertArm = 105
   private static let restAlertLow = 100
+  // 가벼운 세트는 10초만 쉬어도 100 아래로 내려온다 — 마지막으로 무장 값 위에 있던 때(세트 끝 무렵)부터
+  // 이만큼은 쉬게 둔다. ponytail: 고정 90초, 운동마다 휴식을 다르게(근력 2~5분) 하려면 설정으로 뺀다
+  private static let restAlertMinRest: TimeInterval = 90
 
   // JS로 이벤트를 보내는 길(모듈이 붙인다). 보냈으면 true. 모듈이 뜨기 전(워치가 앱을
   // 백그라운드로 깨운 경우 등)이거나 JS가 아직 안 들으면 못 보낸다 — 그 사이 끝난 측정의
@@ -395,8 +412,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private let released = NSHashTable<HKWorkoutSession>.weakObjects()
   // 곧 내보낼 예정인지 — 거의 동시에 오는 수집 콜백을 한 번으로 묶는다(publishSoon)
   private var publishPending = false
-  // 세트로 심박이 무장 값을 넘었다 — 내려오면 휴식 알림(checkRestAlert)
-  private var restAlertArmed = false
+  // 세트로 심박이 무장 값을 넘은 마지막 때 — 있으면 무장, 내려와 쉬면 휴식 알림(checkRestAlert)
+  private var restAlertHighAt: Date?
 
   private override init() {
     super.init()
@@ -1381,7 +1398,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     endLiveActivity()
     carried = nil
     pauseReason = nil
-    restAlertArmed = false
+    restAlertHighAt = nil
+    removeRestAlert()
   }
 
   // 시작하다 실패한 구간을 치운다 — 이어 붙일 앞 구간(carried)이 있으면 그 측정·섬은 남긴다
@@ -1571,17 +1589,19 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     guard body["state"] as? String == "running",
       let message = UserDefaults.standard.stringArray(forKey: restAlertKey)?.randomElement()
     else {
-      restAlertArmed = false
+      restAlertHighAt = nil
       return
     }
     // 심박이 잠깐 끊긴 건(신호 낡음) 쉬는 게 아니다 — 무장은 그대로 둔다
     guard let bpm = body["heartRate"] as? Int else { return }
     if bpm >= Self.restAlertArm {
-      restAlertArmed = true
+      restAlertHighAt = Date()
       return
     }
-    guard restAlertArmed, bpm <= Self.restAlertLow else { return }
-    restAlertArmed = false
+    guard let highAt = restAlertHighAt, bpm <= Self.restAlertLow,
+      Date().timeIntervalSince(highAt) >= Self.restAlertMinRest
+    else { return }
+    restAlertHighAt = nil
     let content = UNMutableNotificationContent()
     content.body = message
     content.sound = .default

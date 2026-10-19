@@ -23,6 +23,9 @@ import {
   FAB_TAB_GAP,
 } from "@/components/circle-button";
 import Animated, {
+  runOnJS,
+  SharedValue,
+  useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -171,10 +174,11 @@ export default function TabOneScreen() {
       const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
       const y = contentOffset.y;
       // 끝에서 튕겨 되돌아오는 건 위로 올린 게 아니다 — 끝 너머(바운스)는 보지 않는다.
-      // 몇 px 손떨림도 무시한다
+      // 몇 px 손떨림도 무시한다. 내용이 화면보다 짧으면 끝은 0이다 — 음수로 두면 숨긴 채 계획을 지워
+      // 목록이 짧아졌을 때(오프셋이 0으로 돌아온다) 버튼이 다시 안 나왔다
       const dy = y - lastScrollY.current;
       if (
-        y <= contentSize.height - layoutMeasurement.height &&
+        y <= Math.max(0, contentSize.height - layoutMeasurement.height) &&
         Math.abs(dy) > 8
       ) {
         setFabHidden(dy > 0 && y > 0);
@@ -306,16 +310,6 @@ export default function TabOneScreen() {
 
   const openCalculate = () => router.push("/(modals)/calculate");
 
-  // 숨을 땐 탭바 아래 화면 밖까지 내려가며 흐려진다
-  const fabStyle = useAnimatedStyle(() => ({
-    opacity: 1 - fabHidden.value,
-    transform: [
-      {
-        translateY: fabHidden.value * (tabBarHeight + FAB_TAB_GAP + FAB_SIZE),
-      },
-    ],
-  }));
-
   // 내려 둔 채 기록을 다 지우면 스크롤할 게 없는 빈 화면에서 버튼이 안 돌아온다
   const isEmpty = workoutPlanList.length === 0 && !isLive;
   useEffect(() => {
@@ -323,19 +317,12 @@ export default function TabOneScreen() {
   }, [isEmpty, setFabHidden]);
 
   const calculateButton = (
-    <Animated.View
-      style={[
-        styles.calculateButton,
-        { bottom: tabBarHeight + FAB_TAB_GAP },
-        fabStyle,
-      ]}
-    >
-      <CircleButton
-        onPress={openCalculate}
-        label={t("workout.openCalculator")}
-        icon="calculate"
-      />
-    </Animated.View>
+    <CalculateButton
+      hidden={fabHidden}
+      tabBarHeight={tabBarHeight}
+      onPress={openCalculate}
+      label={t("workout.openCalculator")}
+    />
   );
 
   if (isEmpty) {
@@ -385,6 +372,48 @@ export default function TabOneScreen() {
     </View>
   );
 }
+
+// 숨을 땐 탭바 아래 화면 밖까지 내려가며 흐려진다. 다 숨으면 VoiceOver에서도 뺀다 — 투명하게 화면 밖에 있을
+// 뿐 접근성 트리엔 남아 포커스가 갔다. 그 상태는 숨김이 바뀔 때 이 버튼만 리렌더해 맞춘다
+const CalculateButton = ({
+  hidden,
+  tabBarHeight,
+  onPress,
+  label,
+}: {
+  hidden: SharedValue<number>;
+  tabBarHeight: number;
+  onPress: () => void;
+  label: string;
+}) => {
+  const [isHidden, setIsHidden] = useState(false);
+  useAnimatedReaction(
+    () => hidden.value === 1,
+    (now, prev) => {
+      if (now !== prev) runOnJS(setIsHidden)(now);
+    },
+  );
+  const style = useAnimatedStyle(() => ({
+    opacity: 1 - hidden.value,
+    transform: [
+      { translateY: hidden.value * (tabBarHeight + FAB_TAB_GAP + FAB_SIZE) },
+    ],
+  }));
+
+  return (
+    <Animated.View
+      accessibilityElementsHidden={isHidden}
+      importantForAccessibility={isHidden ? "no-hide-descendants" : "auto"}
+      style={[
+        styles.calculateButton,
+        { bottom: tabBarHeight + FAB_TAB_GAP },
+        style,
+      ]}
+    >
+      <CircleButton onPress={onPress} label={label} icon="calculate" />
+    </Animated.View>
+  );
+};
 
 const styles = StyleSheet.create({
   footer: {

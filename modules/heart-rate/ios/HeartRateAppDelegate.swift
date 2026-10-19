@@ -23,9 +23,12 @@ public class HeartRateAppDelegate: ExpoAppDelegateSubscriber {
 final class ForegroundNotifications: NSObject, UNUserNotificationCenterDelegate {
   static let shared = ForegroundNotifications()
 
+  // completion 버전으로 둔다 — async 버전은 액터 밖에서 돌아 시스템 completion을 메인이 아닌 스레드에서
+  // 부를 수 있다
   func userNotificationCenter(
-    _ center: UNUserNotificationCenter, willPresent notification: UNNotification
-  ) async -> UNNotificationPresentationOptions {
-    [.banner, .list, .sound]
+    _ center: UNUserNotificationCenter, willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    completionHandler([.banner, .list, .sound])
   }
 }
