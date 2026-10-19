@@ -11,7 +11,7 @@
     },
     "production": {
       "channel": "production",
-      "ios": { "image": "latest" },
+      "ios": { "image": "macos-tahoe-26.5-xcode-26.6" },
       "android": { "autoIncrement": true }
     },
     "development": {
