@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "3.5.4",
-    "runtimeVersion": "3.5.4",
+    "version": "3.6.0",
+    "runtimeVersion": "3.6.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-dark.png",
     "scheme": "myapp",
@@ -36,8 +36,10 @@
     "android": {
       "package": "com.dwhddnjs.pown",
       "edgeToEdgeEnabled": true,
+      "icon": "./assets/images/app-icon-dark.png",
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/adaptive-icon-foreground.png",
+        "monochromeImage": "./assets/images/adaptive-icon-monochrome.png",
         "backgroundColor": "#1A1A1A"
       },
       "blockedPermissions": [
