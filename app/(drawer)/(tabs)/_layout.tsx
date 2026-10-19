@@ -5,6 +5,7 @@ import { View } from "@/components/themed";
 import WorkoutTabHeader from "@/components/workout-plan/workout-tab-header";
 import { ChartHeader } from "@/components/chart";
 import { BarBackground } from "@/components/bar-background";
+import { DrawerCard } from "@/components/drawer/drawer-card";
 import { WorkoutTabIcon } from "@/components/navigation/workout-tab-icon";
 import {
   headerBarTop,
@@ -105,7 +106,8 @@ export default function TabLayout() {
   };
 
   return (
-    <View style={{ flex: 1 }}>
+    // 드로어가 열리면 탭바·FAB 오버레이까지 한 장의 둥근 카드로 밀려난다
+    <DrawerCard>
       <Tabs
         screenOptions={tabOption}
         screenListeners={({ route }) => ({
@@ -209,7 +211,7 @@ export default function TabLayout() {
         <Tabs.Screen name="index" redirect />
       </Tabs>
       <FabOverlay isOpen={fabOpen} onClose={closeFab} />
-    </View>
+    </DrawerCard>
   );
 }
 

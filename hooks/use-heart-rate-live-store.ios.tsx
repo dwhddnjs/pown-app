@@ -9,8 +9,9 @@ import {
   useHeartRateStore,
 } from "@/hooks/use-heart-rate-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useUserStore } from "@/hooks/use-user-store";
 // hooks
-import { tt } from "@/hooks/use-t";
+import { tt, useT } from "@/hooks/use-t";
 // lib
 import { dateKey, PLAN_DATE_FORMAT } from "@/lib/date";
 import { format, parse } from "date-fns";
@@ -154,9 +155,42 @@ export const resumeMeasurement = async (toWatch = false) => {
   }
 };
 
+const REST_ALERT_KEYS = [
+  "heartRate.restAlertMsg1",
+  "heartRate.restAlertMsg2",
+  "heartRate.restAlertMsg3",
+  "heartRate.restAlertMsg4",
+  "heartRate.restAlertMsg5",
+] as const;
+
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
 // 이어폰 빠짐) 항상 살아 있는 루트 레이아웃에서 한 번만 건다.
 export const useHeartRateSync = () => {
+  const restAlert = useUserStore((state) => state.restAlert);
+  const t = useT();
+  // 휴식 알림은 앱이 뒤에 있어도 네이티브가 판정해 띄운다 — 켜짐 여부와 멘트(앱 언어)만 넘겨 둔다
+  useEffect(() => {
+    HeartRate?.setRestAlert(
+      restAlert ? REST_ALERT_KEYS.map((key) => t(key)) : null,
+    );
+  }, [restAlert, t]);
+  // 켜 둔 뒤 설정에서 알림을 끄면 네이티브 알림이 조용히 실패한다 — 앱이 앞으로 올 때마다 보고 토글을 끈다.
+  // 다시 켜면 거절 안내(설정 열기)가 뜬다
+  useEffect(() => {
+    if (!restAlert) return;
+    const check = () =>
+      HeartRate?.hasNotificationPermission()
+        .then((granted) => {
+          if (!granted) useUserStore.getState().setUser("restAlert", false);
+        })
+        .catch(() => {});
+    check();
+    const app = AppState.addEventListener("change", (state) => {
+      if (state === "active") check();
+    });
+    return () => app.remove();
+  }, [restAlert]);
+
   useEffect(() => {
     const native = HeartRate;
     if (!native || !isHeartRateSupported) return;

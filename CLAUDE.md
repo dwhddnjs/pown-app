@@ -96,7 +96,7 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
 | 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
 | 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`·키보드 내리면 포커스 해제                                    |
-| 키보드 회피                  | `components/keyboard-avoid`                 | padding + 오프셋(시트만)              | padding (edge-to-edge)                                                     |
+| 키보드 회피                  | `components/keyboard-avoid`                 | padding(스크롤뷰 안 자름)+시트 오프셋 | padding (edge-to-edge)                                                     |
 | 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
 | 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
 | 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |

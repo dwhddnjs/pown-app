@@ -23,6 +23,8 @@ export type UserTypes = {
   theme: "light" | "dark" | "system";
   // null = 미선택 → 기기 언어를 따라간다 (useLanguage)
   language: Lang | null;
+  // 심박 휴식 알림 (iOS 측정 박스 스위치). 알림 권한을 물어야 해서 기본은 끔
+  restAlert: boolean;
   setUser: (
     type: keyof Omit<
       UserTypes,
@@ -49,6 +51,7 @@ export const useUserStore = create<UserTypes>()(
       userInfo: [],
       theme: "system",
       language: null,
+      restAlert: false,
       setUserData: (value) =>
         set((prev) => ({
           ...prev,
@@ -64,6 +67,7 @@ export const useUserStore = create<UserTypes>()(
           workoutList: workoutData,
           theme: "system",
           language: null,
+          restAlert: false,
         }),
 
       setAddWorkoutTag: (type, tag) =>
