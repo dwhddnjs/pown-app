@@ -9,8 +9,9 @@ import {
   useHeartRateStore,
 } from "@/hooks/use-heart-rate-store";
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
+import { useUserStore } from "@/hooks/use-user-store";
 // hooks
-import { tt } from "@/hooks/use-t";
+import { tt, useT } from "@/hooks/use-t";
 // lib
 import { dateKey, PLAN_DATE_FORMAT } from "@/lib/date";
 import { format, parse } from "date-fns";
@@ -154,9 +155,26 @@ export const resumeMeasurement = async (toWatch = false) => {
   }
 };
 
+const REST_ALERT_KEYS = [
+  "heartRate.restAlertMsg1",
+  "heartRate.restAlertMsg2",
+  "heartRate.restAlertMsg3",
+  "heartRate.restAlertMsg4",
+  "heartRate.restAlertMsg5",
+] as const;
+
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
 // 이어폰 빠짐) 항상 살아 있는 루트 레이아웃에서 한 번만 건다.
 export const useHeartRateSync = () => {
+  const restAlert = useUserStore((state) => state.restAlert);
+  const t = useT();
+  // 휴식 알림은 앱이 뒤에 있어도 네이티브가 판정해 띄운다 — 켜짐 여부와 멘트(앱 언어)만 넘겨 둔다
+  useEffect(() => {
+    HeartRate?.setRestAlert?.(
+      restAlert ? REST_ALERT_KEYS.map((key) => t(key)) : null,
+    );
+  }, [restAlert, t]);
+
   useEffect(() => {
     const native = HeartRate;
     if (!native || !isHeartRateSupported) return;

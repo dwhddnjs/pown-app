@@ -3,12 +3,16 @@ import AVFoundation
 import ExpoModulesCore
 import HealthKit
 import UIKit
+import UserNotifications
 import WatchConnectivity
 import os
 
 // 실기 진단용 — Mac Console.app에서 아이폰을 고르고 subsystem:com.anonymous.workout-app 으로 본다(워치 앱도
 // 같은 subsystem). 심박 값은 남기지 않는다
 private let log = Logger(subsystem: "com.anonymous.workout-app", category: "HeartRate")
+
+// 휴식 알림 멘트(앱 언어)를 두는 키 — 없으면 꺼진 것. 알림 id로도 쓴다
+private let restAlertKey = "restAlertMessages"
 
 // iPhone 운동 세션(iOS 26+)으로 에어팟 프로 3 같은 웨어러블의 심박·칼로리를 받거나, 애플워치
 // 운동 세션을 미러링해 받아 JS와 Live Activity(다이나믹 아일랜드·잠금화면)에 흘려보낸다.
@@ -99,6 +103,17 @@ public class HeartRateModule: Module {
     AsyncFunction("getActive") { () async -> [String: Any]? in
       guard #available(iOS 26.0, *) else { return nil }
       return await self.workout().recover()
+    }
+
+    // 휴식 알림 멘트. null이면 끈다 — 디스크에 둬서 워치가 꺼진 앱을 백그라운드로 깨워 JS가 뜨기
+    // 전에도 산다
+    Function("setRestAlert") { (messages: [String]?) in
+      UserDefaults.standard.set(messages, forKey: restAlertKey)
+    }
+
+    // 휴식 알림을 켤 때 묻는다 — 이미 거절했으면 창 없이 false
+    AsyncFunction("requestNotificationPermission") { () async throws -> Bool in
+      try await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound])
     }
 
     AsyncFunction("deleteWorkout") { (startedAt: Double) async -> String in
@@ -299,6 +314,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   ]
   // 일시정지로 남긴 채 잊은 측정은 시작한 지 이만큼 지나면 거기까지로 저장하고 끝낸다(expireSuspended)
   private static let suspendedLimit: TimeInterval = 6 * 3600
+  // 휴식 알림 — 세트로 무장 값까지 오른 심박이 알림 값까지 내려오면 한 번 띄운다. 다시 무장 값을 넘기 전엔
+  // 안 울린다(100 언저리에서 오르내려도 한 번)
+  private static let restAlertArm = 110
+  private static let restAlertLow = 100
 
   // JS로 이벤트를 보내는 길(모듈이 붙인다). 보냈으면 true. 모듈이 뜨기 전(워치가 앱을
   // 백그라운드로 깨운 경우 등)이거나 JS가 아직 안 들으면 못 보낸다 — 그 사이 끝난 측정의
@@ -376,6 +395,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private let released = NSHashTable<HKWorkoutSession>.weakObjects()
   // 곧 내보낼 예정인지 — 거의 동시에 오는 수집 콜백을 한 번으로 묶는다(publishSoon)
   private var publishPending = false
+  // 세트로 심박이 무장 값을 넘었다 — 내려오면 휴식 알림(checkRestAlert)
+  private var restAlertArmed = false
 
   private override init() {
     super.init()
@@ -1360,6 +1381,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     endLiveActivity()
     carried = nil
     pauseReason = nil
+    restAlertArmed = false
   }
 
   // 시작하다 실패한 구간을 치운다 — 이어 붙일 앞 구간(carried)이 있으면 그 측정·섬은 남긴다
@@ -1505,6 +1527,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private func publish() {
     // 준비 중(prepared)에 보내면 JS가 "측정 중"으로 그렸다가, 실제 시작 때 시간이 0으로 되돌아간다
     guard !isEnding, isLive, let body = snapshot() else { return }
+    checkRestAlert(body)
     // 화면이 안 보이는 동안 샘플마다 JS를 깨워 박스를 다시 그릴 이유가 없다 — 돌아오면
     // JS가 getActive로 다시 맞춘다. Live Activity는 이때가 제일 중요하니 계속 갱신한다
     if UIApplication.shared.applicationState == .active { send(body) }
@@ -1540,6 +1563,32 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       seconds = start / 1000 - carriedSec
     }
     return Date(timeIntervalSince1970: (seconds * 1000).rounded() / 1000)
+  }
+
+  // 앱이 뒤에 있어도 여기는 돈다(섬 갱신과 같은 길) — JS를 거치지 않고 바로 알린다. 일시정지 중이거나 꺼져
+  // 있으면 무장을 푼다: 켜자마자·재개하자마자 쉬던 심박으로 울리지 않게
+  private func checkRestAlert(_ body: [String: Any]) {
+    guard body["state"] as? String == "running",
+      let message = UserDefaults.standard.stringArray(forKey: restAlertKey)?.randomElement()
+    else {
+      restAlertArmed = false
+      return
+    }
+    // 심박이 잠깐 끊긴 건(신호 낡음) 쉬는 게 아니다 — 무장은 그대로 둔다
+    guard let bpm = body["heartRate"] as? Int else { return }
+    if bpm >= Self.restAlertArm {
+      restAlertArmed = true
+      return
+    }
+    guard restAlertArmed, bpm <= Self.restAlertLow else { return }
+    restAlertArmed = false
+    let content = UNMutableNotificationContent()
+    content.body = message
+    content.sound = .default
+    // 같은 id라 알림 센터에 쌓이지 않고 마지막 것으로 바뀐다
+    UNUserNotificationCenter.current().add(
+      UNNotificationRequest(identifier: restAlertKey, content: content, trigger: nil),
+      withCompletionHandler: nil)
   }
 
   // MARK: - Live Activity

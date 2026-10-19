@@ -19,8 +19,14 @@ import { HeartRateRow, useIsHeartRateLive } from "@/components/heart-rate";
 import {
   CircleButton,
   circleButtonSmall,
+  FAB_SIZE,
   FAB_TAB_GAP,
 } from "@/components/circle-button";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 // zustand
 import { useWorkoutPlanStore } from "@/hooks/use-workout-plan-store";
 import { useSelectDateStore } from "@/hooks/use-select-date-store";
@@ -98,6 +104,20 @@ export default function TabOneScreen() {
   // 새 행 높이만큼 밀려 내려갔다. 다시 보일 때 그 한 번의 밀림을 되돌린다 — 사용자가 먼저 끌면 푼다
   const pinTop = useRef(false);
 
+  // 계산기 버튼은 내려 읽는 동안 아래로 빠지고, 위로 올리면 다시 올라온다. 화면 상태가 아니라
+  // 공유 값이라 스크롤 중에 화면이 리렌더되지 않는다 — 바뀔 때만 애니메이션을 건다
+  const fabHidden = useSharedValue(0);
+  const isFabHidden = useRef(false);
+  const lastScrollY = useRef(0);
+  const setFabHidden = useCallback(
+    (hidden: boolean) => {
+      if (isFabHidden.current === hidden) return;
+      isFabHidden.current = hidden;
+      fabHidden.value = withTiming(hidden ? 1 : 0, { duration: 220 });
+    },
+    [fabHidden],
+  );
+
   // 맨 위로 버튼은 최상단이 아닐 때만 뜬다. 스크롤 이벤트를 따로 받지 않고 이미
   // 도는 viewability 결과를 쓴다 — 스크롤 중 JS 스레드에 일을 더 얹지 않는다.
   // 노출 여부는 화면 상태가 아니라 스토어에 둔다: 화면 상태로 두면 경계를 넘을
@@ -148,12 +168,25 @@ export default function TabOneScreen() {
 
   const onScroll = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      if (!pinTop.current || e.nativeEvent.contentOffset.y <= 0) return;
+      const { contentOffset, contentSize, layoutMeasurement } = e.nativeEvent;
+      const y = contentOffset.y;
+      // 끝에서 튕겨 되돌아오는 건 위로 올린 게 아니다 — 끝 너머(바운스)는 보지 않는다.
+      // 몇 px 손떨림도 무시한다
+      const dy = y - lastScrollY.current;
+      if (
+        y <= contentSize.height - layoutMeasurement.height &&
+        Math.abs(dy) > 8
+      ) {
+        setFabHidden(dy > 0 && y > 0);
+        lastScrollY.current = y;
+      }
+
+      if (!pinTop.current || y <= 0) return;
       if (!navigation.isFocused()) return;
       pinTop.current = false;
       listRef.current?.scrollToOffset({ offset: 0, animated: false });
     },
-    [navigation],
+    [navigation, setFabHidden],
   );
   const onScrollBeginDrag = useCallback(() => {
     pinTop.current = false;
@@ -193,7 +226,10 @@ export default function TabOneScreen() {
     setListKey((prev) => prev + 1);
     // 리마운트로 스크롤이 0으로 돌아가지만 viewability는 그다음 프레임에나 온다
     setScrolled(false);
-  }, [selectedDate, setScrolled]);
+    // 스크롤 이벤트 없이 맨 위로 돌아온다 — 숨겨 둔 계산기 버튼도 다시 올린다
+    lastScrollY.current = 0;
+    setFabHidden(false);
+  }, [selectedDate, setScrolled, setFabHidden]);
 
   // 계획이 추가되면 새 기록은 맨 위에 쌓인다 — 과거를 보던 중이었어도 최신으로 되돌린다
   const planCount = useRef(workoutPlanList.length);
@@ -270,16 +306,39 @@ export default function TabOneScreen() {
 
   const openCalculate = () => router.push("/(modals)/calculate");
 
+  // 숨을 땐 탭바 아래 화면 밖까지 내려가며 흐려진다
+  const fabStyle = useAnimatedStyle(() => ({
+    opacity: 1 - fabHidden.value,
+    transform: [
+      {
+        translateY: fabHidden.value * (tabBarHeight + FAB_TAB_GAP + FAB_SIZE),
+      },
+    ],
+  }));
+
+  // 내려 둔 채 기록을 다 지우면 스크롤할 게 없는 빈 화면에서 버튼이 안 돌아온다
+  const isEmpty = workoutPlanList.length === 0 && !isLive;
+  useEffect(() => {
+    if (isEmpty) setFabHidden(false);
+  }, [isEmpty, setFabHidden]);
+
   const calculateButton = (
-    <CircleButton
-      onPress={openCalculate}
-      label={t("workout.openCalculator")}
-      icon="calculate"
-      style={[styles.calculateButton, { bottom: tabBarHeight + FAB_TAB_GAP }]}
-    />
+    <Animated.View
+      style={[
+        styles.calculateButton,
+        { bottom: tabBarHeight + FAB_TAB_GAP },
+        fabStyle,
+      ]}
+    >
+      <CircleButton
+        onPress={openCalculate}
+        label={t("workout.openCalculator")}
+        icon="calculate"
+      />
+    </Animated.View>
   );
 
-  if (workoutPlanList.length === 0 && !isLive) {
+  if (isEmpty) {
     return (
       <View style={{ flex: 1, position: "relative" }}>
         <EmptyList />

@@ -4,7 +4,10 @@ import { Keyboard, Pressable, ScrollView, StyleSheet } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { View } from "@/components/themed";
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { KeyBoardAvoid } from "@/components/keyboard-avoid";
+import {
+  KeyBoardAvoid,
+  keyboardScrollStyle,
+} from "@/components/keyboard-avoid";
 import { useBlurHeaderInset } from "@/components/navigation/stack-header";
 import { WorkoutTags } from "@/components/add-plan/workout-tags";
 import { SetCounter } from "@/components/add-plan/set-counter";
@@ -204,7 +207,7 @@ export const PlanForm = ({
         // currentScrollY로 스크롤 양을 정하는 입력창들(TopWeight·PlanNote)과 아래 수정모드
         // 스크롤 계산이 전부 헤더 높이만큼 어긋난다.
         contentContainerStyle={{ paddingTop: headerHeight }}
-        style={{ flex: 1 }}
+        style={[{ flex: 1 }, keyboardScrollStyle]}
       >
         <Pressable {...outsideTapProps}>
           {header ?? <View style={{ height: 24 }} />}

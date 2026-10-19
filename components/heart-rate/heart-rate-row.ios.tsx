@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
+  Pressable,
   View as RNView,
   StyleSheet,
   TouchableOpacity,
@@ -17,8 +18,10 @@ import { toast } from "sonner-native";
 import Animated, {
   Easing,
   FadeIn,
+  interpolateColor,
   LayoutAnimationConfig,
   useAnimatedProps,
+  useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
@@ -32,11 +35,13 @@ import {
   saveRecord,
   useHeartRateLiveStore,
 } from "@/hooks/use-heart-rate-live-store";
+import { useUserStore } from "@/hooks/use-user-store";
 // hooks
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
 // lib
 import { dateKey, formatElapsed } from "@/lib/date";
+import { hapticSelection } from "@/lib/haptics";
 import { TKey } from "@/lib/i18n";
 import { mmkv } from "@/lib/storage";
 // native
@@ -329,6 +334,8 @@ const LiveBox = ({
     (state) => state.preparingDevice,
   );
   const resuming = useHeartRateLiveStore((state) => state.resuming);
+  const restAlert = useUserStore((state) => state.restAlert);
+  const setUser = useUserStore((state) => state.setUser);
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const isRunning = live?.state === "running";
@@ -371,6 +378,26 @@ const LiveBox = ({
   // 이어폰은 보통 3초면 끝나고, 넘기면 같은 이유로 취소를 연다
   const canCancel = !live && (preparingDevice === "watch" || waitingLong);
   const endLocked = locked && !canCancel;
+
+  // 켤 때만 알림 권한을 묻는다 — 거절돼 있으면 켜지 않고(토글은 꺼진 채) 설정으로 안내한다
+  const onRestAlertChange = async (on: boolean) => {
+    const granted =
+      !on ||
+      (await HeartRate?.requestNotificationPermission?.().catch(() => false));
+    if (!granted) {
+      toast.error(t("heartRate.restAlertDenied"), {
+        duration: 6000,
+        // 설정 열기는 토스트 오른쪽 끝에
+        styles: { buttons: { justifyContent: "flex-end" } },
+        action: {
+          label: t("heartRate.openSettings"),
+          onClick: () => Linking.openSettings(),
+        },
+      });
+      return;
+    }
+    setUser("restAlert", on);
+  };
 
   return (
     <Animated.View entering={CONTENT_FADE} style={styles.box}>
@@ -467,6 +494,23 @@ const LiveBox = ({
         </TouchableOpacity>
       )}
 
+      {/* 쉬다가 심박이 100 아래로 내려오면 알림 — 거슬리는 사람은 여기서 바로 끈다 */}
+      <RNView style={styles.restAlert}>
+        <RNView style={styles.restAlertText}>
+          <Text style={[styles.restAlertLabel, { color: themeColor.tintText }]}>
+            {t("heartRate.restAlert")}
+          </Text>
+          <Text style={[styles.restAlertDesc, { color: themeColor.subText }]}>
+            {t("heartRate.restAlertDesc")}
+          </Text>
+        </RNView>
+        <Toggle
+          value={restAlert}
+          onValueChange={onRestAlertChange}
+          label={t("heartRate.restAlert")}
+        />
+      </RNView>
+
       <RNView style={styles.actions}>
         {/* 보조 동작은 회색 면으로 한 톤 낮춘다 — 민트 테두리는 빨간 종료와 시선을 다퉜다 */}
         <Button
@@ -495,6 +539,60 @@ const LiveBox = ({
         </Button>
       </RNView>
     </Animated.View>
+  );
+};
+
+// 원 손잡이 토글. 앱이 UIDesignRequiresCompatibility라 RN Switch는 옛 51×31로 그려져 짧아 보였고,
+// iOS 26 크기(63×28)는 박스에서 길어 보여 그 사이로 맞췄다 — scaleX로 늘리면 손잡이가 찌그러지고 흐려져
+// 직접 그린다
+const TOGGLE_W = 50;
+const TOGGLE_H = 28;
+const KNOB_INSET = 2;
+// 완전한 원 — 트랙 높이에서 위아래 여백을 뺀 지름
+const KNOB_W = TOGGLE_H - KNOB_INSET * 2;
+
+const Toggle = ({
+  value,
+  onValueChange,
+  label,
+}: {
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+  label: string;
+}) => {
+  const themeColor = useCurrentThemeColor();
+  const progress = useSharedValue(value ? 1 : 0);
+  useEffect(() => {
+    progress.value = withTiming(value ? 1 : 0, { duration: 200 });
+  }, [progress, value]);
+
+  const { divider, tint } = themeColor;
+  const trackStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(progress.value, [0, 1], [divider, tint]),
+  }));
+  const knobStyle = useAnimatedStyle(() => ({
+    transform: [
+      {
+        translateX: progress.value * (TOGGLE_W - KNOB_W - KNOB_INSET * 2),
+      },
+    ],
+  }));
+
+  return (
+    <Pressable
+      accessibilityRole="switch"
+      accessibilityLabel={label}
+      accessibilityState={{ checked: value }}
+      hitSlop={8}
+      onPress={() => {
+        hapticSelection();
+        onValueChange(!value);
+      }}
+    >
+      <Animated.View style={[styles.toggle, trackStyle]}>
+        <Animated.View style={[styles.knob, knobStyle]} />
+      </Animated.View>
+    </Pressable>
   );
 };
 
@@ -752,6 +850,40 @@ const styles = StyleSheet.create({
   switchLabel: {
     fontSize: 13,
     fontFamily: "sb-m",
+  },
+  restAlert: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  // 설명이 길어져도(영어) 스위치를 밀어내지 않고 줄을 바꾼다
+  restAlertText: {
+    flex: 1,
+    gap: 2,
+  },
+  restAlertLabel: {
+    fontSize: 14,
+    fontFamily: "sb-m",
+  },
+  restAlertDesc: {
+    fontSize: 12,
+    fontFamily: "sb-l",
+  },
+  toggle: {
+    width: TOGGLE_W,
+    height: TOGGLE_H,
+    borderRadius: TOGGLE_H / 2,
+    padding: KNOB_INSET,
+  },
+  knob: {
+    width: KNOB_W,
+    height: TOGGLE_H - KNOB_INSET * 2,
+    borderRadius: TOGGLE_H / 2,
+    backgroundColor: "#fff",
+    shadowColor: "#000",
+    shadowOpacity: 0.15,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
   },
   // 숫자와 버튼 사이는 박스 gap(12)보다 조금 더 띄운다
   actions: {

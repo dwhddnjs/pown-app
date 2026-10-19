@@ -68,6 +68,11 @@ type HeartRateModule = {
   // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. failed: 찾았는데 못 지웠다
   // (워치 앱이 저장한 운동·쓰기 권한 해제 — 앱은 자기가 저장한 것만 지울 수 있다)
   deleteWorkout(startedAt: number): Promise<"deleted" | "notFound" | "failed">;
+  // 휴식 알림 — 세트로 오른 심박이 100 아래로 내려오면 이 멘트 중 하나를 알림으로 띄운다(앱이 뒤에 있어도
+  // 네이티브가 본다). null이면 끈다. 3.7.0 전 바이너리엔 없다
+  setRestAlert?(messages: string[] | null): void;
+  // 휴식 알림을 켤 때 묻는다 — 이미 거절했으면 창 없이 false
+  requestNotificationPermission?(): Promise<boolean>;
   addListener(
     event: "onUpdate",
     // 시스템이 세션을 닫거나(다른 운동 앱·워치에서 종료) 아일랜드 버튼으로 끝내면 ended에 저장할
