@@ -76,12 +76,18 @@ export default function Video() {
   // 이 화면엔 상단 SafeAreaView가 없다 — 가이드 버튼만 직접 인셋을 받는다
   const insets = useSafeAreaInsets();
 
+  // 화면에 들어올 때 한 번씩만 묻는다 — 안드로이드는 처음 거부해도 canAskAgain이 true로 남아,
+  // 권한 상태가 바뀌자마자 이 effect가 같은 창을 곧바로 또 띄웠다(iOS는 첫 응답 뒤 false)
+  const askedRef = useRef({ camera: false, mic: false });
+
   useEffect(() => {
     if (
       cameraPermission &&
       !cameraPermission.granted &&
-      cameraPermission.canAskAgain
+      cameraPermission.canAskAgain &&
+      !askedRef.current.camera
     ) {
+      askedRef.current.camera = true;
       requestCameraPermission();
     }
   }, [cameraPermission, requestCameraPermission]);
@@ -91,8 +97,10 @@ export default function Video() {
       cameraPermission?.granted &&
       micPermission &&
       !micPermission.granted &&
-      micPermission.canAskAgain
+      micPermission.canAskAgain &&
+      !askedRef.current.mic
     ) {
+      askedRef.current.mic = true;
       requestMicPermission();
     }
   }, [cameraPermission, micPermission, requestMicPermission]);
@@ -303,14 +311,19 @@ export default function Video() {
     return (
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.cancelText}>{t("shorts.permission")}</Text>
+          {/* cancelText는 카메라 위 흰 글자다 — 여기 배경(hard)은 라이트 테마에서 흰색이라 글자가 안 보였다 */}
+          <Text style={[styles.cancelText, { color: themeColor.text }]}>
+            {t("shorts.permission")}
+          </Text>
           <Pressable onPress={onAllowCamera}>
             <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}
             </Text>
           </Pressable>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>{t("common.goBack")}</Text>
+            <Text style={[styles.cancelText, { color: themeColor.text }]}>
+              {t("common.goBack")}
+            </Text>
           </Pressable>
         </View>
       </View>

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 // component
-import { Pressable, StyleSheet } from "react-native";
+import { Linking, Pressable, StyleSheet } from "react-native";
 import { Text, View } from "@/components/themed";
 import { PressScale } from "@/components/press-scale";
 import {
@@ -33,11 +33,28 @@ const Camera = () => {
   // 카메라 권한은 앱 시작이 아닌 카메라를 실제로 여는 이 시점에 요청한다
   const [permission, requestPermission] = useCameraPermissions();
 
+  // 한 번만 묻는다 — 안드로이드는 처음 거부해도 canAskAgain이 true라 곧바로 같은 창이 또 떴다
+  const askedRef = useRef(false);
+
   useEffect(() => {
-    if (permission && !permission.granted && permission.canAskAgain) {
+    if (
+      permission &&
+      !permission.granted &&
+      permission.canAskAgain &&
+      !askedRef.current
+    ) {
+      askedRef.current = true;
       requestPermission();
     }
   }, [permission, requestPermission]);
+
+  // 다시 묻지 못하는 상태(iOS는 한 번, 안드로이드는 두 번 거부)면 창 없이 거부가 돌아와
+  // 버튼이 먹통이었다 — 숏츠 촬영 화면(onAllowCamera)처럼 그때만 설정으로 보낸다
+  const onAllow = async () => {
+    const couldAsk = permission?.canAskAgain !== false;
+    const { granted } = await requestPermission();
+    if (!granted && !couldAsk) Linking.openSettings();
+  };
 
   const takePicture = async () => {
     try {
@@ -143,14 +160,19 @@ const Camera = () => {
     return (
       <View style={[styles.container, { backgroundColor: themeColor.hard }]}>
         <View style={styles.permissionContainer}>
-          <Text style={styles.cancelText}>{t("camera.permission")}</Text>
-          <Pressable onPress={requestPermission}>
+          {/* cancelText는 카메라 위 흰 글자다 — 여기 배경(hard)은 라이트 테마에서 흰색이라 글자가 안 보였다 */}
+          <Text style={[styles.cancelText, { color: themeColor.text }]}>
+            {t("camera.permission")}
+          </Text>
+          <Pressable onPress={onAllow}>
             <Text style={[styles.cancelText, { color: themeColor.tintText }]}>
               {t("common.allowPermission")}
             </Text>
           </Pressable>
           <Pressable onPress={() => router.back()}>
-            <Text style={styles.cancelText}>{t("common.goBack")}</Text>
+            <Text style={[styles.cancelText, { color: themeColor.text }]}>
+              {t("common.goBack")}
+            </Text>
           </Pressable>
         </View>
       </View>
