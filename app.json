@@ -98,11 +98,16 @@
         {
           "ios": {
             "deploymentTarget": "15.5"
+          },
+          "android": {
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36
           }
         }
       ],
       "expo-localization",
       "./plugins/with-fmt-consteval-fix",
+      "./plugins/with-predictive-back-off",
       [
         "react-native-google-mobile-ads",
         {
