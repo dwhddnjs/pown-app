@@ -1,4 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { PanResponder, Pressable, StyleSheet, View } from "react-native";
 import { isMediaMissing, resolveMediaUri } from "@/lib/media";
 import { UnplayableBadge } from "./unplayable-badge";
@@ -106,9 +112,19 @@ export const ShortsPlayer = ({
     if (progressSV && isActiveRef.current) progressSV.value = ratio;
   };
 
+  // 안드로이드 expo-video는 반복 재생이 한 바퀴 돌 때(onMediaItemTransition REPEAT) duration을
+  // 0으로 지우고 다시 채우지 않는다 — 진행바·시킹·AI 분석(길이 0이면 실패)이 한 바퀴 뒤 전부
+  // 멈췄다. 한 번이라도 읽은 길이를 기억해 쓴다(iOS는 늘 그대로라 무변화)
+  const durationRef = useRef(0);
+  const getDuration = useCallback(() => {
+    if (player.duration > 0) durationRef.current = player.duration;
+    return durationRef.current;
+  }, [player]);
+
   useEventListener(player, "timeUpdate", ({ currentTime }) => {
     if (seekingRef.current) return;
-    updateProgress(player.duration ? currentTime / player.duration : 0);
+    const duration = getDuration();
+    updateProgress(duration ? currentTime / duration : 0);
   });
 
   useEffect(() => {
@@ -119,9 +135,8 @@ export const ShortsPlayer = ({
       opacity.value = 0;
       // 페이지가 바뀐 직후 첫 timeUpdate 전까지 부모 손잡이가 옛 위치에 남지 않게
       if (progressSV) {
-        progressSV.value = player.duration
-          ? player.currentTime / player.duration
-          : 0;
+        const duration = getDuration();
+        progressSV.value = duration ? player.currentTime / duration : 0;
       }
     } else {
       player.pause();
@@ -130,7 +145,7 @@ export const ShortsPlayer = ({
       player.currentTime = 0;
       setProgress(0);
     }
-  }, [isActive, player, opacity, progressSV]);
+  }, [isActive, player, opacity, progressSV, getDuration]);
 
   const iconStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,
@@ -165,11 +180,12 @@ export const ShortsPlayer = ({
   // 인자는 항상 화면 절대 X — grant(pageX)와 move(moveX)가 같은 좌표계를 쓰게 맞춘다
   const seekToX = (pageX: number) => {
     const width = trackWidthRef.current;
-    if (!width || !player.duration) return;
+    const duration = getDuration();
+    if (!width || !duration) return;
     const x = pageX - trackLeftRef.current;
     const ratio = Math.min(1, Math.max(0, x / width));
     updateProgress(ratio);
-    player.currentTime = ratio * player.duration;
+    player.currentTime = ratio * duration;
   };
 
   const panResponder = useMemo(
@@ -259,7 +275,7 @@ export const ShortsPlayer = ({
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel={analyzeLabel}
-          onPress={() => onPressAnalyze((player.duration || 0) * 1000)}
+          onPress={() => onPressAnalyze(getDuration() * 1000)}
         >
           {/* 다른 오버레이 버튼과 같은 모양을 유지하고 아이콘만 바꾼다 */}
           <Feather
