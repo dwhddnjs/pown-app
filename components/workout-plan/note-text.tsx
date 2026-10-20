@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 import React from "react";
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { Text, View } from "../themed";
+import { RichNoteText } from "../rich-note";
 
 interface NoteTextProps {
   title?: string;
@@ -13,7 +14,7 @@ export const NoteText = ({ title, content }: NoteTextProps) => {
   return (
     <View style={[styles.container, { backgroundColor: themeColor.itemColor }]}>
       {title && <Text style={styles.title}>{title}</Text>}
-      <Text style={styles.content}>{content}</Text>
+      {!!content && <RichNoteText html={content} size={12} />}
     </View>
   );
 };
@@ -24,9 +25,5 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-  },
-  content: {
-    fontFamily: "sb-l",
-    fontSize: 12,
   },
 });

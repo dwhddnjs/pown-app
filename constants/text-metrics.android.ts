@@ -87,3 +87,12 @@ export const sbLineHeight = (
       (typeof margin === "number" ? margin : 0) + ios - (lines * px) / density,
   };
 };
+
+// 리치 노트 글머리 목록의 marginLeft (react-native-enriched htmlStyle.ul) — 안드로이드는 점을 marginLeft 오른쪽에
+// 그리고 글자를 marginLeft+점+gap에서 시작한다(iOS는 점이 marginLeft 왼쪽). 점 왼쪽 끝(left)을 그대로 쓴다
+export const enrichedUlMarginLeft = (left: number, _bulletSize: number) => left;
+
+// 리치 노트 번호 목록의 marginLeft (react-native-enriched htmlStyle.ol) — 안드로이드는 여기에 글자 크기의 절반을
+// 몰래 더한다(HtmlStyle.calculateOlMarginLeft, iOS엔 없다). 번호·글자가 iOS보다 8.5 오른쪽에 섰다 — 그만큼 뺀다
+export const enrichedOlMarginLeft = (center: number, fontSize: number) =>
+  center - fontSize / 2;

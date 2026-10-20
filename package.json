@@ -11,7 +11,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.android.json",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "postinstall": "node scripts/patch-sonner-native.js"
+    "postinstall": "node scripts/patch-sonner-native.js && node scripts/patch-enriched.js"
   },
   "dependencies": {
     "@bacons/apple-targets": "^4.0.7",
@@ -58,6 +58,7 @@
     "react-hook-form": "^7.53.0",
     "react-native": "0.79.2",
     "react-native-collapsible": "^1.6.2",
+    "react-native-enriched": "0.4.1",
     "react-native-gesture-handler": "^2.25.0",
     "react-native-gifted-charts": "^1.4.58",
     "react-native-google-mobile-ads": "^15.8.3",

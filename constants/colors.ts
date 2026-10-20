@@ -19,6 +19,8 @@ const Colors = {
     // 탭바 FAB 플러스 전용 — 항상 tint 원 위라 양 테마 흰색 계열로 통일
     fabIcon: "#fff",
     divider: "#D8D7DE",
+    // 켜진 토글·눌린 버튼 바탕 — iOS 시스템 tertiarySystemFill (노트 서식 툴바)
+    fill: "rgba(118, 118, 128, 0.12)",
     // 일시정지처럼 "지금은 안 움직이는" 값. 라벨(subText)보다 흐려야 멈춘 게 보인다
     disabled: "#BCBCC0",
     // 선택색은 다크와 동일한 #00ccbb로 통일(기존 #009488).
@@ -47,6 +49,7 @@ const Colors = {
     // 라이트만 흰색, 다크는 기존대로 background(어두움) 유지
     fabIcon: "#1a1a1a",
     divider: "#555555",
+    fill: "rgba(118, 118, 128, 0.24)",
     disabled: "#5E5E63",
     tabIconDefault: "#8E8E93",
     tabIconSelected: "#00ccbb",

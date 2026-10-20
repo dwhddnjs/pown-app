@@ -2,8 +2,8 @@
   "expo": {
     "name": "pown",
     "slug": "pown",
-    "version": "3.6.0",
-    "runtimeVersion": "3.6.0",
+    "version": "3.7.0",
+    "runtimeVersion": "3.7.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-dark.png",
     "scheme": "myapp",
@@ -108,6 +108,7 @@
       "expo-localization",
       "./plugins/with-fmt-consteval-fix",
       "./plugins/with-predictive-back-off",
+      "./plugins/with-sb-font-family",
       [
         "react-native-google-mobile-ads",
         {

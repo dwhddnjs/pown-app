@@ -27,3 +27,12 @@ export const sbLineHeight = (
   _allowFontScaling?: boolean,
   _lines?: number,
 ): TextStyle | undefined => undefined;
+
+// 리치 노트 글머리 목록의 marginLeft (react-native-enriched htmlStyle.ul) — iOS는 점을 marginLeft 왼쪽에 그리고
+// 글자를 marginLeft+gap에서 시작한다. 점 왼쪽 끝(left)을 넘기면 그 자리에 점이 오게 바꾼다 (text-metrics.android.ts 참고)
+export const enrichedUlMarginLeft = (left: number, bulletSize: number) =>
+  left + bulletSize;
+
+// 리치 노트 번호 목록의 marginLeft (react-native-enriched htmlStyle.ol) — iOS는 번호를 marginLeft에 가운데 맞춘다
+export const enrichedOlMarginLeft = (center: number, _fontSize: number) =>
+  center;
