@@ -20,6 +20,7 @@ import { useLanguage } from "@/hooks/use-user-store";
 import { tEquipment, tWorkout } from "@/lib/i18n";
 // lib
 import { groupByDate } from "@/lib/date";
+import { richNotePlain } from "@/lib/rich-note";
 // expo
 import { useNavigation } from "expo-router";
 
@@ -57,7 +58,8 @@ export default function Search() {
         workout.equipment.includes(convertValue) ||
         workout.type.includes(convertValue) ||
         workout.workout.includes(convertValue) ||
-        workout.content.includes(convertValue) ||
+        // 전체 노트는 서식 HTML이다 — 태그 이름에 걸리지 않게 글자만 본다
+        richNotePlain(workout.content).includes(convertValue) ||
         workout.title.includes(convertValue) ||
         workout.weight.includes(convertValue) ||
         // 표시 라벨(영어)로도 매칭 — 영어 사용자가 "Bench"로 찾을 수 있게

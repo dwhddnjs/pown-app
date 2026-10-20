@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import { StyleSheet, TextInput } from "react-native";
 import { Text, View } from "../themed";
 import { IconTitle } from "../icon-title";
+import { RichNoteText } from "../rich-note";
 import { iconLine } from "@/constants/text-metrics";
 // icon
 import NoteIcon from "@expo/vector-icons/MaterialCommunityIcons";
@@ -12,6 +13,8 @@ import { usePlanStore } from "@/hooks/use-plan-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
 import { useT } from "@/hooks/use-t";
+// lib
+import { isRichNote } from "@/lib/rich-note";
 
 interface PlanNoteProps {
   // 칸의 pageY와 나눌 값을 넘기면 폼이 스크롤 양을 정한다 (plan-form.tsx)
@@ -44,10 +47,11 @@ export const PlanNote = ({ onFocusScroll }: PlanNoteProps) => {
         </Link>
       </View>
 
-      {title && content ? (
+      {/* 전체 노트로 쓴 글(제목이 있거나 서식 HTML)은 미리보기, 아니면 퀵 노트 입력칸 */}
+      {title || isRichNote(content) ? (
         <View style={{ paddingHorizontal: 20, gap: 4 }}>
-          <Text style={{ fontSize: 18 }}>{title}</Text>
-          <Text style={{ fontSize: 14, fontFamily: "sb-l" }}>{content}</Text>
+          {!!title && <Text style={{ fontSize: 18 }}>{title}</Text>}
+          {!!content && <RichNoteText html={content} size={14} />}
         </View>
       ) : (
         <TextInput

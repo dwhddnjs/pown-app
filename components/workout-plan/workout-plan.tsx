@@ -261,7 +261,10 @@ export const WorkoutPlan = React.memo(function WorkoutPlan({
           </View>
         )}
         {/* 노트 */}
-        {item.content && <NoteText title={item.title} content={item.content} />}
+        {/* 제목만 쓴 전체 노트도 보인다 (계획 폼 미리보기와 같은 기준) */}
+        {!!(item.title || item.content) && (
+          <NoteText title={item.title} content={item.content} />
+        )}
 
         {/* 세트와 횟수 + 완료율 */}
         {item.setWithCount.length > 0 && (

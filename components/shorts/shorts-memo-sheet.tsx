@@ -13,14 +13,21 @@ import BottomSheet, {
   useBottomSheetInternal,
 } from "@gorhom/bottom-sheet";
 import { View } from "../themed";
+import { RichNoteEditor } from "../rich-note";
+import { NoteFormatToolbar } from "../note-format-toolbar";
+import { NOTE_DOCK_EXTRA_INSET, NoteToolbarDock } from "../note-toolbar-dock";
+import type {
+  EnrichedTextInputInstance,
+  OnChangeStateEvent,
+} from "react-native-enriched";
 // zustand
 import { ShortsVideoTypes, useShortsStore } from "@/hooks/use-shorts-store";
 // hook
 import useCurrentThemeColor from "@/hooks/use-current-theme-color";
-import { MULTILINE_INPUT_TOP } from "@/constants/text-metrics";
 import { useT } from "@/hooks/use-t";
 // lib
-import {
+import { isRichNote, normalizeRichNote } from "@/lib/rich-note";
+import Animated, {
   runOnJS,
   SharedValue,
   useAnimatedStyle,
@@ -35,22 +42,42 @@ interface ShortsMemoSheetProps {
 
 interface MemoFormProps {
   title: string;
-  content: string;
+  // 본문 에디터의 처음 값 — 영상이 바뀌면 contentKey가 바뀌어 에디터를 새로 띄운다
+  initialContent: string;
+  contentKey?: number;
   onChangeTitle: (value: string) => void;
+  // 본문을 건드린 뒤의 HTML만 넘긴다 — 열어 보기만 한 예전 평문 메모가 HTML로 바뀌어 저장되지 않게
   onChangeContent: (value: string) => void;
 }
 
 // useBottomSheetInternal은 BottomSheet 안쪽에서만 쓸 수 있어 별도 컴포넌트로 분리한다
 const MemoForm = ({
   title,
-  content,
+  initialContent,
+  contentKey,
   onChangeTitle,
   onChangeContent,
 }: MemoFormProps) => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
-  const { animatedKeyboardHeight } = useBottomSheetInternal();
+  const { animatedKeyboardHeight, shouldHandleKeyboardEvents } =
+    useBottomSheetInternal();
   const [isKeyboardUp, setIsKeyboardUp] = useState(false);
+  const editorRef = useRef<EnrichedTextInputInstance>(null);
+  const [styleState, setStyleState] = useState<OnChangeStateEvent | null>(null);
+  // 서식 툴바는 본문용이다 — 제목 칸을 쓰는 동안엔 안 보인다
+  const [isTitleFocused, setIsTitleFocused] = useState(false);
+  const isEdited = useRef(false);
+  useEffect(() => {
+    isEdited.current = false;
+  }, [contentKey]);
+  // 포커스된 채 사라지면 시트가 계속 키보드를 따라간다 — BottomSheetTextInput처럼 끈다
+  useEffect(
+    () => () => {
+      shouldHandleKeyboardEvents.value = false;
+    },
+    [shouldHandleKeyboardEvents],
+  );
 
   // 키보드가 떠 있을 때만 "드래그해서 닫기" 제스처를 켠다.
   // Will 이벤트는 iOS에서만 온다 — 양쪽에서 오는 Did로 받는다
@@ -67,10 +94,12 @@ const MemoForm = ({
     };
   }, []);
 
-  // 키보드가 올라온 만큼 내용 입력칸만 줄인다 —
-  // 컨테이너에 padding을 주면 제목까지 위로 밀려 시트 밖으로 잘린다
+  // 키보드가 뜨면 시트(keyboardBehavior extend)가 내용 영역을 키보드 위까지 줄여 준다 — 본문은 남는 칸을 채운다.
+  // 예전엔 여기서 키보드 높이를 한 번 더 빼서 본문 칸이 0으로 접혀 안 보였다(시트 165pt − 키보드 379pt).
+  // 서식 툴바가 키보드 높이 밖에 얹히는 플랫폼만 그만큼 더 줄인다 (note-toolbar-dock)
+  const extraInset = isTitleFocused ? 0 : NOTE_DOCK_EXTRA_INSET;
   const descStyle = useAnimatedStyle(() => ({
-    marginBottom: animatedKeyboardHeight.value,
+    marginBottom: animatedKeyboardHeight.value > 0 ? extraInset : 0,
   }));
 
   // Keyboard.dismiss를 그대로 runOnJS에 넘기면 네이티브 모듈 메서드라 UI 런타임으로 못 보낸다
@@ -106,21 +135,35 @@ const MemoForm = ({
           },
         ]}
         onChangeText={onChangeTitle}
+        onFocus={() => setIsTitleFocused(true)}
+        onBlur={() => setIsTitleFocused(false)}
       />
       <GestureDetector gesture={dismissOnDrag}>
-        <BottomSheetTextInput
-          value={content}
-          multiline
-          autoCorrect={false}
-          spellCheck={false}
-          placeholder={t("plan.contentPlaceholder")}
-          placeholderTextColor={themeColor.subText}
-          cursorColor={themeColor.cursor}
-          selectionHandleColor={themeColor.cursor}
-          style={[styles.descInput, { color: themeColor.text }, descStyle]}
-          onChangeText={onChangeContent}
-        />
+        <Animated.View style={[styles.descArea, descStyle]}>
+          <RichNoteEditor
+            key={contentKey}
+            editorRef={editorRef}
+            defaultValue={initialContent}
+            // 시트는 자기 입력칸(BottomSheetTextInput)이 포커스될 때만 키보드를 따라간다 — 같은 표시를 켠다
+            onFocus={() => {
+              shouldHandleKeyboardEvents.value = true;
+              isEdited.current = true;
+            }}
+            onBlur={() => {
+              shouldHandleKeyboardEvents.value = false;
+            }}
+            onChangeState={setStyleState}
+            onChangeHtml={(html) => isEdited.current && onChangeContent(html)}
+          />
+        </Animated.View>
       </GestureDetector>
+      <NoteToolbarDock titleFocused={isTitleFocused}>
+        <NoteFormatToolbar
+          editorRef={editorRef}
+          state={styleState}
+          onHideKeyboard={() => editorRef.current?.blur()}
+        />
+      </NoteToolbarDock>
     </View>
   );
 };
@@ -149,7 +192,10 @@ export const ShortsMemoSheet = forwardRef<BottomSheet, ShortsMemoSheetProps>(
         return;
       }
       const nextTitle = draft.title.trim();
-      const nextContent = draft.content.trim();
+      // 본문을 건드렸으면 에디터 HTML이다 — 저장 형태로 맞춘다(글자가 없으면 "")
+      const nextContent = isRichNote(draft.content)
+        ? normalizeRichNote(draft.content)
+        : draft.content.trim();
       if (
         nextTitle === (draft.video.title ?? "") &&
         nextContent === (draft.video.content ?? "")
@@ -189,7 +235,8 @@ export const ShortsMemoSheet = forwardRef<BottomSheet, ShortsMemoSheetProps>(
       >
         <MemoForm
           title={title}
-          content={content}
+          initialContent={video?.content ?? ""}
+          contentKey={video?.id}
           onChangeTitle={setTitle}
           onChangeContent={setContent}
         />
@@ -216,16 +263,9 @@ const styles = StyleSheet.create({
     // 안드로이드 TextInput 기본 오른쪽 여백을 없앤다 — iOS는 0이라 글자가 더 일찍 줄바꿈됐다
     paddingRight: 0,
   },
-  descInput: {
+  descArea: {
     // 고정 높이 대신 남는 공간을 채운다 — 키보드가 뜨면 그만큼 줄어든다
     flex: 1,
-    paddingLeft: 2,
-    paddingRight: 0,
-    fontSize: 16,
-    paddingVertical: 14,
-    paddingTop: 14 + MULTILINE_INPUT_TOP,
-    fontFamily: "sb-l",
-    textAlignVertical: "top",
     // 이게 없으면 길게 쓸 때 스크롤된 글자가 입력칸 밖(제목 밑줄 위)까지 그려진다
     overflow: "hidden",
   },

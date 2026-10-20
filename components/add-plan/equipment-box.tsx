@@ -70,10 +70,11 @@ export const EquipmentBox = () => {
 };
 
 const styles = StyleSheet.create({
+  // flex: 1을 주면 계획 폼 스크롤뷰 안이라 높이가 0으로 접혀, 제목·도구 칸이 다음 칸(목표 중량)에 덮이고
+  // 테두리 윗변만 선처럼 남았다
   container: {
     paddingVertical: 16,
     gap: 10,
-    flex: 1,
     paddingHorizontal: 20,
   },
 

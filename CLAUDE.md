@@ -67,6 +67,7 @@ npm run typecheck  # 타입 체크 — iOS 세계(tsconfig.json) + Android 세�
 - `types/workout.ts` — 도메인 타입(`WorkoutTypes`, `SetWithCountType`, `ImageUriType`)과 부위 순회 목록 `WORKOUT_TYPE_LIST`. 부위 유니온을 인라인으로 다시 적지 말 것.
 - `constants/body-part.tsx` — 부위별 SVG 아이콘 맵(`BODY_PART_ICON`)과 선택 UI용 `BODY_PART_ITEMS`.
 - `lib/date.ts` — 날짜 포맷·정렬·그룹핑. `lib/stats.ts` — 차트 집계. `lib/hangul.ts` — 초성 검색. `lib/seed.ts` — 테스트용 더미 기록.
+- 전체 노트는 `content`에 react-native-enriched HTML(`<html>…</html>`)로 저장된다(퀵 노트는 평문). 판별·평문 추출·파싱은 `lib/rich-note.ts`, 에디터 `htmlStyle`과 읽기 렌더러 `RichNoteText`는 같은 치수를 쓰도록 `components/rich-note.tsx` 한 곳에 둔다. `content`를 글자로 비교하려면 `richNotePlain`을 거칠 것.
 - 공용 컴포넌트: `components/confirm-dialog.tsx`(취소+실행 2버튼 확인창), `components/circle-button.tsx`(떠 있는 원형 버튼), `components/chart/chart-card.tsx`(기록 탭 카드 껍데기 `ChartCard`/`ChartBody`), `components/mypage/settings-screen-styles.ts`(설정 화면 공통 여백), `components/rounded-side.tsx`(위나 아래 모서리만 연속 곡률), `components/dashed-border.tsx`(연속 곡률 점선 테두리).
 - 계획 작성 폼은 `components/plan-form.tsx` 하나다 — 추가·수정·루틴 추가가 모두 이걸 쓰고, 화면별 차이는 `header`/`extraSheets`/`onLeave` prop으로 넘긴다. 폼을 복사하지 말 것.
 
@@ -99,8 +100,9 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 키보드 회피                  | `components/keyboard-avoid`                 | padding(스크롤뷰 안 자름)+시트 오프셋 | padding (edge-to-edge)                                                     |
 | 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
 | 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
-| 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0                                | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정                                   |
+| 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0 (글머리 marginLeft는 점 포함)  | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정·리치 노트 글머리 들여쓰기         |
 | 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
+| 전체 노트 서식 툴바 자리     | `components/note-toolbar-dock`              | 키보드 보조 막대(InputAccessoryView)  | 키보드 윗변에 붙임 (reanimated `useAnimatedKeyboard`)                      |
 | 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
 | 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 실 단위 ID, 없음                                                           |
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
@@ -158,6 +160,6 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 
 ## 주요 라이브러리
 
-`@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트 — 0.15의 "누르면 안 사라짐" 버그를 postinstall `scripts/patch-sonner-native.js`가 고친다. 버전을 올리면 스크립트를 지울 것), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
+`react-native-enriched`(전체 노트 에디터 — **0.4.1 고정**: RN 0.79를 지원하는 마지막 판이다. 0.5+와 후속 `react-native-enriched-html`은 RN 0.81+라 SDK 54 이상으로 올릴 때 옮긴다. 굵게는 sb-m — iOS는 postinstall `scripts/patch-enriched.js`가 sb-l↔sb-m을 잇고(추천 단어 바 끄기도 여기), 안드로이드는 `plugins/with-sb-font-family.js`가 sb-l을 굵기별 패밀리로 등록한다. 버전을 올리면 둘 다 확인할 것 — 패치 목록·남은 작업은 `docs/2026-10-21/README.md`), `@gorhom/bottom-sheet`(바텀시트, `BottomSheetModalProvider`는 `_layout.tsx`에 마운트), `sonner-native`(토스트 — 0.15의 "누르면 안 사라짐" 버그를 postinstall `scripts/patch-sonner-native.js`가 고친다. 버전을 올리면 스크립트를 지울 것), `date-fns`, `react-native-gifted-charts`, `react-native-reanimated`, `@shopify/flash-list`, `react-hook-form`.
 
 컨텍스트 메뉴/드롭다운은 `hooks/use-popover.tsx` + `Modal`(전체 화면 backdrop) 조합을 쓴다. 운동계획 카드의 ⋯ 메뉴는 `components/workout-plan/plan-menu.tsx` 하나만 `_layout.tsx`에 마운트하고, 각 행은 `use-plan-menu-store`에 좌표만 올린다.
