@@ -1,4 +1,4 @@
-import React, { RefObject, useMemo } from "react";
+import React, { RefObject, useLayoutEffect, useMemo, useRef } from "react";
 // component
 import { StyleSheet, Text as RNText, TextStyle, View } from "react-native";
 import Svg, { Path, Rect } from "react-native-svg";
@@ -118,6 +118,15 @@ export const RichNoteEditor = ({
   const themeColor = useCurrentThemeColor();
   const t = useT();
   const htmlStyle = useRichNoteHtmlStyle();
+  // 포커스된 채 화면이 닫히면 안드로이드가 남은 화면의 첫 입력칸(계획 폼 목표 중량)에 포커스를 넘겨
+  // 숫자 키패드가 떴다 — RN TextInput처럼 사라지기 전에 스스로 포커스를 놓는다
+  const isFocused = useRef(false);
+  useLayoutEffect(
+    () => () => {
+      if (isFocused.current) editorRef.current?.blur();
+    },
+    [editorRef],
+  );
   return (
     <EnrichedTextInput
       ref={editorRef}
@@ -129,8 +138,14 @@ export const RichNoteEditor = ({
       // '@'로 멘션이 시작되지 않게, 주소처럼 보이는 글자가 링크로 바뀌지 않게 끈다
       mentionIndicators={NO_MENTION}
       linkRegex={null}
-      onFocus={onFocus}
-      onBlur={onBlur}
+      onFocus={() => {
+        isFocused.current = true;
+        onFocus?.();
+      }}
+      onBlur={() => {
+        isFocused.current = false;
+        onBlur?.();
+      }}
       onChangeState={(e) => onChangeState(e.nativeEvent)}
       onChangeHtml={onChangeHtml && ((e) => onChangeHtml(e.nativeEvent.value))}
       style={{ ...styles.editor, color: themeColor.text }}
