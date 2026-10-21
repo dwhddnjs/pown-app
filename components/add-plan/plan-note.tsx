@@ -41,6 +41,8 @@ export const PlanNote = ({ onFocusScroll }: PlanNoteProps) => {
         </IconTitle>
         <Link
           href="/(modals)/note"
+          // 누르는 동안 iOS가 글자 뒤에 까는 회색 하이라이트를 끈다 (안드로이드는 원래 없다)
+          suppressHighlighting
           style={[styles.link, { color: themeColor.tintText }]}
         >
           {t("plan.openFullNote")}

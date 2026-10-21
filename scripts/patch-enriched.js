@@ -116,6 +116,45 @@ $1`,
         /(textView\.textContainer\.lineFragmentPadding = 0;)/,
         `$1\n  // ${MARK} suggestions\n  textView.autocorrectionType = UITextAutocorrectionTypeNo;\n  textView.spellCheckingType = UITextSpellCheckingTypeNo;`,
       ],
+      // 9. 위아래 여백 스크롤: RN은 패딩만큼 텍스트뷰 프레임을 안쪽으로 줄여서, 스크롤한 글이 에디터 위끝(디바이더)·
+      //    아래끝(서식 툴바)이 아니라 패딩 선에서 잘려 사라졌다 — 툴바 위에 투명한 띠가 글을 가리는 것처럼 보였다.
+      //    위아래 패딩은 프레임 대신 글 영역 안쪽 여백(textContainerInset)으로 옮긴다 — 처음·끝에선 그만큼 띄워 그리고,
+      //    스크롤 중엔 글이 에디터 끝까지 지나간다. 안드로이드는 같은 번호의 onDraw 패치
+      [
+        /(  BOOL _emitHtml;\n)/,
+        `$1  NSLayoutConstraint *_pownPlaceholderTop; // ${MARK} scroll-padding-ivar
+`,
+      ],
+      [
+        /\[_placeholderLabel\.topAnchor constraintEqualToAnchor:textView\.topAnchor\],/,
+        `(_pownPlaceholderTop = [_placeholderLabel.topAnchor constraintEqualToAnchor:textView.topAnchor]), // ${MARK} scroll-padding-placeholder`,
+      ],
+      [
+        /    self->textView\.contentSize = measuredSize;\n/,
+        `    // ${MARK} scroll-padding-size — 글 높이만 재므로 안쪽 여백을 더한다(안 더하면 마지막 줄이 끝까지 안 올라온다)
+    self->textView.contentSize = CGSizeMake(
+        measuredSize.width, measuredSize.height + self->textView.textContainerInset.top +
+                                self->textView.textContainerInset.bottom);
+`,
+      ],
+      [
+        /(- \(void\)setupPlaceholderLabel \{)/,
+        `// ${MARK} scroll-padding
+- (void)updateLayoutMetrics:(const LayoutMetrics &)layoutMetrics
+           oldLayoutMetrics:(const LayoutMetrics &)oldLayoutMetrics {
+  [super updateLayoutMetrics:layoutMetrics oldLayoutMetrics:oldLayoutMetrics];
+  CGFloat top = layoutMetrics.contentInsets.top;
+  CGFloat bottom = layoutMetrics.contentInsets.bottom;
+  CGRect frame = RCTCGRectFromRect(layoutMetrics.getContentFrame());
+  frame.origin.y -= top;
+  frame.size.height += top + bottom;
+  textView.frame = frame;
+  textView.textContainerInset = UIEdgeInsetsMake(top, 0, bottom, 0);
+  _pownPlaceholderTop.constant = top;
+}
+
+$1`,
+      ],
     ],
   ],
   [
@@ -178,16 +217,18 @@ $1`,
     }
 `,
       ],
-      // 줄 높이 1.5em: SB 어그로는 안드로이드 글꼴 지표(ascent~descent)가 1.56em이라 iOS(1.2em)처럼 고정 배율을
-      // 곱하면 넘친다 — 글자 크기·글꼴이 정해질 때마다 1.5em ÷ 실제 지표로 배율을 잡는다(제목도 같은 배율로 비례)
+      // 줄 높이 1.5em: 글자 크기·글꼴이 정해질 때마다 1.5em − 실제 정수 지표를 줄마다 더한다. 배율로 곱하면 본문 줄은
+      // 같지만 제목 줄은 (자기 지표 × 배율)을 반올림해 원하는 픽셀이 안 나오는 높이가 생겼다(18 제목 70 다음이 72) —
+      // 더하는 값이 정해져 있어야 제목 줄 높이(아래 8번)를 아무 픽셀로나 맞출 수 있다
       [
         /(  private fun updateTypeface\(\) \{)/,
         `  // ${MARK} line-height-apply
   private fun applyPownLineSpacing() {
-    // 줄 높이는 정수 픽셀 지표(ascent·descent 각각 올림)에 배율을 곱한다 — 실수 지표로 잡으면 줄마다 0.38씩 길었다
+    // 줄 높이는 정수 픽셀 지표(ascent·descent 각각 반올림)에서 잰다 — 실수 지표로 잡으면 줄마다 0.38씩 길었다
+    // (EnrichedInputH1Span pownHeadingLine이 같은 값을 다시 잡는다)
     val metrics = paint.fontMetricsInt
     val natural = (metrics.descent - metrics.ascent).toFloat()
-    if (natural > 0f) setLineSpacing(0f, 1.5f * textSize / natural)
+    if (natural > 0f) setLineSpacing(1.5f * textSize - natural, 1f)
   }
 
 $1`,
@@ -215,6 +256,298 @@ $1`,
       [
         /(inputType = InputType\.TYPE_CLASS_TEXT or InputType\.TYPE_TEXT_FLAG_MULTI_LINE)(\n)/,
         `$1 or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS // ${MARK} suggestions$2`,
+      ],
+      // 10/21 판(배율로 곱하던 줄 간격)이 이미 걸린 node_modules를 더하는 방식으로 바꾼다 — 위 line-height-apply는 표식이
+      // 있으면 건너뛰어서, 그대로 두면 제목 줄 높이(8번)가 어긋난다. 새로 깐 node_modules에선 맞는 줄이 없어 아무것도 안 한다
+      [
+        /    if \(natural > 0f\) setLineSpacing\(0f, 1\.5f \* textSize \/ natural\)\n/,
+        `    if (natural > 0f) setLineSpacing(1.5f * textSize - natural, 1f) // ${MARK} line-height-add
+`,
+      ],
+      // 9. 위아래 여백 스크롤: TextView는 맨 위가 아니면 paddingTop 선, 맨 끝이 아니면 paddingBottom 선에서 글을 잘라 그려서,
+      //    글이 디바이더 아래·서식 툴바 위의 여백 띠에서 사라졌다(툴바 위에 투명한 띠가 글을 가리는 것처럼 보였다).
+      //    잘리는 여백 띠에 글(과 선택 영역)을 이어 그린다. 커서는 그리지 않는다 — 입력 중엔 커서 줄이 여백 안쪽에 머문다
+      //    (iOS는 같은 번호의 textContainerInset 패치)
+      [
+        /(import android\.graphics\.Color\n)/,
+        `$1import android.graphics.Canvas // ${MARK} scroll-padding-import
+import android.graphics.Paint
+import android.graphics.Path
+`,
+      ],
+      [
+        /(  override fun clearFocus\(\) \{)/,
+        `  // ${MARK} scroll-padding
+  private val pownStripHighlight = Path()
+  private val pownStripPaint = Paint()
+
+  override fun onDraw(canvas: Canvas) {
+    super.onDraw(canvas)
+    val textLayout = layout ?: return
+    val top = extendedPaddingTop
+    val bottom = extendedPaddingBottom
+    // TextView.onDraw와 같은 기준 — 글이 칸보다 길 때만 스크롤된다
+    val maxScrollY = textLayout.height - (height - top - bottom)
+    if (maxScrollY <= 0) return
+    if (scrollY != 0 && top > 0) drawPownStrip(canvas, textLayout, scrollY, scrollY + top)
+    if (scrollY != maxScrollY && bottom > 0) {
+      drawPownStrip(canvas, textLayout, scrollY + height - bottom, scrollY + height)
+    }
+  }
+
+  private fun drawPownStrip(
+    canvas: Canvas,
+    textLayout: android.text.Layout,
+    from: Int,
+    to: Int,
+  ) {
+    canvas.save()
+    canvas.clipRect(
+      compoundPaddingLeft + scrollX,
+      from,
+      width - compoundPaddingRight + scrollX,
+      to,
+    )
+    canvas.translate(compoundPaddingLeft.toFloat(), extendedPaddingTop.toFloat())
+    var highlight: Path? = null
+    if (hasSelection()) {
+      pownStripHighlight.reset()
+      textLayout.getSelectionPath(selectionStart, selectionEnd, pownStripHighlight)
+      pownStripPaint.color = highlightColor
+      highlight = pownStripHighlight
+    }
+    textLayout.draw(canvas, highlight, pownStripPaint, 0)
+    canvas.restore()
+  }
+
+$1`,
+      ],
+      [
+        /(  var isRemovingMany: Boolean = false\n)/,
+        `$1  var pownComposingEdit: Boolean = false // ${MARK} ime-flag
+`,
+      ],
+    ],
+  ],
+  [
+    // 7. 안드로이드 한글 조합: 키보드는 조합 중인 글자를 통째로 갈아 끼운다('핳' → '하하', 단어 전체 '하핳' → '하하하',
+    //    스페이스에 조합 확정). 안드로이드 글 버퍼는 갈아 끼운 자리를 꼭 맞게 덮은 서식은 새 글자 전체로 늘리고, 그 안에
+    //    든 서식은 지운다 — 굵게를 끈 뒤 친 글자까지 굵어지고, 늘어난 것만 잘라 내면 확정할 때 첫 글자 굵게가 지워졌다.
+    //    iOS 3번처럼 갈아 끼우기 전 글자마다의 서식을 기억했다가, 원래 있던 자리는 원래 서식·늘어난 글자는 지금 칠 서식으로
+    //    돌려놓는다. 조합 중인 글자를 갈아 끼울 때만 한다(선택 영역에 친 글자·붙여넣기는 라이브러리 그대로)
+    "android/src/main/java/com/swmansion/enriched/textinput/EnrichedTextInputConnectionWrapper.kt",
+    [
+      [
+        /(import android\.view\.inputmethod\.InputConnection\n)/,
+        `import android.view.inputmethod.BaseInputConnection // ${MARK} ime-import
+$1`,
+      ],
+      [
+        /    val consumed = super\.setComposingText\(text, newCursorPosition\)\n/,
+        `    markComposingEdit() // ${MARK} ime-compose
+    val consumed =
+      try {
+        super.setComposingText(text, newCursorPosition)
+      } finally {
+        editText.pownComposingEdit = false
+      }
+`,
+      ],
+      [
+        /    return super\.commitText\(text, newCursorPosition\)\n/,
+        `    markComposingEdit() // ${MARK} ime-commit
+    try {
+      return super.commitText(text, newCursorPosition)
+    } finally {
+      editText.pownComposingEdit = false
+    }
+`,
+      ],
+      [
+        /(  private fun dispatchKeyEventOrEnqueue)/,
+        `  // ${MARK} ime-mark — 조합 중인 글자가 있을 때 들어온 글자만 조합 갈아 끼우기로 본다
+  private fun markComposingEdit() {
+    val editable = editText.text
+    editText.pownComposingEdit = editable != null && BaseInputConnection.getComposingSpanStart(editable) != -1
+  }
+
+$1`,
+      ],
+    ],
+  ],
+  [
+    "android/src/main/java/com/swmansion/enriched/textinput/watchers/EnrichedTextWatcher.kt",
+    [
+      [
+        /(import android\.text\.Editable\n)/,
+        `$1import android.text.Spannable // ${MARK} ime-import
+import android.text.Spanned
+import com.swmansion.enriched.textinput.spans.EnrichedSpans
+import com.swmansion.enriched.textinput.styles.HtmlStyle
+`,
+      ],
+      [
+        /(  private var previousTextLength: Int = 0\n)/,
+        `$1
+  // ${MARK} ime-fields
+  private var pownComposeStart = -1
+  private var pownComposeLength = 0
+  private var pownComposeStyles: Map<String, BooleanArray> = emptyMap()
+`,
+      ],
+      [
+        /(    previousTextLength = s\?\.length \?: 0\n)/,
+        `$1    // ${MARK} ime-remember — 갈아 끼울 글자마다 어느 서식이 있었는지
+    pownComposeStart = -1
+    if (view.pownComposingEdit && s is Spanned && count > 0 && after > 0) {
+      view.pownComposingEdit = false
+      pownComposeStart = start
+      pownComposeLength = after
+      pownComposeStyles =
+        EnrichedSpans.inlineSpans.mapValues { (_, config) ->
+          BooleanArray(count) { i -> s.getSpans(start + i, start + i + 1, config.clazz).isNotEmpty() }
+        }
+    }
+`,
+      ],
+      [
+        /(    if \(view\.isDuringTransaction\) return\n)(    applyStyles\(s\)\n)/,
+        `$1    restoreComposeStyles(s) // ${MARK} ime-restore-call
+$2`,
+      ],
+      [
+        /(  private fun applyStyles\(s: Editable\) \{)/,
+        `  // ${MARK} ime-restore
+  private fun restoreComposeStyles(s: Editable) {
+    val start = pownComposeStart
+    if (start == -1) return
+    pownComposeStart = -1
+    val end = (start + pownComposeLength).coerceAtMost(s.length)
+    if (end <= start) return
+    for ((style, config) in EnrichedSpans.inlineSpans) {
+      val before = pownComposeStyles[style] ?: continue
+      val typing = view.spanState?.getStart(style) != null
+      val want = BooleanArray(end - start) { i -> if (i < before.size) before[i] else typing }
+      val have = BooleanArray(end - start) { i -> s.getSpans(start + i, start + i + 1, config.clazz).isNotEmpty() }
+      if (want.contentEquals(have)) continue
+      // 앞뒤로 이어 붙은 같은 서식까지 한 번에 다시 깐다 — 서식이 글자마다 조각나지 않게
+      val spans = s.getSpans((start - 1).coerceAtLeast(0), (end + 1).coerceAtMost(s.length), config.clazz)
+      var low = start
+      var high = end
+      for (span in spans) {
+        low = minOf(low, s.getSpanStart(span))
+        high = maxOf(high, s.getSpanEnd(span))
+      }
+      val covered =
+        BooleanArray(high - low) { i ->
+          val at = low + i
+          if (at in start until end) want[at - start] else spans.any { s.getSpanStart(it) <= at && at < s.getSpanEnd(it) }
+        }
+      for (span in spans) s.removeSpan(span)
+      var from = 0
+      while (from < covered.size) {
+        if (!covered[from]) {
+          from++
+          continue
+        }
+        var to = from
+        while (to < covered.size && covered[to]) to++
+        val span = config.clazz.getDeclaredConstructor(HtmlStyle::class.java).newInstance(view.htmlStyle)
+        s.setSpan(span, low + from, low + to, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        from = to
+      }
+    }
+  }
+
+$1`,
+      ],
+    ],
+  ],
+  [
+    // 8. 안드로이드 제목 줄 높이: 줄 간격(위 line-height-apply)은 본문 글꼴로 잡혀 있어 제목 줄은 iOS보다 줄마다 0.3
+    //    짧았다(20 → 29.7, 18 → 26.7). 제목 줄 높이를 iOS(제목 글자 × sb-m 자연 줄 1.199 × 1.25 — components/rich-note.tsx
+    //    읽기 화면과 같은 식)에 가장 가까운 픽셀로 정한다(20 → 79px = 30.1, 18 → 71px = 27.05 — iOS 29.98·26.98)
+    "android/src/main/java/com/swmansion/enriched/textinput/spans/EnrichedInputH1Span.kt",
+    [
+      [
+        /(import com\.swmansion\.enriched\.common\.spans\.EnrichedH1Span\n)/,
+        `import android.graphics.Paint // ${MARK} heading-line-import
+import android.text.TextPaint
+import android.text.style.LineHeightSpan
+import com.facebook.react.uimanager.PixelUtil
+$1`,
+      ],
+      [
+        /(  EnrichedInputSpan \{\n)(  override val dependsOnHtmlStyle: Boolean = true\n)/,
+        `  EnrichedInputSpan,
+  LineHeightSpan.WithDensity {
+$2  private val pownSize = style.h1FontSize // ${MARK} heading-line
+
+  override fun chooseHeight(text: CharSequence, start: Int, end: Int, spanstartv: Int, lineHeight: Int, fm: Paint.FontMetricsInt) = Unit
+
+  override fun chooseHeight(
+    text: CharSequence,
+    start: Int,
+    end: Int,
+    spanstartv: Int,
+    lineHeight: Int,
+    fm: Paint.FontMetricsInt,
+    paint: TextPaint,
+  ) = pownHeadingLine(pownSize, fm, paint)
+`,
+      ],
+      [
+        /(\nclass EnrichedInputH1Span\()/,
+        `
+// ${MARK} heading-line-fun — 제목 줄 하나의 높이를 iOS에 가장 가까운 픽셀로 (EnrichedInputH2Span도 쓴다)
+internal fun pownHeadingLine(
+  sizePx: Int,
+  fm: Paint.FontMetricsInt,
+  paint: TextPaint,
+) {
+  // paint는 에디터 본문 글꼴 — EnrichedTextInputView applyPownLineSpacing이 줄마다 더하는 값을 다시 잡는다
+  // (StaticLayout은 그 값을 반올림해 descent 아래에 붙인다)
+  val base = paint.fontMetricsInt
+  val extra = Math.round(1.5f * paint.textSize - (base.descent - base.ascent))
+  // 제목 크기는 sp를 픽셀로 올림해 받는다(HtmlStyle parseFloat) — 정수 sp로 되돌려 iOS 줄 높이를 잡는다
+  // ponytail: 제목 크기가 정수 sp라고 본다(components/rich-note.tsx M.h1·h2) — 소수로 바꾸면 이 반올림을 뺄 것
+  val spPx = PixelUtil.toPixelFromSP(1f)
+  val target = Math.round(Math.round(sizePx / spPx) * spPx * 1.199f * 1.25f)
+  // 글자 자리(ascent)는 그대로 두고 아래만 늘이거나 줄인다 — iOS도 줄 간격을 글자 아래에 둔다
+  fm.descent = fm.ascent + target - extra
+}
+$1`,
+      ],
+    ],
+  ],
+  [
+    "android/src/main/java/com/swmansion/enriched/textinput/spans/EnrichedInputH2Span.kt",
+    [
+      [
+        /(import com\.swmansion\.enriched\.common\.spans\.EnrichedH2Span\n)/,
+        `import android.graphics.Paint // ${MARK} heading-line-import
+import android.text.TextPaint
+import android.text.style.LineHeightSpan
+$1`,
+      ],
+      [
+        /(  EnrichedInputSpan \{\n)(  override val dependsOnHtmlStyle: Boolean = true\n)/,
+        `  EnrichedInputSpan,
+  LineHeightSpan.WithDensity {
+$2  private val pownSize = htmlStyle.h2FontSize // ${MARK} heading-line
+
+  override fun chooseHeight(text: CharSequence, start: Int, end: Int, spanstartv: Int, lineHeight: Int, fm: Paint.FontMetricsInt) = Unit
+
+  override fun chooseHeight(
+    text: CharSequence,
+    start: Int,
+    end: Int,
+    spanstartv: Int,
+    lineHeight: Int,
+    fm: Paint.FontMetricsInt,
+    paint: TextPaint,
+  ) = pownHeadingLine(pownSize, fm, paint)
+`,
       ],
     ],
   ],

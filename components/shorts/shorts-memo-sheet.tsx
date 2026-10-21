@@ -15,7 +15,7 @@ import BottomSheet, {
 import { View } from "../themed";
 import { RichNoteEditor } from "../rich-note";
 import { NoteFormatToolbar } from "../note-format-toolbar";
-import { NOTE_DOCK_EXTRA_INSET, NoteToolbarDock } from "../note-toolbar-dock";
+import { NoteToolbarDock, useNoteSheetEditorInset } from "../note-toolbar-dock";
 import type {
   EnrichedTextInputInstance,
   OnChangeStateEvent,
@@ -30,7 +30,7 @@ import { isRichNote, normalizeRichNote } from "@/lib/rich-note";
 import Animated, {
   runOnJS,
   SharedValue,
-  useAnimatedStyle,
+  useSharedValue,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 
@@ -60,8 +60,7 @@ const MemoForm = ({
 }: MemoFormProps) => {
   const themeColor = useCurrentThemeColor();
   const t = useT();
-  const { animatedKeyboardHeight, shouldHandleKeyboardEvents } =
-    useBottomSheetInternal();
+  const { shouldHandleKeyboardEvents } = useBottomSheetInternal();
   const [isKeyboardUp, setIsKeyboardUp] = useState(false);
   const editorRef = useRef<EnrichedTextInputInstance>(null);
   const [styleState, setStyleState] = useState<OnChangeStateEvent | null>(null);
@@ -96,11 +95,9 @@ const MemoForm = ({
 
   // 키보드가 뜨면 시트(keyboardBehavior extend)가 내용 영역을 키보드 위까지 줄여 준다 — 본문은 남는 칸을 채운다.
   // 예전엔 여기서 키보드 높이를 한 번 더 빼서 본문 칸이 0으로 접혀 안 보였다(시트 165pt − 키보드 379pt).
-  // 서식 툴바가 키보드 높이 밖에 얹히는 플랫폼만 그만큼 더 줄인다 (note-toolbar-dock)
-  const extraInset = isTitleFocused ? 0 : NOTE_DOCK_EXTRA_INSET;
-  const descStyle = useAnimatedStyle(() => ({
-    marginBottom: animatedKeyboardHeight.value > 0 ? extraInset : 0,
-  }));
+  // 서식 툴바가 키보드 밖에 얹히는 안드로이드만 툴바·시트가 덜 줄어든 만큼 더 비운다 — 독이 잰 자리를 같이 쓴다
+  const dockGap = useSharedValue(0);
+  const descStyle = useNoteSheetEditorInset(dockGap, isTitleFocused);
 
   // Keyboard.dismiss를 그대로 runOnJS에 넘기면 네이티브 모듈 메서드라 UI 런타임으로 못 보낸다
   const dismissKeyboard = useCallback(() => Keyboard.dismiss(), []);
@@ -157,7 +154,7 @@ const MemoForm = ({
           />
         </Animated.View>
       </GestureDetector>
-      <NoteToolbarDock titleFocused={isTitleFocused}>
+      <NoteToolbarDock titleFocused={isTitleFocused} gap={dockGap}>
         <NoteFormatToolbar
           editorRef={editorRef}
           state={styleState}

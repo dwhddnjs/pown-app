@@ -196,8 +196,11 @@ $ADB logcat -d -s ReactNativeJS:V | tail -50     # JS 로그·에러
 
 **키보드 함정**: AVD 기본값 `hw.keyboard = yes`면 소프트 키보드가 안 뜬다(키보드 회피를 검증할 수
 없다) — `~/.android/avd/<AVD>.avd/config.ini`에서 `no`로 바꾸고 콜드 부팅(`-no-snapshot-load`),
-끝나면 되돌린다. `adb shell input text`를 한 번이라도 쓰면 Gboard가 물리 키보드 모드(떠 있는
-툴바)로 바뀌니, 키보드 모양은 탭으로 포커스만 한 직후에 캡처한다.
+끝나면 되돌린다. `adb shell input text`나 `input keyevent`(뒤로가기 4 포함)를 한 번이라도 쓰면 Gboard가
+물리 키보드 모드(떠 있는 세로 툴바)로 바뀌고 Gboard 강제 종료로도 안 돌아온다 — `adb reboot`해야 풀린다.
+키보드를 쓰는 검증에선 뒤로가기도 화면 버튼·내비 바 키보드 내리기(⌄)를 탭으로 누른다.
+한글은 Gboard 한국어 두벌식 자판을 탭으로 친다(Pixel 6: ㅎ `540 1863`, ㅏ `861 1863`, 스페이스 `591 2178`,
+엔터 `984 2178`, 지우기 `987 2025`) — 조합 중 서식 토글처럼 IME 동작은 이렇게만 재현된다.
 
 축소본을 볼 때 좌표 배율 주의는 iOS와 같다(`sips -Z`는 긴 변 기준). 원본 픽셀로 환산해서 누를 것.
 

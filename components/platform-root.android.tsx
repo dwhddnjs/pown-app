@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 // component
 import { Keyboard, TextInput } from "react-native";
+import { useAnimatedKeyboard } from "react-native-reanimated";
 // expo
 import { StatusBar } from "expo-status-bar";
 
@@ -18,6 +19,11 @@ export const PlatformRoot = () => {
     );
     return () => hide.remove();
   }, []);
+
+  // reanimated는 useAnimatedKeyboard를 쓰는 화면이 하나도 없으면 키보드 감시를 멈추고 마지막 상태를 그대로 둔다 —
+  // 전체 노트를 키보드 띄운 채 닫으면 키보드가 내려간 걸 못 봐서, 다음에 연 숏츠 메모가 "키보드 열림 336"을 받아
+  // 서식 툴바가 키보드 없이 떠 있었다. 루트에서 늘 구독해 감시가 끊기지 않게 한다 (note-toolbar-dock.android)
+  useAnimatedKeyboard();
 
   return <StatusBar style="auto" />;
 };

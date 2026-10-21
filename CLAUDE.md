@@ -96,13 +96,13 @@ SVG는 `react-native-svg-transformer`로 컴포넌트 import(`metro.config.js`, 
 | 헤더 기하(바 위치·버튼·제목) | `components/navigation/header-metrics`      | 푸시·모달 보정, 기본값                | iOS 내비 바 자리(안전영역−5⅓, 44)·제목 +3·드로어 제목·포커스 pageY         |
 | 검색창 옵션                  | `components/navigation/search-bar-options`  | UISearchController, 목록 상단 110     | 헤더를 목록 위에 겹침, 목록 상단 인셋+48                                   |
 | 모달 상태바                  | `components/navigation/modal-status-bar`    | `light` (시트 모달)                   | 없음 (전체화면)                                                            |
-| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`·키보드 내리면 포커스 해제                                    |
+| 루트 전용 요소               | `components/platform-root`                  | App Store 업데이트 안내               | 상태바 `auto`·키보드 내리면 포커스 해제·키보드 감시 상시                   |
 | 키보드 회피                  | `components/keyboard-avoid`                 | padding(스크롤뷰 안 자름)+시트 오프셋 | padding (edge-to-edge)                                                     |
 | 날짜·시간 스피너             | `components/add-plan/date-time-spinner`     | UIDatePicker 스피너                   | JS 휠 (iOS 스피너 실측, `wheel.android`)                                   |
 | 목록에서 하나 고르기         | `components/option-picker`                  | 휠 (216)                              | JS 휠 (iOS 휠 실측, `wheel.android`)                                       |
 | 글자 배치 보정값             | `constants/text-metrics`                    | 전부 0 (글머리 marginLeft는 점 포함)  | 이모지 섞인 줄·여러 줄 입력칸 첫 줄 보정·리치 노트 글머리 들여쓰기         |
 | 뒤로가기로 시트 닫기         | `hooks/use-back-to-close`                   | 없음                                  | `BackHandler`                                                              |
-| 전체 노트 서식 툴바 자리     | `components/note-toolbar-dock`              | 키보드 보조 막대(InputAccessoryView)  | 키보드 윗변에 붙임 (reanimated `useAnimatedKeyboard`)                      |
+| 전체 노트 서식 툴바 자리     | `components/note-toolbar-dock`              | 키보드 보조 막대(InputAccessoryView)  | 키보드 윗변에 붙임 (`useAnimatedKeyboard`·부모 아래끝 실측)                |
 | 메일 앱 열기                 | `lib/open-mail`                             | Gmail → mailto                        | mailto 바로                                                                |
 | 광고 단위·추적 동의          | `lib/ads-platform`                          | 실 단위 ID, ATT                       | 실 단위 ID, 없음                                                           |
 | AI 요청 앱 헤더              | `lib/ai-client-headers`                     | `X-Ios-Bundle-Identifier`             | 없음                                                                       |
