@@ -155,6 +155,19 @@ $1`,
 
 $1`,
       ],
+      // 10. 문서 끝 입력 시 커서 따라가기: contentSize를 이 블록에서 비동기로 넣어서, UIKit이 커서로 스크롤할 땐 새 줄이
+      //     아직 크기에 없다 — 끝에 줄을 계속 더하면 커서 줄이 키보드 뒤로 내려가고 화면이 안 따라왔다(문서 중간은 멀쩡).
+      //     크기를 넣은 뒤 포커스 중이면 커서 줄과 아래 안쪽 여백(9번)이 보이게 한다. 선택만 바뀔 땐 이 블록이 안 돈다
+      [
+        /(  \}\);\n\}\n\n- \(void\)didMoveToWindow \{)/,
+        `    // ${MARK} caret-follow
+    if (self->textView.isFirstResponder && self->textView.selectedTextRange != nil) {
+      CGRect caret = [self->textView caretRectForPosition:self->textView.selectedTextRange.end];
+      caret.size.height += self->textView.textContainerInset.bottom;
+      [self->textView scrollRectToVisible:caret animated:NO];
+    }
+$1`,
+      ],
     ],
   ],
   [
@@ -197,6 +210,29 @@ $1`,
       [
         /(@implementation InputTextView\n)/,
         `$1\n// ${MARK} accessory\n- (NSString *)inputAccessoryViewID {\n  return @"enriched-text-input";\n}\n`,
+      ],
+    ],
+  ],
+  [
+    // 4-1. 툴바 위 빈 칸: RN 보조 막대 내용 뷰는 툴바를 안전영역 아래끝에 붙이는데, 보조 막대 높이를 처음 잰 안전영역(화면
+    //      아래 — 홈 인디케이터 34)으로 잡은 채 키보드 위에 붙어 툴바 위에 34짜리 칸이 남았다(투명하면 빈 박스, iOS 27에선
+    //      글을 가렸다). 안전영역이 바뀌면 크기를 다시 재게 한다 — 화면 키보드 위에선 툴바 높이 그대로, 하드웨어 키보드(화면
+    //      아래)에선 홈 인디케이터 위에 선다. react-native 파일이라 경로가 enriched 밖이다
+    "../react-native/React/Fabric/Mounting/ComponentViews/InputAccessory/RCTInputAccessoryContentView.mm",
+    [
+      [
+        /(- \(CGSize\)intrinsicContentSize\n\{\n)  \/\/ This is needed so the view size is based on autolayout constraints\.\n  return CGSizeZero;\n\}/,
+        `$1  // ${MARK} accessory-safe-area
+  return CGSizeMake(
+      UIViewNoIntrinsicMetric,
+      _heightConstraint.constant + self.safeAreaInsets.top + self.safeAreaInsets.bottom);
+}
+
+- (void)safeAreaInsetsDidChange
+{
+  [super safeAreaInsetsDidChange];
+  [self invalidateIntrinsicContentSize];
+}`,
       ],
     ],
   ],

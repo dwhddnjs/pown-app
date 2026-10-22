@@ -46,6 +46,8 @@
 | 7 | Android | 한글 조합: 키보드가 조합 중인 글자를 통째로 갈아 끼우면('핳'→'하하', 단어 전체 '하핳'→'하하하') 글 버퍼가 꼭 맞게 덮은 서식은 새 글자 전체로 늘리고 안에 든 서식은 지움 → 굵게를 끄고 친 글자가 굵어짐 | `EnrichedTextInputConnectionWrapper`가 조합 중 글자가 있을 때 들어온 입력을 표시하고, `EnrichedTextWatcher`가 갈아 끼우기 전 글자마다 서식을 기억했다가 원래 자리는 원래 서식·늘어난 글자는 지금 칠 서식으로 돌려놓음 |
 | 8 | Android | 줄 간격이 본문 글꼴 기준이라 제목 줄이 iOS보다 줄마다 0.3pt 짧음 | `EnrichedInputH1Span`·`H2Span`이 `LineHeightSpan`으로 제목 줄 높이를 iOS(글자 × 1.199 × 1.25)에 가장 가까운 픽셀로 정함 (20 → 79px, 18 → 71px) |
 | 9 | 양쪽 | 에디터 위아래 패딩(14)이 스크롤 글을 자르는 선이 돼, 글이 디바이더 14 아래·툴바 14 위에서 사라짐(툴바 위에 투명한 띠가 글을 가리는 것처럼 보임) | iOS: 위아래 패딩을 프레임 대신 `textContainerInset`으로 옮기고 강제 `contentSize`에 더함. Android: `onDraw`에서 TextView가 잘라 낸 위아래 여백 띠에 글·선택 영역을 이어 그림 |
+| 4-1 | iOS | RN 보조 막대 내용 뷰가 처음 잰 안전영역(34)을 키보드 위에서도 높이에 남겨 툴바 위에 34pt 칸이 생김(iOS 27에선 글을 가림). **react-native 파일 패치** | `RCTInputAccessoryContentView.mm` — 안전영역이 바뀌면 크기를 다시 잰다(화면 키보드 위 44, 하드웨어 키보드 땐 홈 인디케이터 위) (10/23) |
+| 10 | iOS | 문서 끝에 줄을 더하면 커서 줄이 키보드 뒤로 내려감 — `contentSize`를 비동기로 넣어 UIKit이 커서로 스크롤할 땐 새 줄이 없음 | `_performRelayout`에서 크기를 넣은 뒤 포커스 중이면 커서 줄 + 아래 여백을 `scrollRectToVisible` (10/23) |
 
 ## 10/22 처리
 

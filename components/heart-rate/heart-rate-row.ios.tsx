@@ -494,7 +494,7 @@ const LiveBox = ({
         </TouchableOpacity>
       )}
 
-      {/* 쉬다가 심박이 100 아래로 내려오면 알림 — 거슬리는 사람은 여기서 바로 끈다 */}
+      {/* 세트 뒤 심박 100 아래로 1분 쉬면 알림 — 거슬리는 사람은 여기서 바로 끈다 */}
       <RNView style={styles.restAlert}>
         <RNView style={styles.restAlertText}>
           <Text style={[styles.restAlertLabel, { color: themeColor.tintText }]}>
