@@ -386,8 +386,11 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
   // 이 워치 구간은 짧아도 건강 앱에 남기라고 보냈다(keep) — 요약의 healthStarts에 넣는다
   private var watchKeep = false
-  // 이어폰을 빼서 멈췄다("earphonesRemoved") — 박스가 안내한다. 재개하면 지운다
-  private var pauseReason: String?
+  // 이어폰을 빼서 멈췄다("earphonesRemoved") — 박스가 안내한다. 재개하면 지운다. 일시정지로 남은 측정과 같이 앱이 죽어도
+  // 남게 디스크에 둔다 — 다시 켤 때 기기로 짐작하면 워치로 바꿔 재던 측정에도 "이어폰이 빠져서"가 붙었다
+  private var pauseReason: String? = UserDefaults.standard.string(forKey: "heartRatePauseReason") {
+    didSet { UserDefaults.standard.set(pauseReason, forKey: "heartRatePauseReason") }
+  }
   // 세션 없이 일시정지로 남은 측정(suspended)을 새 세션으로 잇는 중
   private var isResuming = false
   private var activity: Activity<HeartRateAttributes>?
@@ -434,6 +437,17 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 마무리(건강 앱 저장·섬 갱신·기록 넘기기) 동안 잡는 백그라운드 시간 — 세션이 멈추면 앱엔 뒤에서 돌 이유가 없어(백그라운드
   // 모드가 없다) iOS가 곧 정지시킨다
   private var backgroundTask = UIBackgroundTaskIdentifier.invalid
+  // 백그라운드 시간을 잡은 흐름 수 — 다 놓아야 놓는다(먼저 끝난 흐름이 다른 흐름의 시간까지 놓지 않게)
+  private var backgroundHolds = 0
+  // 이어폰 빠짐·시스템 종료로 지금 구간을 일시정지로 넘기는 중 — 그 사이 누른 종료·전체 초기화는 넘김이 끝난 뒤 남은 측정에
+  // 건다(바로 던지면 종료가 버려지고, 초기화 뒤 넘김이 측정을 되살렸다)
+  private var suspending: Task<Void, Never>?
+  // 멈춘 구간 체크포인트를 이미 남겼다 — 멈춘 동안엔 값이 그대로라 다시 쓰지 않는다
+  private var checkpointPaused = false
+  // 마지막 recover()가 HealthKit 조회에 실패했다(잠금 등) — 그 상태로는 섬 종료를 마칠 수 없다
+  private var recoverFailed = false
+  // 잠금이라 못 마친 섬 종료 — 잠금이 풀리거나 앱이 앞으로 오면 마저 끝낸다
+  private var endWhenAccessible = false
   // 마지막 섬 갱신·종료 — 백그라운드 시간을 놓기 전에 닿게 기다린다
   private var activityWork: Task<Void, Never>?
 
@@ -482,6 +496,22 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         self?.routeChanged(reason: reason, earphones: !now.isEmpty, removed: removed)
       }
     }
+    // 잠금 때문에 미룬 섬 종료를 마저 끝낸다 — 잠금이 풀리는 알림은 앱이 정지돼 있으면 못 받으니 앱이 앞으로 올 때도 본다
+    for name in [
+      UIApplication.protectedDataDidBecomeAvailableNotification,
+      UIApplication.didBecomeActiveNotification,
+    ] {
+      NotificationCenter.default.addObserver(forName: name, object: nil, queue: .main) {
+        [weak self] _ in
+        Task { @MainActor in await self?.endWhenAccessibleIfNeeded() }
+      }
+    }
+  }
+
+  private func endWhenAccessibleIfNeeded() async {
+    guard endWhenAccessible, UIApplication.shared.isProtectedDataAvailable else { return }
+    endWhenAccessible = false
+    await control("end")
   }
 
   private func control(_ action: String) async {
@@ -491,6 +521,11 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     case "pause": pause()
     // 세션 없이 일시정지로 남은 측정은 뒤에서 새 세션을 못 연다 — 그때 섬은 이 버튼 대신 앱을 여는 링크를 보인다
     case "resume": _ = try? await resume()
+    case "end" where recoverFailed && (checkpoint != nil || carried == nil):
+      // 잠긴 기기라 되찾을 세션을 못 읽었다 — 지금 끝내면 체크포인트 구간을 잃거나(앞 구간만 저장하고 지운다), 끝낼 측정을 못
+      // 찾아 섬이 그대로 남는다. 읽을 수 있게 되면 마저 끝낸다(endWhenAccessibleIfNeeded). 앞 구간만 남은 측정은 그대로 끝낸다
+      log.notice("end deferred until protected data is available")
+      endWhenAccessible = true
     case "end":
       // 앱이 뒤에 있을 때 끝난 것이라 종료 버튼 쪽 저장이 없다 — 시스템 종료와 같은 이벤트로
       // 요약을 넘겨 JS가 기록을 남긴다(JS가 아직 안 들으면 send가 들고 있다)
@@ -522,8 +557,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     // 멈추기만 하고 iOS가 세션을 끝내길(에어팟을 빼면 끝낸다, 10/6 실기) 기다리면, 그 끝을 받아 넘기는 사이 앱이 뒤에서
     // 정지·회수돼 측정이 통째로 사라졌다(끝났다는 콜백은 앱이 깨어나야 온다 — HKWorkoutSession.h). 앱이 살아 있는 지금 넘긴다
     pauseReason = "earphonesRemoved"
+    // Task가 돌기 전에 끼어든 종료·시스템 종료가 같은 세션을 또 마무리하지 않게 지금 세운다
+    isEnding = true
     holdBackground()
-    Task {
+    suspending = Task {
       await finishing {
         guard await suspendSegment(session, builder) else { return }
         publish()
@@ -860,6 +897,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 먼저 끝내던 쪽이 하므로, JS가 "1분 미만" 안내를 잘못 띄우지 않게 구분한다
   // discard: 길이와 상관없이 건강 앱에도 남기지 않고 버린다(전체 초기화)
   func end(discard: Bool = false) async throws -> [String: Any]? {
+    // 이어폰을 빼서(또는 시스템이 닫아서) 일시정지로 넘기는 중이면 넘김이 끝나길 기다렸다 그 측정을 끝낸다 — 에어팟을 빼고 바로
+    // 종료를 누르는 게 흔하다
+    if isEnding, let suspending { await suspending.value }
     // 전체 초기화 — 일시정지로 남은 앞 구간까지 버린다(건강 앱에 남긴 것도). 체크포인트도 — 남기면 다음 실행 때 되살아난다
     if discard {
       purge(carried)
@@ -885,20 +925,25 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     isEnding = true
     // 종료를 누르고 바로 앱을 나가도(섬 종료 버튼도 앱 밖이다) 저장까지 끝낸다
     holdBackground()
-    defer {
-      reset()
+    let summary: [String: Any]?
+    if let builder {
+      // 끝내는 도중 앱이 죽으면 다음 실행 때 이 구간을 기록으로 마무리한다(recover) — 버리는 거면 남기지 않는다
+      if !discard { saveCheckpoint(ending: true) }
+      if session.state == .running || session.state == .paused {
+        await waitForStop(session, timeout: Self.stopTimeout)
+      }
+      summary = merged(await finish(session, builder, discard: discard), discard: discard)
+    } else {
+      summary = merged(await finishOnWatch(session, discard: discard), discard: discard)
+    }
+    reset()
+    // 섬 종료가 닿은 뒤 백그라운드 시간을 놓는다(finishing과 같다) — 돌려주는 건 기다리지 않는다
+    let work = activityWork
+    Task {
+      await work?.value
       releaseBackground()
     }
-    guard let builder else {
-      return merged(await finishOnWatch(session, discard: discard), discard: discard)
-    }
-    // 끝내는 도중 앱이 죽으면 다음 실행 때 이 구간을 기록으로 마무리한다(recover) — 버리는 거면 남기지 않는다
-    if !discard { saveCheckpoint(ending: true) }
-
-    if session.state == .running || session.state == .paused {
-      await waitForStop(session, timeout: Self.stopTimeout)
-    }
-    return merged(await finish(session, builder, discard: discard), discard: discard)
+    return summary
   }
 
   // stopActivity를 걸고 stopped(또는 바로 ended)가 올 때까지 기다린다. 미러 세션은 ended까지
@@ -928,7 +973,10 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   ) async -> [String: Any]? {
     // 멈춘 때까지만 잰다 — 앱이 죽었다 되찾은 멈춘 세션은 그 뒤 죽어 있던 시간까지 운동 시간에 들어갔다(51초 → 86초)
     let end = session.endDate ?? .now
-    _ = await limited(Self.finishLimit.collection) { try? await builder.endCollection(at: end) }
+    // 한도를 넘겨도 수집 종료는 뒤에서 마저 끝난다 — 저장(finishWorkout)은 그게 끝난 뒤에 건다. 먼저 걸면 실패해 운동 없이
+    // 심박·칼로리 샘플만 건강 앱에 남았다
+    let collection = Task { @MainActor in _ = try? await builder.endCollection(at: end) }
+    _ = await limited(Self.finishLimit.collection) { await collection.value }
     var summary = segmentSnapshot()
 
     let total = (carried?["elapsedSec"] as? Int ?? 0) + Int(builder.elapsedTime)
@@ -940,14 +988,20 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       if !samples.isEmpty { summary?["samples"] = samples }
       return summary
     }
-    // 건강 앱 저장이 실패하거나(쓰기 권한 해제 등) 늦어도 앱 기록은 남긴다
-    let workout = await limited(Self.finishLimit.save) { try? await builder.finishWorkout() } ?? nil
+    // 건강 앱 저장이 실패하거나(쓰기 권한 해제 등) 늦어도 앱 기록은 남긴다. nil: 한도를 넘겨 뒤에서 저장 중, .some(nil): 실패
+    let saved = await limited(Self.finishLimit.save) { () -> HKWorkout? in
+      await collection.value
+      return try? await builder.finishWorkout()
+    }
+    let workout = saved ?? nil
     session.end()
     let stored = await limited(Self.finishLimit.samples) { await self.storedSamples(of: workout) } ?? []
     let all = stored.isEmpty ? samples : stored
     if !all.isEmpty { summary?["samples"] = all }
-    // 건강 앱에 남은 운동의 시작 — 기록을 지울 때 이걸로 찾는다
-    if let start = summary?["startedAt"] { summary?["healthStarts"] = [start] }
+    // 건강 앱에 남은(또는 뒤에서 저장 중인) 운동의 시작 — 기록을 지울 때 이걸로 찾는다. 저장이 실패했으면 찾을 운동이 없다
+    if workout != nil || saved == nil, let start = summary?["startedAt"] {
+      summary?["healthStarts"] = [start]
+    }
     return summary
   }
 
@@ -1128,9 +1182,11 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     log.notice(
       "phone session closed by system error=\(describe(error), privacy: .public) suspend=\(suspend)")
     isEnding = true
+    // 다른 운동 앱이 가져갔으면 그대로 끝낸다 — 마무리 도중 앱이 죽어도 다음 실행 때 일시정지가 아니라 기록으로 남긴다(recover)
+    if !suspend { saveCheckpoint(ending: true) }
     // 시스템이 닫는 건 대개 앱이 뒤에 있을 때다 — 백그라운드 시간을 잡고 마무리한다
     holdBackground()
-    Task {
+    suspending = Task {
       await finishing {
         if suspend {
           guard await suspendSegment(session, builder) else { return }
@@ -1202,23 +1258,33 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     checkpointAt = Date()
   }
 
-  // 앱이 뒤에 있어도 마무리를 끝내게 백그라운드 시간을 잡고, 섬 갱신이 닿은 뒤 놓는다
+  // 마무리를 끝내고 섬 갱신이 닿은 뒤 백그라운드 시간을 놓는다 — 잡는 건 부르는 쪽이 Task를 만들기 전에 한다(그래야 Task가
+  // 돌기 전에 앱이 정지되지 않는다)
   private func finishing(_ work: () async -> Void) async {
-    holdBackground()
     await work()
     await activityWork?.value
     releaseBackground()
   }
 
+  // 잡을 때마다 releaseBackground를 한 번 부른다
   private func holdBackground() {
+    backgroundHolds += 1
     guard backgroundTask == .invalid else { return }
     backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "HeartRateFinish") {
       // 시간이 다 됐다 — 놓지 않으면 iOS가 앱을 죽인다. 못 끝낸 구간은 체크포인트가 다음 실행에 잇는다
-      MainActor.assumeIsolated { WorkoutManager.shared.releaseBackground() }
+      MainActor.assumeIsolated { WorkoutManager.shared.expireBackground() }
     }
   }
 
   private func releaseBackground() {
+    guard backgroundHolds > 0 else { return }
+    backgroundHolds -= 1
+    guard backgroundHolds == 0 else { return }
+    expireBackground()
+  }
+
+  // 잡은 흐름이 남아 있어도 놓는다(시간 만료) — 남은 흐름이 놓을 땐 이미 놓여 있다
+  private func expireBackground() {
     guard backgroundTask != .invalid else { return }
     UIApplication.shared.endBackgroundTask(backgroundTask)
     backgroundTask = .invalid
@@ -1311,6 +1377,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   func recover() async -> [String: Any]? {
+    recoverFailed = false
     // 워치 시작 대기·재개 중엔 아직 새 구간 전이다 — 스냅샷을 주면 JS가 "측정 중"으로 그린다. 잇는 중인
     // 측정이 있으면 그 값(일시정지)을 그대로 보여준다
     if isStartingOnWatch || isResuming { return carried != nil ? suspendedSnapshot() : nil }
@@ -1324,6 +1391,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         noSession = recovered == nil
       } catch {
         log.error("recover failed: \(describe(error), privacy: .public)")
+        recoverFailed = true
       }
       // 되찾는 사이 재개·워치 시작이 들어왔다(섬의 재개 링크는 앱이 앞으로 오는 것과 같이 온다) — 그쪽이 붙인 준비
       // 중인 세션은 아직 측정 중이 아니라, 아래로 가면 nil을 돌려 박스가 접힌다
@@ -1344,12 +1412,6 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       expireSuspended()
       // 세션 없이 일시정지로 남은 측정 — 섬을 다시 붙이고 그대로 보여준다(재개·종료는 사용자가)
       if carried != nil, session == nil {
-        // 앱이 죽었다 켜졌으면 사유를 잃었다 — 이어폰으로 재던 측정인데 이어폰이 없으면 빠진 것이다
-        if pauseReason == nil, carried?["source"] as? String == "phone",
-          !HeartRateModule.hasEarphones()
-        {
-          pauseReason = "earphonesRemoved"
-        }
         attachLiveActivity()
         publish()
         return suspendedSnapshot()
@@ -1538,6 +1600,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     // 이 구간은 앞 구간(carried)에 붙었거나 버렸다
     checkpoint = nil
     checkpointAt = nil
+    checkpointPaused = false
   }
 
   // 측정을 통째로 치운다
@@ -1695,12 +1758,16 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     guard !isEnding, isLive, let body = snapshot() else { return }
     checkRestAlert(body)
     let paused = body["state"] as? String == "paused"
-    // 아이폰 구간은 멈출 때와 재는 동안 30초마다 체크포인트를 남긴다(앱이 갑자기 죽어도 다음 실행 때 잇는다)
+    // 아이폰 구간은 멈출 때 한 번과 재는 동안 30초마다 체크포인트를 남긴다(앱이 갑자기 죽어도 다음 실행 때 잇는다). 멈춘
+    // 동안엔 값이 그대로라 갱신마다 샘플 전체를 다시 쓰지 않는다
     if builder != nil,
-      paused || Date().timeIntervalSince(checkpointAt ?? .distantPast) >= Self.checkpointInterval
+      paused
+        ? !checkpointPaused
+        : Date().timeIntervalSince(checkpointAt ?? .distantPast) >= Self.checkpointInterval
     {
       saveCheckpoint()
     }
+    checkpointPaused = paused
     // 화면이 안 보이는 동안 샘플마다 JS를 깨워 박스를 다시 그릴 이유가 없다 — 돌아오면
     // JS가 getActive로 다시 맞춘다. Live Activity는 이때가 제일 중요하니 계속 갱신한다. 섬을 눌러 돌아오는
     // 순간(inactive)엔 보낸다 — 그때 넘긴 상태(일시정지로 넘긴 측정 등)가 박스에 안 가 접힌 채 남았다
