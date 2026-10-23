@@ -9,6 +9,16 @@ const fs = require("fs");
 const path = require("path");
 
 const MARK = "POWN_ENRICHED_PATCH";
+// 9번 스크롤 높이 — 새로 깐 node_modules(원래 줄)와 10/22 판이 걸린 node_modules(이행) 둘 다 이 코드로 바꾼다
+const CONTENT_SIZE = `    // ${MARK} scroll-padding-size — 실제 레이아웃 높이(줄 간격 패치 5 포함)에 안쪽 여백을 더한다. boundingRect(measuredSize)는
+    // 줄 간격을 몰라 글을 1.25배 짧게 재서, 긴 글의 끝이 스크롤로 안 올라오고 툴바·키보드 뒤에 갇혔다(40줄 중 7줄)
+    CGFloat pownTextHeight = MAX(
+        measuredSize.height,
+        [self->textView.layoutManager usedRectForTextContainer:self->textView.textContainer].size.height);
+    self->textView.contentSize = CGSizeMake(
+        measuredSize.width, pownTextHeight + self->textView.textContainerInset.top +
+                                self->textView.textContainerInset.bottom);
+`;
 const swap = (from, to) => `
   // ${MARK} ${from}
   if ([self.fontName isEqualToString:@"${from}"]) {
@@ -129,13 +139,12 @@ $1`,
         /\[_placeholderLabel\.topAnchor constraintEqualToAnchor:textView\.topAnchor\],/,
         `(_pownPlaceholderTop = [_placeholderLabel.topAnchor constraintEqualToAnchor:textView.topAnchor]), // ${MARK} scroll-padding-placeholder`,
       ],
+      [/    self->textView\.contentSize = measuredSize;\n/, CONTENT_SIZE],
+      // 10/22 판(boundingRect 높이에 여백만 더하던 것)이 이미 걸린 node_modules를 위 코드로 바꾼다 — 새로 깐 node_modules에선
+      // 맞는 줄이 없어 아무것도 안 한다
       [
-        /    self->textView\.contentSize = measuredSize;\n/,
-        `    // ${MARK} scroll-padding-size — 글 높이만 재므로 안쪽 여백을 더한다(안 더하면 마지막 줄이 끝까지 안 올라온다)
-    self->textView.contentSize = CGSizeMake(
-        measuredSize.width, measuredSize.height + self->textView.textContainerInset.top +
-                                self->textView.textContainerInset.bottom);
-`,
+        /    \/\/ POWN_ENRICHED_PATCH scroll-padding-size — 글 높이만 재므로[^\n]*\n    self->textView\.contentSize = CGSizeMake\(\n        measuredSize\.width, measuredSize\.height \+ self->textView\.textContainerInset\.top \+\n                                self->textView\.textContainerInset\.bottom\);\n/,
+        CONTENT_SIZE,
       ],
       [
         /(- \(void\)setupPlaceholderLabel \{)/,
