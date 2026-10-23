@@ -154,7 +154,12 @@ const MemoForm = ({
           />
         </Animated.View>
       </GestureDetector>
-      <NoteToolbarDock titleFocused={isTitleFocused} gap={dockGap}>
+      {/* 에디터와 같이 새로 띄운다 — iOS 보조 막대는 화면에 붙을 때 찾은 에디터에만 붙어, 영상을 넘기면 새 에디터에 툴바가 없었다 */}
+      <NoteToolbarDock
+        key={contentKey}
+        titleFocused={isTitleFocused}
+        gap={dockGap}
+      >
         <NoteFormatToolbar
           editorRef={editorRef}
           state={styleState}

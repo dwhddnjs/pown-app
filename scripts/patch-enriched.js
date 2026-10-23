@@ -9,6 +9,31 @@ const fs = require("fs");
 const path = require("path");
 
 const MARK = "POWN_ENRICHED_PATCH";
+// 예전 판 패치가 걸린 node_modules만 고치는 항목 — 새로 깐 node_modules에선 안 맞는 게 정상이다
+const MIGRATION = "migration";
+// 9번 스크롤 높이 — 새로 깐 node_modules(원래 줄)와 10/22 판이 걸린 node_modules(이행) 둘 다 이 코드로 바꾼다
+const CONTENT_SIZE = `    // ${MARK} scroll-padding-size — 실제 레이아웃 높이(줄 간격 패치 5 포함)에 안쪽 여백을 더한다. boundingRect(measuredSize)는
+    // 줄 간격을 몰라 글을 1.25배 짧게 재서, 긴 글의 끝이 스크롤로 안 올라오고 툴바·키보드 뒤에 갇혔다(40줄 중 7줄)
+    CGFloat pownTextHeight = MAX(
+        measuredSize.height,
+        [self->textView.layoutManager usedRectForTextContainer:self->textView.textContainer].size.height);
+    self->textView.contentSize = CGSizeMake(
+        measuredSize.width, pownTextHeight + self->textView.textContainerInset.top +
+                                self->textView.textContainerInset.bottom);
+`;
+// 10번 커서 따라가기 — 새로 깐 node_modules(9번 바로 뒤)와 10/23 판(조건 없이 따라가던 것, 이행) 둘 다 이 코드로 바꾼다
+const CARET_FOLLOW = `    // ${MARK} caret-follow-typed — 글자 수가 바뀌고(입력·붙여넣기·줄바꿈·지우기) 커서만 있을 때 따라간다. 서식 토글·
+    // 체크박스까지 따라가면 위에서 여러 줄을 골라 굵게를 누르는 순간 보던 자리가 선택 끝으로 튀었다
+    NSUInteger pownLength = self->textView.textStorage.length;
+    BOOL pownTextChanged = pownLength != self->_pownCaretLength;
+    self->_pownCaretLength = pownLength;
+    if (pownTextChanged && self->textView.isFirstResponder &&
+        self->textView.selectedRange.length == 0 && self->textView.selectedTextRange != nil) {
+      CGRect caret = [self->textView caretRectForPosition:self->textView.selectedTextRange.end];
+      caret.size.height += self->textView.textContainerInset.bottom;
+      [self->textView scrollRectToVisible:caret animated:NO];
+    }
+`;
 const swap = (from, to) => `
   // ${MARK} ${from}
   if ([self.fontName isEqualToString:@"${from}"]) {
@@ -129,13 +154,13 @@ $1`,
         /\[_placeholderLabel\.topAnchor constraintEqualToAnchor:textView\.topAnchor\],/,
         `(_pownPlaceholderTop = [_placeholderLabel.topAnchor constraintEqualToAnchor:textView.topAnchor]), // ${MARK} scroll-padding-placeholder`,
       ],
+      [/    self->textView\.contentSize = measuredSize;\n/, CONTENT_SIZE],
+      // 10/22 판(boundingRect 높이에 여백만 더하던 것)이 이미 걸린 node_modules를 위 코드로 바꾼다 — 새로 깐 node_modules에선
+      // 맞는 줄이 없어 아무것도 안 한다
       [
-        /    self->textView\.contentSize = measuredSize;\n/,
-        `    // ${MARK} scroll-padding-size — 글 높이만 재므로 안쪽 여백을 더한다(안 더하면 마지막 줄이 끝까지 안 올라온다)
-    self->textView.contentSize = CGSizeMake(
-        measuredSize.width, measuredSize.height + self->textView.textContainerInset.top +
-                                self->textView.textContainerInset.bottom);
-`,
+        /    \/\/ POWN_ENRICHED_PATCH scroll-padding-size — 글 높이만 재므로[^\n]*\n    self->textView\.contentSize = CGSizeMake\(\n        measuredSize\.width, measuredSize\.height \+ self->textView\.textContainerInset\.top \+\n                                self->textView\.textContainerInset\.bottom\);\n/,
+        CONTENT_SIZE,
+        MIGRATION,
       ],
       [
         /(- \(void\)setupPlaceholderLabel \{)/,
@@ -154,6 +179,24 @@ $1`,
 }
 
 $1`,
+      ],
+      // 10. 문서 끝 입력 시 커서 따라가기: contentSize를 이 블록에서 비동기로 넣어서, UIKit이 커서로 스크롤할 땐 새 줄이
+      //     아직 크기에 없다 — 끝에 줄을 계속 더하면 커서 줄이 키보드 뒤로 내려가고 화면이 안 따라왔다(문서 중간은 멀쩡).
+      //     크기를 넣은 뒤 글이 바뀌었으면 커서 줄과 아래 안쪽 여백(9번)이 보이게 한다. 선택만 바뀔 땐 이 블록이 안 돈다
+      [
+        /(  BOOL _emitHtml;\n)/,
+        `$1  NSUInteger _pownCaretLength; // ${MARK} caret-follow-ivar
+`,
+      ],
+      [
+        /(textContainerInset\.bottom\);\n)(  \}\);\n\}\n\n- \(void\)didMoveToWindow \{)/,
+        `$1${CARET_FOLLOW}$2`,
+      ],
+      // 10/23 판(조건 없이 따라가던 것)이 이미 걸린 node_modules를 위 코드로 바꾼다
+      [
+        /    \/\/ POWN_ENRICHED_PATCH caret-follow\n    if \(self->textView\.isFirstResponder && self->textView\.selectedTextRange != nil\) \{\n      CGRect caret = \[self->textView caretRectForPosition:self->textView\.selectedTextRange\.end\];\n      caret\.size\.height \+= self->textView\.textContainerInset\.bottom;\n      \[self->textView scrollRectToVisible:caret animated:NO\];\n    \}\n/,
+        CARET_FOLLOW,
+        MIGRATION,
       ],
     ],
   ],
@@ -197,6 +240,81 @@ $1`,
       [
         /(@implementation InputTextView\n)/,
         `$1\n// ${MARK} accessory\n- (NSString *)inputAccessoryViewID {\n  return @"enriched-text-input";\n}\n`,
+      ],
+      // 4-2. RN 보조 막대는 화면에 붙는 순간 창에서 이 이름을 가진 첫 입력 하나에만 붙는다 — 그 뒤 새로 뜬 에디터(숏츠에서 영상을
+      //      넘기면 에디터를 새로 띄운다)엔 툴바가 없었고, 창에 에디터가 둘이면 엉뚱한 쪽에 붙었다. 키보드를 올리기 직전에 이
+      //      에디터와 가장 가까운(조상을 따라 올라가며 먼저 나오는) 보조 막대를 찾아 붙인다
+      [
+        /(@implementation InputTextView\n)/,
+        `// ${MARK} accessory-attach
+static UIView *PownAccessoryIn(UIView *view) {
+  static Class accessoryClass;
+  if (accessoryClass == nil) {
+    accessoryClass = NSClassFromString(@"RCTInputAccessoryComponentView");
+  }
+  if (accessoryClass != nil && [view isKindOfClass:accessoryClass] &&
+      [((RCTViewComponentView *)view).nativeId isEqualToString:@"enriched-text-input"]) {
+    return view.inputAccessoryView;
+  }
+  for (UIView *subview in view.subviews) {
+    UIView *found = PownAccessoryIn(subview);
+    if (found != nil) {
+      return found;
+    }
+  }
+  return nil;
+}
+
+$1
+- (BOOL)becomeFirstResponder {
+  UIView *accessory = nil;
+  UIView *child = self;
+  for (UIView *ancestor = self.superview; ancestor != nil && accessory == nil;
+       child = ancestor, ancestor = ancestor.superview) {
+    for (UIView *subview in ancestor.subviews) {
+      // 올라온 쪽은 이미 봤다
+      if (subview != child && (accessory = PownAccessoryIn(subview)) != nil) {
+        break;
+      }
+    }
+  }
+  if (accessory != nil && self.inputAccessoryView != accessory) {
+    self.inputAccessoryView = accessory;
+  }
+  return [super becomeFirstResponder];
+}
+`,
+      ],
+    ],
+  ],
+  [
+    // 4-1. 툴바 위 빈 칸: RN 보조 막대 내용 뷰는 툴바를 안전영역 아래끝에 붙이는데, 보조 막대 높이를 처음 잰 안전영역(화면
+    //      아래 — 홈 인디케이터 34)으로 잡은 채 키보드 위에 붙어 툴바 위에 34짜리 칸이 남았다(투명하면 빈 박스, iOS 27에선
+    //      글을 가렸다). 안전영역이 바뀌면 크기를 다시 재게 한다 — 화면 키보드 위에선 툴바 높이 그대로, 하드웨어 키보드(화면
+    //      아래)에선 홈 인디케이터 위에 선다. react-native 파일이라 경로가 enriched 밖이다
+    "../react-native/React/Fabric/Mounting/ComponentViews/InputAccessory/RCTInputAccessoryContentView.mm",
+    [
+      [
+        /(- \(CGSize\)intrinsicContentSize\n\{\n)  \/\/ This is needed so the view size is based on autolayout constraints\.\n  return CGSizeZero;\n\}/,
+        `$1  // ${MARK} accessory-safe-area
+  return CGSizeMake(
+      UIViewNoIntrinsicMetric,
+      _heightConstraint.constant + self.safeAreaInsets.top + self.safeAreaInsets.bottom);
+}
+
+- (void)safeAreaInsetsDidChange
+{
+  [super safeAreaInsetsDidChange];
+  [self invalidateIntrinsicContentSize];
+}`,
+      ],
+      // 위 크기는 툴바 높이(_heightConstraint)에도 기댄다 — RN 레이아웃이 보조 막대가 붙은 뒤에 와서 높이가 바뀌면(첫 포커스가
+      // 레이아웃보다 빠를 때) UIKit이 예전 크기를 계속 쓰지 않게 다시 재게 한다. setFrame:은 RN 레이아웃만 부른다(UIKit은
+      // 보조 막대를 오토레이아웃으로 놓는다)
+      [
+        /(  _heightConstraint\.constant = frame\.size\.height;\n)(  \[self layoutIfNeeded\];\n)/,
+        `$1  [self invalidateIntrinsicContentSize]; // ${MARK} accessory-height
+$2`,
       ],
     ],
   ],
@@ -263,6 +381,7 @@ $1`,
         /    if \(natural > 0f\) setLineSpacing\(0f, 1\.5f \* textSize \/ natural\)\n/,
         `    if (natural > 0f) setLineSpacing(1.5f * textSize - natural, 1f) // ${MARK} line-height-add
 `,
+        MIGRATION,
       ],
       // 9. 위아래 여백 스크롤: TextView는 맨 위가 아니면 paddingTop 선, 맨 끝이 아니면 paddingBottom 선에서 글을 잘라 그려서,
       //    글이 디바이더 아래·서식 툴바 위의 여백 띠에서 사라졌다(툴바 위에 투명한 띠가 글을 가리는 것처럼 보였다).
@@ -553,23 +672,49 @@ $2  private val pownSize = htmlStyle.h2FontSize // ${MARK} heading-line
   ],
 ];
 
+// 패치 표식 이름 — 다른 표식의 앞부분일 수 있어(scroll-padding / scroll-padding-ivar) 뒤에 이름 글자가 이어지지 않는 것만 센다
+const markOf = (to) => to.match(/\/\/ POWN_ENRICHED_PATCH [\w-]+/)[0];
+const hasMark = (source, to) =>
+  new RegExp(`${markOf(to)}(?![\\w-])`).test(source);
+
+const missing = [];
 for (const [relative, patches] of FILES) {
   const file = path.join(
     __dirname,
     "../node_modules/react-native-enriched",
     relative,
   );
-  if (!fs.existsSync(file)) continue;
-  let source = fs.readFileSync(file, "utf8");
-  // 패치마다 표식 줄이 이미 있으면 그 패치만 건너뛴다
-  const applied = patches.filter(
-    ([from, to]) =>
-      from.test(source) && !source.includes(to.match(/\/\/ .*/)[0]),
-  );
-  for (const [from, to] of applied) source = source.replace(from, to);
+  if (!fs.existsSync(file)) {
+    missing.push(relative);
+    continue;
+  }
+  const original = fs.readFileSync(file, "utf8");
+  let source = original;
+  let applied = 0;
+  for (const [from, to] of patches) {
+    // 표식 줄이 이미 있으면(이번에 걸기 전 글 기준) 그 패치만 건너뛴다. 원래 줄은 앞 패치를 건 글에서 찾는다 — 9번 뒤에 붙는
+    // 10번처럼 앞 패치에 기대는 것, 예전 판을 고치는 이행 항목이 차례대로 걸리게
+    if (original.includes(to.match(/\/\/ .*/)[0]) || !from.test(source))
+      continue;
+    source = source.replace(from, to);
+    applied++;
+  }
   fs.writeFileSync(file, source);
   console.log(
-    `react-native-enriched ${path.basename(relative)}: 패치 ${applied.length}/${patches.length}` +
-      (applied.length ? "" : " (이미 패치했거나 버전이 바뀜)"),
+    `react-native-enriched ${path.basename(relative)}: 패치 ${applied}/${patches.length}` +
+      (applied ? "" : " (이미 패치함)"),
   );
+  for (const [, to, kind] of patches) {
+    if (kind !== MIGRATION && !hasMark(source, to)) {
+      missing.push(`${relative} — ${markOf(to)}`);
+    }
+  }
+}
+// 걸려야 할 패치가 안 걸렸다(라이브러리·RN 버전이 바뀌어 원래 줄을 못 찾음) — 조용히 넘어가면 고친 버그가 빌드에 그대로
+// 돌아온다(툴바 위 빈 칸·한글 서식 등). 설치를 실패시켜 EAS 빌드에서도 바로 보이게 한다
+if (missing.length) {
+  console.error(
+    `react-native-enriched 패치 실패 — 이 스크립트를 새 버전에 맞출 것:\n  ${missing.join("\n  ")}`,
+  );
+  process.exitCode = 1;
 }

@@ -161,6 +161,11 @@ const REST_ALERT_KEYS = [
   "heartRate.restAlertMsg3",
   "heartRate.restAlertMsg4",
   "heartRate.restAlertMsg5",
+  "heartRate.restAlertMsg6",
+  "heartRate.restAlertMsg7",
+  "heartRate.restAlertMsg8",
+  "heartRate.restAlertMsg9",
+  "heartRate.restAlertMsg10",
 ] as const;
 
 // 네이티브 이벤트 구독. 측정 박스가 없는 화면에서도 받아야 하므로(시스템 종료 저장,
