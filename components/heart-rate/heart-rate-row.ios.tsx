@@ -64,6 +64,13 @@ const WATCH_CHECK_SEC = 4;
 const GUIDE_SEEN_KEY = "heartRateGuideSeen";
 // 카드 안 내용이 바뀔 때(버튼 ↔ 박스)만 페이드 — 카드 높이는 AnimatedHeight가 옮긴다
 const CONTENT_FADE = FadeIn.duration(200);
+// 세트 압박 알림을 울릴 휴식 시간(초) — 근비대 1~2분, 고중량 복합 3~5분
+const REST_OPTIONS = [
+  { sec: 90, label: "heartRate.restAlert90" },
+  { sec: 120, label: "heartRate.restAlert120" },
+  { sec: 180, label: "heartRate.restAlert180" },
+  { sec: 300, label: "heartRate.restAlert300" },
+] as const;
 
 // 1초마다 다시 그린다 — 켜져 있을 때만
 const useSecondTick = (enabled: boolean) => {
@@ -335,6 +342,7 @@ const LiveBox = ({
   );
   const resuming = useHeartRateLiveStore((state) => state.resuming);
   const restAlert = useUserStore((state) => state.restAlert);
+  const restAlertSec = useUserStore((state) => state.restAlertSec);
   const setUser = useUserStore((state) => state.setUser);
   const themeColor = useCurrentThemeColor();
   const t = useT();
@@ -494,14 +502,19 @@ const LiveBox = ({
         </TouchableOpacity>
       )}
 
-      {/* 세트 뒤 심박 100 아래로 1분 쉬면 알림 — 거슬리는 사람은 여기서 바로 끈다 */}
+      {/* 세트 뒤 고른 시간 넘게 쉬면 알림 — 거슬리는 사람은 여기서 바로 끈다 */}
       <RNView style={styles.restAlert}>
         <RNView style={styles.restAlertText}>
           <Text style={[styles.restAlertLabel, { color: themeColor.tintText }]}>
             {t("heartRate.restAlert")}
           </Text>
           <Text style={[styles.restAlertDesc, { color: themeColor.subText }]}>
-            {t("heartRate.restAlertDesc")}
+            {t("heartRate.restAlertDesc", {
+              time: t(
+                REST_OPTIONS.find((option) => option.sec === restAlertSec)
+                  ?.label ?? "heartRate.restAlert120",
+              ),
+            })}
           </Text>
         </RNView>
         <Toggle
@@ -510,6 +523,47 @@ const LiveBox = ({
           label={t("heartRate.restAlert")}
         />
       </RNView>
+      {/* 휴식 시간은 켰을 때만 고른다 — 꺼져 있으면 의미가 없다 */}
+      {restAlert && (
+        <RNView style={styles.restOptions} accessibilityRole="radiogroup">
+          {REST_OPTIONS.map((option) => {
+            const selected = option.sec === restAlertSec;
+            return (
+              <TouchableOpacity
+                key={option.sec}
+                activeOpacity={0.7}
+                accessibilityRole="radio"
+                accessibilityState={{ selected }}
+                onPress={() => {
+                  if (selected) return;
+                  hapticSelection();
+                  setUser("restAlertSec", option.sec);
+                }}
+                style={[
+                  styles.restOption,
+                  // 고른 것은 운동 태그처럼 민트 테두리·글자
+                  selected
+                    ? { borderColor: themeColor.tint }
+                    : { backgroundColor: themeColor.background },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.restOptionLabel,
+                    {
+                      color: selected
+                        ? themeColor.tintText
+                        : themeColor.subText,
+                    },
+                  ]}
+                >
+                  {t(option.label)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </RNView>
+      )}
 
       <RNView style={styles.actions}>
         {/* 보조 동작은 회색 면으로 한 톤 낮춘다 — 민트 테두리는 빨간 종료와 시선을 다퉜다 */}
@@ -868,6 +922,28 @@ const styles = StyleSheet.create({
   restAlertDesc: {
     fontSize: 12,
     fontFamily: "sb-l",
+  },
+  // 알림 줄 바로 밑 — 박스 gap(12)이면 줄과 떨어져 보여 조금 당긴다
+  // 글자를 키우면(손쉬운 사용) 넘치지 않게 다음 줄로 접고 칸이 자란다 — 기본 크기에선 한 줄·28 그대로
+  restOptions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: -4,
+  },
+  restOption: {
+    minHeight: 28,
+    paddingVertical: 4,
+    paddingHorizontal: 12,
+    borderRadius: 999,
+    // 고르지 않은 칸도 같은 테두리 자리를 둬 고를 때 글자가 밀리지 않게
+    borderWidth: 1.5,
+    borderColor: "transparent",
+    justifyContent: "center",
+  },
+  restOptionLabel: {
+    fontSize: 13,
+    fontFamily: "sb-m",
   },
   toggle: {
     width: TOGGLE_W,

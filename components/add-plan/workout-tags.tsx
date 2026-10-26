@@ -26,8 +26,6 @@ import {
 } from "@/lib/tag-layout";
 // type
 import { WorkoutTypes } from "@/types/workout";
-// expo
-import { usePathname } from "expo-router";
 // icon
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
@@ -50,10 +48,6 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
     useWorkoutTagDialogStore();
   // 액션만 셀렉터로 집는다 — 통째로 구독하면 테마·언어 등 무관한 변경에도 그리드가 다시 그려진다
   const setReorderWorkoutTag = useUserStore((s) => s.setReorderWorkoutTag);
-  const pathname = usePathname().split("/");
-  // 태그를 늘리고 줄이는 화면에서만 수정모드를 연다 (edit-plan은 계획만 고친다)
-  const canEdit =
-    pathname[1] === "add-plan" || pathname.includes("add-multi-plan");
 
   // 드래그하는 동안의 순서. 손을 뗄 때 한 번만 스토어(=MMKV)에 커밋한다.
   const [order, setOrder] = useState(workoutList);
@@ -192,7 +186,7 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
   return (
     <View>
       {/* 태그가 없을 때는 "길게 누르세요"가 가리킬 대상이 없다 — 수정모드일 때만 안내한다 */}
-      {canEdit && (!isEmpty || isEditMode) && (
+      {(!isEmpty || isEditMode) && (
         <Text style={[styles.hint, { color: themeColor.subText }]}>
           {t(isEditMode ? "tag.editDoneHint" : "tag.editHint")}
         </Text>
@@ -222,8 +216,7 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
                 isPlacedMode ? (layout?.positions[index] ?? null) : null
               }
               onPress={onPressWorkout}
-              // 수정모드가 없는 화면에서 넘기면 길게 누른 탭이 통째로 사라진다
-              onLongPress={canEdit && isMeasured ? onLongPress : undefined}
+              onLongPress={isMeasured ? onLongPress : undefined}
               onRemove={setRemoveTarget}
               onMeasure={onMeasure}
               onDragStart={setDraggingItem}
@@ -250,7 +243,7 @@ export const WorkoutTags = ({ workoutList, workoutType }: WorkoutTagsProps) => {
           )}
           {/* 태그가 하나도 없으면 길게 누를 대상이 없어 수정모드로 못 들어간다.
               그러면 + 버튼도 못 보게 되어 그 부위는 영영 비어 있게 된다. */}
-          {canEdit && isEmpty && (
+          {isEmpty && (
             <TouchableOpacity
               style={[styles.plusBase, plusColors]}
               onPress={() => setOpen(true)}

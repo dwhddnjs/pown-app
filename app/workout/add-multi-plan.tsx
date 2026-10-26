@@ -169,7 +169,7 @@ export default function AddMultiPlan() {
 const styles = StyleSheet.create({
   header: {
     // 폼 기본 머리말 여백과 같은 값 — PlanForm이 header 없을 때 주는 24pt
-    paddingTop: 12,
+    paddingTop: 24,
     paddingBottom: 24,
     gap: 16,
   },

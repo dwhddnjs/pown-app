@@ -13,6 +13,8 @@ private let log = Logger(subsystem: "com.anonymous.workout-app", category: "Hear
 
 // 휴식 알림 멘트(앱 언어)를 두는 키 — 없으면 꺼진 것. 알림 id로도 쓴다
 private let restAlertKey = "restAlertMessages"
+// 세트 뒤 이만큼(초) 쉬면 울린다 — 측정 박스에서 고른다
+private let restAlertSecondsKey = "restAlertSeconds"
 
 // 측정이 끝나거나 알림을 끄면 지난 "쉬는 시간 끝" 알림은 의미가 없다
 private func removeRestAlert() {
@@ -110,10 +112,11 @@ public class HeartRateModule: Module {
       return await self.workout().recover()
     }
 
-    // 휴식 알림 멘트. null이면 끈다 — 디스크에 둬서 워치가 꺼진 앱을 백그라운드로 깨워 JS가 뜨기
-    // 전에도 산다
-    Function("setRestAlert") { (messages: [String]?) in
+    // 휴식 알림 멘트와 휴식 시간(초). 멘트가 null이면 끈다 — 디스크에 둬서 워치가 꺼진 앱을 백그라운드로 깨워 JS가
+    // 뜨기 전에도 산다
+    Function("setRestAlert") { (messages: [String]?, restSec: Double) in
       UserDefaults.standard.set(messages, forKey: restAlertKey)
+      UserDefaults.standard.set(restSec, forKey: restAlertSecondsKey)
       // 끄면 알림 센터에 남은 마지막 알림도 치운다
       if messages == nil { removeRestAlert() }
     }
@@ -426,6 +429,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private var publishPending = false
   // 세트 압박 알림 판정 (RestAlert.swift)
   private var restAlert = RestAlert()
+  // 이번 측정에서 세트 압박 알림이 울린 때(측정 시작 후 초) — 종료 요약에 붙여 기록 그래프에 점으로 보인다. 일시정지로
+  // 남긴 채 앱이 죽어도 이어지게 디스크에 둔다
+  private var restAlertTimes: [Int] {
+    get { UserDefaults.standard.array(forKey: "heartRateRestAlerts") as? [Int] ?? [] }
+    set { UserDefaults.standard.set(newValue, forKey: "heartRateRestAlerts") }
+  }
   // 아이폰 구간 체크포인트 — 지금 구간의 마지막 값(요약 키 + 샘플). 구간을 앞 구간(carried)에 붙이기 전에 앱이 죽으면(뒤에서
   // 정지된 채 회수되면 넘김·종료를 끝내지도, 시스템 종료 콜백을 받지도 못한다 — HKWorkoutSession.h) 다음 실행 때 이걸로 그
   // 구간을 잇는다(recover). 붙이면 지운다(releaseSegment). "ending": 종료를 누르던 중이었다 — 이어 재지 않고 기록으로 남긴다
@@ -600,6 +609,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     expireSuspended()
     // 세션 없이 일시정지로 남은 측정이 있다 — 박스가 그걸 보여준다(재개·종료는 거기서)
     if carried != nil { return snapshot() }
+    // 새 측정이다 — reset()을 못 거치고 잃은 측정(워치 종료가 새 측정 뒤에 와 버려진 경우)의 알림 시각이 남아 있으면 섞인다
+    restAlertTimes = []
     return try await startSegment(device: device)
   }
 
@@ -1066,8 +1077,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 앞 구간(carried)과 합친 최종 요약. 합계 1분 미만이면(실수로 누른 것으로 본다) 또는 discard(전체 초기화)면
   // 남기지 않고 nil — 그때 이 측정이 건강 앱에 남긴 것도 지운다
   private func merged(_ segment: [String: Any]?, discard: Bool = false) -> [String: Any]? {
-    let summary = carried.map { carried in segment.map { Self.merge(carried, $0) } ?? carried } ?? segment
+    var summary = carried.map { carried in segment.map { Self.merge(carried, $0) } ?? carried } ?? segment
     if !discard, (summary?["elapsedSec"] as? Int ?? 0) >= Int(WatchSnapshot.minimumDuration) {
+      if !restAlertTimes.isEmpty { summary?["restAlerts"] = restAlertTimes }
       return summary
     }
     purge(summary)
@@ -1610,6 +1622,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     carried = nil
     pauseReason = nil
     restAlert = RestAlert()
+    restAlertTimes = []
     removeRestAlert()
   }
 
@@ -1810,20 +1823,33 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private func checkRestAlert(_ body: [String: Any]) {
     // 꺼져 있으면(멘트 없음) 일시정지처럼 무장을 푼다
     let messages = UserDefaults.standard.stringArray(forKey: restAlertKey)
+    let rest = UserDefaults.standard.double(forKey: restAlertSecondsKey)
     guard
       restAlert.update(
         bpm: body["heartRate"] as? Int,
-        running: messages != nil && body["state"] as? String == "running", at: Date()),
+        running: messages != nil && body["state"] as? String == "running",
+        rest: rest > 0 ? rest : 120, at: Date()),
       let message = messages?.randomElement()
     else { return }
     log.notice("rest alert")
+    // 그래프 샘플과 같은 기준(첫 구간 시작부터 흐른 실제 시간) — 화면값의 startedAt이 앞 구간까지 합친 시작이다
+    let startedAt = body["startedAt"] as? Double ?? Date().timeIntervalSince1970 * 1000
+    let time = max(0, Int(Date().timeIntervalSince1970 - startedAt / 1000))
     let content = UNMutableNotificationContent()
     content.body = message
     content.sound = .default
-    // 같은 id라 알림 센터에 쌓이지 않고 마지막 것으로 바뀐다
-    UNUserNotificationCenter.current().add(
-      UNNotificationRequest(identifier: restAlertKey, content: content, trigger: nil),
-      withCompletionHandler: nil)
+    // 받은 알림만 기록에 남긴다 — 앱이 뒤에 있는 동안 설정에서 알림을 끄면 JS가 토글을 못 꺼 판정은 계속 울린다
+    Task { @MainActor in
+      let center = UNUserNotificationCenter.current()
+      let status = await center.notificationSettings().authorizationStatus
+      guard [.authorized, .provisional, .ephemeral].contains(status) else { return }
+      do {
+        // 같은 id라 알림 센터에 쌓이지 않고 마지막 것으로 바뀐다
+        try await center.add(
+          UNNotificationRequest(identifier: restAlertKey, content: content, trigger: nil))
+      } catch { return }
+      restAlertTimes.append(time)
+    }
   }
 
   // MARK: - Live Activity

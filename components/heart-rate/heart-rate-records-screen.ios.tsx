@@ -10,7 +10,7 @@ import {
 import { Text, View } from "@/components/themed";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { Stat } from "@/components/heart-rate/heart-rate-row";
-import Svg, { Line, Rect } from "react-native-svg";
+import Svg, { Circle, Line, Rect } from "react-native-svg";
 // zustand
 import {
   HeartRateRecordTypes,
@@ -35,6 +35,9 @@ const GRAPH_HEIGHT = 56;
 // 막대 간격이 이보다 좁아지면(약 110분 넘는 운동) 이웃한 분을 묶는다. 애플은 약 3.8pt
 const MIN_SLOT = 3;
 const MAX_BAR_WIDTH = 3;
+// 세트 압박 알림 점이 앉는 줄 — 최대값 위에 따로 둬 가장 높은 막대·최대값과 겹치지 않는다
+const ALERT_LANE = 10;
+const ALERT_DOT = 3;
 
 // 날짜 헤더의 심박 요약을 누르면 뜨는 그날의 측정 목록. 요약은 합친 값이라 잘못 잰
 // 한 번을 골라 지울 곳이 여기뿐이다
@@ -79,71 +82,109 @@ export const HeartRateRecordsScreen = () => {
         showsVerticalScrollIndicator={false}
         onLayout={(event) => setListWidth(event.nativeEvent.layout.width)}
       >
-        {day.map((record) => (
-          <RNView
-            key={record.id}
-            style={[styles.card, { backgroundColor: themeColor.itemColor }]}
-          >
-            <RNView style={styles.cardHeader}>
-              <Text style={styles.time}>{formatTime(record.startedAt)}</Text>
-              <Text style={[styles.duration, { color: themeColor.subText }]}>
-                {t("heartRate.minutes", { n: toMinutes(record.durationSec) })}
-              </Text>
-              <TouchableOpacity
-                hitSlop={12}
-                activeOpacity={0.6}
-                onPress={() => setTarget(record)}
-                style={styles.delete}
-              >
-                <MaterialCommunityIcons
-                  name="trash-can-outline"
-                  size={20}
-                  color={themeColor.subText}
-                />
-              </TouchableOpacity>
-            </RNView>
+        {day.map((record) => {
+          const ranges = graphRanges(record);
+          return (
             <RNView
-              style={[styles.divider, { backgroundColor: themeColor.divider }]}
-            />
-            <RNView style={styles.stats}>
-              {record.avgHR != null && (
+              key={record.id}
+              style={[styles.card, { backgroundColor: themeColor.itemColor }]}
+            >
+              <RNView style={styles.cardHeader}>
+                <RNView style={styles.headerText}>
+                  <RNView style={styles.timeRow}>
+                    <Text style={styles.time}>
+                      {formatTime(record.startedAt)}
+                    </Text>
+                    <Text
+                      style={[styles.duration, { color: themeColor.subText }]}
+                    >
+                      {t("heartRate.minutes", {
+                        n: toMinutes(record.durationSec),
+                      })}
+                    </Text>
+                  </RNView>
+                  {/* 그래프의 민트 점이 무엇인지 — 시간 밑에 한 줄로 */}
+                  {!!ranges && !!record.restAlerts?.length && (
+                    <RNView style={styles.alertLegend}>
+                      <RNView
+                        style={[
+                          styles.alertDot,
+                          { backgroundColor: themeColor.tint },
+                        ]}
+                      />
+                      <Text
+                        style={[
+                          styles.graphValue,
+                          { color: themeColor.subText },
+                        ]}
+                      >
+                        {t("heartRate.restAlertCount", {
+                          n: record.restAlerts.length,
+                        })}
+                      </Text>
+                    </RNView>
+                  )}
+                </RNView>
+                <TouchableOpacity
+                  hitSlop={12}
+                  activeOpacity={0.6}
+                  onPress={() => setTarget(record)}
+                  style={styles.delete}
+                >
+                  <MaterialCommunityIcons
+                    name="trash-can-outline"
+                    size={20}
+                    color={themeColor.subText}
+                  />
+                </TouchableOpacity>
+              </RNView>
+              <RNView
+                style={[
+                  styles.divider,
+                  { backgroundColor: themeColor.divider },
+                ]}
+              />
+              <RNView style={styles.stats}>
+                {record.avgHR != null && (
+                  <Stat
+                    compact
+                    label={t("heartRate.avg")}
+                    value={String(record.avgHR)}
+                    unit="bpm"
+                  />
+                )}
+                {record.minHR != null && record.maxHR != null && (
+                  <Stat
+                    compact
+                    label={t("heartRate.range")}
+                    value={`${record.minHR}-${record.maxHR}`}
+                    unit="bpm"
+                  />
+                )}
                 <Stat
                   compact
-                  label={t("heartRate.avg")}
-                  value={String(record.avgHR)}
-                  unit="bpm"
+                  label={t("heartRate.activeKcal")}
+                  value={String(record.activeKcal)}
+                  unit="kcal"
                 />
-              )}
-              {record.minHR != null && record.maxHR != null && (
                 <Stat
                   compact
-                  label={t("heartRate.range")}
-                  value={`${record.minHR}-${record.maxHR}`}
-                  unit="bpm"
+                  label={t("heartRate.totalKcal")}
+                  value={String(record.totalKcal)}
+                  unit="kcal"
+                />
+              </RNView>
+              {ranges && (
+                <HeartRateGraph
+                  ranges={ranges}
+                  startedAt={record.startedAt}
+                  alerts={record.restAlerts ?? []}
+                  width={graphWidth}
                 />
               )}
-              <Stat
-                compact
-                label={t("heartRate.activeKcal")}
-                value={String(record.activeKcal)}
-                unit="kcal"
-              />
-              <Stat
-                compact
-                label={t("heartRate.totalKcal")}
-                value={String(record.totalKcal)}
-                unit="kcal"
-              />
             </RNView>
-            {record.heartRates && (
-              <HeartRateGraph
-                ranges={record.heartRates}
-                startedAt={record.startedAt}
-                width={graphWidth}
-              />
-            )}
-          </RNView>
-        ))}
+          );
+        })}
         <Text style={[styles.note, { color: themeColor.subText }]}>
           {t("heartRate.recordsNote")}
         </Text>
@@ -164,19 +205,34 @@ export const HeartRateRecordsScreen = () => {
   );
 };
 
-// 세로 격자(시작·1/3·2/3) 아래에 그 시각을, 오른쪽 위·아래에 전체 최대·최소를 단다
+// 그래프 칸(1분)들 — 막대 하나로는 흐름이 안 보여 그때는 그리지 않는다(null). 마지막 샘플 뒤에 울린 알림(신호가 끊긴
+// 채 쉬던 때)도 제자리에 찍히게 그 분까지 빈 칸으로 늘린다
+const graphRanges = (record: HeartRateRecordTypes) => {
+  const ranges = record.heartRates;
+  if (!ranges || ranges.filter(Boolean).length < 2) return null;
+  const minutes = Math.max(
+    ranges.length,
+    ...(record.restAlerts ?? []).map((sec) => Math.floor(sec / 60) + 1),
+  );
+  return [...ranges, ...Array<null>(minutes - ranges.length).fill(null)];
+};
+
+// 세로 격자(시작·1/3·2/3) 아래에 그 시각을, 오른쪽 위·아래에 전체 최대·최소를 단다. 세트 압박 알림이 울린 때는
+// 최대값 위 줄에 민트 점, 막대 사이에 옅은 세로선으로 찍는다(횟수는 카드 머리 시간 밑) — 언제 오래 쉬었는지 심박 흐름과
+// 같이 보인다
 const HeartRateGraph = ({
   ranges,
   startedAt,
+  alerts,
   width,
 }: {
   ranges: ([number, number] | null)[];
   startedAt: string;
+  // 시작 후 초
+  alerts: number[];
   width: number;
 }) => {
   const themeColor = useCurrentThemeColor();
-  // 막대 하나로는 흐름이 안 보인다
-  if (ranges.filter(Boolean).length < 2) return null;
   const values = ranges.flatMap((range) => range ?? []);
 
   const group = Math.ceil(ranges.length / Math.floor(width / MIN_SLOT));
@@ -204,9 +260,26 @@ const HeartRateGraph = ({
     barWidth / 2 +
     (high === low ? inner / 2 : ((high - bpm) / (high - low)) * inner);
   const start = parse(startedAt, PLAN_DATE_FORMAT, new Date());
+  // 막대 하나가 group분이라 분 단위 위치를 막대 칸 폭으로 옮긴다 — 끝에 붙은 점이 잘리지 않게 안쪽으로
+  const alertX = (sec: number) =>
+    Math.min(width - ALERT_DOT, Math.max(ALERT_DOT, (sec / 60 / group) * slot));
 
   return (
     <RNView style={styles.graph}>
+      {/* 최대값은 막대 위끝 바로 위에 붙어야 어느 높이인지 읽힌다 — 점 줄은 그 위에 */}
+      {alerts.length > 0 && (
+        <Svg width={width} height={ALERT_LANE}>
+          {alerts.map((sec, index) => (
+            <Circle
+              key={index}
+              cx={alertX(sec)}
+              cy={ALERT_DOT}
+              r={ALERT_DOT}
+              fill={themeColor.tint}
+            />
+          ))}
+        </Svg>
+      )}
       <Text
         style={[
           styles.graphValue,
@@ -217,6 +290,19 @@ const HeartRateGraph = ({
         {high}
       </Text>
       <Svg width={width} height={GRAPH_HEIGHT}>
+        {alerts.map((sec, index) => (
+          <Line
+            key={index}
+            x1={alertX(sec)}
+            x2={alertX(sec)}
+            y1={0}
+            y2={GRAPH_HEIGHT}
+            stroke={themeColor.tint}
+            strokeOpacity={0.45}
+            strokeWidth={1}
+            strokeDasharray="2 2"
+          />
+        ))}
         {[0, 1, 2].map((k) => (
           <Line
             key={k}
@@ -321,6 +407,15 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 12,
   },
+  // 시간 줄 밑에 알림 줄을 쌓는다 — 휴지통은 두 줄 가운데에 남는다
+  headerText: {
+    gap: 4,
+  },
+  timeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
   time: {
     fontSize: 16,
     fontFamily: "sb-m",
@@ -368,6 +463,16 @@ const styles = StyleSheet.create({
   graphMin: {
     position: "absolute",
     right: 0,
+  },
+  alertLegend: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  alertDot: {
+    width: ALERT_DOT * 2,
+    height: ALERT_DOT * 2,
+    borderRadius: ALERT_DOT,
   },
   note: {
     marginTop: 4,
