@@ -25,6 +25,8 @@ export type UserTypes = {
   language: Lang | null;
   // 심박 휴식 알림 (iOS 측정 박스 스위치). 알림 권한을 물어야 해서 기본은 끔
   restAlert: boolean;
+  // 세트 뒤 이만큼(초) 쉬면 휴식 알림 — 측정 박스에서 90·120·180·300 중 고른다
+  restAlertSec: number;
   setUser: (
     type: keyof Omit<
       UserTypes,
@@ -35,7 +37,13 @@ export type UserTypes = {
       | "setRemoveWorkoutTag"
       | "setReorderWorkoutTag"
     >,
-    value: string | boolean | UserInfoTypes[] | UserTypes["workoutList"] | Lang,
+    value:
+      | string
+      | number
+      | boolean
+      | UserInfoTypes[]
+      | UserTypes["workoutList"]
+      | Lang,
   ) => void;
   setUserData: (value: UserInfoTypes) => void;
   onReset: () => void;
@@ -52,6 +60,7 @@ export const useUserStore = create<UserTypes>()(
       theme: "system",
       language: null,
       restAlert: false,
+      restAlertSec: 120,
       setUserData: (value) =>
         set((prev) => ({
           ...prev,
@@ -68,6 +77,7 @@ export const useUserStore = create<UserTypes>()(
           theme: "system",
           language: null,
           restAlert: false,
+          restAlertSec: 120,
         }),
 
       setAddWorkoutTag: (type, tag) =>

@@ -39,6 +39,8 @@ export type HeartRateSnapshot = {
   samples?: [number, number][];
   // 종료 요약에만 온다 — 건강 앱에 저장된 운동(구간)들의 시작 시각(ms). 기록을 지울 때 찾는다
   healthStarts?: number[];
+  // 종료 요약에만 온다 — 세트 압박 알림이 울린 때(시작 후 초). 한 번도 안 울렸으면 없다
+  restAlerts?: number[];
 };
 
 type HeartRateModule = {
@@ -68,9 +70,9 @@ type HeartRateModule = {
   // 이 앱이 건강 앱에 저장한 운동을 시작 시각(ms)으로 찾아 지운다. failed: 찾았는데 못 지웠다
   // (워치 앱이 저장한 운동·쓰기 권한 해제 — 앱은 자기가 저장한 것만 지울 수 있다)
   deleteWorkout(startedAt: number): Promise<"deleted" | "notFound" | "failed">;
-  // 휴식 알림 — 세트로 100 이상 오른 심박이 100 아래로 1분 머물면 이 멘트 중 하나를 알림으로 띄운다(쉬는 시간마다
-  // 1번, 앱이 뒤에 있어도 네이티브가 본다 — RestAlert.swift). null이면 끈다
-  setRestAlert(messages: string[] | null): void;
+  // 휴식 알림 — 심박으로 세트가 끝난 걸 알아보고 restSec초 넘게 쉬면 이 멘트 중 하나를 알림으로 띄운다(쉬는 시간마다
+  // 1번, 앱이 뒤에 있어도 네이티브가 본다 — RestAlert.swift). messages가 null이면 끈다
+  setRestAlert(messages: string[] | null, restSec: number): void;
   // 휴식 알림을 켤 때 묻는다 — 이미 거절했으면 창 없이 false
   requestNotificationPermission(): Promise<boolean>;
   // 창 없이 지금 알림 권한이 있는지만 본다 (아직 안 물어봤으면 false)

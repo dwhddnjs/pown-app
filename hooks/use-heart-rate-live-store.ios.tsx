@@ -172,13 +172,15 @@ const REST_ALERT_KEYS = [
 // 이어폰 빠짐) 항상 살아 있는 루트 레이아웃에서 한 번만 건다.
 export const useHeartRateSync = () => {
   const restAlert = useUserStore((state) => state.restAlert);
+  const restAlertSec = useUserStore((state) => state.restAlertSec);
   const t = useT();
-  // 휴식 알림은 앱이 뒤에 있어도 네이티브가 판정해 띄운다 — 켜짐 여부와 멘트(앱 언어)만 넘겨 둔다
+  // 휴식 알림은 앱이 뒤에 있어도 네이티브가 판정해 띄운다 — 켜짐 여부·멘트(앱 언어)·휴식 시간만 넘겨 둔다
   useEffect(() => {
     HeartRate?.setRestAlert(
       restAlert ? REST_ALERT_KEYS.map((key) => t(key)) : null,
+      restAlertSec,
     );
-  }, [restAlert, t]);
+  }, [restAlert, restAlertSec, t]);
   // 켜 둔 뒤 설정에서 알림을 끄면 네이티브 알림이 조용히 실패한다 — 앱이 앞으로 올 때마다 보고 토글을 끈다.
   // 다시 켜면 거절 안내(설정 열기)가 뜬다
   useEffect(() => {

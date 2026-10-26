@@ -35,6 +35,8 @@ export type HeartRateRecordTypes = {
   // 건강 앱에 저장된 운동들의 시작 시각(ms) — 에어팟을 빼 일시정지됐다 이어 잰 측정은 구간마다 운동이
   // 따로 있다. 이번 버전부터 저장한다(없으면 startedAtMs 하나)
   healthStarts?: number[];
+  // 세트 압박 알림이 울린 때(시작 후 초) — 기록 그래프에 점으로 찍는다. 안 울렸으면 없다. 3.7.2부터 저장한다
+  restAlerts?: number[];
 };
 
 // 전체 초기화한 시각. 그 전에 시작해 초기화 뒤에 끝난 측정(이미 끝나는 중이라 버리지 못한 것)의
@@ -77,6 +79,7 @@ export const useHeartRateStore = create<HeartRateStoreTypes>()(
                   ? toMinuteRanges(snapshot.samples)
                   : undefined,
                 healthStarts: snapshot.healthStarts,
+                restAlerts: snapshot.restAlerts,
               },
             ],
           };
