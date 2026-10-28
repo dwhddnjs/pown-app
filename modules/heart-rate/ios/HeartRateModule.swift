@@ -99,7 +99,18 @@ public class HeartRateModule: Module {
 
     AsyncFunction("end") { () async throws -> [String: Any]? in
       guard #available(iOS 26.0, *) else { return nil }
-      return try await self.workout().end()
+      let manager = await self.workout()
+      let summary = try await manager.end()
+      // 종료를 누르고 바로 앱을 나가면 JS가 받아 저장하기 전에 앱이 정지·회수될 수 있다 — 저장했다고 알릴 때까지(ackEnded)
+      // 사본을 들고 있다가 다음 실행 때 넘긴다
+      if let summary { await manager.keepUntilSaved(["state": "ended", "summary": summary]) }
+      return summary
+    }
+
+    // JS가 종료 요약을 받아 기록으로 남겼다(이미 있거나 전체 초기화 전 측정이라 거른 것도) — 들고 있던 사본을 지운다
+    Function("ackEnded") { (startedAt: Double) in
+      guard #available(iOS 26.0, *) else { return }
+      Task { @MainActor in WorkoutManager.shared.ackEnded(startedAt: startedAt) }
     }
 
     AsyncFunction("discard") { () async throws in
@@ -355,8 +366,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 오디오 출력이 바뀌었다(에어팟을 꽂거나 뺐다) — 모듈이 JS에 알려 시작 버튼을 갱신한다. true면 있던 블루투스
   // 출력이 사라졌다
   var deviceChanged: ((Bool) -> Void)?
-  // 못 보낸 요약들. 겹쳐 와도 덮어쓰지 않는다. 버튼이 깨운 앱이 JS가 듣기 전에 정지됐다 회수되면
-  // 건강 앱엔 운동이 남는데 앱 기록만 빠지니 디스크에 둔다
+  // JS가 저장했다고 알리기(ackEnded) 전의 종료 요약들. 겹쳐 와도 덮어쓰지 않는다. 보내기만 하고 사본을 안 두면, 앱이 뒤에
+  // 있을 때 끝난 측정(워치에서 종료·섬 종료·시스템 종료)은 JS가 저장하기 전에 앱이 정지·회수돼 건강 앱엔 운동이 남는데 앱
+  // 기록만 빠졌다 — 디스크에 두고 JS가 들을 때마다 다시 넘긴다(saveRecord가 같은 측정은 거른다)
   private var pendingEnded: [[String: Any]] {
     get { UserDefaults.standard.array(forKey: "heartRatePendingEnded") as? [[String: Any]] ?? [] }
     set { UserDefaults.standard.set(newValue, forKey: "heartRatePendingEnded") }
@@ -448,15 +460,28 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private var backgroundTask = UIBackgroundTaskIdentifier.invalid
   // 백그라운드 시간을 잡은 흐름 수 — 다 놓아야 놓는다(먼저 끝난 흐름이 다른 흐름의 시간까지 놓지 않게)
   private var backgroundHolds = 0
-  // 이어폰 빠짐·시스템 종료로 지금 구간을 일시정지로 넘기는 중 — 그 사이 누른 종료·전체 초기화는 넘김이 끝난 뒤 남은 측정에
-  // 건다(바로 던지면 종료가 버려지고, 초기화 뒤 넘김이 측정을 되살렸다)
+  // 이어폰 빠짐·시스템 종료·워치 전환으로 지금 구간을 일시정지로 넘기는 중 — 그 사이 누른 종료·전체 초기화는 넘김이 끝난 뒤
+  // 남은 측정에 건다(바로 던지면 종료가 버려지고, 초기화 뒤 넘김이 측정을 되살렸다)
   private var suspending: Task<Void, Never>?
+  // 지금 구간을 앞 구간(carried)에 붙이는 중(suspendSegment) — 그동안 앱을 열면 넘긴 뒤의 모습(일시정지)을 보여준다
+  private var handingOver = false
+  // 받은 종료·전체 초기화 수 — 넘김·재개·워치 전환처럼 오래 걸리는 흐름이 기다리는 사이 종료가 왔는지 본다(왔으면 이어 재지
+  // 않는다 — 넘김 뒤 워치를 깨워 끝낸 측정을 새로 시작했다)
+  private var endRequests = 0
+  // 측정을 치운 수(reset) — 늦게 끝난 비동기 작업이 다음 측정을 건드리지 않게
+  private var resets = 0
   // 멈춘 구간 체크포인트를 이미 남겼다 — 멈춘 동안엔 값이 그대로라 다시 쓰지 않는다
   private var checkpointPaused = false
   // 마지막 recover()가 HealthKit 조회에 실패했다(잠금 등) — 그 상태로는 섬 종료를 마칠 수 없다
   private var recoverFailed = false
-  // 잠금이라 못 마친 섬 종료 — 잠금이 풀리거나 앱이 앞으로 오면 마저 끝낸다
-  private var endWhenAccessible = false
+  // 잠금이라 못 마친 섬 종료를 누른 때(초) — 잠금이 풀리거나 앱이 앞으로 오면 그 시각으로 멈춰 마저 끝낸다. 그 사이 앱이 죽어도
+  // 종료가 사라지지 않게 디스크에 둔다(메모리에만 두면 다음 실행 때 측정이 다시 "측정 중"으로 붙었다)
+  private var endRequestedAt: Double? {
+    get { UserDefaults.standard.object(forKey: "heartRateEndRequested") as? Double }
+    set { UserDefaults.standard.set(newValue, forKey: "heartRateEndRequested") }
+  }
+  // 되찾을 측정이 없을 때 남은 섬을 늦게 치우는 작업(recover) — 워치가 미러링을 다시 걸면 그 섬을 이어 쓴다
+  private var staleCleanup: Task<Void, Never>?
   // 마지막 섬 갱신·종료 — 백그라운드 시간을 놓기 전에 닿게 기다린다
   private var activityWork: Task<Void, Never>?
 
@@ -518,12 +543,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   private func endWhenAccessibleIfNeeded() async {
-    guard endWhenAccessible, UIApplication.shared.isProtectedDataAvailable else { return }
-    endWhenAccessible = false
-    await control("end")
+    guard let at = endRequestedAt, UIApplication.shared.isProtectedDataAvailable else { return }
+    endRequestedAt = nil
+    await control("end", at: Date(timeIntervalSince1970: at))
   }
 
-  private func control(_ action: String) async {
+  // at: 종료를 누른 때 — 잠금 때문에 미뤘다 끝낼 때 그 시각으로 멈춘다(지금으로 멈추면 미룬 만큼 기록·건강 앱 운동이 길어졌다)
+  private func control(_ action: String, at: Date? = nil) async {
     // 버튼 때문에 앱이 막 깨어났으면 세션이 아직 안 붙어 있다
     _ = await recover()
     switch action {
@@ -534,18 +560,22 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       // 잠긴 기기라 되찾을 세션을 못 읽었다 — 지금 끝내면 체크포인트 구간을 잃거나(앞 구간만 저장하고 지운다), 끝낼 측정을 못
       // 찾아 섬이 그대로 남는다. 읽을 수 있게 되면 마저 끝낸다(endWhenAccessibleIfNeeded). 앞 구간만 남은 측정은 그대로 끝낸다
       log.notice("end deferred until protected data is available")
-      endWhenAccessible = true
+      if endRequestedAt == nil { endRequestedAt = (at ?? Date()).timeIntervalSince1970 }
     case "end":
       // 앱이 뒤에 있을 때 끝난 것이라 종료 버튼 쪽 저장이 없다 — 시스템 종료와 같은 이벤트로
       // 요약을 넘겨 JS가 기록을 남긴다(JS가 아직 안 들으면 send가 들고 있다)
       do {
         var body: [String: Any] = ["state": "ended"]
-        if let summary = try await end() { body["summary"] = summary }
+        if let summary = try await end(at: at) { body["summary"] = summary }
         send(body)
       } catch {
         // 이미 끝나는 중이면 그쪽이 마무리하고 알린다 — 시스템 종료는 측정을 일시정지로 남길 수 있어, 여기서 ended를
-        // 보내면 JS가 남은 측정의 박스를 접는다. 끝낼 측정이 아예 없을 때만 박스를 접게 알린다
-        if !isEnding { send(["state": "ended"]) }
+        // 보내면 JS가 남은 측정의 박스를 접는다. 끝낼 측정이 아예 없을 때만 박스를 접게 알리고, 남은 섬(앱이 죽기 전 측정이
+        // 멈춘 채 남긴 것)도 바로 치운다 — 늦게 치우려고 남겨 둔 섬의 X를 눌렀는데 섬이 그대로 있었다
+        if !isEnding {
+          send(["state": "ended"])
+          await endStaleActivities()
+        }
       }
     default: break
     }
@@ -569,9 +599,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     // Task가 돌기 전에 끼어든 종료·시스템 종료가 같은 세션을 또 마무리하지 않게 지금 세운다
     isEnding = true
     holdBackground()
+    let request = endRequests
     suspending = Task {
       await finishing {
-        guard await suspendSegment(session, builder) else { return }
+        // 넘기는 사이 종료·전체 초기화가 왔으면 그쪽이 남은 측정을 끝낸다 — 여기서 일시정지로 알리면 방금 버린 측정의 박스가
+        // 되살아났다
+        guard await suspendSegment(session, builder), endRequests == request else { return }
         publish()
       }
     }
@@ -596,6 +629,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 3초 링이 "1"에 멈춘 채 워치를 기다리는 등)
   func start(device: String?) async throws -> [String: Any]? {
     guard !isStartingOnWatch, !isResuming else { return nil }
+    // 이어폰을 빼 지금 구간을 일시정지로 넘기는 중 — 넘긴 뒤의 일시정지를 보여준다(재개·종료는 거기서). nil을 주면 살아 있는
+    // 측정의 박스가 안내 없이 접혔다
+    if handingOver { return suspendedSnapshot() }
     if let session, !isEnding {
       // 이미 재는 중이면 그 값을 돌려준다(박스가 펴진다). 시작 전·멈춘 채 남은 세션은 정리하고 새로 연다 —
       // 그냥 nil을 돌려주면 앱을 다시 켤 때까지 시작이 조용히 막힌다
@@ -654,6 +690,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       // 기다리는 사이 시스템이 세션을 닫았으면(정리 중이어도) 그쪽이 마무리한다 — 끝난
       // 세션에 시작을 걸면 아무도 끝내지 않는 Live Activity가 남는다
       guard self.session === session, !isEnding else { throw CancellationError() }
+      // 준비하는 3초 사이 이어폰을 뺐다 — 준비 중인 세션엔 빼는 알림(routeChanged)이 걸리지 않아, 그대로 시작하면 심박 없는
+      // "측정 중"이 이어폰 빠짐 안내도 자동 일시정지도 없이 돌았다
+      guard HeartRateModule.hasEarphones() else { throw NoDeviceException() }
       let now = Date()
       session.startActivity(with: now)
       try await builder.beginCollection(at: now)
@@ -844,6 +883,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 세션 없이 일시정지로 남은 측정(suspended)이면 지금 쓸 기기로 새 구간을 열어 잇고 그 스냅샷을 돌려준다.
   // 뒤에서는 새 세션을 못 연다(errorBackgroundWorkoutSessionNotAllowed) — 그래서 섬은 이때 앱을 연다
   func resume() async throws -> [String: Any]? {
+    // 이어폰을 빼 일시정지로 넘기는 중(박스는 이미 일시정지로 보인다) — 넘김이 끝나길 기다렸다 남은 측정을 잇는다. 그냥 돌아가면
+    // 다시 끼고 누른 재개가 아무 일 없이 사라졌다
+    if handingOver, let suspending { await suspending.value }
     if let session {
       // 끝내거나 일시정지로 넘기는 중인 세션엔 재개가 닿지 않는다 — 사유만 지워 안내가 사라졌다
       guard !isWatchLost, !isEnding else { return nil }
@@ -876,7 +918,16 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     log.notice("switch to watch")
     isResuming = true
     defer { isResuming = false }
-    guard await suspendSegment(session, builder) else { return nil }
+    let request = endRequests
+    // 넘기는 동안 누른 종료(섬)·전체 초기화는 넘김이 끝나길 기다렸다 남은 측정에 건다(end) — 기다리지 않으면 섬 종료가 무시되고,
+    // 초기화 뒤 넘김이 측정을 되살렸다. 누르고 바로 앱을 나가도 넘김이 얼어붙지 않게 백그라운드 시간을 잡는다
+    holdBackground()
+    let handover = Task { await suspendSegment(session, builder) }
+    suspending = Task { _ = await handover.value }
+    let handedOver = await handover.value
+    releaseBackground()
+    // 넘기는 사이 종료·전체 초기화가 왔다 — 그쪽이 남은 측정을 끝낸다. 워치를 깨우면 끝낸 측정이 새로 시작됐다
+    guard handedOver, endRequests == request else { return nil }
     do {
       let snapshot = try await startSegment(device: "watch", fallback: false)
       pauseReason = nil
@@ -906,10 +957,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
 
   // nil은 합계 1분 미만(버림)뿐이다. 이미 끝나는 중이거나 세션이 없으면 던진다 — 그 경우 저장은
   // 먼저 끝내던 쪽이 하므로, JS가 "1분 미만" 안내를 잘못 띄우지 않게 구분한다
-  // discard: 길이와 상관없이 건강 앱에도 남기지 않고 버린다(전체 초기화)
-  func end(discard: Bool = false) async throws -> [String: Any]? {
-    // 이어폰을 빼서(또는 시스템이 닫아서) 일시정지로 넘기는 중이면 넘김이 끝나길 기다렸다 그 측정을 끝낸다 — 에어팟을 빼고 바로
-    // 종료를 누르는 게 흔하다
+  // discard: 길이와 상관없이 건강 앱에도 남기지 않고 버린다(전체 초기화). at: 종료를 누른 때(미뤘다 끝낼 때만 — 그 밖엔 지금)
+  func end(discard: Bool = false, at stopDate: Date? = nil) async throws -> [String: Any]? {
+    // 기다리는 넘김·재개·워치 전환이 이어 재지 않게 먼저 센다
+    endRequests += 1
+    // 이어폰을 빼서(또는 시스템이 닫아서, 워치로 바꾸려고) 일시정지로 넘기는 중이면 넘김이 끝나길 기다렸다 그 측정을 끝낸다 —
+    // 에어팟을 빼고 바로 종료를 누르는 게 흔하다
     if isEnding, let suspending { await suspending.value }
     // 전체 초기화 — 일시정지로 남은 앞 구간까지 버린다(건강 앱에 남긴 것도). 체크포인트도 — 남기면 다음 실행 때 되살아난다
     if discard {
@@ -917,12 +970,17 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       carried = nil
       checkpoint = nil
     }
-    // 워치를 깨우는 중(박스는 준비 표시라 종료 버튼이 잠겨 있다 — 전체 초기화만 온다) — 시작을
-    // 취소한다. 정리는 startOnWatch가 한다
+    // 워치를 깨우는 중 — 시작을 취소한다. 정리는 startOnWatch가 한다
     if isStartingOnWatch {
       abandonedWatchStart = true
       resolveWatchStart(CancellationError())
-      return nil
+      // 새 측정의 준비 중엔 박스의 종료 버튼이 잠겨 있어 전체 초기화(취소)만 온다 — 여기까지다. 일시정지로 남은 측정을 워치로
+      // 잇던 중 누른 섬 종료면 시작이 풀리길 기다렸다 남은 측정을 끝낸다 — 바로 nil을 돌려주면 1분 미만으로 보고 박스만
+      // 접고 측정·섬은 일시정지로 남았다
+      guard !discard else { return nil }
+      for _ in 0..<100 where isStartingOnWatch || isResuming {
+        try? await Task.sleep(nanoseconds: 50_000_000)
+      }
     }
     // 두 번 불려도 한 번만 마무리한다 — 두 번째가 stopped를 덮어쓰면 첫 호출이 영영 안 끝난다
     guard !isEnding else { throw CancellationError() }
@@ -941,11 +999,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       // 끝내는 도중 앱이 죽으면 다음 실행 때 이 구간을 기록으로 마무리한다(recover) — 버리는 거면 남기지 않는다
       if !discard { saveCheckpoint(ending: true) }
       if session.state == .running || session.state == .paused {
-        await waitForStop(session, timeout: Self.stopTimeout)
+        await waitForStop(session, timeout: Self.stopTimeout, at: stopDate)
       }
       summary = merged(await finish(session, builder, discard: discard), discard: discard)
     } else {
-      summary = merged(await finishOnWatch(session, discard: discard), discard: discard)
+      summary = merged(
+        await finishOnWatch(session, discard: discard, at: stopDate), discard: discard)
     }
     reset()
     // 섬 종료가 닿은 뒤 백그라운드 시간을 놓는다(finishing과 같다) — 돌려주는 건 기다리지 않는다
@@ -958,13 +1017,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   }
 
   // stopActivity를 걸고 stopped(또는 바로 ended)가 올 때까지 기다린다. 미러 세션은 ended까지
-  // 기다린다(델리게이트 참고). stop: false면 멈추지 않고 기다리기만 한다(워치가 스스로 멈출 때)
-  private func waitForStop(_ session: HKWorkoutSession, timeout: UInt64?, stop: Bool = true) async {
+  // 기다린다(델리게이트 참고). stop: false면 멈추지 않고 기다리기만 한다(워치가 스스로 멈출 때). date: 멈춘 시각(없으면 지금)
+  private func waitForStop(
+    _ session: HKWorkoutSession, timeout: UInt64?, stop: Bool = true, at date: Date? = nil
+  ) async {
     stopWait += 1
     let wait = stopWait
     await withCheckedContinuation { continuation in
       stopped = continuation
-      if stop { session.stopActivity(with: .now) }
+      if stop { session.stopActivity(with: date ?? .now) }
       guard let timeout else { return }
       Task { @MainActor in
         try? await Task.sleep(nanoseconds: timeout)
@@ -988,10 +1049,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     // 심박·칼로리 샘플만 건강 앱에 남았다
     let collection = Task { @MainActor in _ = try? await builder.endCollection(at: end) }
     _ = await limited(Self.finishLimit.collection) { await collection.value }
-    var summary = segmentSnapshot()
-
-    let total = (carried?["elapsedSec"] as? Int ?? 0) + Int(builder.elapsedTime)
-    let save = keep ? builder.elapsedTime >= 1 : total >= Int(WatchSnapshot.minimumDuration)
+    // 경과 시간도 멈춘 때 기준 — 수집 종료가 한도를 넘겨 아직이면 빌더 시간은 계속 흘러, 되찾은 멈춘 세션은 죽어 있던 몇 시간까지
+    // 운동 시간·1분 판정에 들어갔다
+    var summary = segmentSnapshot(at: end)
+    let elapsed = builder.elapsedTime(at: end)
+    let total = (carried?["elapsedSec"] as? Int ?? 0) + Int(elapsed)
+    let save = keep ? elapsed >= 1 : total >= Int(WatchSnapshot.minimumDuration)
     log.notice("phone segment finished save=\(save && !discard) keep=\(keep) total=\(total)")
     if discard || !save {
       builder.discardWorkout()
@@ -1019,7 +1082,9 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   // 워치 세션 종료 — 멈추면 워치가 1분 이상일 때 건강 앱에 저장하고 끝낸다. 워치는 끝내기 직전에
   // 멈춘 시각의 값을 보낸다 — 그 값까지 받고 요약을 만들어야 1분 기준이 워치와 같아, 건강 앱과
   // 앱 기록이 같이 남거나 같이 빠진다. 버려도 요약은 돌려준다 — merged가 그 시작 시각부터 지운다(앞 구간에 남긴 것)
-  private func finishOnWatch(_ session: HKWorkoutSession, discard: Bool) async -> [String: Any]? {
+  private func finishOnWatch(_ session: HKWorkoutSession, discard: Bool, at date: Date? = nil) async
+    -> [String: Any]?
+  {
     if isWatchLost {
       // 끊긴 미러엔 멈춤이 닿지 않는다 — 워치는 계속 재다 다시 붙으면 그때 멈춘다(adopt)
       markLostEnd(discard: discard)
@@ -1032,7 +1097,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
         await waitForStop(session, timeout: Self.stopTimeout, stop: false)
       }
     } else if session.state == .running || session.state == .paused || session.state == .stopped {
-      await waitForStop(session, timeout: Self.stopTimeout, stop: session.state != .stopped)
+      await waitForStop(
+        session, timeout: Self.stopTimeout, stop: session.state != .stopped, at: date)
     }
     // 답이 없었으면(연결 끊김) 여기서라도 끝낸다. 워치는 끊긴 줄 알고 계속 잴 수 있어 다시 붙으면 그때 끝낸다
     if session.state != .stopped && session.state != .ended {
@@ -1053,7 +1119,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     guard let data = try? JSONEncoder().encode(command) else { return false }
     for attempt in 0..<3 where session.state != .ended {
       if attempt > 0 { try? await Task.sleep(nanoseconds: 500_000_000) }
-      if (try? await session.sendToRemoteWorkoutSession(data: data)) != nil { return true }
+      // 답이 없으면 한도까지만 기다린다 — 끝나지 않는 보내기를 기다리면 종료(isEnding)가 안 풀려 앱을 다시 켤 때까지 측정을
+      // 시작할 수 없었다
+      let sent = await limited(Self.finishLimit.collection) {
+        (try? await session.sendToRemoteWorkoutSession(data: data)) != nil
+      }
+      if sent == true { return true }
     }
     return false
   }
@@ -1179,12 +1250,19 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       // 워치에서 끝냈다(종료 버튼·실패). 건강 앱 저장은 워치가 맡고 여기선 요약만 남긴다. 혹시 남았으면
       // 여기서도 닫는다. 연결이 끊긴 건 여기로 오지 않는다 — 다시 붙기를 기다린다(isWatchLost)
       log.notice("watch session closed by watch")
+      // 앱이 뒤에 있으면 미러 세션이 끝나는 대로 정지된다 — 섬 종료가 닿을 때까지 백그라운드 시간을 잡는다
+      holdBackground()
       let summary = merged(watchSummary())
       closeMirrored(session)
       reset()
       var body: [String: Any] = ["state": "ended"]
       if let summary { body["summary"] = summary }
       send(body)
+      let work = activityWork
+      Task {
+        await work?.value
+        releaseBackground()
+      }
       return
     }
     // 다른 운동 앱이 세션을 가져간 게 아니면 측정은 끝내지 않는다 — 에어팟을 빼면 iOS가 아이폰 세션을 끝낸다
@@ -1198,10 +1276,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     if !suspend { saveCheckpoint(ending: true) }
     // 시스템이 닫는 건 대개 앱이 뒤에 있을 때다 — 백그라운드 시간을 잡고 마무리한다
     holdBackground()
+    let request = endRequests
     suspending = Task {
       await finishing {
         if suspend {
-          guard await suspendSegment(session, builder) else { return }
+          // 넘기는 사이 종료·전체 초기화가 왔으면 그쪽이 남은 측정을 끝낸다(routeChanged와 같다)
+          guard await suspendSegment(session, builder), endRequests == request else { return }
           publish()
           return
         }
@@ -1221,6 +1301,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     -> Bool
   {
     isEnding = true
+    handingOver = true
+    defer { handingOver = false }
     saveCheckpoint()
     if session.state == .running || session.state == .paused {
       await waitForStop(session, timeout: Self.stopTimeout)
@@ -1259,10 +1341,11 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     send(body)
   }
 
-  // 지금 아이폰 구간을 체크포인트로 남긴다 — 워치 구간은 워치가 들고 있다(끊겨도 다시 붙거나 마지막 값을 보낸다)
+  // 지금 아이폰 구간을 체크포인트로 남긴다 — 워치 구간은 워치가 들고 있다(끊겨도 다시 붙거나 마지막 값을 보낸다). 이미 멈춘
+  // 세션(앱이 죽었다 되찾은 것)은 멈춘 때까지만 — 그 뒤 죽어 있던 시간이 들어가지 않게
   private func saveCheckpoint(ending: Bool = false) {
     guard builder != nil,
-      var body = segmentSnapshot()?.filter({ Self.summaryKeys.contains($0.key) })
+      var body = segmentSnapshot(at: session?.endDate)?.filter({ Self.summaryKeys.contains($0.key) })
     else { return }
     if !samples.isEmpty { body["samples"] = samples }
     if ending { body["ending"] = true }
@@ -1315,35 +1398,65 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     }
   }
 
-  // 워치가 아이폰과 끊긴 채 운동을 끝냈다 — 마지막 값이 WCSession으로 왔다(WatchState). 끊긴 그 측정을 기다리고
-  // 있었으면 이 값으로 마무리한다. 그 사이 앱이 죽어 측정을 잃었으면 이걸로라도 기록을 남긴다(일시정지로 남은 앞
-  // 구간이 있으면 합친다). 아이폰에서 이미 끝낸 측정이면 버린다
+  // 워치가 아이폰과 끊긴 채 운동을 끝냈다 — 마지막 값이 WCSession으로 왔다(WatchState). 한 번만 오니 어느 측정 것인지 가려
+  // 버리지 않는다: 끊긴 채 기다리던 지금 측정이면 이 값으로 마무리하고, 일시정지로 남은 측정에 이어 재던 구간이면 앞 구간에
+  // 붙이고, 앱이 죽어 잃었던 측정이면 지금 측정은 건드리지 않고 그 기록만 따로 남긴다. 아이폰에서 이미 끝낸 측정이면 버린다.
+  // (예전엔 시작·재개 중이면 버리고, 잃었던 측정이면 reset()으로 지금 측정의 체크포인트·섬까지 지웠다)
   func watchFinished(_ final: WatchSnapshot) {
     if lostEnd?["start"] as? Double == final.startedAt {
       lostEnd = nil
       return
     }
-    guard !isStartingOnWatch, !isResuming, !isEnding else { return }
-    if let session {
-      guard session.type == .mirrored, remote?.snapshot.startedAt == final.startedAt else { return }
-    } else if let start = carried?["startedAt"] as? Double, final.startedAt < start {
+    // 끊긴 미러로 기다리던 그 워치 구간 — 끝내는 중이면 그쪽이 마무리한다
+    if let session, session.type == .mirrored, remote?.snapshot.startedAt == final.startedAt {
+      guard !isEnding, !isStartingOnWatch else { return }
+      log.notice("watch finished while disconnected")
+      remote = (final, Date())
+      isWatchLost = false
+      let summary = merged(watchSummary())
+      reset()
+      var body: [String: Any] = ["state": "ended"]
+      if let summary { body["summary"] = summary }
+      send(body)
       return
     }
-    log.notice("watch finished while disconnected")
-    let current = session != nil || carried != nil
-    remote = (final, Date())
-    isWatchLost = false
-    var summary = watchSummary()
-    if current {
-      summary = merged(summary)
-    } else if (summary?["elapsedSec"] as? Int ?? 0) < Int(WatchSnapshot.minimumDuration) {
-      // 잃었던 측정이면 그 사이 다른 측정이 있었을 수 있어 건강 앱은 건드리지 않고 기록만 안 남긴다
-      summary = nil
+    let segment = Self.segment(from: final)
+    // 일시정지로 남은 측정(앞 구간)에 이어 재던 워치 구간이다 — 앱이 죽어 그 구간의 미러를 잃었다. 앞 구간에 붙인다
+    if let head = carried, let start = head["startedAt"] as? Double, final.startedAt >= start {
+      log.notice("carried watch segment finished")
+      carried = Self.merge(head, segment).filter { Self.summaryKeys.contains($0.key) }
+      // 다른 구간을 잇거나 끝내는 중이면 그쪽이 이어 간다. 아니면 워치에서 끝낸 것이다 — 측정을 끝낸다
+      guard session == nil, !isEnding, !isStartingOnWatch, !isResuming else { return }
+      let summary = merged(nil)
+      reset()
+      var body: [String: Any] = ["state": "ended"]
+      if let summary { body["summary"] = summary }
+      send(body)
+      return
     }
-    reset()
-    var body: [String: Any] = ["state": "ended"]
-    if let summary { body["summary"] = summary }
-    send(body)
+    // 지금 측정과 상관없는 측정(앱이 죽어 잃었던 것) — 1분이 넘으면 워치가 건강 앱에 저장했으니 그 기록만 따로 남긴다. JS는
+    // 지금 측정의 박스를 접지 않는다(시작 시각이 다르다)
+    guard final.elapsedSec >= Int(WatchSnapshot.minimumDuration) else { return }
+    log.notice("lost watch measurement finished")
+    send(["state": "ended", "summary": segment])
+  }
+
+  // 워치가 끝내며 보낸 마지막 값을 구간 요약으로 — 워치는 1분 이상이면 건강 앱에 저장했다
+  private static func segment(from final: WatchSnapshot) -> [String: Any] {
+    var body: [String: Any] = [
+      "source": "watch",
+      "startedAt": final.startedAt,
+      "elapsedSec": final.elapsedSec,
+      "activeKcal": final.activeKcal,
+      "totalKcal": final.totalKcal,
+    ]
+    if let low = final.minHR { body["minHR"] = low }
+    if let high = final.maxHR { body["maxHR"] = high }
+    if let average = final.avgHR { body["avgHR"] = average }
+    if final.elapsedSec >= Int(WatchSnapshot.minimumDuration) {
+      body["healthStarts"] = [final.startedAt]
+    }
+    return body
   }
 
   // 기록 삭제 — 이 앱(아이폰·워치)이 저장한 운동을 시작 시각(앱 기록은 초 단위로 잘려 있다)으로
@@ -1391,8 +1504,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   func recover() async -> [String: Any]? {
     recoverFailed = false
     // 워치 시작 대기·재개 중엔 아직 새 구간 전이다 — 스냅샷을 주면 JS가 "측정 중"으로 그린다. 잇는 중인
-    // 측정이 있으면 그 값(일시정지)을 그대로 보여준다
-    if isStartingOnWatch || isResuming { return carried != nil ? suspendedSnapshot() : nil }
+    // 측정이 있으면 그 값(일시정지 — 워치로 바꾸려고 넘기는 중이면 넘긴 뒤 값)을 그대로 보여준다
+    if isStartingOnWatch || isResuming { return suspendedSnapshot() }
     // 되찾을 아이폰 세션. 워치 측정은 여기서 못 되찾는다 — 미러링 핸들러가 다시 넘긴다
     var recovered: HKWorkoutSession?
     // HealthKit이 되찾을 세션이 없다고 답했다 — 조회가 실패한 것(잠금 등)은 "없음"이 아니다(HKHealthStore.h)
@@ -1407,9 +1520,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       }
       // 되찾는 사이 재개·워치 시작이 들어왔다(섬의 재개 링크는 앱이 앞으로 오는 것과 같이 온다) — 그쪽이 붙인 준비
       // 중인 세션은 아직 측정 중이 아니라, 아래로 가면 nil을 돌려 박스가 접힌다
-      if isStartingOnWatch || isResuming { return carried != nil ? suspendedSnapshot() : nil }
+      if isStartingOnWatch || isResuming { return suspendedSnapshot() }
     }
     if session != nil {
+      // 이어폰을 빼 지금 구간을 일시정지로 넘기는 중(최대 25초쯤) — 넘긴 뒤의 일시정지를 보여준다. nil을 주면 살아 있는 측정의
+      // 박스가 접혀(기기가 없으면 카드째 사라져) 측정이 그냥 끝난 것처럼 보였다
+      if handingOver { return suspendedSnapshot() }
       // 준비 3초 사이 앱이 뒤로 가면 Live Activity 요청이 거절된다(앞에 있을 때만 된다) —
       // 돌아왔을 때 다시 띄운다. 안 그러면 이 세션 내내 아일랜드·잠금화면이 없다
       if isLive, !isEnding, !hasLiveActivity {
@@ -1432,19 +1548,24 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       guard noSession else { return nil }
       // 워치 측정은 여기서 되찾지 못한다 — 이어지고 있으면 미러링 핸들러가 곧 세션을 다시
       // 넘긴다(adopt). 그 전에 섬을 끝내면 섬이 사라지고 섬 버튼도 듣지 않는다. 남은 섬이 있을
-      // 때만 잠깐 기다린다. ponytail: 핸들러가 3초 안에 온다고 본다 — 실기에서 늦으면 늘릴 것
+      // 때만 잠깐 기다린다
       if !Activity<HeartRateAttributes>.activities.isEmpty {
         for _ in 0..<15 where session == nil {
           try? await Task.sleep(nanoseconds: 200_000_000)
         }
       }
-      // 앱이 죽은 사이 세션이 끝났으면 아일랜드에 멈춘 숫자만 남아 있다. 기다리는 사이 붙은 세션이
-      // 이어 쓰는 섬만 남긴다 — 그 사이 시작을 눌렀으면 새 섬을 띄우니 남은 섬은 전부 멈춘 것이다.
-      // 끝날 때까지 기다려야 뒤이어 붙는 세션이 끝나는 중인 섬을 집어 쓰지 않는다
-      for activity in Activity<HeartRateAttributes>.activities where activity.id != self.activity?.id {
-        await activity.end(nil, dismissalPolicy: .immediate)
+      if session != nil { return await recover() }
+      // 앱이 죽은 사이 세션이 끝났으면 섬에 멈춘 숫자만 남아 있다. 다만 앱이 죽어 끊긴 워치는 계속 재며 5초에서 60초 간격으로
+      // 미러링을 다시 건다 — 그만큼 섬을 두고 기다린다(붙으면 adopt가 그 섬을 이어 쓴다). 3초 만에 치웠더니 워치는 계속 재는데
+      // 섬이 사라져 측정이 이유 없이 끝난 것처럼 보였다. 워치가 없으면 바로 치운다
+      if !Activity<HeartRateAttributes>.activities.isEmpty {
+        if HeartRateModule.isWatchAvailable() {
+          cleanUpStaleActivitiesLater()
+        } else {
+          await endStaleActivities()
+        }
       }
-      return session != nil ? await recover() : nil
+      return nil
     }
     // 되찾는 사이 다른 호출(아일랜드 버튼·JS getActive)이 먼저 붙였으면 그쪽을 쓴다 — 덮어쓰면 진행
     // 중인 종료가 기다리는 세션이 바뀌어 종료가 끝나지 않는다(워치 쪽 WatchWorkout.recover와 같다)
@@ -1458,6 +1579,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     builder.delegate = self
     session = recovered
     self.builder = builder
+    // 앱이 죽기 전 이 구간의 그래프 샘플은 체크포인트에 있다 — 되살리지 않으면 이어 쓰는 체크포인트가 빈 샘플로 덮어써, 건강
+    // 앱에서 못 읽을 때(잠금 등) 그 앞 그래프가 사라졌다
+    if let saved = checkpoint, let start = builder.startDate,
+      abs((saved["startedAt"] as? Double ?? 0) - start.timeIntervalSince1970 * 1000) < 1
+    {
+      samples = saved["samples"] as? [[Int]] ?? []
+    }
     // 멈췄거나(stopped) 이미 끝난 세션이 돌아올 때가 있다 — 앱이 정지·회수돼 시스템 종료(에어팟을 빼면 iOS가 끝낸다)나
     // 넘김·종료를 마치지 못한 세션이다. 그대로 붙이면 "측정 중 0:03" 박스와 아무도 갱신하지 않는 Live Activity가 생긴다.
     // 종료를 누르던 중이었으면 기록으로 마무리하고, 아니면 일시정지로 남긴다(남은 섬을 이어 쓴다)
@@ -1580,17 +1708,27 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return Date().timeIntervalSince(remote.at) < WatchSnapshot.heartRateFreshness
   }
 
+  // 종료 요약은 JS가 저장했다고 알릴 때까지 사본을 둔다 — 보내기만 하면 JS가 저장하기 전에 앱이 정지·회수될 때 사라졌다
   func send(_ body: [String: Any]) {
-    if emit?(body) == true { return }
-    if body["summary"] != nil { pendingEnded.append(body) }
+    if body["summary"] != nil { keepUntilSaved(body) }
+    _ = emit?(body)
   }
 
-  // JS가 onUpdate를 듣기 시작하면 모듈이 부른다
+  // 최근 20개까지만 — JS가 답을 못 하는 상태(버그·버전 어긋남)가 이어져도 실행할 때마다 읽는 UserDefaults가 샘플째 불어나지 않게
+  func keepUntilSaved(_ body: [String: Any]) {
+    pendingEnded = Array((pendingEnded + [body]).suffix(20))
+  }
+
+  // JS가 그 요약을 기록으로 남겼다 — 같은 측정의 사본을 지운다
+  func ackEnded(startedAt: Double) {
+    pendingEnded.removeAll {
+      ($0["summary"] as? [String: Any])?["startedAt"] as? Double == startedAt
+    }
+  }
+
+  // JS가 onUpdate를 듣기 시작하면 모듈이 부른다 — 저장했다는 답이 없던 요약을 다시 넘긴다(지우는 건 ackEnded)
   func flushPending() {
-    let pending = pendingEnded
-    guard !pending.isEmpty else { return }
-    pendingEnded = []
-    for body in pending { send(body) }
+    for body in pendingEnded { _ = emit?(body) }
   }
 
   // 구간(세션 하나)에 딸린 상태만 비운다 — 측정(앞 구간 carried·섬·일시정지 사유)은 남는다
@@ -1617,10 +1755,13 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
 
   // 측정을 통째로 치운다
   private func reset() {
+    resets += 1
     releaseSegment()
     endLiveActivity()
     carried = nil
     pauseReason = nil
+    // 잠금 때문에 미뤄 둔 종료도 — 다른 길로 이미 끝났다
+    endRequestedAt = nil
     restAlert = RestAlert()
     restAlertTimes = []
     removeRestAlert()
@@ -1639,15 +1780,28 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       let quantity = heart.mostRecentQuantity()
     else { return }
     lastSampleAt = at
-    samples.append([
-      Int(at.timeIntervalSince(start)), Int(quantity.doubleValue(for: Self.bpm).rounded()),
-    ])
+    let bpm = Int(quantity.doubleValue(for: Self.bpm).rounded())
+    samples.append([Int(at.timeIntervalSince(start)), bpm])
+    checkRestAlert(bpm: bpm, at: at)
   }
 
   // 워치 값도 같은 모양(시작 후 실제 흐른 초)으로 쌓는다. elapsedSec는 일시정지를 뺀 시간이라 그대로
   // 쓰면 그래프와 시각 라벨이 멈춘 만큼 당겨진다 — 경과 0초였던 시각(timerStart)과 시작 시각의 차가
   // 그동안 멈춘 시간이다. 일시정지 중 값·같은 초에 온 값(칼로리만 바뀐 갱신)은 건너뛴다
   private func recordRemoteSample(_ snapshot: WatchSnapshot) {
+    // 세트 압박 판정엔 새 심박만 그 샘플 시각으로 넣는다 — 워치는 칼로리가 바뀔 때도 같은 심박을 다시 보낸다. 시각을 안 보내는
+    // 워치 앱(3.7.2 이하)이면 받을 때마다 지금 시각으로 넣는다
+    if let heartRate = snapshot.heartRate, !snapshot.paused {
+      if let ms = snapshot.heartRateAt {
+        let at = Date(timeIntervalSince1970: ms / 1000)
+        if at != lastSampleAt {
+          lastSampleAt = at
+          checkRestAlert(bpm: heartRate, at: at)
+        }
+      } else {
+        checkRestAlert(bpm: heartRate, at: Date())
+      }
+    }
     let pausedSec = ((snapshot.timerStart ?? snapshot.startedAt) - snapshot.startedAt) / 1000
     let sec = snapshot.elapsedSec + Int(pausedSec)
     guard let heartRate = snapshot.heartRate, !snapshot.paused, samples.last?.first != sec else {
@@ -1672,9 +1826,12 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return body
   }
 
-  // 세션 없이 일시정지로 남은 측정(suspended)
+  // 세션 없이 일시정지로 남은 측정(suspended). 지금 구간을 넘기는 중이면 아직 앞 구간에 안 붙은 그 구간(체크포인트)까지 —
+  // 넘긴 뒤의 모습이다
   private func suspendedSnapshot() -> [String: Any]? {
-    guard var body = carried else { return nil }
+    let segment = handingOver ? checkpoint?.filter { Self.summaryKeys.contains($0.key) } : nil
+    guard var body = carried.map({ head in segment.map { Self.merge(head, $0) } ?? head }) ?? segment
+    else { return nil }
     body["samples"] = nil
     body["healthStarts"] = nil
     body["state"] = "paused"
@@ -1683,8 +1840,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return body
   }
 
-  // 지금 구간(세션 하나)만의 값
-  private func segmentSnapshot() -> [String: Any]? {
+  // 지금 구간(세션 하나)만의 값. at: 경과 시간을 잴 시각(멈춘 세션은 멈춘 때 — 없으면 지금)
+  private func segmentSnapshot(at date: Date? = nil) -> [String: Any]? {
     guard let session else { return nil }
     guard let builder else { return remoteSnapshot() }
     let kcal = HKUnit.kilocalorie()
@@ -1707,7 +1864,7 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
       "state": session.state == .paused ? "paused" : "running",
       "activeKcal": Int(active.rounded()),
       "totalKcal": Int((active + basal).rounded()),
-      "elapsedSec": Int(builder.elapsedTime),
+      "elapsedSec": Int(date.map { builder.elapsedTime(at: $0) } ?? builder.elapsedTime),
       "startedAt": (builder.startDate ?? Date()).timeIntervalSince1970 * 1000,
     ]
     if let at = heart?.mostRecentQuantityDateInterval()?.end,
@@ -1769,7 +1926,8 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
   private func publish() {
     // 준비 중(prepared)에 보내면 JS가 "측정 중"으로 그렸다가, 실제 시작 때 시간이 0으로 되돌아간다
     guard !isEnding, isLive, let body = snapshot() else { return }
-    checkRestAlert(body)
+    // 새 심박은 들어올 때(recordSample) 넣었다 — 여기선 시간만 본다(심박이 끊겨도 휴식 시간은 흐른다)
+    checkRestAlert(bpm: nil, at: Date())
     let paused = body["state"] as? String == "paused"
     // 아이폰 구간은 멈출 때 한 번과 재는 동안 30초마다 체크포인트를 남긴다(앱이 갑자기 죽어도 다음 실행 때 잇는다). 멈춘
     // 동안엔 값이 그대로라 갱신마다 샘플 전체를 다시 쓰지 않는다
@@ -1818,38 +1976,53 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     return Date(timeIntervalSince1970: (seconds * 1000).rounded() / 1000)
   }
 
-  // 앱이 뒤에 있어도 여기는 돈다(섬 갱신과 같은 길) — JS를 거치지 않고 바로 알린다. 일시정지 중이거나 꺼져
-  // 있으면 무장을 푼다: 켜자마자·재개하자마자 쉬던 심박으로 울리지 않게
-  private func checkRestAlert(_ body: [String: Any]) {
+  // 세트 압박 판정 — 새 심박 샘플은 그 시각으로(recordSample·recordRemoteSample), 그 밖엔 시간만(bpm nil, publish) 넣는다.
+  // 화면 갱신마다 마지막 심박을 지금 시각으로 다시 넣었더니 튄 값 하나가 칼로리 갱신에 실려 세트(20초)를 혼자 채웠다. 앱이 뒤에
+  // 있어도 여기는 돈다(섬 갱신과 같은 길) — JS를 거치지 않고 바로 알린다. 일시정지 중이거나 꺼져 있으면 무장을 푼다: 켜자마자·
+  // 재개하자마자 쉬던 심박으로 울리지 않게
+  private func checkRestAlert(bpm: Int?, at date: Date) {
     // 꺼져 있으면(멘트 없음) 일시정지처럼 무장을 푼다
     let messages = UserDefaults.standard.stringArray(forKey: restAlertKey)
     let rest = UserDefaults.standard.double(forKey: restAlertSecondsKey)
+    // 재는 중 — 끊긴 워치는 계속 재고 있다(미러 상태는 끊긴 때에 멈춰 있다)
+    let running = !isEnding && session.map { isWatchLost || $0.state == .running } == true
     guard
       restAlert.update(
-        bpm: body["heartRate"] as? Int,
-        running: messages != nil && body["state"] as? String == "running",
-        rest: rest > 0 ? rest : 120, at: Date()),
-      let message = messages?.randomElement()
+        bpm: bpm, running: messages != nil && running, rest: rest > 0 ? rest : 120, at: date),
+      let message = messages?.randomElement(),
+      let startedAt = measurementStart
     else { return }
     log.notice("rest alert")
-    // 그래프 샘플과 같은 기준(첫 구간 시작부터 흐른 실제 시간) — 화면값의 startedAt이 앞 구간까지 합친 시작이다
-    let startedAt = body["startedAt"] as? Double ?? Date().timeIntervalSince1970 * 1000
+    // 그래프 샘플과 같은 기준(첫 구간 시작부터 흐른 실제 시간). 알림을 띄우기 전에 남긴다 — 띄우는 사이 측정이 끝나면 그 요약에서
+    // 빠졌다
     let time = max(0, Int(Date().timeIntervalSince1970 - startedAt / 1000))
+    restAlertTimes.append(time)
+    let measurement = resets
     let content = UNMutableNotificationContent()
     content.body = message
     content.sound = .default
-    // 받은 알림만 기록에 남긴다 — 앱이 뒤에 있는 동안 설정에서 알림을 끄면 JS가 토글을 못 꺼 판정은 계속 울린다
     Task { @MainActor in
       let center = UNUserNotificationCenter.current()
       let status = await center.notificationSettings().authorizationStatus
-      guard [.authorized, .provisional, .ephemeral].contains(status) else { return }
-      do {
+      var delivered = false
+      if [.authorized, .provisional, .ephemeral].contains(status) {
         // 같은 id라 알림 센터에 쌓이지 않고 마지막 것으로 바뀐다
-        try await center.add(
-          UNNotificationRequest(identifier: restAlertKey, content: content, trigger: nil))
-      } catch { return }
-      restAlertTimes.append(time)
+        delivered =
+          (try? await center.add(
+            UNNotificationRequest(identifier: restAlertKey, content: content, trigger: nil))) != nil
+      }
+      // 받은 알림만 기록에 남긴다 — 앱이 뒤에 있는 동안 설정에서 알림을 끄면 JS가 토글을 못 꺼 판정은 계속 울린다
+      guard !delivered, resets == measurement, let index = restAlertTimes.lastIndex(of: time)
+      else { return }
+      restAlertTimes.remove(at: index)
     }
+  }
+
+  // 측정 시작(ms) — 앞 구간이 있으면 그 시작
+  private var measurementStart: Double? {
+    if let start = carried?["startedAt"] as? Double { return start }
+    if let start = builder?.startDate { return start.timeIntervalSince1970 * 1000 }
+    return remote?.snapshot.startedAt
   }
 
   // MARK: - Live Activity
@@ -1885,10 +2058,15 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     if let last = lastPushed, last.state == state, Date().timeIntervalSince(last.at) < 60 {
       return
     }
-    lastPushed = (state, Date())
+    let now = Date()
+    lastPushed = (state, now)
     // 앱이 죽어 갱신이 끊기면 2분 뒤 흐리게 — 일시정지 중엔 갱신이 없으니 걸지 않는다
-    let staleDate = paused ? nil : Date().addingTimeInterval(120)
-    activityWork = Task { await activity.update(.init(state: state, staleDate: staleDate)) }
+    let staleDate = paused ? nil : now.addingTimeInterval(120)
+    // 갱신마다 따로 보내 순서가 뒤바뀌어 닿을 수 있다 — 보낸 시각을 붙여 늦게 닿은 옛 값이 새 값을 덮지 않게 한다
+    activityWork = Task {
+      await activity.update(
+        .init(state: state, staleDate: staleDate), alertConfiguration: nil, timestamp: now)
+    }
   }
 
   private func endLiveActivity() {
@@ -1896,5 +2074,26 @@ final class WorkoutManager: NSObject, HKWorkoutSessionDelegate, HKLiveWorkoutBui
     self.activity = nil
     lastPushed = nil
     activityWork = Task { await activity.end(nil, dismissalPolicy: .immediate) }
+  }
+
+  // 끝낼 측정이 없는데 남은 섬(앱이 죽기 전 측정이 멈춘 채 남긴 것)을 치운다 — 지금 측정이 이어 쓰는 섬은 남긴다
+  private func endStaleActivities() async {
+    staleCleanup?.cancel()
+    staleCleanup = nil
+    for activity in Activity<HeartRateAttributes>.activities where activity.id != self.activity?.id {
+      await activity.end(nil, dismissalPolicy: .immediate)
+    }
+  }
+
+  // 끊긴 워치가 미러링을 다시 걸 때까지(재시도 간격 최대 60초 + 미러링 한도 15초) 남은 섬을 두었다 치운다. 그 사이 붙은
+  // 측정(adopt)은 그 섬을 이어 쓰니 남는다
+  private func cleanUpStaleActivitiesLater() {
+    guard staleCleanup == nil else { return }
+    staleCleanup = Task {
+      try? await Task.sleep(nanoseconds: 75_000_000_000)
+      guard !Task.isCancelled else { return }
+      staleCleanup = nil
+      await endStaleActivities()
+    }
   }
 }

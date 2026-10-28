@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 // component
 import {
   ActivityIndicator,
+  AppState,
   Linking,
   Pressable,
   View as RNView,
@@ -72,14 +73,23 @@ const REST_OPTIONS = [
   { sec: 300, label: "heartRate.restAlert300" },
 ] as const;
 
-// 1초마다 다시 그린다 — 켜져 있을 때만
+// 1초마다 다시 그린다 — 켜져 있고 앱이 보일 때만. 측정 세션이 앱을 뒤에서도 살려 둬, 안 보이는 박스를 매초 다시 그렸다
 const useSecondTick = (enabled: boolean) => {
   const [, setTick] = useState(0);
+  const [visible, setVisible] = useState(
+    AppState.currentState !== "background",
+  );
   useEffect(() => {
-    if (!enabled) return;
+    const subscription = AppState.addEventListener("change", (state) =>
+      setVisible(state !== "background"),
+    );
+    return () => subscription.remove();
+  }, []);
+  useEffect(() => {
+    if (!enabled || !visible) return;
     const id = setInterval(() => setTick((n) => n + 1), 1000);
     return () => clearInterval(id);
-  }, [enabled]);
+  }, [enabled, visible]);
 };
 
 const secondsSince = (at: number) => Math.floor((Date.now() - at) / 1000);
@@ -227,8 +237,11 @@ export const HeartRateRow = ({ isLatest }: { isLatest: boolean }) => {
     try {
       const summary = await HeartRate.end();
       useHeartRateLiveStore.getState().setLive(null);
-      if (summary) saveRecord(summary);
-      else toast(t("heartRate.tooShort"));
+      if (summary) {
+        saveRecord(summary);
+        // 저장했다 — 네이티브가 들고 있던 사본을 지운다(안 지우면 다음 실행 때 다시 넘어온다)
+        HeartRate.ackEnded(summary.startedAt);
+      } else toast(t("heartRate.tooShort"));
     } catch {
       // 이미 끝나는 중이면 그쪽 ended 이벤트가 저장한다 — 박스만 네이티브에 맞춘다.
       // 세션이 살아 있으면 박스가 그대로 남아 다시 누를 수 있다
@@ -356,8 +369,17 @@ const LiveBox = ({
     : isPaused
       ? live.elapsedSec
       : live.elapsedSec + secondsSince(live.receivedAt);
+  // 신호 없음은 이번에 재기 시작한 때(시작·재개)부터 센다 — 앞 구간까지 합친 경과 시간으로 셌더니 일시정지했다 재개하자마자
+  // 첫 심박이 오기 전에 안내와 워치 전환 버튼이 떠, 누르면 멀쩡한 이어폰 구간을 끊었다
+  const [runningSince, setRunningSince] = useState<number | null>(null);
+  useEffect(() => {
+    setRunningSince(isRunning ? Date.now() : null);
+  }, [isRunning]);
   const noSignal =
-    isRunning && live.heartRate == null && elapsed >= NO_SIGNAL_SEC;
+    isRunning &&
+    live.heartRate == null &&
+    runningSince !== null &&
+    secondsSince(runningSince) >= NO_SIGNAL_SEC;
   const waitingWatch =
     !live &&
     preparingDevice === "watch" &&

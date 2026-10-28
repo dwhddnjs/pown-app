@@ -31,6 +31,8 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
   @Published private(set) var isRunning = false
   @Published private(set) var isPaused = false
   @Published private(set) var heartRate: Int?
+  // heartRate를 잰 시각 — 아이폰 세트 압박 판정이 새 샘플만 넣게 같이 보낸다(WatchSnapshot.heartRateAt)
+  private var heartRateAt: Date?
   @Published private(set) var activeKcal = 0
   @Published private(set) var totalKcal = 0
   @Published private(set) var status = WatchWorkout.idleStatus
@@ -81,8 +83,13 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     isStarting = true
     defer { isStarting = false }
     // 아이폰이 하던 측정을 잃고(앱 종료 등) 다시 시작했다 — 하던 운동은 마무리하고 새로 연다.
-    // 그대로 두면 아이폰은 새 세션을 영영 못 받는다
-    if let session { close(session, at: .now) }
+    // 그대로 두면 아이폰은 새 세션을 영영 못 받는다. 아이폰은 그 미러를 이미 놓았으니 끊긴 것으로 치고 닫는다 — 아이폰에 값이
+    // 닿던 측정이면 마지막 값이 WCSession으로 가 기록이 남는다(일시정지로 남은 측정에 이어 재던 구간이면 거기 붙는다 —
+    // HeartRateModule.watchFinished). 끊긴 줄 모르면 아무것도 안 보내 그 측정의 앱 기록이 사라졌다
+    if let session {
+      mirrorLost = true
+      close(session, at: .now)
+    }
     do {
       let types: Set<HKSampleType> = [Self.heartRateType, Self.activeEnergy, Self.basalEnergy]
       try await store.requestAuthorization(toShare: types.union([.workoutType()]), read: types)
@@ -173,13 +180,16 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     builder.delegate = self
     session = recovered
     self.builder = builder
-    // 멈췄거나 끝나던 중에 죽었으면 마저 마무리한다
+    // 멈췄거나 끝나던 중에 죽었으면 마저 마무리한다 — 멈춘 때까지만(지금으로 끝내면 죽어 있던 시간까지 운동이 길어졌다)
     guard recovered.state == .running || recovered.state == .paused else {
-      close(recovered, at: .now)
+      close(recovered, at: recovered.endDate ?? .now)
       return
     }
     isRunning = true
     isPaused = recovered.state == .paused
+    // 아이폰이 받고 있던 측정이다 — 끊긴 채 끝나면 마지막 값을 WCSession으로 보내야 한다(close). 새 프로세스라 false로 두면
+    // 아이폰에 다시 닿기 전에 끝낸 측정은 마지막 값을 안 보내 앱 기록이 사라졌다
+    delivered = true
     status = Self.idleStatus
     // 미러링이 끊겼으면 다시 붙인다. 실패하면 아직 붙어 있거나 아이폰이 멀리 있다 — 붙을 때까지 다시 건다(reconnect가
     // 붙어 있으면 바로 멈춘다)
@@ -239,13 +249,14 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     log.notice("close discard=\(discard) report=\(report) lost=\(lost)")
     reset()
     Task {
-      if let final, lost {
-        if WCSession.default.activationState == .activated {
+      if let final {
+        // 미러로 못 보내면(끊긴 줄 아직 모르는 사이 아이폰 앱이 회수된 경우 등) WCSession으로 — 그냥 버리면 건강 앱엔 운동이
+        // 남는데 앱 기록은 영영 없었다. 못 보내도 저장은 그대로 한다
+        var mirrored = false
+        if !lost { mirrored = (try? await session.sendToRemoteWorkoutSession(data: final)) != nil }
+        if !mirrored, WCSession.default.activationState == .activated {
           WCSession.default.transferUserInfo(["final": final])
         }
-      } else if let final {
-        // 못 보내도 저장은 그대로 한다
-        _ = try? await session.sendToRemoteWorkoutSession(data: final)
       }
       try? await builder.endCollection(at: date)
       if discard {
@@ -315,6 +326,7 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
     isRunning = false
     isPaused = false
     heartRate = nil
+    heartRateAt = nil
     activeKcal = 0
     totalKcal = 0
     discardOnClose = false
@@ -327,15 +339,16 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       fakeTimer = Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
         Task { @MainActor in
           guard !self.isPaused else { return }
-          self.see(Int.random(in: 90...150))
+          self.see(Int.random(in: 90...150), at: Date())
           self.send()
         }
       }
     #endif
   }
 
-  private func see(_ bpm: Int?) {
+  private func see(_ bpm: Int?, at date: Date?) {
     heartRate = bpm
+    heartRateAt = date
     guard let bpm else { return }
     heardAt = Date()
     seen = seen.map { (min($0.min, bpm), max($0.max, bpm), $0.sum + bpm, $0.count + 1) }
@@ -357,9 +370,10 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
         Date().timeIntervalSince(at) < WatchSnapshot.heartRateFreshness,
         let quantity = stat?.mostRecentQuantity()
       {
-        see(Int(quantity.doubleValue(for: Self.bpm).rounded()))
+        see(Int(quantity.doubleValue(for: Self.bpm).rounded()), at: at)
       } else {
         heartRate = nil
+        heartRateAt = nil
       }
     #endif
   }
@@ -409,7 +423,8 @@ final class WatchWorkout: NSObject, ObservableObject, HKWorkoutSessionDelegate,
       elapsedSec: Int(elapsed),
       timerStart: ((date.timeIntervalSince1970 - elapsed) * 1000).rounded(),
       startedAt: (builder.startDate ?? date).timeIntervalSince1970 * 1000,
-      wrist: pausedForNoHeartRate ? false : nil
+      wrist: pausedForNoHeartRate ? false : nil,
+      heartRateAt: heartRate == nil ? nil : heartRateAt.map { $0.timeIntervalSince1970 * 1000 }
     )
     return try? JSONEncoder().encode(snapshot)
   }

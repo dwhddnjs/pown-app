@@ -84,14 +84,28 @@ export const saveRecord = (snapshot: HeartRateSnapshot) => {
   const start = new Date(snapshot.startedAt);
   const date = dateKey(start);
   const { records, addRecord } = useHeartRateStore.getState();
-  // 같은 세션 요약이 두 번 올 수 있다(이미 끝난 세션이 복구돼 다시 닫히는 등) — 준비에 3초가
-  // 걸려 같은 초에 시작한 세션은 둘일 수 없으니 이미 남긴 것이다
+  // 같은 측정이 두 번 올 수 있다 — 같은 세션 요약(이미 끝난 세션이 복구돼 다시 닫히는 등, 저장했다는 답이 닿기 전에 앱이
+  // 꺼져 다시 넘겨받은 것. 준비에 3초가 걸려 같은 초에 시작한 세션은 둘일 수 없다), 또는 아이폰에서 끝낸 측정의 워치 구간이
+  // 워치에서 따로 끝나 다시 온 것(건강 앱 운동 시작이 겹친다)
   const startedAt = format(start, PLAN_DATE_FORMAT);
-  if (records.some((record) => record.startedAt === startedAt)) return;
+  const healthStarts = snapshot.healthStarts ?? [];
+  if (
+    records.some(
+      (record) =>
+        record.startedAt === startedAt ||
+        record.healthStarts?.some((at) => healthStarts.includes(at)),
+    )
+  )
+    return;
   const isFirst = !records.some((record) => record.date === date);
   addRecord(snapshot);
-  if (!hasPlanOn(date)) toast(tt("heartRate.savedNoPlan"));
-  else toast.success(tt(isFirst ? "heartRate.saved" : "heartRate.added"));
+  try {
+    if (!hasPlanOn(date)) toast(tt("heartRate.savedNoPlan"));
+    else toast.success(tt(isFirst ? "heartRate.saved" : "heartRate.added"));
+  } catch {
+    // 앱이 막 켜지며 넘겨받은 요약은 토스트가 아직 없다(글꼴을 불러오는 동안 Toaster를 안 그린다) — 안내 없이 남긴다.
+    // 던지면 이벤트 리스너 밖으로 나가 저장했다는 답(ackEnded)도 빠졌다
+  }
 };
 
 // 기록 하나를 지우고 건강 앱에 저장된 같은 운동도 지운다 — 거기 남으면 잘못 잰 기록이 활동 링과
@@ -210,10 +224,20 @@ export const useHeartRateSync = () => {
 
     const update = native.addListener("onUpdate", (body) => {
       if (body.state !== "ended") return setLive(body);
-      setLive(null);
+      const { summary } = body;
+      // 지난 측정의 요약(앱이 죽어 잃었던 워치 측정, 저장했다는 답이 없던 요약)은 기록만 남긴다 — 지금 측정의 박스는 접지
+      // 않는다(시작 시각이 다르다)
+      if (
+        !summary ||
+        summary.startedAt === useHeartRateLiveStore.getState().live?.startedAt
+      )
+        setLive(null);
       // 시스템이 세션을 닫았거나 아일랜드 버튼으로 끝낸 경우만 요약이 온다 — 앱의 종료
       // 버튼으로 끝낸 건 그쪽이 저장한다
-      if (body.summary) saveRecord(body.summary);
+      if (summary) {
+        saveRecord(summary);
+        native.ackEnded(summary.startedAt);
+      }
     });
     // 에어팟을 빼면 멈추는 건 네이티브가 한다 — 앱이 뒤에 있으면 여기 live가 낡아 판단을 놓친다
     const deviceChange = native.addListener("onDeviceChange", ({ device }) =>

@@ -37,6 +37,9 @@ struct WatchSnapshot: Codable {
   // 앱은 손목 감지로, 그 뒤 워치 앱은 심박이 한참 안 들어오면(WatchWorkout.noHeartRatePause) 보낸다. 재개하면 지운다.
   // nil은 해당 없음. 처음 버전 뒤에 더해 옵셔널이다
   var wrist: Bool?
+  // 이 심박을 잰 시각(ms) — 워치는 칼로리가 바뀔 때도 같은 심박을 다시 보내, 아이폰 세트 압박 판정이 새 샘플만 그 시각으로
+  // 넣으려고 본다(RestAlert). nil이면 심박 없음 또는 이걸 안 보내는 워치 앱. 처음 버전 뒤에 더해 옵셔널이다
+  var heartRateAt: Double?
 }
 
 // 아이폰 → 워치
