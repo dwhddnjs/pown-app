@@ -61,11 +61,14 @@ export const useHeartRateStore = create<HeartRateStoreTypes>()(
       addRecord: (snapshot) =>
         set((prev) => {
           const start = new Date(snapshot.startedAt);
+          // 요약 여럿이 한꺼번에 오면(다음 실행 때 넘겨받은 것) 같은 ms라 ID가 겹친다 — 겹치면 하나를 지울 때 같이 지워졌다
+          let id = Date.now();
+          while (prev.records.some((record) => record.id === id)) id += 1;
           return {
             records: [
               ...prev.records,
               {
-                id: Date.now(),
+                id,
                 date: dateKey(start),
                 startedAt: format(start, PLAN_DATE_FORMAT),
                 startedAtMs: snapshot.startedAt,

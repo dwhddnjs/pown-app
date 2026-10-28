@@ -62,8 +62,11 @@ type HeartRateModule = {
   // 이어폰으로 돌아가지 않고 일시정지로 남아 WATCH_UNAVAILABLE·WATCH_APP_MISSING으로 reject
   switchToWatch(): Promise<HeartRateSnapshot | null>;
   // 합계 1분 미만이면 저장하지 않고 null. 이미 끝나는 중(아일랜드·시스템 종료)이거나 세션이
-  // 없으면 reject — 저장은 먼저 끝내던 쪽의 ended 이벤트가 한다
+  // 없으면 reject — 저장은 먼저 끝내던 쪽의 ended 이벤트가 한다. 돌려준 요약은 ackEnded 전까지 네이티브가 들고 있다
   end(): Promise<HeartRateSnapshot | null>;
+  // 종료 요약(end()의 반환값·ended 이벤트의 summary)을 기록으로 남겼다(saveRecord가 거른 것도) — 네이티브가 들고 있던 사본을
+  // 지운다. 안 부르면 JS가 다시 들을 때(다음 실행) 같은 요약이 또 온다
+  ackEnded(startedAt: number): void;
   // 길이와 상관없이 저장 없이 버린다(건강 앱에도 안 남는다) — 전체 초기화용
   discard(): Promise<void>;
   getActive(): Promise<HeartRateSnapshot | null>;
@@ -80,7 +83,8 @@ type HeartRateModule = {
   addListener(
     event: "onUpdate",
     // 시스템이 세션을 닫거나(다른 운동 앱·워치에서 종료) 아일랜드 버튼으로 끝내면 ended에 저장할
-    // 요약이 붙는다 (1분 미만이면 없다). 에어팟을 빼 시스템이 닫은 건 끝내지 않고 suspended로 온다
+    // 요약이 붙는다 (1분 미만이면 없다). 에어팟을 빼 시스템이 닫은 건 끝내지 않고 suspended로 온다.
+    // 지난 측정의 요약(앱이 죽어 잃었던 워치 측정, 저장했다는 답이 없던 요약)도 ended로 온다 — 시작 시각이 지금 측정과 다르다
     listener: (
       body: HeartRateSnapshot | { state: "ended"; summary?: HeartRateSnapshot },
     ) => void,
