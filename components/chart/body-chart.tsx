@@ -14,6 +14,9 @@ import { getMonthlyBodyData } from "@/lib/stats";
 import { ChartBody, ChartCard } from "./chart-card";
 
 const POINTER_LABEL_WIDTH = 90;
+// x축 날짜 라벨 폭 — "30일"(12pt)이 들어간다. 라벨끼리는 GAP 이상 띄운다
+const LABEL_WIDTH = 32;
+const LABEL_GAP = 4;
 // 차트 높이를 고정해야 세로선을 정확히 꽉 채울 수 있다(pointerStripHeight = 높이).
 const CHART_HEIGHT = 200;
 // 영역 그라데이션 — 원래 청록 0.9 → 카드색 0.2였는데, 색이 바뀌는 그라데이션을 iOS는 색·투명도를 따로
@@ -40,32 +43,11 @@ export const BodyChart = () => {
       ? [bodyData[0], { ...bodyData[0], label: "", hideDataPoint: true }]
       : bodyData;
 
-  // gifted-charts는 x축 라벨을 점보다 왼쪽에 치우쳐 그린다(실측). marginLeft로 되민다.
-  // marginLeft는 라벨 컨테이너 폭도 같이 줄여 실제 이동량은 값의 절반이다.
   const xAxisLabelStyle = {
-    textAlign: "center" as const,
     fontFamily: "sb-l",
     fontSize: 12,
     color: themeColor.text,
-    marginLeft: 20,
   };
-
-  // 선·영역을 축 좌우 끝에 딱 붙이려 첫/마지막 점을 축 끝에 둔다(spacing 0).
-  // 그러면 두 라벨의 바깥쪽 절반이 SVG 캔버스를 벗어나 잘리므로, 그 절반만큼
-  // transform으로 안쪽으로 당긴다(정렬은 그만큼 어긋나지만 양 끝 라벨뿐).
-  const edgeLabelData = chartData.map((d, i) =>
-    i === 0
-      ? { ...d, labelTextStyle: { ...xAxisLabelStyle, marginLeft: 14 } }
-      : i === chartData.length - 1
-        ? {
-            ...d,
-            labelTextStyle: {
-              ...xAxisLabelStyle,
-              transform: [{ translateX: -16 }],
-            },
-          }
-        : d,
-  );
 
   const Y_AXIS_LABEL_WIDTH = 40;
   // 카드 콘텐츠 폭 = 화면폭 - (차트 탭 패딩 20*2 + 카드 패딩 12*2)
@@ -73,6 +55,40 @@ export const BodyChart = () => {
   const chartWidth = cardContentWidth - Y_AXIS_LABEL_WIDTH;
   const pointSpacing =
     chartData.length > 1 ? chartWidth / (chartData.length - 1) : 0;
+
+  // gifted-charts는 라벨 칸 폭을 점 간격으로 잡는다 — 한 달에 8번 넘게 재면 칸이 좁아져
+  // "15···"로 잘렸다. 라벨에 고정 폭을 주고(칸 밖으로 넘쳐 그려진다) 겹치는 라벨은 건너뛴다.
+  // 위치는 첫 점을 0으로 한 좌표다. 선·영역을 축 끝에 붙이려 양 끝 점이 캔버스 끝에 있어
+  // 바깥으로 나간 글자는 잘린다 — 양 끝 라벨만 축 끝에 맞춰 안쪽으로 붙인다.
+  const last = chartData.length - 1;
+  const labelStart = (i: number) =>
+    i === 0
+      ? 0
+      : i === last
+        ? pointSpacing * i - LABEL_WIDTH
+        : pointSpacing * i - LABEL_WIDTH / 2;
+  // 라벨 칸의 왼쪽 끝 — 점보다 칸 반 + 10 왼쪽이고, 첫 칸만 14 오른쪽이다(라이브러리 실측·소스)
+  const slotStart = (i: number) =>
+    pointSpacing * i - pointSpacing / 2 + (i === 0 ? 4 : -10);
+  let prevEnd = -Infinity;
+  const labeledData = chartData.map((d, i) => {
+    const start = labelStart(i);
+    const fits =
+      !!d.label &&
+      start >= prevEnd + LABEL_GAP &&
+      (i === last || start + LABEL_WIDTH + LABEL_GAP <= labelStart(last));
+    if (!fits) return { ...d, label: "" };
+    prevEnd = start + LABEL_WIDTH;
+    return {
+      ...d,
+      labelTextStyle: {
+        ...xAxisLabelStyle,
+        width: LABEL_WIDTH,
+        marginLeft: start - slotStart(i),
+        textAlign: i === 0 ? "left" : i === last ? "right" : "center",
+      } as const,
+    };
+  });
 
   // 몸무게는 좁은 대역(예: 70~80kg)에서 움직이므로 0부터 그리면 변화가 안 보인다.
   // 데이터 min/max 주변을 5kg 눈금으로 감싸 y축을 잡는다. (offset 아래로는 잘리므로 주의)
@@ -95,7 +111,7 @@ export const BodyChart = () => {
         <LineChart
           disableScroll
           areaChart
-          data={edgeLabelData}
+          data={labeledData}
           height={CHART_HEIGHT}
           width={chartWidth}
           spacing={pointSpacing}

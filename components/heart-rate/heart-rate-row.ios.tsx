@@ -775,8 +775,11 @@ export const Stat = ({
       <Text style={[styles.statLabel, { color: themeColor.subText }]}>
         {label}
       </Text>
+      {/* 칸이 같은 폭이라 긴 값("16시간 54분")은 말줄임됐다 — 넘칠 때만 글자를 줄인다 */}
       <Text
         numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
         style={[
           styles.statValue,
           compact && styles.statValueCompact,
